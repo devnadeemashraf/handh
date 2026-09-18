@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { createDbClient, findStoreBySlug, validateCartItems } from '@hh/db';
 import { CartValidationInputSchema } from '@hh/domain';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
