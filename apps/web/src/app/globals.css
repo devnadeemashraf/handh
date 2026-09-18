@@ -4,8 +4,12 @@
   --color-border: #ebe7df;
   --color-primary: #0a2e24;
   --color-primary-hover: #07221a;
+  --color-primary-emerald: #0a2e24;
+  --color-primary-emerald-hover: #07221a;
   --color-accent: #c5a880;
   --color-accent-light: #f5efe6;
+  --color-accent-gold: #c5a880;
+  --color-accent-gold-light: #f5efe6;
   --color-text: #171a19;
   --color-text-muted: #5c6460;
   --font-serif: 'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif;
@@ -147,4 +151,13 @@ img {
   opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }

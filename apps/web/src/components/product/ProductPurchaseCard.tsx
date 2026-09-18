@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useCart } from '@/context/CartContext';
 import { Money, type PublicVariantItem } from '@hh/domain';
 import { ShoppingBag, Check, ShieldCheck, Truck, Sparkles } from 'lucide-react';
 
@@ -27,10 +28,13 @@ export function ProductPurchaseCard({
   const isAvailable = selectedVariant.isAvailable && selectedVariant.availableQuantity > 0;
   const maxAllowed = Math.min(selectedVariant.availableQuantity, 5);
 
-  const handleAddToCart = () => {
-    // UI state feedback for Milestone 3 (Full guest cart state integrated in Milestone 4)
+  const { addItem } = useCart();
+
+  const handleAddToCart = async () => {
+    if (!isAvailable || !selectedVariant) return;
     setAdded(true);
-    setTimeout(() => setAdded(false), 2500);
+    await addItem(selectedVariant.id, quantity);
+    setTimeout(() => setAdded(false), 2000);
   };
 
   return (

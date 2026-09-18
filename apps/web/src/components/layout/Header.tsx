@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ShoppingBag } from 'lucide-react';
+import { HeaderCartButton } from './HeaderCartButton';
 import type { CategoryTreeItem } from '@hh/domain';
 
 export function Header({
@@ -91,32 +91,7 @@ export function Header({
 
         {/* Right Actions: Bag / Cart */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Link
-            href="/cart"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 12px',
-              borderRadius: 'var(--radius-sm)',
-              color: 'var(--color-primary)'
-            }}
-            aria-label="Shopping Bag"
-          >
-            <ShoppingBag size={20} />
-            <span
-              style={{
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                backgroundColor: 'var(--color-primary)',
-                color: '#ffffff',
-                padding: '2px 8px',
-                borderRadius: '9999px'
-              }}
-            >
-              0
-            </span>
-          </Link>
+          <HeaderCartButton />
         </div>
       </div>
     </header>

@@ -8,8 +8,12 @@ export function ThemeInjector({ theme }: { theme: StorefrontTheme }) {
       --color-border: ${theme.border};
       --color-primary: ${theme.primaryEmerald};
       --color-primary-hover: ${theme.primaryEmeraldHover};
+      --color-primary-emerald: ${theme.primaryEmerald};
+      --color-primary-emerald-hover: ${theme.primaryEmeraldHover};
       --color-accent: ${theme.accentGold};
       --color-accent-light: ${theme.accentGoldLight};
+      --color-accent-gold: ${theme.accentGold};
+      --color-accent-gold-light: ${theme.accentGoldLight};
       --color-text: ${theme.textPrimary};
       --color-text-muted: ${theme.textSecondary};
     }

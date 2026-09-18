@@ -3,6 +3,7 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  transpilePackages: ['@hh/domain', '@hh/db', '@hh/config'],
   images: {
     remotePatterns: [
       {

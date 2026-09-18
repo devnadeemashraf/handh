@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@hh/domain": ["packages/domain/src/index.ts"],
+      "@hh/db": ["packages/db/src/index.ts"],
+      "@hh/config": ["packages/config/src/index.ts"]
+    }
+  },
+  "references": [
+    { "path": "./packages/config" },
+    { "path": "./packages/domain" },
+    { "path": "./packages/db" },
+    { "path": "./apps/web" },
+    { "path": "./apps/worker" }
+  ],
+  "files": []
+}

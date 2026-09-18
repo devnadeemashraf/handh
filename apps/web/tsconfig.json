@@ -20,7 +20,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@hh/domain": ["../../packages/domain/src/index.ts"],
+      "@hh/db": ["../../packages/db/src/index.ts"],
+      "@hh/config": ["../../packages/config/src/index.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
