@@ -37,7 +37,15 @@ export const serverEnvSchema = z
       .string({ required_error: 'ADMIN_SESSION_SECRET is required' })
       .min(32, 'ADMIN_SESSION_SECRET must be at least 32 characters long for session encryption'),
 
-    // Storage (Cloudflare R2 / S3)
+    // Storage (S3 / Cloudflare R2 / Local Floci)
+    S3_ENDPOINT: z.string().url().optional(),
+    S3_REGION: z.string().default('us-east-1'),
+    S3_ACCESS_KEY_ID: z.string().optional(),
+    S3_SECRET_ACCESS_KEY: z.string().optional(),
+    S3_BUCKET_NAME: z.string().default('hh-media-dev'),
+    S3_FORCE_PATH_STYLE: z.coerce.boolean().default(true),
+    S3_PUBLIC_URL: z.string().url().optional(),
+
     R2_ACCOUNT_ID: z.string().optional(),
     R2_ACCESS_KEY_ID: z.string().optional(),
     R2_SECRET_ACCESS_KEY: z.string().optional(),

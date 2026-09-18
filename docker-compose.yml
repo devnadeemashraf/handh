@@ -1,0 +1,54 @@
+name: hh-local
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hh-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: hh_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d hh_dev']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: hh-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Floci Local Cloud Emulator (S3, SQS, SecretsManager)
+  # Uses profile 'with-floci' so it won't conflict with a standalone Floci container already running on port 4566
+  floci:
+    image: floci/floci:latest
+    container_name: hh-floci
+    profiles:
+      - with-floci
+    ports:
+      - '4566:4566'
+    environment:
+      - SERVICES=s3,sqs,sns,secretsmanager
+    volumes:
+      - floci_data:/var/lib/floci
+
+volumes:
+  postgres_data:
+  redis_data:
+  floci_data:

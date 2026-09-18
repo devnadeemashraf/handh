@@ -16,6 +16,12 @@
     "lint": "eslint .",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
+    "docker:up": "docker compose up -d postgres redis",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "db:generate": "pnpm --filter=@hh/db db:generate",
+    "db:migrate": "pnpm --filter=@hh/db db:migrate",
+    "db:push": "pnpm --filter=@hh/db db:push",
     "clean": "pnpm -r --parallel exec rm -rf dist .next .turbo node_modules"
   },
   "devDependencies": {
