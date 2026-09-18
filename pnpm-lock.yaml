@@ -265,6 +265,9 @@ importers:
       '@hh/config':
         specifier: workspace:*
         version: link:../config
+      '@hh/domain':
+        specifier: workspace:*
+        version: link:../domain
       drizzle-orm:
         specifier: ^0.40.0
         version: 0.40.1(gel@2.2.1)(postgres@3.4.9)

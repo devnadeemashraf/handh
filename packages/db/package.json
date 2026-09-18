@@ -10,10 +10,14 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@hh/config": "workspace:*",
+    "@hh/domain": "workspace:*",
     "drizzle-orm": "^0.40.0",
     "postgres": "^3.4.5"
   },
