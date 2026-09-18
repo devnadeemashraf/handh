@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import * as schema from './schema';
 
 export * from './schema';
+export * from './repositories';
 export { schema };
 
 export type DatabaseClient = ReturnType<typeof createDbClient>;

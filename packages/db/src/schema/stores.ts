@@ -2,11 +2,11 @@ import { pgTable, uuid, varchar, text, boolean, jsonb, timestamp } from 'drizzle
 import { relations } from 'drizzle-orm';
 
 export interface StoreSettings {
-  contactEmail?: string;
-  supportPhone?: string;
-  instagramHandle?: string;
-  orderNotificationEmails?: string[];
-  enableCoupons?: boolean;
+  contactEmail?: string | undefined;
+  supportPhone?: string | undefined;
+  instagramHandle?: string | undefined;
+  orderNotificationEmails?: string[] | undefined;
+  enableCoupons?: boolean | undefined;
 }
 
 export const stores = pgTable('stores', {
