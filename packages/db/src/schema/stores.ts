@@ -1,12 +1,15 @@
 import { pgTable, uuid, varchar, text, boolean, jsonb, timestamp } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
+import type { StorefrontConfig } from '@hh/domain';
+
 export interface StoreSettings {
   contactEmail?: string | undefined;
   supportPhone?: string | undefined;
   instagramHandle?: string | undefined;
   orderNotificationEmails?: string[] | undefined;
   enableCoupons?: boolean | undefined;
+  storefront?: StorefrontConfig | undefined;
 }
 
 export const stores = pgTable('stores', {

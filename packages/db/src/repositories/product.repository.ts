@@ -19,7 +19,7 @@ import type { DatabaseClient } from '../index';
 export async function listPublishedProducts(
   db: DatabaseClient,
   storeId: string,
-  options: { categorySlug?: string } = {}
+  options: { categorySlug?: string | undefined } = {}
 ): Promise<PublicProductListItem[]> {
   const baseConditions = [eq(products.storeId, storeId), eq(products.status, 'published')];
 

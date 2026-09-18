@@ -15,6 +15,56 @@ async function seed(): Promise<void> {
 
   let store = existingStore[0];
   if (!store) {
+    const initialSettings = {
+      contactEmail: 'support@handh.com',
+      instagramHandle: 'handh_official',
+      enableCoupons: true,
+      storefront: {
+        theme: {
+          background: '#FDFBF7',
+          surface: '#FFFFFF',
+          border: '#EBE7DF',
+          primaryEmerald: '#0A2E24',
+          primaryEmeraldHover: '#07221A',
+          accentGold: '#C5A880',
+          accentGoldLight: '#F5EFE6',
+          textPrimary: '#171A19',
+          textSecondary: '#5C6460'
+        },
+        hero: {
+          eyebrow: 'H&H Signature Collection',
+          title: 'Crafted for Grace & Modesty',
+          subtitle:
+            'Exquisite handcrafted nose-pieces and accessories designed for refined everyday elegance.',
+          ctaText: 'Explore the Collection',
+          ctaLink: '#catalog',
+          badgeText: 'Limited Launch • 20 Pieces'
+        },
+        announcement: {
+          enabled: true,
+          text: 'Handcrafted in limited batches • Express courier dispatch across India via India Post & DTDC',
+          badge: 'Signature Drop'
+        },
+        reassurances: [
+          {
+            icon: 'sparkles' as const,
+            title: 'Artisanal Craftsmanship',
+            description: 'Meticulously shaped in limited quantities for unmatched grace.'
+          },
+          {
+            icon: 'truck' as const,
+            title: 'Direct Courier Dispatch',
+            description: 'Carefully packaged and shipped with verifiable tracking.'
+          },
+          {
+            icon: 'shield' as const,
+            title: 'Secure Online Payments',
+            description: 'End-to-end encrypted checkout powered by Razorpay.'
+          }
+        ]
+      }
+    };
+
     const [created] = await db
       .insert(stores)
       .values({
@@ -23,11 +73,7 @@ async function seed(): Promise<void> {
         description: 'Curated luxury essentials and refined accessories.',
         defaultCurrency: 'INR',
         isActive: true,
-        settings: {
-          contactEmail: 'support@handh.com',
-          instagramHandle: 'handh_official',
-          enableCoupons: true
-        }
+        settings: initialSettings
       })
       .returning();
 
@@ -41,7 +87,63 @@ async function seed(): Promise<void> {
       isPrimary: true
     });
   } else {
-    console.log(`  ✓ Found existing store: ${store.name} (${store.slug})`);
+    // Update existing store settings with storefront configuration
+    await db
+      .update(stores)
+      .set({
+        settings: {
+          ...store.settings,
+          storefront: {
+            theme: {
+              background: '#FDFBF7',
+              surface: '#FFFFFF',
+              border: '#EBE7DF',
+              primaryEmerald: '#0A2E24',
+              primaryEmeraldHover: '#07221A',
+              accentGold: '#C5A880',
+              accentGoldLight: '#F5EFE6',
+              textPrimary: '#171A19',
+              textSecondary: '#5C6460'
+            },
+            hero: {
+              eyebrow: 'H&H Signature Collection',
+              title: 'Crafted for Grace & Modesty',
+              subtitle:
+                'Exquisite handcrafted nose-pieces and accessories designed for refined everyday elegance.',
+              ctaText: 'Explore the Collection',
+              ctaLink: '#catalog',
+              badgeText: 'Limited Launch • 20 Pieces'
+            },
+            announcement: {
+              enabled: true,
+              text: 'Handcrafted in limited batches • Express courier dispatch across India via India Post & DTDC',
+              badge: 'Signature Drop'
+            },
+            reassurances: [
+              {
+                icon: 'sparkles',
+                title: 'Artisanal Craftsmanship',
+                description: 'Meticulously shaped in limited quantities for unmatched grace.'
+              },
+              {
+                icon: 'truck',
+                title: 'Direct Courier Dispatch',
+                description: 'Carefully packaged and shipped with verifiable tracking.'
+              },
+              {
+                icon: 'shield',
+                title: 'Secure Online Payments',
+                description: 'End-to-end encrypted checkout powered by Razorpay.'
+              }
+            ]
+          }
+        }
+      })
+      .where(eq(stores.id, store.id));
+
+    console.log(
+      `  ✓ Updated existing store settings with server-driven config: ${store.name} (${store.slug})`
+    );
   }
 
   // 2. Standard Taxonomy Categories

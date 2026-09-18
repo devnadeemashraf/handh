@@ -1,23 +1,26 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'H&H — Premium Essentials & Modest Wear',
+    default: 'H&H — Curated Modest Essentials & Jewelry',
     template: '%s | H&H'
   },
-  description: 'Refined essentials and modest wear crafted with precision and purpose.',
+  description: 'Refined modest wear accessories and essentials crafted with precision and purpose.',
   metadataBase: new URL(process.env['APP_URL'] ?? 'http://localhost:3000'),
   openGraph: {
-    title: 'H&H — Premium Essentials & Modest Wear',
-    description: 'Refined essentials and modest wear crafted with precision and purpose.',
+    title: 'H&H — Curated Modest Essentials & Jewelry',
+    description:
+      'Refined modest wear accessories and essentials crafted with precision and purpose.',
     type: 'website',
     siteName: 'H&H'
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'H&H — Premium Essentials & Modest Wear',
-    description: 'Refined essentials and modest wear crafted with precision and purpose.'
+    title: 'H&H — Curated Modest Essentials & Jewelry',
+    description:
+      'Refined modest wear accessories and essentials crafted with precision and purpose.'
   },
   robots: {
     index: true,
@@ -33,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0a0a0a',
+  themeColor: '#0a2e24',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5
@@ -42,16 +45,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body
-        style={{
-          margin: 0,
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          backgroundColor: '#fafafa',
-          color: '#111'
-        }}
-      >
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
