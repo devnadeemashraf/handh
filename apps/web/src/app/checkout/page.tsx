@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { AddressForm, type AddressFormValues } from '@/components/checkout/AddressForm';
 import { OrderReviewCard } from '@/components/checkout/OrderReviewCard';
@@ -13,12 +15,32 @@ import {
   Clock,
   AlertTriangle,
   Copy,
-  Check
+  Check,
+  CreditCard,
+  Loader2,
+  ShieldCheck
 } from 'lucide-react';
 
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (event: string, handler: (response: unknown) => void) => void;
+    };
+  }
+}
+
 export default function CheckoutPage() {
+  const router = useRouter();
   const { cartSummary, isLoading: isCartLoading, clearCart, refreshCart } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [orderPlaced, setOrderPlaced] = useState<CheckoutOrderResult | null>(null);
   const [copiedOrderNumber, setCopiedOrderNumber] = useState(false);
@@ -79,6 +101,116 @@ export default function CheckoutPage() {
     navigator.clipboard.writeText(num);
     setCopiedOrderNumber(true);
     setTimeout(() => setCopiedOrderNumber(false), 2000);
+  };
+
+  // Verify payment on server
+  const verifyPayment = async (params: {
+    orderId: string;
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+    orderNumber: string;
+  }) => {
+    setIsProcessingPayment(true);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch('/api/checkout/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: params.orderId,
+          razorpayOrderId: params.razorpayOrderId,
+          razorpayPaymentId: params.razorpayPaymentId,
+          razorpaySignature: params.razorpaySignature
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setSubmitError(data.error || 'Payment confirmation failed. Please contact support.');
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      // Route directly to the receipt page
+      router.push(`/checkout/success?orderNumber=${params.orderNumber}`);
+    } catch (err) {
+      console.error('Payment verification error:', err);
+      setSubmitError('A network error occurred while confirming payment.');
+      setIsProcessingPayment(false);
+    }
+  };
+
+  // Launch Razorpay gateway modal
+  const launchPaymentGateway = async (createdOrder: CheckoutOrderResult) => {
+    setIsProcessingPayment(true);
+    setSubmitError(null);
+
+    try {
+      const initRes = await fetch('/api/checkout/payment-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: createdOrder.orderId })
+      });
+
+      const initData = await initRes.json();
+      if (!initRes.ok || !initData.success) {
+        setSubmitError(initData.error || 'Failed to initialize payment gateway.');
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      // Check if Razorpay Checkout SDK is available
+      if (typeof window !== 'undefined' && window.Razorpay) {
+        const options = {
+          key: initData.keyId,
+          amount: initData.amountMinor,
+          currency: initData.currency,
+          name: 'H&H',
+          description: `Order ${initData.orderNumber}`,
+          order_id: initData.razorpayOrderId,
+          prefill: {
+            name: values.fullName,
+            email: values.email,
+            contact: values.phone
+          },
+          theme: {
+            color: '#0A2E24'
+          },
+          handler: async function (response: RazorpayResponse) {
+            await verifyPayment({
+              orderId: createdOrder.orderId,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+              orderNumber: createdOrder.orderNumber
+            });
+          },
+          modal: {
+            ondismiss: function () {
+              setIsProcessingPayment(false);
+            }
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      } else {
+        // Fallback for offline/mock development mode
+        await verifyPayment({
+          orderId: createdOrder.orderId,
+          razorpayOrderId: initData.razorpayOrderId,
+          razorpayPaymentId: `mock_pay_${Date.now()}`,
+          razorpaySignature: 'mock_payment_signature',
+          orderNumber: createdOrder.orderNumber
+        });
+      }
+    } catch (err) {
+      console.error('Payment launch error:', err);
+      setSubmitError('Unable to launch payment gateway. Please try again.');
+      setIsProcessingPayment(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -156,19 +288,22 @@ export default function CheckoutPage() {
         return;
       }
 
-      // Order created successfully!
+      // Order created & stock locked!
       const createdOrder = data.order as CheckoutOrderResult;
       setOrderPlaced(createdOrder);
       clearCart();
+      setIsSubmitting(false);
+
+      // Immediately launch payment gateway
+      await launchPaymentGateway(createdOrder);
     } catch (err) {
       console.error('Checkout submission network error:', err);
       setSubmitError('A network error occurred. Please verify your connection and try again.');
-    } finally {
       setIsSubmitting(false);
     }
   };
 
-  // 1. Order Placed Screen
+  // 1. Order Placed Screen (Awaiting Payment or Retry)
   if (orderPlaced) {
     const minutes = Math.floor(reservationRemainingSecs / 60);
     const seconds = reservationRemainingSecs % 60;
@@ -176,6 +311,7 @@ export default function CheckoutPage() {
 
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <main className="royale-container" style={{ flex: 1, padding: '56px 16px 96px' }}>
           <div
             style={{
@@ -188,7 +324,7 @@ export default function CheckoutPage() {
               textAlign: 'center'
             }}
           >
-            {/* Success Icon */}
+            {/* Header Icon */}
             <div
               style={{
                 width: '72px',
@@ -206,7 +342,7 @@ export default function CheckoutPage() {
             </div>
 
             <span className="royale-eyebrow" style={{ display: 'block', marginBottom: '8px' }}>
-              Order Initiated
+              Order Reserved
             </span>
 
             <h1 className="royale-heading" style={{ fontSize: '1.85rem', margin: '0 0 12px' }}>
@@ -221,9 +357,31 @@ export default function CheckoutPage() {
                 marginBottom: '24px'
               }}
             >
-              Thank you, <strong>{values.fullName}</strong>. Your pending order has been recorded
-              and the handcrafted pieces are locked in inventory.
+              Thank you, <strong>{values.fullName}</strong>. Your pieces are held in inventory.
+              Please complete your payment below to confirm dispatch.
             </p>
+
+            {/* Error message if payment failed */}
+            {submitError && (
+              <div
+                style={{
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '12px 16px',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  color: '#B91C1C',
+                  fontSize: '0.85rem',
+                  textAlign: 'left'
+                }}
+              >
+                <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+                <span>{submitError}</span>
+              </div>
+            )}
 
             {/* Order Reference Badge */}
             <div
@@ -333,7 +491,7 @@ export default function CheckoutPage() {
                 >
                   {reservationRemainingSecs > 0
                     ? 'Your items are reserved in stock while payment is pending.'
-                    : 'The reservation has timed out and stock has been made available to other shoppers.'}
+                    : 'The reservation window has timed out. Please refresh to place a new order.'}
                 </div>
               </div>
             </div>
@@ -386,53 +544,57 @@ export default function CheckoutPage() {
                   borderTop: '1px solid var(--color-border)'
                 }}
               >
-                <span>Total Amount</span>
+                <span>Total Amount Due</span>
                 <span style={{ color: 'var(--color-primary-emerald)' }}>
                   {Money.fromMinor(orderPlaced.totalMinor, 'INR').format()}
                 </span>
               </div>
             </div>
 
-            {/* Delivery Destination Snapshot */}
-            <div style={{ textAlign: 'left', marginBottom: '32px' }}>
-              <span
+            {/* Payment Trigger CTA */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <button
+                type="button"
+                onClick={() => launchPaymentGateway(orderPlaced)}
+                disabled={isProcessingPayment || reservationRemainingSecs <= 0}
+                className="royale-button-primary"
                 style={{
-                  fontSize: '0.75rem',
-                  color: 'var(--color-text-muted)',
-                  textTransform: 'uppercase',
+                  width: '100%',
+                  padding: '16px',
+                  fontSize: '1rem',
                   fontWeight: 600,
-                  letterSpacing: '0.05em'
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
                 }}
               >
-                Shipping Destination
-              </span>
+                {isProcessingPayment ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Connecting with Razorpay...</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard size={18} />
+                    <span>Pay {Money.fromMinor(orderPlaced.totalMinor, 'INR').format()} Now</span>
+                  </>
+                )}
+              </button>
+
               <div
                 style={{
-                  fontSize: '0.85rem',
-                  color: 'var(--color-text)',
-                  marginTop: '4px',
-                  lineHeight: 1.5
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  fontSize: '0.75rem',
+                  color: 'var(--color-text-muted)'
                 }}
               >
-                <div>{values.fullName}</div>
-                <div>{values.line1}</div>
-                {values.line2 && <div>{values.line2}</div>}
-                <div>
-                  {values.city}, {values.state} - {values.postalCode}
-                </div>
-                <div>Phone: +91 {values.phone}</div>
+                <ShieldCheck size={14} color="var(--color-primary-emerald)" />
+                <span>UPI, Credit/Debit Cards, NetBanking, and Wallets accepted</span>
               </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <Link
-                href="/"
-                className="royale-button-primary"
-                style={{ width: '100%', padding: '14px', textDecoration: 'none' }}
-              >
-                Explore More Collections
-              </Link>
             </div>
           </div>
         </main>
@@ -508,6 +670,7 @@ export default function CheckoutPage() {
   // 3. Active Checkout Form Screen
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <main className="royale-container" style={{ flex: 1, padding: '40px 16px 96px' }}>
         {/* Navigation Breadcrumb */}
         <div style={{ marginBottom: '24px' }}>
@@ -570,7 +733,7 @@ export default function CheckoutPage() {
               values={values}
               errors={errors}
               onChange={handleFieldChange}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isProcessingPayment}
             />
           </div>
 
@@ -579,7 +742,7 @@ export default function CheckoutPage() {
             {cartSummary && (
               <OrderReviewCard
                 cartSummary={cartSummary}
-                isSubmitting={isSubmitting}
+                isSubmitting={isSubmitting || isProcessingPayment}
                 onSubmit={handleSubmit}
               />
             )}

@@ -4,9 +4,11 @@ import * as schema from './schema';
 
 export * from './schema';
 export * from './repositories';
+export * from './services';
 export { schema };
 
 export type DatabaseClient = ReturnType<typeof createDbClient>;
+export type DbTransaction = Parameters<Parameters<DatabaseClient['transaction']>[0]>[0];
 
 /**
  * Creates a configured PostgreSQL connection pool wrapped with Drizzle ORM

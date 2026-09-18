@@ -9,6 +9,7 @@
   },
   "packageManager": "pnpm@12.4.2",
   "scripts": {
+    "dev": "pnpm --filter=@hh/web dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "vitest run",

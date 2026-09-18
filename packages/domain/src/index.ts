@@ -5,6 +5,7 @@ export * from './states';
 export * from './catalog';
 export * from './cart';
 export * from './checkout';
+export * from './payment';
 
 export type {
   CategoryTreeItem,
@@ -21,3 +22,12 @@ export type {
   CheckoutOrderResult,
   IndianState
 } from './checkout';
+
+export type {
+  PaymentOrderRequestInput,
+  PaymentVerificationInput,
+  RazorpayOrderInput,
+  RazorpayOrderResult,
+  RazorpayPaymentModalOptions,
+  RazorpayWebhookEvent
+} from './payment';
