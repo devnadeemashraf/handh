@@ -244,7 +244,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (appliedCouponCode?: string) => {
     setSubmitError(null);
 
     if (isServicePaused) {
@@ -301,6 +301,7 @@ export default function CheckoutPage() {
         })),
         shippingAddress: addressValidation.data,
         customerNotes: values.customerNotes ? values.customerNotes.trim() : undefined,
+        couponCode: appliedCouponCode || undefined,
         idempotencyKey: idempotencyKey || crypto.randomUUID()
       };
 

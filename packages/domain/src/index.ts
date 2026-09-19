@@ -12,6 +12,7 @@ export * from './inventory';
 export * from './invoice';
 export * from './insights';
 export * from './service-control';
+export * from './coupon';
 
 export type {
   CategoryTreeItem,

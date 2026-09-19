@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { stores, storeDomains, type Store } from '../schema';
-import type { CreateStoreInput, ServiceControlConfig } from '@hh/domain';
-import { resolveServiceControl, NotFoundError } from '@hh/domain';
+import type { CreateStoreInput, ServiceControlConfig, StorefrontConfig } from '@hh/domain';
+import { resolveServiceControl, resolveStorefrontConfig, NotFoundError } from '@hh/domain';
 import type { DatabaseClient } from '../index';
 
 export async function findStoreById(db: DatabaseClient, id: string): Promise<Store | null> {
@@ -91,6 +91,57 @@ export async function updateStoreServiceControl(
       settings: {
         ...store.settings,
         serviceControl: updated
+      },
+      updatedAt: new Date()
+    })
+    .where(eq(stores.id, store.id));
+
+  return updated;
+}
+
+/**
+ * Retrieves the current Server-Driven UI StorefrontConfig.
+ */
+export async function getStorefrontConfig(
+  db: DatabaseClient,
+  slug: string
+): Promise<StorefrontConfig> {
+  const store = await findStoreBySlug(db, slug);
+  if (!store) {
+    throw new NotFoundError('Store', slug);
+  }
+  return resolveStorefrontConfig(
+    (store.settings as Record<string, unknown> | undefined)?.['storefront']
+  );
+}
+
+/**
+ * Atomically updates Server-Driven UI StorefrontConfig (announcements, hero banner, reassurance badges).
+ */
+export async function updateStorefrontConfig(
+  db: DatabaseClient,
+  slug: string,
+  settings: Record<string, unknown>
+): Promise<StorefrontConfig> {
+  const store = await findStoreBySlug(db, slug);
+  if (!store) {
+    throw new NotFoundError('Store', slug);
+  }
+
+  const current = resolveStorefrontConfig(
+    (store.settings as Record<string, unknown> | undefined)?.['storefront']
+  );
+  const updated = resolveStorefrontConfig({
+    ...current,
+    ...settings
+  });
+
+  await db
+    .update(stores)
+    .set({
+      settings: {
+        ...store.settings,
+        storefront: updated
       },
       updatedAt: new Date()
     })

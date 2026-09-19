@@ -6,3 +6,4 @@ export * from './orders';
 export * from './payments';
 export * from './fulfillments';
 export * from './outbox';
+export * from './coupons';

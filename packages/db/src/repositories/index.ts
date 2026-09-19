@@ -7,3 +7,4 @@ export * from './payment.repository';
 export * from './fulfillment.repository';
 export * from './inventory.repository';
 export * from './insights.repository';
+export * from './coupon.repository';

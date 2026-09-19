@@ -5,6 +5,8 @@ import {
   Boxes,
   BarChart3,
   Sliders,
+  Tag,
+  Palette,
   ExternalLink,
   LogOut,
   ShieldCheck
@@ -97,6 +99,24 @@ export default function AdminHeader() {
           >
             <BarChart3 style={{ width: '16px', height: '16px', color: '#C5A880' }} />
             <span>Insights</span>
+          </a>
+
+          <a
+            href="/admin/coupons"
+            className="admin-btn-secondary"
+            style={{ minHeight: '40px', padding: '8px 14px' }}
+          >
+            <Tag style={{ width: '16px', height: '16px', color: '#C5A880' }} />
+            <span>Coupons</span>
+          </a>
+
+          <a
+            href="/admin/brand"
+            className="admin-btn-secondary"
+            style={{ minHeight: '40px', padding: '8px 14px' }}
+          >
+            <Palette style={{ width: '16px', height: '16px', color: '#C5A880' }} />
+            <span>Brand</span>
           </a>
 
           <a

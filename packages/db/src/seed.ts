@@ -9,7 +9,8 @@ import {
   orders,
   orderItems,
   fulfillments,
-  paymentAttempts
+  paymentAttempts,
+  coupons
 } from './schema';
 import { createProductWithVariants } from './repositories';
 import { defaultInvoiceTemplate } from '@hh/domain';
@@ -527,6 +528,33 @@ async function seed(): Promise<void> {
 
       console.log('    ✓ Seeded "To Pack" Order: HH-2026-00002 (Zoya Farooqui - Hyderabad)');
     }
+  }
+
+  // 5. Seed Promotional Coupons
+  const existingCoupons = await db.select().from(coupons).where(eq(coupons.storeId, store.id));
+  if (existingCoupons.length === 0) {
+    await db.insert(coupons).values([
+      {
+        storeId: store.id,
+        code: 'WELCOME10',
+        discountType: 'percentage',
+        value: 10,
+        minOrderValueMinor: 50000,
+        maxDiscountMinor: 20000,
+        usageLimit: 200,
+        isActive: true
+      },
+      {
+        storeId: store.id,
+        code: 'ROYAL150',
+        discountType: 'fixed',
+        value: 15000,
+        minOrderValueMinor: 99900,
+        usageLimit: 100,
+        isActive: true
+      }
+    ]);
+    console.log('  ✓ Seeded promotional coupons: WELCOME10 (10% off) and ROYAL150 (₹150 off)');
   }
 
   // Sanity check

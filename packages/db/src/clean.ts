@@ -21,6 +21,7 @@ async function clean(): Promise<void> {
         webhook_events,
         outbox_events,
         orders,
+        coupons,
         product_images,
         product_variants,
         products,

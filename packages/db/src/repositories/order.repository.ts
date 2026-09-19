@@ -9,12 +9,15 @@ import {
   stores,
   paymentAttempts,
   fulfillments,
+  coupons,
   type Order,
   type OrderItem
 } from '../schema';
 import {
   calculateCheckoutFinancials,
   generateOrderNumber,
+  validateCoupon,
+  type Coupon,
   ConflictError,
   ValidationError,
   NotFoundError,
@@ -137,8 +140,51 @@ export async function createPendingCheckoutOrder(
       subtotalMinor += variant.priceMinor * item.quantity;
     }
 
-    // 2. Authoritative Financial Calculations
-    const financials = calculateCheckoutFinancials(subtotalMinor, 'INR');
+    // 2. Authoritative Financial Calculations & Optional Coupon Verification
+    let appliedCouponCode: string | null = null;
+    let discountMinor = 0;
+
+    if (params.couponCode) {
+      const normalizedCode = params.couponCode.trim().toUpperCase();
+      const couponRows = await tx
+        .select()
+        .from(coupons)
+        .where(and(eq(coupons.storeId, storeId), eq(coupons.code, normalizedCode)))
+        .limit(1);
+
+      const couponRecord = couponRows[0];
+      if (couponRecord) {
+        const domainCoupon: Coupon = {
+          id: couponRecord.id,
+          code: couponRecord.code,
+          discountType: couponRecord.discountType as 'percentage' | 'fixed',
+          value: couponRecord.value,
+          minOrderValueMinor: couponRecord.minOrderValueMinor,
+          maxDiscountMinor: couponRecord.maxDiscountMinor,
+          usageLimit: couponRecord.usageLimit,
+          timesUsed: couponRecord.timesUsed,
+          startsAt: couponRecord.startsAt ? couponRecord.startsAt.toISOString() : null,
+          expiresAt: couponRecord.expiresAt ? couponRecord.expiresAt.toISOString() : null,
+          isActive: couponRecord.isActive,
+          createdAt: couponRecord.createdAt.toISOString()
+        };
+
+        const validation = validateCoupon(domainCoupon, { subtotalMinor });
+        if (validation.valid) {
+          discountMinor = validation.discountMinor;
+          appliedCouponCode = domainCoupon.code;
+          await tx
+            .update(coupons)
+            .set({
+              timesUsed: sql`${coupons.timesUsed} + 1`,
+              updatedAt: new Date()
+            })
+            .where(eq(coupons.id, domainCoupon.id));
+        }
+      }
+    }
+
+    const financials = calculateCheckoutFinancials(subtotalMinor, 'INR', { discountMinor });
 
     // 3. Generate Order ID & Order Number
     const orderNumber = generateOrderNumber();
@@ -173,6 +219,7 @@ export async function createPendingCheckoutOrder(
         shippingMinor: financials.shippingMinor,
         discountMinor: financials.discountMinor,
         totalMinor: financials.totalMinor,
+        couponCode: appliedCouponCode,
         notes: notesContent
       })
       .returning();

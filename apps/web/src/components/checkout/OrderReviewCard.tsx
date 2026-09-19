@@ -1,14 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { Money, calculateCheckoutFinancials, type CartSummary } from '@hh/domain';
-import { ShieldCheck, Clock, Truck, Sparkles, Loader2 } from 'lucide-react';
+import { ShieldCheck, Clock, Truck, Sparkles, Loader2, Tag, X } from 'lucide-react';
 
 interface OrderReviewCardProps {
   cartSummary: CartSummary;
   isSubmitting: boolean;
-  onSubmit: () => void;
+  onSubmit: (couponCode?: string) => void;
   disabled?: boolean;
 }
 
@@ -18,7 +18,58 @@ export function OrderReviewCard({
   onSubmit,
   disabled = false
 }: OrderReviewCardProps) {
-  const financials = calculateCheckoutFinancials(cartSummary.subtotalMinor, 'INR');
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountMinor: number;
+  } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponInput.trim()) return;
+
+    setCouponLoading(true);
+    setCouponError(null);
+
+    try {
+      const res = await fetch('/api/cart/coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: couponInput.trim(),
+          subtotalMinor: cartSummary.subtotalMinor
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.valid) {
+        setCouponError(data.reason || 'Invalid promotional code.');
+        setAppliedCoupon(null);
+      } else {
+        setAppliedCoupon({
+          code: data.coupon.code,
+          discountMinor: data.discountMinor
+        });
+        setCouponError(null);
+      }
+    } catch {
+      setCouponError('Failed to verify promotional code.');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponError(null);
+  };
+
+  const financials = calculateCheckoutFinancials(cartSummary.subtotalMinor, 'INR', {
+    discountMinor: appliedCoupon?.discountMinor ?? 0
+  });
 
   const subtotalFormatted = Money.fromMinor(financials.subtotalMinor, 'INR').format();
   const shippingFormatted = financials.isFreeDelivery
@@ -182,6 +233,93 @@ export function OrderReviewCard({
         </div>
       )}
 
+      {/* Coupon Code Entry Form */}
+      <div style={{ marginBottom: '18px' }}>
+        {!appliedCoupon ? (
+          <form
+            onSubmit={handleApplyCoupon}
+            style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
+          >
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="text"
+                placeholder="PROMO CODE (e.g. WELCOME10)"
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                disabled={disabled || isSubmitting || couponLoading}
+                aria-label="Promotional Code"
+                style={{
+                  flex: 1,
+                  padding: '10px 12px',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-bg)',
+                  fontSize: '0.85rem',
+                  fontFamily: 'monospace',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  outline: 'none'
+                }}
+              />
+              <button
+                type="submit"
+                disabled={!couponInput.trim() || disabled || isSubmitting || couponLoading}
+                className="royale-button-secondary"
+                style={{
+                  padding: '10px 16px',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer'
+                }}
+              >
+                {couponLoading ? 'Checking...' : 'Apply'}
+              </button>
+            </div>
+            {couponError && (
+              <div style={{ fontSize: '0.78rem', color: '#DC2626', marginTop: '2px' }}>
+                {couponError}
+              </div>
+            )}
+          </form>
+        ) : (
+          <div
+            style={{
+              padding: '10px 14px',
+              backgroundColor: 'rgba(5, 150, 105, 0.08)',
+              border: '1px solid #A7F3D0',
+              borderRadius: 'var(--radius-sm)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Tag size={16} color="#059669" />
+              <span style={{ fontSize: '0.85rem', color: '#065F46', fontWeight: 600 }}>
+                {appliedCoupon.code} applied
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleRemoveCoupon}
+              aria-label="Remove promo code"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#6B7280',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '4px'
+              }}
+            >
+              <X size={15} />
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Financial Breakdown Table */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
         <div
@@ -197,6 +335,25 @@ export function OrderReviewCard({
             {subtotalFormatted}
           </span>
         </div>
+
+        {/* Applied Coupon Discount Row */}
+        {financials.discountMinor > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontSize: '0.9rem',
+              color: '#059669',
+              fontWeight: 600
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Tag size={14} />
+              <span>Coupon Discount ({appliedCoupon?.code})</span>
+            </div>
+            <span>- {Money.fromMinor(financials.discountMinor, 'INR').format()}</span>
+          </div>
+        )}
 
         <div
           style={{
@@ -282,7 +439,7 @@ export function OrderReviewCard({
       {/* Primary Submit Button */}
       <button
         type="button"
-        onClick={onSubmit}
+        onClick={() => onSubmit(appliedCoupon?.code)}
         disabled={disabled || isSubmitting || !cartSummary.isValidForCheckout}
         className="royale-button-primary"
         style={{

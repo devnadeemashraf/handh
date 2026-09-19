@@ -34,6 +34,14 @@ describe('AdminHeader Component', () => {
     expect(insightsLink).toBeInTheDocument();
     expect(insightsLink).toHaveAttribute('href', '/admin/insights');
 
+    const couponsLink = screen.getByRole('link', { name: /coupons/i });
+    expect(couponsLink).toBeInTheDocument();
+    expect(couponsLink).toHaveAttribute('href', '/admin/coupons');
+
+    const brandLink = screen.getByRole('link', { name: /brand/i });
+    expect(brandLink).toBeInTheDocument();
+    expect(brandLink).toHaveAttribute('href', '/admin/brand');
+
     const servicesLink = screen.getByRole('link', { name: /services/i });
     expect(servicesLink).toBeInTheDocument();
     expect(servicesLink).toHaveAttribute('href', '/admin/service-control');
