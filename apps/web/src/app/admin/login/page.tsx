@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getAdminSession } from '@/lib/admin-auth';
 
-import { getAdminSession } from '../../../lib/admin-auth';
 import AdminLoginForm from './AdminLoginForm';
 
 export const dynamic = 'force-dynamic';
@@ -15,61 +16,24 @@ export default async function AdminLoginPage(props: { searchParams: Promise<{ ke
   const entryKey = searchParams.key ?? '';
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#081F18',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '16px'
-      }}
-    >
-      <div
-        className="admin-card"
-        style={{
-          maxWidth: '420px',
-          width: '100%',
-          padding: '36px 28px'
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '50%',
-              backgroundColor: '#164335',
-              color: '#C5A880',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px',
-              border: '1px solid #235847',
-              fontSize: '1rem',
-              fontFamily: 'serif',
-              letterSpacing: '0.05em'
-            }}
-          >
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="max-w-md w-full border-border bg-card shadow-lg p-2 sm:p-4">
+        <CardHeader className="text-center pb-6">
+          <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 text-accent font-serif font-bold text-base flex items-center justify-center mx-auto mb-3">
             H&amp;H
           </div>
-          <h1
-            style={{
-              fontSize: '1.5rem',
-              fontFamily: 'serif',
-              color: '#FDFBF7',
-              margin: '0 0 6px'
-            }}
-          >
+          <CardTitle className="font-serif text-2xl font-bold tracking-tight text-foreground">
             Workshop Operations
-          </h1>
-          <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: 0 }}>
+          </CardTitle>
+          <CardDescription className="text-xs text-muted-foreground mt-1">
             Authorized personnel portal
-          </p>
-        </div>
+          </CardDescription>
+        </CardHeader>
 
-        <AdminLoginForm initialKey={entryKey} />
-      </div>
+        <CardContent>
+          <AdminLoginForm initialKey={entryKey} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

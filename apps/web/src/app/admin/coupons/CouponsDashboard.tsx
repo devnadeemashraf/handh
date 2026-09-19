@@ -1,7 +1,12 @@
 'use client';
 
-import { Check, CheckCircle2, Copy, Plus, RefreshCw, Search, Sparkles, Tag, X } from 'lucide-react';
+import { Check, CheckCircle2, Copy, Plus, RefreshCw, Search, Sparkles, Tag } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 import type { Coupon, DiscountType } from '@hh/domain';
 
@@ -161,299 +166,149 @@ export default function CouponsDashboard({ initialCoupons }: CouponsDashboardPro
   const totalRedemptions = coupons.reduce((sum, c) => sum + c.timesUsed, 0);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="flex flex-col gap-6">
       {/* Header Bar */}
-      <div
-        className="admin-card"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px'
-        }}
-      >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <Tag style={{ width: '18px', height: '18px', color: '#C5A880' }} />
-            <h2
-              style={{
-                fontSize: '1.25rem',
-                fontFamily: 'serif',
-                fontWeight: 600,
-                color: '#FDFBF7',
-                margin: 0
-              }}
-            >
+          <div className="flex items-center gap-2 mb-1">
+            <Tag className="h-5 w-5 text-accent" />
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
               Promotional Coupons &amp; Discounts
-            </h2>
+            </h1>
           </div>
-          <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: 0 }}>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Drive social campaigns and reward loyal patrons with flexible cart and checkout discount
             codes.
           </p>
         </div>
 
-        <button
-          type="button"
+        <Button
           onClick={() => {
             resetForm();
             setIsModalOpen(true);
           }}
-          className="admin-btn-primary"
-          style={{
-            padding: '8px 16px',
-            fontSize: '0.875rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
+          className="gap-2"
         >
-          <Plus style={{ width: '16px', height: '16px' }} />
+          <Plus className="h-4 w-4" />
           <span>Create New Coupon</span>
-        </button>
+        </Button>
       </div>
 
       {/* KPI Scorecards */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '16px'
-        }}
-      >
-        <div className="admin-card">
-          <span
-            style={{
-              fontSize: '0.75rem',
-              color: '#8BAAA0',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em'
-            }}
-          >
-            Active Coupons
-          </span>
-          <div
-            style={{
-              fontSize: '1.75rem',
-              fontFamily: 'serif',
-              fontWeight: 700,
-              color: '#FDFBF7',
-              marginTop: '6px'
-            }}
-          >
-            {activeCount}
-            <span
-              style={{ fontSize: '0.875rem', color: '#8BAAA0', fontWeight: 400, marginLeft: '6px' }}
-            >
-              / {totalCoupons} total
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Active Coupons
             </span>
-          </div>
-        </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div className="text-2xl sm:text-3xl font-bold font-serif text-foreground">
+              {activeCount}
+              <span className="text-xs text-muted-foreground font-normal ml-2">
+                / {totalCoupons} total
+              </span>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="admin-card">
-          <span
-            style={{
-              fontSize: '0.75rem',
-              color: '#8BAAA0',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em'
-            }}
-          >
-            Total Redemptions
-          </span>
-          <div
-            style={{
-              fontSize: '1.75rem',
-              fontFamily: 'serif',
-              fontWeight: 700,
-              color: '#FDFBF7',
-              marginTop: '6px'
-            }}
-          >
-            {totalRedemptions}
-          </div>
-        </div>
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Total Redemptions
+            </span>
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div className="text-2xl sm:text-3xl font-bold font-serif text-foreground">
+              {totalRedemptions}
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="admin-card">
-          <span
-            style={{
-              fontSize: '0.75rem',
-              color: '#8BAAA0',
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em'
-            }}
-          >
-            Active Strategies
-          </span>
-          <div style={{ fontSize: '0.9rem', color: '#6EE7B7', fontWeight: 500, marginTop: '10px' }}>
-            Percentage &amp; Flat Rupee Discounts
-          </div>
-        </div>
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Active Strategies
+            </span>
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400 mt-1">
+              Percentage &amp; Flat Rupee Discounts
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Success Notification */}
       {actionSuccess && (
-        <div
-          style={{
-            padding: '12px 16px',
-            backgroundColor: '#064E3B',
-            border: '1px solid #059669',
-            borderRadius: '8px',
-            color: '#6EE7B7',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            fontSize: '0.85rem'
-          }}
-        >
-          <CheckCircle2 style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+        <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-sm flex items-center gap-2 font-medium">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>{actionSuccess}</span>
         </div>
       )}
 
       {/* Controls Bar: Tabs & Search */}
-      <div
-        className="admin-card"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px',
-          padding: '12px 16px'
-        }}
-      >
-        <div style={{ display: 'flex', gap: '8px' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="inline-flex rounded-lg border border-border bg-card p-1 shadow-xs">
           {(['all', 'active', 'inactive'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setFilterTab(tab)}
-              style={{
-                padding: '6px 14px',
-                borderRadius: '6px',
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                border: '1px solid',
-                borderColor: filterTab === tab ? '#C5A880' : '#1C4D3E',
-                backgroundColor: filterTab === tab ? '#164335' : 'transparent',
-                color: filterTab === tab ? '#FDFBF7' : '#8BAAA0',
-                cursor: 'pointer',
-                textTransform: 'capitalize'
-              }}
+              className={cn(
+                'rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none capitalize',
+                filterTab === tab
+                  ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
             >
               {tab === 'all' ? 'All Coupons' : tab}
             </button>
           ))}
         </div>
 
-        <div style={{ position: 'relative', minWidth: '240px' }}>
-          <Search
-            style={{
-              position: 'absolute',
-              left: '10px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: '14px',
-              height: '14px',
-              color: '#8BAAA0'
-            }}
-          />
-          <input
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
             type="text"
             placeholder="Search coupon code..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '6px 12px 6px 32px',
-              backgroundColor: '#081F18',
-              border: '1px solid #1C4D3E',
-              borderRadius: '6px',
-              color: '#FDFBF7',
-              fontSize: '0.8rem',
-              outline: 'none'
-            }}
+            className="pl-9 pr-4 h-10 text-xs"
           />
         </div>
       </div>
 
       {/* Coupons Table */}
-      <div className="admin-card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="admin-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#0B2920', borderBottom: '1px solid #1C4D3E' }}>
-                <th
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: 'left',
-                    fontSize: '0.75rem',
-                    color: '#8BAAA0'
-                  }}
-                >
+      <Card className="border-border bg-card shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="border-b border-border bg-muted/40">
+              <tr>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   COUPON CODE
                 </th>
-                <th
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: 'left',
-                    fontSize: '0.75rem',
-                    color: '#8BAAA0'
-                  }}
-                >
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   DISCOUNT VALUE
                 </th>
-                <th
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: 'left',
-                    fontSize: '0.75rem',
-                    color: '#8BAAA0'
-                  }}
-                >
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   MIN. ORDER
                 </th>
-                <th
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: 'left',
-                    fontSize: '0.75rem',
-                    color: '#8BAAA0'
-                  }}
-                >
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   USAGE &amp; REDEMPTIONS
                 </th>
-                <th
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: 'left',
-                    fontSize: '0.75rem',
-                    color: '#8BAAA0'
-                  }}
-                >
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   EXPIRATION
                 </th>
-                <th
-                  style={{
-                    padding: '12px 16px',
-                    textAlign: 'right',
-                    fontSize: '0.75rem',
-                    color: '#8BAAA0'
-                  }}
-                >
+                <th className="text-right px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   STATUS &amp; ACTIONS
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-border">
               {filteredCoupons.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={6}
-                    style={{ padding: '36px 16px', textAlign: 'center', color: '#8BAAA0' }}
-                  >
+                  <td colSpan={6} className="py-12 px-4 text-center text-muted-foreground text-xs">
                     No promotional coupons found matching your criteria.
                   </td>
                 </tr>
@@ -463,126 +318,96 @@ export default function CouponsDashboard({ initialCoupons }: CouponsDashboardPro
                   return (
                     <tr
                       key={c.id}
-                      style={{
-                        borderBottom: '1px solid #164335',
-                        backgroundColor:
-                          !c.isActive || isExpired ? 'rgba(11, 41, 32, 0.4)' : 'transparent'
-                      }}
+                      className={cn(
+                        'hover:bg-muted/20 transition-colors',
+                        (!c.isActive || isExpired) && 'opacity-70 bg-muted/10'
+                      )}
                     >
                       {/* Code Badge */}
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                          <span
-                            style={{
-                              fontFamily: 'monospace',
-                              fontWeight: 700,
-                              fontSize: '0.9rem',
-                              color: '#C5A880',
-                              backgroundColor: '#081F18',
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              border: '1px solid #1C4D3E',
-                              letterSpacing: '0.05em'
-                            }}
-                          >
+                      <td className="px-4 py-3">
+                        <div className="inline-flex items-center gap-2">
+                          <span className="font-mono font-bold text-xs text-accent bg-accent/10 border border-accent/30 px-2 py-1 rounded">
                             {c.code}
                           </span>
                           <button
                             type="button"
                             onClick={() => handleCopyCode(c.code)}
                             aria-label={`Copy coupon ${c.code}`}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: '#8BAAA0',
-                              cursor: 'pointer',
-                              padding: '2px'
-                            }}
+                            className="text-muted-foreground hover:text-foreground p-1 transition-colors"
                           >
                             {copiedCode === c.code ? (
-                              <Check style={{ width: '14px', height: '14px', color: '#10B981' }} />
+                              <Check className="h-3.5 w-3.5 text-emerald-500" />
                             ) : (
-                              <Copy style={{ width: '14px', height: '14px' }} />
+                              <Copy className="h-3.5 w-3.5" />
                             )}
                           </button>
                         </div>
                       </td>
 
                       {/* Discount Value */}
-                      <td style={{ padding: '14px 16px', fontSize: '0.875rem', color: '#FDFBF7' }}>
+                      <td className="px-4 py-3 text-sm text-foreground">
                         {c.discountType === 'percentage' ? (
-                          <span>
+                          <div>
                             <strong>{c.value}%</strong> Off
                             {c.maxDiscountMinor ? (
-                              <span
-                                style={{ fontSize: '0.75rem', color: '#8BAAA0', display: 'block' }}
-                              >
+                              <div className="text-xs text-muted-foreground">
                                 Capped at ₹{c.maxDiscountMinor / 100}
-                              </span>
+                              </div>
                             ) : null}
-                          </span>
+                          </div>
                         ) : (
-                          <span>
+                          <div>
                             <strong>₹{c.value / 100}</strong> Flat Off
-                          </span>
+                          </div>
                         )}
                       </td>
 
                       {/* Min Order */}
-                      <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#FDFBF7' }}>
+                      <td className="px-4 py-3 text-xs text-foreground">
                         {c.minOrderValueMinor > 0 ? `₹${c.minOrderValueMinor / 100}` : 'None'}
                       </td>
 
                       {/* Usage */}
-                      <td style={{ padding: '14px 16px', fontSize: '0.85rem', color: '#8BAAA0' }}>
-                        <span style={{ color: '#FDFBF7', fontWeight: 600 }}>{c.timesUsed}</span>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        <span className="text-foreground font-semibold">{c.timesUsed}</span>
                         {c.usageLimit ? ` / ${c.usageLimit} max` : ' (unlimited)'}
                       </td>
 
                       {/* Expiration */}
-                      <td
-                        style={{
-                          padding: '14px 16px',
-                          fontSize: '0.8rem',
-                          color: isExpired ? '#EF4444' : '#8BAAA0'
-                        }}
-                      >
+                      <td className="px-4 py-3 text-xs">
                         {c.expiresAt ? (
                           <>
-                            <div>{new Date(c.expiresAt).toLocaleDateString('en-IN')}</div>
+                            <div
+                              className={cn(
+                                isExpired ? 'text-destructive font-medium' : 'text-muted-foreground'
+                              )}
+                            >
+                              {new Date(c.expiresAt).toLocaleDateString('en-IN')}
+                            </div>
                             {isExpired && (
-                              <span style={{ fontSize: '0.725rem', color: '#EF4444' }}>
+                              <span className="text-[10px] text-destructive uppercase tracking-wider font-semibold">
                                 Expired
                               </span>
                             )}
                           </>
                         ) : (
-                          'Never'
+                          <span className="text-muted-foreground">Never</span>
                         )}
                       </td>
 
                       {/* Toggle & Action */}
-                      <td style={{ padding: '14px 16px', textAlign: 'right' }}>
-                        <button
-                          type="button"
+                      <td className="px-4 py-3 text-right">
+                        <Button
+                          variant={c.isActive ? 'default' : 'outline'}
+                          size="sm"
                           onClick={() => handleToggleStatus(c)}
                           aria-label={
                             c.isActive ? `Pause coupon ${c.code}` : `Activate coupon ${c.code}`
                           }
-                          style={{
-                            padding: '4px 12px',
-                            borderRadius: '6px',
-                            border: '1px solid',
-                            borderColor: c.isActive ? '#10B981' : '#1C4D3E',
-                            backgroundColor: c.isActive ? '#064E3B' : 'transparent',
-                            color: c.isActive ? '#6EE7B7' : '#8BAAA0',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            cursor: 'pointer'
-                          }}
+                          className="h-7 px-3 text-xs"
                         >
                           {c.isActive ? 'Active' : 'Paused'}
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   );
@@ -591,380 +416,178 @@ export default function CouponsDashboard({ initialCoupons }: CouponsDashboardPro
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
 
       {/* Create Coupon Modal */}
-      {isModalOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(8, 31, 24, 0.85)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px',
-            zIndex: 100,
-            backdropFilter: 'blur(4px)'
-          }}
-        >
-          <div
-            className="admin-card"
-            style={{
-              width: '100%',
-              maxWidth: '540px',
-              backgroundColor: '#0B2920',
-              border: '1px solid #1C4D3E',
-              borderRadius: '12px',
-              padding: '24px',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)',
-              maxHeight: '90vh',
-              overflowY: 'auto'
-            }}
-          >
-            {/* Modal Header */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '20px'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Sparkles style={{ width: '18px', height: '18px', color: '#C5A880' }} />
-                <h3
-                  style={{ fontSize: '1.125rem', fontFamily: 'serif', color: '#FDFBF7', margin: 0 }}
-                >
-                  Create Promotional Coupon
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                aria-label="Close modal"
-                style={{ background: 'none', border: 'none', color: '#8BAAA0', cursor: 'pointer' }}
-              >
-                <X style={{ width: '20px', height: '20px' }} />
-              </button>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-accent" />
+              <DialogTitle className="font-serif text-xl">Create Promotional Coupon</DialogTitle>
+            </div>
+          </DialogHeader>
+
+          {formError && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-xs">
+              {formError}
+            </div>
+          )}
+
+          <form onSubmit={handleCreateCoupon} className="flex flex-col gap-4 py-2">
+            {/* Code */}
+            <div className="space-y-1.5">
+              <label htmlFor="couponCode" className="block text-xs font-medium text-foreground">
+                Coupon Code *
+              </label>
+              <Input
+                id="couponCode"
+                type="text"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                placeholder="e.g. EIDGIFT15, WELCOME10"
+                className="font-mono font-bold tracking-wider text-accent"
+              />
             </div>
 
-            {formError && (
-              <div
-                style={{
-                  padding: '10px 14px',
-                  backgroundColor: '#451A1A',
-                  border: '1px solid #EF4444',
-                  borderRadius: '6px',
-                  color: '#FCA5A5',
-                  fontSize: '0.85rem',
-                  marginBottom: '16px'
-                }}
-              >
-                {formError}
-              </div>
-            )}
-
-            <form
-              onSubmit={handleCreateCoupon}
-              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-            >
-              {/* Code */}
-              <div>
-                <label
-                  htmlFor="couponCode"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    color: '#FDFBF7',
-                    marginBottom: '6px'
-                  }}
-                >
-                  Coupon Code *
-                </label>
-                <input
-                  id="couponCode"
-                  type="text"
-                  required
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  placeholder="e.g. EIDGIFT15, WELCOME10"
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    backgroundColor: '#081F18',
-                    border: '1px solid #1C4D3E',
-                    borderRadius: '6px',
-                    color: '#C5A880',
-                    fontFamily: 'monospace',
-                    fontWeight: 700,
-                    letterSpacing: '0.05em',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              {/* Discount Type */}
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    color: '#FDFBF7',
-                    marginBottom: '6px'
-                  }}
-                >
-                  Discount Strategy *
-                </label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  <button
-                    type="button"
-                    onClick={() => setDiscountType('percentage')}
-                    style={{
-                      padding: '10px',
-                      borderRadius: '6px',
-                      border: '1px solid',
-                      borderColor: discountType === 'percentage' ? '#C5A880' : '#1C4D3E',
-                      backgroundColor: discountType === 'percentage' ? '#164335' : '#081F18',
-                      color: discountType === 'percentage' ? '#FDFBF7' : '#8BAAA0',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Percentage Off (%)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDiscountType('fixed')}
-                    style={{
-                      padding: '10px',
-                      borderRadius: '6px',
-                      border: '1px solid',
-                      borderColor: discountType === 'fixed' ? '#C5A880' : '#1C4D3E',
-                      backgroundColor: discountType === 'fixed' ? '#164335' : '#081F18',
-                      color: discountType === 'fixed' ? '#FDFBF7' : '#8BAAA0',
-                      fontSize: '0.85rem',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Flat Rupee Off (₹)
-                  </button>
-                </div>
-              </div>
-
-              {/* Value & Min Order */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <label
-                    htmlFor="discountValue"
-                    style={{
-                      display: 'block',
-                      fontSize: '0.8rem',
-                      fontWeight: 500,
-                      color: '#FDFBF7',
-                      marginBottom: '6px'
-                    }}
-                  >
-                    {discountType === 'percentage' ? 'Percentage (1-100%) *' : 'Amount in ₹ *'}
-                  </label>
-                  <input
-                    id="discountValue"
-                    type="number"
-                    required
-                    min={1}
-                    max={discountType === 'percentage' ? 100 : 50000}
-                    value={value}
-                    onChange={(e) => setValue(Number(e.target.value))}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      backgroundColor: '#081F18',
-                      border: '1px solid #1C4D3E',
-                      borderRadius: '6px',
-                      color: '#FDFBF7',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="minOrderValue"
-                    style={{
-                      display: 'block',
-                      fontSize: '0.8rem',
-                      fontWeight: 500,
-                      color: '#FDFBF7',
-                      marginBottom: '6px'
-                    }}
-                  >
-                    Min Order Value (₹)
-                  </label>
-                  <input
-                    id="minOrderValue"
-                    type="number"
-                    min={0}
-                    value={minOrderValueRupees}
-                    onChange={(e) => setMinOrderValueRupees(Number(e.target.value))}
-                    placeholder="e.g. 500"
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      backgroundColor: '#081F18',
-                      border: '1px solid #1C4D3E',
-                      borderRadius: '6px',
-                      color: '#FDFBF7',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Optional: Max Discount Cap & Usage Limit */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <label
-                    htmlFor="maxDiscount"
-                    style={{
-                      display: 'block',
-                      fontSize: '0.8rem',
-                      fontWeight: 500,
-                      color: '#FDFBF7',
-                      marginBottom: '6px'
-                    }}
-                  >
-                    Max Discount Cap (₹)
-                  </label>
-                  <input
-                    id="maxDiscount"
-                    type="number"
-                    disabled={discountType !== 'percentage'}
-                    value={maxDiscountRupees}
-                    onChange={(e) => setMaxDiscountRupees(e.target.value)}
-                    placeholder={
-                      discountType === 'percentage' ? 'e.g. 200 (optional)' : 'N/A for flat'
-                    }
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      backgroundColor: '#081F18',
-                      border: '1px solid #1C4D3E',
-                      borderRadius: '6px',
-                      color: '#FDFBF7',
-                      outline: 'none',
-                      opacity: discountType !== 'percentage' ? 0.4 : 1
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="usageLimit"
-                    style={{
-                      display: 'block',
-                      fontSize: '0.8rem',
-                      fontWeight: 500,
-                      color: '#FDFBF7',
-                      marginBottom: '6px'
-                    }}
-                  >
-                    Total Redemptions Cap
-                  </label>
-                  <input
-                    id="usageLimit"
-                    type="number"
-                    min={1}
-                    value={usageLimit}
-                    onChange={(e) => setUsageLimit(e.target.value)}
-                    placeholder="e.g. 100 (optional)"
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      backgroundColor: '#081F18',
-                      border: '1px solid #1C4D3E',
-                      borderRadius: '6px',
-                      color: '#FDFBF7',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Expiry Date */}
-              <div>
-                <label
-                  htmlFor="expiresAt"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    color: '#FDFBF7',
-                    marginBottom: '6px'
-                  }}
-                >
-                  Expiration Date (optional)
-                </label>
-                <input
-                  id="expiresAt"
-                  type="date"
-                  value={expiresAt}
-                  onChange={(e) => setExpiresAt(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    backgroundColor: '#081F18',
-                    border: '1px solid #1C4D3E',
-                    borderRadius: '6px',
-                    color: '#FDFBF7',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              {/* Modal Actions */}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '12px',
-                  marginTop: '12px'
-                }}
-              >
+            {/* Discount Type */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-foreground">
+                Discount Strategy *
+              </label>
+              <div className="grid grid-cols-2 gap-2.5">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="admin-btn-secondary"
-                  style={{ padding: '8px 16px' }}
+                  onClick={() => setDiscountType('percentage')}
+                  className={cn(
+                    'p-2.5 rounded-md border text-xs font-semibold transition-colors',
+                    discountType === 'percentage'
+                      ? 'bg-primary text-primary-foreground border-primary shadow-xs'
+                      : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                  )}
                 >
-                  Cancel
+                  Percentage Off (%)
                 </button>
                 <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="admin-btn-primary"
-                  style={{ padding: '8px 20px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <RefreshCw
-                        className="animate-spin"
-                        style={{ width: '14px', height: '14px' }}
-                      />
-                      <span>Creating...</span>
-                    </>
-                  ) : (
-                    <span>Publish Coupon</span>
+                  type="button"
+                  onClick={() => setDiscountType('fixed')}
+                  className={cn(
+                    'p-2.5 rounded-md border text-xs font-semibold transition-colors',
+                    discountType === 'fixed'
+                      ? 'bg-primary text-primary-foreground border-primary shadow-xs'
+                      : 'bg-background border-border text-muted-foreground hover:text-foreground'
                   )}
+                >
+                  Flat Rupee Off (₹)
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+
+            {/* Value & Min Order */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="discountValue"
+                  className="block text-xs font-medium text-foreground"
+                >
+                  {discountType === 'percentage' ? 'Percentage (1-100%) *' : 'Amount in ₹ *'}
+                </label>
+                <Input
+                  id="discountValue"
+                  type="number"
+                  required
+                  min={1}
+                  max={discountType === 'percentage' ? 100 : 50000}
+                  value={value}
+                  onChange={(e) => setValue(Number(e.target.value))}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="minOrderValue"
+                  className="block text-xs font-medium text-foreground"
+                >
+                  Min Order Value (₹)
+                </label>
+                <Input
+                  id="minOrderValue"
+                  type="number"
+                  min={0}
+                  value={minOrderValueRupees}
+                  onChange={(e) => setMinOrderValueRupees(Number(e.target.value))}
+                  placeholder="e.g. 500"
+                />
+              </div>
+            </div>
+
+            {/* Optional: Max Discount Cap & Usage Limit */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label htmlFor="maxDiscount" className="block text-xs font-medium text-foreground">
+                  Max Discount Cap (₹)
+                </label>
+                <Input
+                  id="maxDiscount"
+                  type="number"
+                  disabled={discountType !== 'percentage'}
+                  value={maxDiscountRupees}
+                  onChange={(e) => setMaxDiscountRupees(e.target.value)}
+                  placeholder={
+                    discountType === 'percentage' ? 'e.g. 200 (optional)' : 'N/A for flat'
+                  }
+                  className={discountType !== 'percentage' ? 'opacity-50' : ''}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="usageLimit" className="block text-xs font-medium text-foreground">
+                  Total Redemptions Cap
+                </label>
+                <Input
+                  id="usageLimit"
+                  type="number"
+                  min={1}
+                  value={usageLimit}
+                  onChange={(e) => setUsageLimit(e.target.value)}
+                  placeholder="e.g. 100 (optional)"
+                />
+              </div>
+            </div>
+
+            {/* Expiry Date */}
+            <div className="space-y-1.5">
+              <label htmlFor="expiresAt" className="block text-xs font-medium text-foreground">
+                Expiration Date (optional)
+              </label>
+              <Input
+                id="expiresAt"
+                type="date"
+                value={expiresAt}
+                onChange={(e) => setExpiresAt(e.target.value)}
+              />
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex justify-end gap-2.5 pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                    <span>Creating...</span>
+                  </>
+                ) : (
+                  <span>Publish Coupon</span>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -12,6 +12,12 @@ import {
   Sliders
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 import type { ServiceControlConfig, StoreOperatingStatus } from '@hh/domain';
 
@@ -117,108 +123,62 @@ export default function ServiceControlDashboard({ initialConfig }: ServiceContro
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="flex flex-col gap-6">
       {/* Header & Status Banner */}
-      <div
-        className="admin-card"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px'
-        }}
-      >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <Sliders style={{ width: '18px', height: '18px', color: '#C5A880' }} />
-            <h2
-              style={{
-                fontSize: '1.25rem',
-                fontFamily: 'serif',
-                fontWeight: 600,
-                color: '#FDFBF7',
-                margin: 0
-              }}
-            >
+          <div className="flex items-center gap-2 mb-1">
+            <Sliders className="h-5 w-5 text-accent" />
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
               Granular Service Control &amp; Circuit Breakers
-            </h2>
+            </h1>
           </div>
-          <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: 0 }}>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Independently manage core storefront systems. Preserve catalog discovery and bag
             curation even during maintenance.
           </p>
         </div>
 
         {/* Global Operational Status Pill */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span
-            className={`admin-badge ${isFullyActive ? 'admin-badge-emerald' : 'admin-badge-amber'}`}
-            style={{
-              padding: '6px 14px',
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              letterSpacing: '0.04em'
-            }}
+        <div className="flex items-center gap-3">
+          <Badge
+            variant={isFullyActive ? 'default' : 'secondary'}
+            className={cn(
+              'px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider gap-1.5',
+              !isFullyActive &&
+                'border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10'
+            )}
           >
             {isFullyActive ? (
               <>
-                <ShieldCheck style={{ width: '14px', height: '14px', color: '#10B981' }} />
+                <ShieldCheck className="h-4 w-4" />
                 <span>ALL SYSTEMS OPERATIONAL</span>
               </>
             ) : (
               <>
-                <AlertTriangle style={{ width: '14px', height: '14px', color: '#F59E0B' }} />
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
                 <span>MAINTENANCE MODE ACTIVE</span>
               </>
             )}
-          </span>
+          </Badge>
         </div>
       </div>
 
       {/* Quick Emergency Action Cards */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '16px'
-        }}
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <button
           type="button"
           onClick={handleEmergencyPause}
-          style={{
-            backgroundColor: '#2A1414',
-            border: '1px solid #7F1D1D',
-            borderRadius: '10px',
-            padding: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            cursor: 'pointer',
-            textAlign: 'left',
-            transition: 'all 0.15s ease'
-          }}
+          className="rounded-xl border border-destructive/30 bg-destructive/5 hover:bg-destructive/10 p-4 sm:p-5 flex items-center gap-4 text-left transition-colors cursor-pointer"
         >
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '8px',
-              backgroundColor: '#451A1A',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}
-          >
-            <Power style={{ width: '20px', height: '20px', color: '#F87171' }} />
+          <div className="w-10 h-10 rounded-lg bg-destructive/15 flex items-center justify-center shrink-0">
+            <Power className="h-5 w-5 text-destructive" />
           </div>
           <div>
-            <div style={{ color: '#FCA5A5', fontWeight: 600, fontSize: '0.9rem' }}>
+            <div className="text-destructive font-semibold text-sm sm:text-base">
               Emergency Pause All Checkouts
             </div>
-            <div style={{ color: '#F87171', fontSize: '0.75rem', marginTop: '2px', opacity: 0.85 }}>
+            <div className="text-destructive/80 text-xs mt-0.5">
               Instantly disable checkout &amp; payments while keeping catalog active
             </div>
           </div>
@@ -227,38 +187,16 @@ export default function ServiceControlDashboard({ initialConfig }: ServiceContro
         <button
           type="button"
           onClick={handleRestoreLive}
-          style={{
-            backgroundColor: '#0E2B21',
-            border: '1px solid #059669',
-            borderRadius: '10px',
-            padding: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            cursor: 'pointer',
-            textAlign: 'left',
-            transition: 'all 0.15s ease'
-          }}
+          className="rounded-xl border border-emerald-600/30 bg-emerald-500/5 hover:bg-emerald-500/10 p-4 sm:p-5 flex items-center gap-4 text-left transition-colors cursor-pointer"
         >
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '8px',
-              backgroundColor: '#064E3B',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}
-          >
-            <CheckCircle2 style={{ width: '20px', height: '20px', color: '#34D399' }} />
+          <div className="w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div>
-            <div style={{ color: '#6EE7B7', fontWeight: 600, fontSize: '0.9rem' }}>
+            <div className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm sm:text-base">
               Restore All Live Operations
             </div>
-            <div style={{ color: '#34D399', fontSize: '0.75rem', marginTop: '2px', opacity: 0.85 }}>
+            <div className="text-emerald-600/80 dark:text-emerald-400/80 text-xs mt-0.5">
               Enable active store status, checkout submissions &amp; Razorpay
             </div>
           </div>
@@ -266,42 +204,23 @@ export default function ServiceControlDashboard({ initialConfig }: ServiceContro
       </div>
 
       {/* Main Settings Form */}
-      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <form onSubmit={handleSave} className="flex flex-col gap-6">
         {/* Granular Service Killswitches */}
-        <div className="admin-card">
-          <h3
-            style={{
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: '#FDFBF7',
-              margin: '0 0 16px',
-              borderBottom: '1px solid #1C4D3E',
-              paddingBottom: '10px'
-            }}
-          >
-            Granular Service Switches
-          </h3>
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 sm:p-5 border-b border-border space-y-0">
+            <CardTitle className="text-base font-semibold">Granular Service Switches</CardTitle>
+          </CardHeader>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <CardContent className="p-4 sm:p-5 flex flex-col gap-3">
             {/* 1. Global Operating Status */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '14px 16px',
-                backgroundColor: '#0B2920',
-                borderRadius: '8px',
-                border: '1px solid #164335'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Power style={{ width: '20px', height: '20px', color: '#C5A880' }} />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-border bg-muted/20">
+              <div className="flex items-center gap-3">
+                <Power className="h-5 w-5 text-accent shrink-0" />
                 <div>
-                  <div style={{ color: '#FDFBF7', fontWeight: 500, fontSize: '0.9rem' }}>
+                  <div className="font-medium text-foreground text-sm">
                     Global Store Operating Mode
                   </div>
-                  <div style={{ color: '#8BAAA0', fontSize: '0.775rem', marginTop: '2px' }}>
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     {operatingStatus === 'active'
                       ? 'Live Mode — Storefront operates normally'
                       : 'Maintenance Mode — Core transactions restricted with customer guidance banner'}
@@ -309,38 +228,28 @@ export default function ServiceControlDashboard({ initialConfig }: ServiceContro
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div className="inline-flex rounded-lg border border-border bg-card p-1 shadow-xs self-start sm:self-auto">
                 <button
                   type="button"
                   onClick={() => setOperatingStatus('active')}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid',
-                    borderColor: operatingStatus === 'active' ? '#10B981' : '#1C4D3E',
-                    backgroundColor: operatingStatus === 'active' ? '#064E3B' : 'transparent',
-                    color: operatingStatus === 'active' ? '#6EE7B7' : '#8BAAA0',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
+                  className={cn(
+                    'rounded-md px-3.5 py-1 text-xs font-semibold transition-colors',
+                    operatingStatus === 'active'
+                      ? 'bg-primary text-primary-foreground shadow-xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
                 >
                   Active
                 </button>
                 <button
                   type="button"
                   onClick={() => setOperatingStatus('maintenance')}
-                  style={{
-                    padding: '6px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid',
-                    borderColor: operatingStatus === 'maintenance' ? '#F59E0B' : '#1C4D3E',
-                    backgroundColor: operatingStatus === 'maintenance' ? '#78350F' : 'transparent',
-                    color: operatingStatus === 'maintenance' ? '#FDE68A' : '#8BAAA0',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
+                  className={cn(
+                    'rounded-md px-3.5 py-1 text-xs font-semibold transition-colors',
+                    operatingStatus === 'maintenance'
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
                 >
                   Maintenance
                 </button>
@@ -348,349 +257,190 @@ export default function ServiceControlDashboard({ initialConfig }: ServiceContro
             </div>
 
             {/* 2. Checkout & Bag Processing */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '14px 16px',
-                backgroundColor: '#0B2920',
-                borderRadius: '8px',
-                border: '1px solid #164335'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <ShoppingBag style={{ width: '20px', height: '20px', color: '#C5A880' }} />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-border bg-muted/20">
+              <div className="flex items-center gap-3">
+                <ShoppingBag className="h-5 w-5 text-accent shrink-0" />
                 <div>
-                  <div style={{ color: '#FDFBF7', fontWeight: 500, fontSize: '0.9rem' }}>
+                  <div className="font-medium text-foreground text-sm">
                     Checkout &amp; Order Placement
                   </div>
-                  <div style={{ color: '#8BAAA0', fontSize: '0.775rem', marginTop: '2px' }}>
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Allows shoppers to initiate checkout and lock inventory reservations
                   </div>
                 </div>
               </div>
 
-              <button
+              <Button
                 type="button"
+                variant={checkoutEnabled ? 'default' : 'destructive'}
+                size="sm"
                 onClick={() => setCheckoutEnabled(!checkoutEnabled)}
                 aria-label={checkoutEnabled ? 'Disable Checkout' : 'Enable Checkout'}
-                style={{
-                  padding: '6px 16px',
-                  borderRadius: '6px',
-                  border: '1px solid',
-                  borderColor: checkoutEnabled ? '#10B981' : '#EF4444',
-                  backgroundColor: checkoutEnabled ? '#064E3B' : '#451A1A',
-                  color: checkoutEnabled ? '#6EE7B7' : '#FCA5A5',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
+                className="h-8 px-4 text-xs font-semibold self-start sm:self-auto"
               >
                 {checkoutEnabled ? 'Enabled' : 'Paused'}
-              </button>
+              </Button>
             </div>
 
             {/* 3. Razorpay Payment Gateway */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '14px 16px',
-                backgroundColor: '#0B2920',
-                borderRadius: '8px',
-                border: '1px solid #164335'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <CreditCard style={{ width: '20px', height: '20px', color: '#C5A880' }} />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-border bg-muted/20">
+              <div className="flex items-center gap-3">
+                <CreditCard className="h-5 w-5 text-accent shrink-0" />
                 <div>
-                  <div style={{ color: '#FDFBF7', fontWeight: 500, fontSize: '0.9rem' }}>
+                  <div className="font-medium text-foreground text-sm">
                     Razorpay Payment Gateway Integration
                   </div>
-                  <div style={{ color: '#8BAAA0', fontSize: '0.775rem', marginTop: '2px' }}>
+                  <div className="text-xs text-muted-foreground mt-0.5">
                     Allows generating payment orders and opening the Razorpay modal
                   </div>
                 </div>
               </div>
 
-              <button
+              <Button
                 type="button"
+                variant={paymentsEnabled ? 'default' : 'destructive'}
+                size="sm"
                 onClick={() => setPaymentsEnabled(!paymentsEnabled)}
                 aria-label={paymentsEnabled ? 'Disable Payments' : 'Enable Payments'}
-                style={{
-                  padding: '6px 16px',
-                  borderRadius: '6px',
-                  border: '1px solid',
-                  borderColor: paymentsEnabled ? '#10B981' : '#EF4444',
-                  backgroundColor: paymentsEnabled ? '#064E3B' : '#451A1A',
-                  color: paymentsEnabled ? '#6EE7B7' : '#FCA5A5',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
+                className="h-8 px-4 text-xs font-semibold self-start sm:self-auto"
               >
                 {paymentsEnabled ? 'Enabled' : 'Paused'}
-              </button>
+              </Button>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Customer Guidance Notice & Live Preview */}
-        <div className="admin-card">
-          <h3
-            style={{
-              fontSize: '1rem',
-              fontWeight: 600,
-              color: '#FDFBF7',
-              margin: '0 0 16px',
-              borderBottom: '1px solid #1C4D3E',
-              paddingBottom: '10px'
-            }}
-          >
-            Customer Reassurance Messaging
-          </h3>
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 sm:p-5 border-b border-border space-y-0">
+            <CardTitle className="text-base font-semibold">
+              Customer Reassurance Messaging
+            </CardTitle>
+          </CardHeader>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <CardContent className="p-4 sm:p-5 flex flex-col gap-4">
             {/* Notice Headline */}
-            <div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'baseline',
-                  marginBottom: '8px'
-                }}
-              >
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-baseline">
                 <label
                   htmlFor="maintenanceHeadline"
-                  style={{ fontSize: '0.85rem', fontWeight: 500, color: '#FDFBF7' }}
+                  className="block text-xs font-medium text-foreground"
                 >
                   Notice Banner Headline
                 </label>
-                <span style={{ fontSize: '0.75rem', color: '#8BAAA0' }}>
+                <span className="text-[11px] text-muted-foreground">
                   {headline.length} / 120 characters
                 </span>
               </div>
-              <input
+              <Input
                 id="maintenanceHeadline"
                 type="text"
                 value={headline}
                 onChange={(e) => setHeadline(e.target.value)}
                 maxLength={120}
                 placeholder="Notice headline..."
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  backgroundColor: '#081F18',
-                  border: '1px solid #1C4D3E',
-                  borderRadius: '6px',
-                  color: '#FDFBF7',
-                  fontSize: '0.875rem',
-                  outline: 'none'
-                }}
               />
             </div>
 
             {/* Notice Textarea */}
-            <div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'baseline',
-                  marginBottom: '8px'
-                }}
-              >
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-baseline">
                 <label
                   htmlFor="maintenanceNotice"
-                  style={{ fontSize: '0.85rem', fontWeight: 500, color: '#FDFBF7' }}
+                  className="block text-xs font-medium text-foreground"
                 >
                   Notice Banner Text
                 </label>
-                <span style={{ fontSize: '0.75rem', color: '#8BAAA0' }}>
+                <span className="text-[11px] text-muted-foreground">
                   {maintenanceNotice.length} / 500 characters
                 </span>
               </div>
-              <textarea
+              <Textarea
                 id="maintenanceNotice"
                 rows={3}
                 value={maintenanceNotice}
                 onChange={(e) => setMaintenanceNotice(e.target.value)}
                 maxLength={500}
                 placeholder="Notice displayed to shoppers when checkout or payment services are paused..."
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  backgroundColor: '#081F18',
-                  border: '1px solid #1C4D3E',
-                  borderRadius: '6px',
-                  color: '#FDFBF7',
-                  fontSize: '0.875rem',
-                  lineHeight: 1.5,
-                  resize: 'vertical',
-                  outline: 'none'
-                }}
+                className="resize-y leading-relaxed"
               />
             </div>
 
             {/* Presets */}
             <div>
-              <div style={{ fontSize: '0.75rem', color: '#8BAAA0', marginBottom: '8px' }}>
-                Quick Presets:
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <div className="text-xs text-muted-foreground mb-2 font-medium">Quick Presets:</div>
+              <div className="flex flex-wrap gap-2">
                 {PRESET_NOTICES.map((preset) => (
-                  <button
+                  <Button
                     key={preset.title}
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() => {
                       setHeadline(preset.headline);
                       setMaintenanceNotice(preset.text);
                     }}
-                    style={{
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #1C4D3E',
-                      backgroundColor: '#0B2920',
-                      color: '#C5A880',
-                      fontSize: '0.775rem',
-                      cursor: 'pointer'
-                    }}
+                    className="h-8 text-xs text-accent border-border hover:bg-muted"
                   >
                     {preset.title}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
 
             {/* Live Customer Preview */}
-            <div style={{ marginTop: '8px' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.775rem',
-                  fontWeight: 600,
-                  color: '#8BAAA0',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  marginBottom: '10px'
-                }}
-              >
-                <Eye style={{ width: '14px', height: '14px', color: '#C5A880' }} />
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider font-semibold">
+                <Eye className="h-3.5 w-3.5 text-accent" />
                 <span>Customer Storefront Preview</span>
               </div>
 
-              <div
-                style={{
-                  backgroundColor: '#FFFBEB',
-                  border: '1px solid #FDE68A',
-                  borderRadius: '8px',
-                  padding: '16px 20px',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '12px',
-                  color: '#92400E'
-                }}
-              >
-                <AlertTriangle
-                  style={{
-                    width: '20px',
-                    height: '20px',
-                    flexShrink: 0,
-                    marginTop: '2px',
-                    color: '#D97706'
-                  }}
-                />
+              <div className="rounded-lg border border-amber-300 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-950/20 p-4 flex items-start gap-3 text-amber-900 dark:text-amber-200 shadow-xs">
+                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <div
-                    style={{
-                      fontWeight: 600,
-                      fontSize: '0.9rem',
-                      marginBottom: '4px',
-                      color: '#92400E'
-                    }}
-                  >
+                  <div className="font-semibold text-sm mb-1 text-amber-950 dark:text-amber-100">
                     {headline || 'Checkout & Payments Temporarily Paused'}
                   </div>
-                  <div style={{ fontSize: '0.85rem', lineHeight: 1.5, color: '#B45309' }}>
+                  <div className="text-xs leading-relaxed text-amber-900/80 dark:text-amber-200/80">
                     {maintenanceNotice ||
                       'We are currently upgrading our payment & checkout systems. Feel free to browse and keep treasures in your cart—checkout will resume shortly!'}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Feedback Messages */}
         {saveSuccess && (
-          <div
-            style={{
-              padding: '12px 16px',
-              backgroundColor: '#064E3B',
-              border: '1px solid #059669',
-              borderRadius: '8px',
-              color: '#6EE7B7',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              fontSize: '0.85rem'
-            }}
-          >
-            <CheckCircle2 style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-sm flex items-center gap-2 font-medium">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
             <span>Service control configuration published successfully to live store.</span>
           </div>
         )}
 
         {saveError && (
-          <div
-            style={{
-              padding: '12px 16px',
-              backgroundColor: '#451A1A',
-              border: '1px solid #EF4444',
-              borderRadius: '8px',
-              color: '#FCA5A5',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              fontSize: '0.85rem'
-            }}
-          >
-            <AlertTriangle style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>{saveError}</span>
           </div>
         )}
 
         {/* Action Controls */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="admin-btn-primary"
-            style={{
-              padding: '10px 24px',
-              fontSize: '0.875rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
+        <div className="flex justify-end gap-3">
+          <Button type="submit" disabled={isSaving} size="lg" className="gap-2">
             {isSaving ? (
               <>
-                <RefreshCw className="animate-spin" style={{ width: '16px', height: '16px' }} />
+                <RefreshCw className="h-4 w-4 animate-spin" />
                 <span>Publishing Changes...</span>
               </>
             ) : (
               <>
-                <ShieldCheck style={{ width: '16px', height: '16px' }} />
+                <ShieldCheck className="h-4 w-4" />
                 <span>Save &amp; Apply Controls</span>
               </>
             )}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

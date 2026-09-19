@@ -13,7 +13,12 @@ import {
   TrendingUp,
   Users
 } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 import { buildVipWhatsAppUrl } from '@hh/domain';
 
@@ -69,41 +74,27 @@ export default function InsightsDashboard({ initialInsights }: InsightsDashboard
   const productVelocity = insights.productVelocity;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="flex flex-col gap-6">
       {/* Top Header & Timeframe Filter Switcher */}
-      <div
-        className="admin-card"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px'
-        }}
-      >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <Sparkles style={{ width: '18px', height: '18px', color: '#C5A880' }} />
-            <h2
-              style={{
-                fontSize: '1.25rem',
-                fontFamily: 'serif',
-                fontWeight: 600,
-                color: '#FDFBF7',
-                margin: 0
-              }}
-            >
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="h-5 w-5 text-accent" />
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
               Executive Insights &amp; Intelligence
-            </h2>
+            </h1>
           </div>
-          <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: 0 }}>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Real-time trajectory of gross revenue, customer repeat loyalty, and product velocity.
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          {/* Timeframe selector pills */}
-          <div className="admin-tabs-bar" role="tablist">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          {/* Timeframe selector tabs */}
+          <div
+            className="inline-flex rounded-lg border border-border bg-card p-1 shadow-xs overflow-x-auto max-w-full"
+            role="tablist"
+          >
             {(
               [
                 { id: 'today', label: 'Today' },
@@ -114,615 +105,404 @@ export default function InsightsDashboard({ initialInsights }: InsightsDashboard
             ).map((tab) => (
               <button
                 key={tab.id}
+                type="button"
                 role="tab"
                 aria-selected={timeframe === tab.id}
                 disabled={isLoading}
                 onClick={() => fetchInsights(tab.id)}
-                className={`admin-tab-btn ${timeframe === tab.id ? 'active' : ''}`}
+                className={cn(
+                  'rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none whitespace-nowrap',
+                  timeframe === tab.id
+                    ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
               >
                 <span>{tab.label}</span>
               </button>
             ))}
           </div>
 
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => fetchInsights(timeframe)}
             disabled={isLoading}
-            className="admin-btn-secondary"
-            style={{ minHeight: '38px', padding: '8px 12px' }}
+            className="h-9 px-3"
             title="Refresh metrics"
           >
-            <RefreshCw
-              style={{
-                width: '14px',
-                height: '14px',
-                color: '#C5A880',
-                animation: isLoading ? 'spin 1s linear infinite' : 'none'
-              }}
-            />
-          </button>
+            <RefreshCw className={cn('h-3.5 w-3.5 text-accent', isLoading && 'animate-spin')} />
+          </Button>
         </div>
       </div>
 
       {error && (
-        <div className="admin-alert-error">
-          <AlertTriangle
-            style={{ width: '16px', height: '16px', flexShrink: 0, color: '#F87171' }}
-          />
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* SECTION 1: Sales & Volume KPI Scoreboard */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: '16px'
-        }}
-      >
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* KPI 1: Gross Revenue */}
-        <div
-          className="admin-card"
-          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#8BAAA0',
-                fontWeight: 600
-              }}
-            >
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Gross Revenue
             </span>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(197, 168, 128, 0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <TrendingUp style={{ width: '16px', height: '16px', color: '#C5A880' }} />
+            <div className="w-8 h-8 rounded-lg bg-accent/15 flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-accent" />
             </div>
-          </div>
-          <div
-            data-testid="kpi-gross-revenue"
-            style={{ fontSize: '1.75rem', fontWeight: 700, color: '#FDFBF7', fontFamily: 'serif' }}
-          >
-            {formatPrice(sales.revenueMinor)}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: '#8BAAA0' }}>
-            Captured payments in {timeframe === 'all' ? 'total' : timeframe}
-          </div>
-        </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div
+              data-testid="kpi-gross-revenue"
+              className="text-2xl sm:text-3xl font-bold font-serif text-foreground"
+            >
+              {formatPrice(sales.revenueMinor)}
+            </div>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
+              Captured payments in {timeframe === 'all' ? 'total' : timeframe}
+            </p>
+          </CardContent>
+        </Card>
 
         {/* KPI 2: Paid Orders */}
-        <div
-          className="admin-card"
-          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#8BAAA0',
-                fontWeight: 600
-              }}
-            >
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Paid Orders
             </span>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(52, 211, 153, 0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <ShoppingBag style={{ width: '16px', height: '16px', color: '#34D399' }} />
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+              <ShoppingBag className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
-          </div>
-          <div
-            data-testid="kpi-paid-orders"
-            style={{ fontSize: '1.75rem', fontWeight: 700, color: '#FDFBF7' }}
-          >
-            {sales.orderCount}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: '#34D399' }}>Successfully processed orders</div>
-        </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div
+              data-testid="kpi-paid-orders"
+              className="text-2xl sm:text-3xl font-bold font-serif text-foreground"
+            >
+              {sales.orderCount}
+            </div>
+            <p className="text-[11px] sm:text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+              Successfully processed orders
+            </p>
+          </CardContent>
+        </Card>
 
         {/* KPI 3: Average Order Value (AOV) */}
-        <div
-          className="admin-card"
-          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#8BAAA0',
-                fontWeight: 600
-              }}
-            >
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Average Order Value
             </span>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(96, 165, 250, 0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <Receipt style={{ width: '16px', height: '16px', color: '#60A5FA' }} />
+            <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center">
+              <Receipt className="h-4 w-4 text-blue-500" />
             </div>
-          </div>
-          <div
-            data-testid="kpi-aov"
-            style={{ fontSize: '1.75rem', fontWeight: 700, color: '#FDFBF7', fontFamily: 'serif' }}
-          >
-            {formatPrice(sales.aovMinor)}
-          </div>
-          <div style={{ fontSize: '0.75rem', color: '#8BAAA0' }}>Average patron cart spend</div>
-        </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div
+              data-testid="kpi-aov"
+              className="text-2xl sm:text-3xl font-bold font-serif text-foreground"
+            >
+              {formatPrice(sales.aovMinor)}
+            </div>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
+              Average patron cart spend
+            </p>
+          </CardContent>
+        </Card>
 
         {/* KPI 4: Pending Packaging */}
-        <div
-          className="admin-card"
-          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span
-              style={{
-                fontSize: '0.75rem',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#8BAAA0',
-                fontWeight: 600
-              }}
-            >
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Pending Packaging
             </span>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <PackageOpen style={{ width: '16px', height: '16px', color: '#F59E0B' }} />
+            <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
+              <PackageOpen className="h-4 w-4 text-amber-500" />
             </div>
-          </div>
-          <div
-            data-testid="kpi-pending-fulfillment"
-            style={{ fontSize: '1.75rem', fontWeight: 700, color: '#FDFBF7' }}
-          >
-            {sales.pendingFulfillmentCount}
-          </div>
-          <a
-            href="/admin/orders"
-            style={{
-              fontSize: '0.75rem',
-              color: '#C5A880',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              textDecoration: 'none'
-            }}
-          >
-            <span>Fulfill orders</span>
-            <ArrowRight style={{ width: '12px', height: '12px' }} />
-          </a>
-        </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div
+              data-testid="kpi-pending-fulfillment"
+              className="text-2xl sm:text-3xl font-bold font-serif text-foreground"
+            >
+              {sales.pendingFulfillmentCount}
+            </div>
+            <Link
+              href="/admin/orders"
+              className="text-[11px] sm:text-xs text-accent hover:text-foreground font-medium inline-flex items-center gap-1 mt-1 transition-colors"
+            >
+              <span>Fulfill orders</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </CardContent>
+        </Card>
       </div>
 
       {/* SECTION 2: Customer Frequency & Loyalty Intelligence */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: '20px'
-        }}
-      >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Left: Customer Retention Rate Card */}
-        <div
-          className="admin-card"
-          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                backgroundColor: '#164335',
-                color: '#C5A880',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid #235847'
-              }}
-            >
-              <Users style={{ width: '16px', height: '16px' }} />
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 sm:p-5 pb-3 sm:pb-3 flex flex-row items-center gap-3 border-b border-border space-y-0">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Users className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h3 style={{ fontSize: '1rem', fontFamily: 'serif', color: '#FDFBF7', margin: 0 }}>
+              <CardTitle className="text-base font-semibold">
                 Patron Retention &amp; Frequency
-              </h3>
-              <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Customer repeat loyalty across paid orders
               </p>
             </div>
-          </div>
+          </CardHeader>
 
-          <div
-            style={{
-              padding: '16px',
-              backgroundColor: '#0F2D24',
-              borderRadius: '12px',
-              border: '1px solid #1C4D3E',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px'
-            }}
-          >
-            <div
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
-            >
-              <span style={{ fontSize: '0.8125rem', color: '#8BAAA0' }}>Repeat Patron Rate</span>
-              <span
-                style={{
-                  fontSize: '1.75rem',
-                  fontWeight: 800,
-                  color: '#34D399',
-                  fontFamily: 'monospace'
-                }}
-              >
-                {customers.repeatRatePercentage}%
-              </span>
-            </div>
-
-            {/* Visual Retention Progress Bar */}
-            <div
-              style={{
-                width: '100%',
-                height: '8px',
-                backgroundColor: '#0A241C',
-                borderRadius: '999px',
-                overflow: 'hidden'
-              }}
-            >
-              <div
-                style={{
-                  width: `${Math.min(100, Math.max(0, customers.repeatRatePercentage))}%`,
-                  height: '100%',
-                  backgroundColor: '#34D399',
-                  borderRadius: '999px',
-                  transition: 'width 0.4s ease'
-                }}
-              />
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                paddingTop: '8px',
-                borderTop: '1px solid #1C4D3E',
-                fontSize: '0.75rem',
-                color: '#8BAAA0'
-              }}
-            >
-              <div>
-                Total Patrons:{' '}
-                <strong style={{ color: '#FDFBF7' }}>{customers.totalCustomers}</strong>
+          <CardContent className="p-4 sm:p-5 flex flex-col gap-4">
+            <div className="p-4 rounded-xl bg-muted/20 border border-border flex flex-col gap-3">
+              <div className="flex justify-between items-baseline">
+                <span className="text-xs text-muted-foreground font-medium">
+                  Repeat Patron Rate
+                </span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                  {customers.repeatRatePercentage}%
+                </span>
               </div>
-              <div>
-                Repeat Patrons:{' '}
-                <strong style={{ color: '#34D399' }}>{customers.repeatCustomers}</strong>
+
+              {/* Visual Retention Progress Bar */}
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-600 dark:bg-emerald-400 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, customers.repeatRatePercentage))}%`
+                  }}
+                />
+              </div>
+
+              <div className="flex justify-between pt-2 border-t border-border text-xs text-muted-foreground">
+                <div>
+                  Total Patrons:{' '}
+                  <strong className="text-foreground font-semibold">
+                    {customers.totalCustomers}
+                  </strong>
+                </div>
+                <div>
+                  Repeat Patrons:{' '}
+                  <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                    {customers.repeatCustomers}
+                  </strong>
+                </div>
               </div>
             </div>
-          </div>
 
-          <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: 0, lineHeight: 1.5 }}>
-            Patrons who place 2 or more orders represent your highest-LTV audience. Use the 1-click
-            VIP Concierge button below to reach out directly via WhatsApp with tailored styling
-            recommendations or early drop access.
-          </p>
-        </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Patrons who place 2 or more orders represent your highest-LTV audience. Use the
+              1-click VIP Concierge button below to reach out directly via WhatsApp with tailored
+              styling recommendations or early drop access.
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Right: Top Customer Frequency Leaderboard */}
-        <div
-          className="admin-card"
-          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 style={{ fontSize: '1rem', fontFamily: 'serif', color: '#FDFBF7', margin: 0 }}>
-              Top Patrons by Lifetime Value
-            </h3>
-            <span className="admin-badge admin-badge-gold">
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 sm:p-5 pb-3 sm:pb-3 flex flex-row items-center justify-between border-b border-border space-y-0">
+            <CardTitle className="text-base font-semibold">Top Patrons by Lifetime Value</CardTitle>
+            <Badge variant="secondary" className="text-xs font-semibold text-accent">
               Top {customers.topCustomers.length} Patrons
-            </span>
-          </div>
+            </Badge>
+          </CardHeader>
 
-          {customers.topCustomers.length === 0 ? (
-            <div
-              style={{
-                padding: '32px',
-                textAlign: 'center',
-                color: '#8BAAA0',
-                fontSize: '0.8125rem'
-              }}
-            >
-              No customer orders captured yet for this timeframe.
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {customers.topCustomers.map((patron, idx) => {
-                const waUrl = buildVipWhatsAppUrl(
-                  patron.customerPhone,
-                  patron.customerName,
-                  'H&H Atelier'
-                );
+          <CardContent className="p-4 sm:p-5">
+            {customers.topCustomers.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground text-xs">
+                No customer orders captured yet for this timeframe.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {customers.topCustomers.map((patron, idx) => {
+                  const waUrl = buildVipWhatsAppUrl(
+                    patron.customerPhone,
+                    patron.customerName,
+                    'H&H Atelier'
+                  );
 
-                return (
-                  <div
-                    key={patron.customerEmail}
-                    className="admin-card-inner"
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '12px',
-                      padding: '12px 14px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div
-                        style={{
-                          width: '28px',
-                          height: '28px',
-                          borderRadius: '50%',
-                          backgroundColor: idx === 0 ? '#C5A880' : '#164335',
-                          color: idx === 0 ? '#0A2E24' : '#FDFBF7',
-                          fontWeight: 700,
-                          fontSize: '0.75rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0
-                        }}
-                      >
-                        #{idx + 1}
-                      </div>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontWeight: 600, color: '#FDFBF7', fontSize: '0.875rem' }}>
-                            {patron.customerName}
-                          </span>
-                          {patron.isRepeatCustomer && (
-                            <span
-                              className="admin-badge admin-badge-emerald"
-                              style={{ fontSize: '0.625rem', padding: '2px 6px' }}
-                            >
-                              Repeat VIP
-                            </span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#8BAAA0' }}>
-                          {patron.customerEmail} &bull; {patron.customerPhone}
-                        </div>
-                      </div>
-                    </div>
-
+                  return (
                     <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        flexWrap: 'wrap'
-                      }}
+                      key={patron.customerEmail}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg border border-border bg-muted/20 text-xs"
                     >
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 700, color: '#FDFBF7', fontSize: '0.875rem' }}>
-                          {formatPrice(patron.totalSpendMinor)}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={cn(
+                            'w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0',
+                            idx === 0
+                              ? 'bg-accent text-accent-foreground'
+                              : 'bg-muted text-muted-foreground'
+                          )}
+                        >
+                          #{idx + 1}
                         </div>
-                        <div style={{ fontSize: '0.6875rem', color: '#8BAAA0' }}>
-                          {patron.orderCount} {patron.orderCount === 1 ? 'order' : 'orders'} &bull;
-                          Last: {formatDate(patron.lastOrderAt)}
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-foreground text-sm">
+                              {patron.customerName}
+                            </span>
+                            {patron.isRepeatCustomer && (
+                              <Badge
+                                variant="default"
+                                className="text-[10px] px-1.5 py-0 font-medium"
+                              >
+                                Repeat VIP
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {patron.customerEmail} &bull; {patron.customerPhone}
+                          </div>
                         </div>
                       </div>
 
-                      {patron.customerPhone && (
-                        <a
-                          href={waUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="admin-btn-wa"
-                          style={{ minHeight: '34px', padding: '6px 10px', fontSize: '0.75rem' }}
-                          title="Open WhatsApp VIP Concierge greeting"
-                        >
-                          <MessageSquare style={{ width: '13px', height: '13px' }} />
-                          <span>VIP Concierge</span>
-                        </a>
-                      )}
+                      <div className="flex items-center justify-between sm:justify-end gap-3 flex-wrap">
+                        <div className="text-left sm:text-right">
+                          <div className="font-bold text-foreground text-sm">
+                            {formatPrice(patron.totalSpendMinor)}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {patron.orderCount} {patron.orderCount === 1 ? 'order' : 'orders'}{' '}
+                            &bull; Last: {formatDate(patron.lastOrderAt)}
+                          </div>
+                        </div>
+
+                        {patron.customerPhone && (
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs shadow-xs transition-colors"
+                            title="Open WhatsApp VIP Concierge greeting"
+                          >
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            <span>VIP Concierge</span>
+                          </a>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* SECTION 3: Product Sales Velocity Leaderboard */}
-      <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '8px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                color: '#F87171',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid rgba(239, 68, 68, 0.3)'
-              }}
-            >
-              <Flame style={{ width: '16px', height: '16px' }} />
+      <Card className="border-border bg-card shadow-xs">
+        <CardHeader className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border space-y-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-destructive/15 flex items-center justify-center text-destructive">
+              <Flame className="h-4 w-4" />
             </div>
             <div>
-              <h3 style={{ fontSize: '1rem', fontFamily: 'serif', color: '#FDFBF7', margin: 0 }}>
+              <CardTitle className="text-base font-semibold">
                 Product Sales Velocity &amp; Stock Burn
-              </h3>
-              <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Artisanal pieces ranked by units sold and revenue during this timeframe
               </p>
             </div>
           </div>
 
-          <a
-            href="/admin/inventory"
-            className="admin-btn-secondary"
-            style={{ minHeight: '36px', padding: '6px 12px', fontSize: '0.75rem' }}
-          >
-            <span>Manage Workshop Inventory</span>
-            <ArrowRight style={{ width: '12px', height: '12px' }} />
-          </a>
-        </div>
+          <Link href="/admin/inventory">
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+              <span>Manage Workshop Inventory</span>
+              <ArrowRight className="h-3 w-3" />
+            </Button>
+          </Link>
+        </CardHeader>
 
-        {productVelocity.length === 0 ? (
-          <div
-            style={{
-              padding: '32px',
-              textAlign: 'center',
-              color: '#8BAAA0',
-              fontSize: '0.8125rem'
-            }}
-          >
-            No sales recorded yet for products in this timeframe.
-          </div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table
-              style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                textAlign: 'left',
-                fontSize: '0.8125rem'
-              }}
-            >
-              <thead>
-                <tr style={{ borderBottom: '1px solid #1C4D3E', color: '#8BAAA0' }}>
-                  <th style={{ padding: '10px 12px', fontWeight: 600 }}>Rank</th>
-                  <th style={{ padding: '10px 12px', fontWeight: 600 }}>
-                    Artisanal Piece &amp; Variant
-                  </th>
-                  <th style={{ padding: '10px 12px', fontWeight: 600 }}>SKU</th>
-                  <th style={{ padding: '10px 12px', fontWeight: 600, textAlign: 'center' }}>
-                    Units Sold
-                  </th>
-                  <th style={{ padding: '10px 12px', fontWeight: 600, textAlign: 'right' }}>
-                    Revenue (₹)
-                  </th>
-                  <th style={{ padding: '10px 12px', fontWeight: 600, textAlign: 'right' }}>
-                    Atelier Stock
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {productVelocity.map((item, index) => (
-                  <tr
-                    key={item.sku}
-                    style={{
-                      borderBottom: '1px solid #164335',
-                      color: '#FDFBF7'
-                    }}
-                  >
-                    <td style={{ padding: '12px' }}>
-                      <span
-                        className="admin-badge admin-badge-gold"
-                        style={{ fontFamily: 'monospace', fontWeight: 700 }}
-                      >
-                        #{index + 1}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      <div style={{ fontWeight: 600 }}>{item.productTitle}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#8BAAA0' }}>
-                        {item.variantTitle}
-                      </div>
-                    </td>
-                    <td style={{ padding: '12px', fontFamily: 'monospace', color: '#8BAAA0' }}>
-                      {item.sku}
-                    </td>
-                    <td style={{ padding: '12px', textAlign: 'center', fontWeight: 700 }}>
-                      {item.unitsSold}
-                    </td>
-                    <td
-                      style={{
-                        padding: '12px',
-                        textAlign: 'right',
-                        fontWeight: 700,
-                        fontFamily: 'serif',
-                        color: '#C5A880'
-                      }}
-                    >
-                      {formatPrice(item.revenueMinor)}
-                    </td>
-                    <td style={{ padding: '12px', textAlign: 'right' }}>
-                      {item.currentStock === 0 ? (
-                        <span className="admin-badge admin-badge-rose">Sold Out</span>
-                      ) : item.currentStock <= 3 ? (
-                        <span className="admin-badge admin-badge-amber">
-                          {item.currentStock} left (Low)
-                        </span>
-                      ) : (
-                        <span className="admin-badge admin-badge-emerald">
-                          {item.currentStock} in stock
-                        </span>
-                      )}
-                    </td>
+        <CardContent className="p-0">
+          {productVelocity.length === 0 ? (
+            <div className="py-12 text-center text-muted-foreground text-xs">
+              No sales recorded yet for products in this timeframe.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b border-border bg-muted/40">
+                  <tr>
+                    <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Rank
+                    </th>
+                    <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Artisanal Piece &amp; Variant
+                    </th>
+                    <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      SKU
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Units Sold
+                    </th>
+                    <th className="text-right px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Revenue (₹)
+                    </th>
+                    <th className="text-right px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Atelier Stock
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {productVelocity.map((item, index) => (
+                    <tr key={item.sku} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-3">
+                        <Badge
+                          variant="secondary"
+                          className="font-mono font-bold text-xs text-accent"
+                        >
+                          #{index + 1}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-foreground text-sm">
+                          {item.productTitle}
+                        </div>
+                        <div className="text-xs text-muted-foreground">{item.variantTitle}</div>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                        {item.sku}
+                      </td>
+                      <td className="px-4 py-3 text-center font-bold text-foreground">
+                        {item.unitsSold}
+                      </td>
+                      <td className="px-4 py-3 text-right font-serif font-bold text-accent">
+                        {formatPrice(item.revenueMinor)}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        {item.currentStock === 0 ? (
+                          <Badge variant="destructive" className="text-xs">
+                            Sold Out
+                          </Badge>
+                        ) : item.currentStock <= 3 ? (
+                          <Badge
+                            variant="secondary"
+                            className="text-xs border-amber-500/40 text-amber-600 dark:text-amber-400"
+                          >
+                            {item.currentStock} left (Low)
+                          </Badge>
+                        ) : (
+                          <Badge variant="default" className="text-xs">
+                            {item.currentStock} in stock
+                          </Badge>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

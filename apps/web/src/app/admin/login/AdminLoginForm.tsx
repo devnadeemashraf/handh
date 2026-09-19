@@ -2,6 +2,8 @@
 
 import { AlertCircle, ArrowRight, Key, Loader2, Lock } from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export default function AdminLoginForm({ initialKey }: { initialKey: string }) {
   const [key, setKey] = useState(initialKey);
@@ -38,130 +40,61 @@ export default function AdminLoginForm({ initialKey }: { initialKey: string }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {error && (
-        <div className="admin-alert-error">
-          <AlertCircle
-            style={{
-              width: '16px',
-              height: '16px',
-              flexShrink: 0,
-              marginTop: '2px',
-              color: '#F87171'
-            }}
-          />
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
-      <div>
-        <label
-          style={{
-            display: 'block',
-            fontSize: '0.75rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            color: '#A0C0B5',
-            fontWeight: 600,
-            marginBottom: '8px'
-          }}
-        >
+      <div className="space-y-1.5">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Access Gateway Key
         </label>
-        <div style={{ position: 'relative' }}>
-          <Key
-            style={{
-              width: '16px',
-              height: '16px',
-              color: '#608578',
-              position: 'absolute',
-              left: '14px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'none'
-            }}
-          />
-          <input
+        <div className="relative">
+          <Key className="h-4 w-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Input
             type="text"
             required
             value={key}
             onChange={(e) => setKey(e.target.value)}
             placeholder="Enter stealth access key"
-            className="admin-input"
-            style={{ paddingLeft: '42px' }}
+            className="pl-9 font-mono text-xs"
           />
         </div>
       </div>
 
-      <div>
-        <label
-          style={{
-            display: 'block',
-            fontSize: '0.75rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            color: '#A0C0B5',
-            fontWeight: 600,
-            marginBottom: '8px'
-          }}
-        >
+      <div className="space-y-1.5">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Master Password
         </label>
-        <div style={{ position: 'relative' }}>
-          <Lock
-            style={{
-              width: '16px',
-              height: '16px',
-              color: '#608578',
-              position: 'absolute',
-              left: '14px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'none'
-            }}
-          />
-          <input
+        <div className="relative">
+          <Lock className="h-4 w-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••••••"
-            className="admin-input"
-            style={{ paddingLeft: '42px' }}
+            className="pl-9 font-mono text-xs"
           />
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="admin-btn-primary"
-        style={{
-          width: '100%',
-          marginTop: '8px',
-          minHeight: '48px',
-          fontSize: '0.9375rem',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-        }}
-      >
+      <Button type="submit" disabled={isLoading} size="lg" className="w-full mt-2 gap-2">
         {isLoading ? (
           <>
-            <Loader2
-              style={{
-                width: '18px',
-                height: '18px',
-                animation: 'spin 1s linear infinite'
-              }}
-            />
+            <Loader2 className="h-4 w-4 animate-spin" />
             <span>Authenticating...</span>
           </>
         ) : (
           <>
             <span>Enter Workshop Portal</span>
-            <ArrowRight style={{ width: '16px', height: '16px' }} />
+            <ArrowRight className="h-4 w-4" />
           </>
         )}
-      </button>
+      </Button>
     </form>
   );
 }

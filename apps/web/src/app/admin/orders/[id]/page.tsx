@@ -1,5 +1,8 @@
 import { ChevronLeft, CreditCard, MapPin, Package } from 'lucide-react';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import {
   createDbClient,
@@ -54,87 +57,42 @@ export default async function AdminOrderDetailPage(props: { params: Promise<{ id
   const typedShippingAddress = order.shippingAddress as ShippingAddress;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="flex flex-col gap-6">
       {/* Top Back Link & Identity */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px'
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <a
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <Link
             href="/admin/orders"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-              fontSize: '0.8125rem',
-              color: '#8BAAA0',
-              textDecoration: 'none',
-              marginBottom: '4px',
-              minHeight: '36px'
-            }}
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-1"
           >
-            <ChevronLeft style={{ width: '16px', height: '16px' }} />
+            <ChevronLeft className="h-4 w-4" />
             <span>Back to Orders</span>
-          </a>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <h1
-              style={{
-                fontSize: '1.75rem',
-                fontFamily: 'serif',
-                color: '#FDFBF7',
-                margin: 0
-              }}
-            >
+          </Link>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
               Order {order.orderNumber}
             </h1>
-            <span
-              className="admin-badge admin-badge-gold"
-              style={{ fontFamily: 'monospace', fontSize: '0.75rem', padding: '4px 10px' }}
-            >
+            <Badge variant="secondary" className="font-mono text-xs text-accent">
               {order.status.toUpperCase()}
-            </span>
+            </Badge>
           </div>
-          <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: 0 }}>
-            Placed on {formatDate(order.createdAt)}
-          </p>
+          <p className="text-xs text-muted-foreground">Placed on {formatDate(order.createdAt)}</p>
         </div>
 
         <div>
-          <span
-            style={{
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: '#8BAAA0',
-              display: 'block'
-            }}
-          >
+          <span className="text-xs uppercase tracking-wider text-muted-foreground block font-medium">
             Total Value
           </span>
-          <p
-            style={{
-              fontSize: '1.75rem',
-              fontWeight: 700,
-              fontFamily: 'monospace',
-              color: '#FDFBF7',
-              margin: 0
-            }}
-          >
+          <p className="text-2xl sm:text-3xl font-bold font-serif text-accent">
             {formatPrice(order.totalMinor)}
           </p>
         </div>
       </div>
 
       {/* Main Grid: Actions, Fulfillment & Order Items */}
-      <div className="admin-detail-grid">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Col: Fulfillment Actions & Items */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div className="lg:col-span-2 flex flex-col gap-6">
           <OrderFulfillmentActions
             order={{
               ...order,
@@ -144,238 +102,118 @@ export default async function AdminOrderDetailPage(props: { params: Promise<{ id
           />
 
           {/* Ordered Line Items Card */}
-          <div
-            className="admin-card"
-            style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '8px',
-                  backgroundColor: '#164335',
-                  color: '#C5A880',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid #235847'
-                }}
-              >
-                <Package style={{ width: '16px', height: '16px' }} />
+          <Card className="border-border bg-card shadow-xs">
+            <CardHeader className="p-4 sm:p-5 pb-3 sm:pb-3 flex flex-row items-center gap-2.5 border-b border-border space-y-0">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <Package className="h-4 w-4" />
               </div>
-              <h3
-                style={{
-                  fontSize: '1rem',
-                  fontFamily: 'serif',
-                  color: '#FDFBF7',
-                  margin: 0
-                }}
-              >
+              <CardTitle className="text-base font-semibold">
                 Purchased Pieces ({order.items.length})
-              </h3>
-            </div>
+              </CardTitle>
+            </CardHeader>
 
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {order.items.map((item, idx) => (
-                <div
-                  key={item.id}
-                  style={{
-                    padding: '14px 0',
-                    borderTop: idx > 0 ? '1px solid #1C4D3E' : 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '16px'
-                  }}
-                >
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <p
-                      style={{
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        color: '#FDFBF7',
-                        margin: 0
-                      }}
-                    >
-                      {item.productNameSnapshot}
-                    </p>
-                    <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: 0 }}>
-                      Variant: <span style={{ color: '#C5A880' }}>{item.variantNameSnapshot}</span>
-                    </p>
-                    <p
-                      style={{
-                        fontSize: '0.6875rem',
-                        fontFamily: 'monospace',
-                        color: '#608578',
-                        margin: 0
-                      }}
-                    >
-                      SKU: {item.skuSnapshot}
-                    </p>
-                  </div>
+            <CardContent className="p-4 sm:p-5">
+              <div className="divide-y divide-border">
+                {order.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4"
+                  >
+                    <div className="space-y-0.5">
+                      <p className="font-semibold text-foreground text-sm">
+                        {item.productNameSnapshot}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Variant: <span className="text-accent">{item.variantNameSnapshot}</span>
+                      </p>
+                      <p className="text-[11px] font-mono text-muted-foreground/70">
+                        SKU: {item.skuSnapshot}
+                      </p>
+                    </div>
 
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <p
-                      style={{
-                        fontSize: '0.875rem',
-                        fontWeight: 600,
-                        color: '#FDFBF7',
-                        margin: 0
-                      }}
-                    >
-                      {formatPrice(item.totalPriceMinor)}
-                    </p>
-                    <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: 0 }}>
-                      {formatPrice(item.unitPriceMinor)} × {item.quantity}
-                    </p>
+                    <div className="text-right shrink-0">
+                      <p className="font-semibold text-foreground text-sm">
+                        {formatPrice(item.totalPriceMinor)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatPrice(item.unitPriceMinor)} × {item.quantity}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Right Col: Shipping & Payment Summary */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div className="flex flex-col gap-6">
           {/* Shipping Destination Card */}
-          <div
-            className="admin-card"
-            style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#C5A880' }}>
-              <MapPin style={{ width: '16px', height: '16px' }} />
-              <h3
-                style={{
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 600,
-                  margin: 0
-                }}
-              >
+          <Card className="border-border bg-card shadow-xs">
+            <CardHeader className="p-4 sm:p-5 pb-3 sm:pb-3 flex flex-row items-center gap-2 border-b border-border space-y-0 text-accent">
+              <MapPin className="h-4 w-4" />
+              <CardTitle className="text-xs uppercase tracking-wider font-semibold">
                 Delivery Address
-              </h3>
-            </div>
+              </CardTitle>
+            </CardHeader>
 
-            <div
-              className="admin-card-inner"
-              style={{
-                fontSize: '0.8125rem',
-                color: '#E8ECE9',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '4px'
-              }}
-            >
-              <p style={{ fontWeight: 600, color: '#FDFBF7', margin: 0 }}>{order.customerName}</p>
-              <p style={{ margin: 0 }}>{typedShippingAddress.line1}</p>
-              {typedShippingAddress.line2 && (
-                <p style={{ margin: 0 }}>{typedShippingAddress.line2}</p>
-              )}
-              <p style={{ margin: 0 }}>
-                {typedShippingAddress.city}, {typedShippingAddress.state} -{' '}
-                <span style={{ fontFamily: 'monospace' }}>{typedShippingAddress.postalCode}</span>
-              </p>
-              <p style={{ color: '#8BAAA0', margin: 0 }}>
-                {typedShippingAddress.country || 'India'}
-              </p>
-              <p
-                style={{
-                  paddingTop: '8px',
-                  color: '#A0C0B5',
-                  fontFamily: 'monospace',
-                  margin: 0
-                }}
-              >
-                Phone: {order.customerPhone}
-              </p>
-            </div>
-          </div>
+            <CardContent className="p-4 sm:p-5">
+              <div className="p-3.5 rounded-lg border border-border bg-muted/20 text-xs flex flex-col gap-1 text-foreground leading-relaxed">
+                <p className="font-semibold text-sm">{order.customerName}</p>
+                <p>{typedShippingAddress.line1}</p>
+                {typedShippingAddress.line2 && <p>{typedShippingAddress.line2}</p>}
+                <p>
+                  {typedShippingAddress.city}, {typedShippingAddress.state} -{' '}
+                  <span className="font-mono">{typedShippingAddress.postalCode}</span>
+                </p>
+                <p className="text-muted-foreground">{typedShippingAddress.country || 'India'}</p>
+                <p className="pt-2 text-muted-foreground font-mono">Phone: {order.customerPhone}</p>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Payment Financial Trace Card */}
-          <div
-            className="admin-card"
-            style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#C5A880' }}>
-              <CreditCard style={{ width: '16px', height: '16px' }} />
-              <h3
-                style={{
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  fontWeight: 600,
-                  margin: 0
-                }}
-              >
+          <Card className="border-border bg-card shadow-xs">
+            <CardHeader className="p-4 sm:p-5 pb-3 sm:pb-3 flex flex-row items-center gap-2 border-b border-border space-y-0 text-accent">
+              <CreditCard className="h-4 w-4" />
+              <CardTitle className="text-xs uppercase tracking-wider font-semibold">
                 Financial Breakdown
-              </h3>
-            </div>
+              </CardTitle>
+            </CardHeader>
 
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px',
-                fontSize: '0.8125rem'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8BAAA0' }}>
+            <CardContent className="p-4 sm:p-5 flex flex-col gap-3 text-xs">
+              <div className="flex justify-between text-muted-foreground">
                 <span>Subtotal</span>
-                <span style={{ color: '#FDFBF7', fontFamily: 'monospace' }}>
+                <span className="text-foreground font-mono font-medium">
                   {formatPrice(order.subtotalMinor)}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8BAAA0' }}>
+              <div className="flex justify-between text-muted-foreground">
                 <span>Shipping Tier</span>
-                <span style={{ color: '#FDFBF7', fontFamily: 'monospace' }}>
+                <span className="text-foreground font-mono font-medium">
                   {order.shippingMinor === 0 ? 'Free' : formatPrice(order.shippingMinor)}
                 </span>
               </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  color: '#FDFBF7',
-                  fontWeight: 600,
-                  paddingTop: '8px',
-                  borderTop: '1px solid rgba(28, 77, 62, 0.6)',
-                  fontSize: '0.9375rem'
-                }}
-              >
+              <div className="flex justify-between text-foreground font-semibold pt-2 border-t border-border text-sm">
                 <span>Grand Total</span>
-                <span style={{ color: '#C5A880', fontFamily: 'monospace' }}>
+                <span className="text-accent font-serif font-bold text-base">
                   {formatPrice(order.totalMinor)}
                 </span>
               </div>
-            </div>
 
-            <div
-              style={{
-                paddingTop: '10px',
-                borderTop: '1px solid #1C4D3E',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: '0.75rem',
-                color: '#8BAAA0'
-              }}
-            >
-              <span>Payment Status:</span>
-              <span
-                style={{
-                  fontFamily: 'monospace',
-                  color: '#34D399',
-                  fontWeight: 600
-                }}
-              >
-                {order.paymentStatus.toUpperCase()}
-              </span>
-            </div>
-          </div>
+              <div className="pt-2 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                <span>Payment Status:</span>
+                <Badge
+                  variant="secondary"
+                  className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400"
+                >
+                  {order.paymentStatus.toUpperCase()}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

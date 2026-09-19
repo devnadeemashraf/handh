@@ -7,10 +7,24 @@ import {
   Boxes,
   CheckCircle2,
   History,
+  Package,
   Search,
   X
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 import type {
   AdminInventoryItem,
@@ -255,20 +269,13 @@ export default function InventoryManager({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="flex flex-col gap-6">
       {/* Page Header */}
       <div>
-        <h1
-          style={{
-            fontSize: '1.75rem',
-            fontFamily: 'serif',
-            color: '#FDFBF7',
-            margin: '0 0 4px'
-          }}
-        >
+        <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight mb-1">
           Inventory &amp; Stock Command
         </h1>
-        <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: 0 }}>
+        <p className="text-xs sm:text-sm text-muted-foreground">
           Manage artisan piece quantities, quick restocks, real-time pricing, and stock audit
           trails.
         </p>
@@ -276,625 +283,441 @@ export default function InventoryManager({
 
       {/* Notifications */}
       {actionError && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            backgroundColor: '#3B1313',
-            border: '1px solid #7F1D1D',
-            color: '#F87171',
-            fontSize: '0.875rem'
-          }}
-        >
-          <AlertTriangle style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>{actionError}</span>
         </div>
       )}
 
       {actionSuccess && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            backgroundColor: '#0F392B',
-            border: '1px solid #165D46',
-            color: '#6EE7B7',
-            fontSize: '0.875rem'
-          }}
-        >
-          <CheckCircle2 style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-sm font-medium">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
           <span>{actionSuccess}</span>
         </div>
       )}
 
       {/* KPI Dashboard Cards */}
-      <div className="admin-kpi-grid">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Available Units */}
-        <div className="admin-kpi-card">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: '#8BAAA0'
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}
-            >
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Available Stock
             </span>
-            <Boxes style={{ width: '16px', height: '16px', color: '#73A796' }} />
-          </div>
-          <div className="admin-kpi-value">{summary.totalAvailable}</div>
-          <div style={{ fontSize: '0.6875rem', color: '#698D80' }}>
-            {summary.totalOnHand} total on hand &bull; {summary.totalReserved} reserved
-          </div>
-        </div>
+            <Boxes className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div className="text-2xl sm:text-3xl font-bold font-serif text-foreground">
+              {summary.totalAvailable}
+            </div>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
+              {summary.totalOnHand} total on hand &bull; {summary.totalReserved} reserved
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Low Stock Warning */}
-        <div className={`admin-kpi-card ${summary.lowStockCount > 0 ? 'urgent' : ''}`}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: summary.lowStockCount > 0 ? '#C5A880' : '#8BAAA0'
-            }}
-          >
+        <Card
+          className={cn(
+            'border-border bg-card shadow-xs',
+            summary.lowStockCount > 0 && 'border-accent/40 bg-accent/5'
+          )}
+        >
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2 flex flex-row items-center justify-between space-y-0">
             <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}
+              className={cn(
+                'text-[11px] sm:text-xs font-semibold uppercase tracking-wider',
+                summary.lowStockCount > 0 ? 'text-accent font-bold' : 'text-muted-foreground'
+              )}
             >
               Low Stock (&le; 3)
             </span>
             <AlertTriangle
-              style={{
-                width: '16px',
-                height: '16px',
-                color: summary.lowStockCount > 0 ? '#C5A880' : '#8BAAA0'
-              }}
+              className={cn(
+                'h-4 w-4',
+                summary.lowStockCount > 0 ? 'text-accent' : 'text-muted-foreground'
+              )}
             />
-          </div>
-          <div className="admin-kpi-value">{summary.lowStockCount}</div>
-          <div style={{ fontSize: '0.6875rem', color: '#A08865' }}>SKUs needing reorder</div>
-        </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div className="text-2xl sm:text-3xl font-bold font-serif text-foreground">
+              {summary.lowStockCount}
+            </div>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
+              SKUs needing reorder
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Out of Stock */}
-        <div className="admin-kpi-card">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: '#8BAAA0'
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}
-            >
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Out of Stock
             </span>
-            <X style={{ width: '16px', height: '16px', color: '#F87171' }} />
-          </div>
-          <div className="admin-kpi-value">{summary.outOfStockCount}</div>
-          <div style={{ fontSize: '0.6875rem', color: '#698D80' }}>Sold out variants</div>
-        </div>
+            <X className="h-4 w-4 text-destructive" />
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div className="text-2xl sm:text-3xl font-bold font-serif text-foreground">
+              {summary.outOfStockCount}
+            </div>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Sold out variants</p>
+          </CardContent>
+        </Card>
 
         {/* Total Variants */}
-        <div className="admin-kpi-card">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: '#8BAAA0'
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}
-            >
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 pb-1 sm:p-5 sm:pb-2 flex flex-row items-center justify-between space-y-0">
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Total SKUs
             </span>
-            <Boxes style={{ width: '16px', height: '16px', color: '#C5A880' }} />
-          </div>
-          <div className="admin-kpi-value">{summary.totalVariants}</div>
-          <div style={{ fontSize: '0.6875rem', color: '#698D80' }}>Catalog active models</div>
-        </div>
+            <Package className="h-4 w-4 text-accent" />
+          </CardHeader>
+          <CardContent className="p-4 pt-1 sm:p-5 sm:pt-2">
+            <div className="text-2xl sm:text-3xl font-bold font-serif text-foreground">
+              {summary.totalVariants}
+            </div>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
+              Catalog active models
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Search & Tabs Controls */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '12px',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}
-      >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Filter Tabs */}
-        <div className="admin-tabs-bar">
+        <div className="inline-flex rounded-lg border border-border bg-card p-1 shadow-xs overflow-x-auto max-w-full">
           <button
+            type="button"
             onClick={() => setActiveTab('all')}
-            className={`admin-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+            className={cn(
+              'rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none whitespace-nowrap',
+              activeTab === 'all'
+                ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             All SKUs ({items.length})
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('needs_restock')}
-            className={`admin-tab-btn ${activeTab === 'needs_restock' ? 'active' : ''}`}
-            style={{
-              color:
-                summary.lowStockCount + summary.outOfStockCount > 0 && activeTab !== 'needs_restock'
-                  ? '#C5A880'
-                  : undefined
-            }}
+            className={cn(
+              'rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none whitespace-nowrap',
+              activeTab === 'needs_restock'
+                ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                : summary.lowStockCount + summary.outOfStockCount > 0
+                  ? 'text-accent font-semibold hover:text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             Needs Restock ({summary.lowStockCount + summary.outOfStockCount})
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('published')}
-            className={`admin-tab-btn ${activeTab === 'published' ? 'active' : ''}`}
+            className={cn(
+              'rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none whitespace-nowrap',
+              activeTab === 'published'
+                ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             Published
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('drafts')}
-            className={`admin-tab-btn ${activeTab === 'drafts' ? 'active' : ''}`}
+            className={cn(
+              'rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none whitespace-nowrap',
+              activeTab === 'drafts'
+                ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             Drafts
           </button>
         </div>
 
         {/* Search Input */}
-        <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
-          <Search
-            style={{
-              position: 'absolute',
-              left: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: '16px',
-              height: '16px',
-              color: '#8BAAA0',
-              pointerEvents: 'none'
-            }}
-          />
-          <input
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
             type="text"
             placeholder="Search piece by title or SKU..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="admin-search-input"
-            style={{ paddingLeft: '36px' }}
+            className="pl-9 pr-8 h-10 text-xs"
           />
           {searchQuery && (
             <button
+              type="button"
               onClick={() => setSearchQuery('')}
-              style={{
-                position: 'absolute',
-                right: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'transparent',
-                border: 'none',
-                color: '#8BAAA0',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center'
-              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
               title="Clear search"
             >
-              <X style={{ width: '14px', height: '14px' }} />
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
       </div>
 
       {/* Inventory Table Container */}
-      <div className="admin-table-container">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Artisanal Piece</th>
-              <th>Status</th>
-              <th>Price (₹)</th>
-              <th style={{ textAlign: 'center' }}>Stock (Available)</th>
-              <th>Quick Restock</th>
-              <th style={{ textAlign: 'right' }}>Audit</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredItems.length === 0 ? (
+      <Card className="border-border bg-card shadow-xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="border-b border-border bg-muted/40">
               <tr>
-                <td
-                  colSpan={6}
-                  style={{
-                    textAlign: 'center',
-                    padding: '48px 16px',
-                    color: '#8BAAA0'
-                  }}
-                >
-                  <Boxes
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      color: '#235847',
-                      margin: '0 auto 12px'
-                    }}
-                  />
-                  <div>No inventory items matched your filter.</div>
-                </td>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Artisanal Piece
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Status
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Price (₹)
+                </th>
+                <th className="text-center px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Stock (Available)
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Quick Restock
+                </th>
+                <th className="text-right px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Audit
+                </th>
               </tr>
-            ) : (
-              filteredItems.map((item) => (
-                <tr key={item.variantId}>
-                  {/* Product & Variant */}
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      {item.primaryImageUrl ? (
-                        <img
-                          src={item.primaryImageUrl}
-                          alt={item.productTitle}
-                          style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '6px',
-                            objectFit: 'cover',
-                            border: '1px solid #1C4D3E'
-                          }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '6px',
-                            backgroundColor: '#164335',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            border: '1px solid #1C4D3E'
-                          }}
-                        >
-                          <Boxes style={{ width: '18px', height: '18px', color: '#8BAAA0' }} />
-                        </div>
-                      )}
-                      <div>
-                        <a
-                          href={`/products/${item.productSlug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: '#FDFBF7',
-                            fontWeight: 600,
-                            textDecoration: 'none',
-                            fontSize: '0.875rem'
-                          }}
-                        >
-                          {item.productTitle}
-                        </a>
-                        <div
-                          style={{
-                            fontSize: '0.6875rem',
-                            color: '#8BAAA0',
-                            fontFamily: 'monospace',
-                            marginTop: '2px'
-                          }}
-                        >
-                          {item.variantSku} &bull; {item.variantTitle}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Status Toggle */}
-                  <td>
-                    <button
-                      onClick={() => handleStatusToggle(item.productId, item.productStatus)}
-                      disabled={isLoading}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 0
-                      }}
-                      title="Click to toggle status"
-                    >
-                      <span
-                        className={`admin-badge ${
-                          item.productStatus === 'published'
-                            ? 'admin-badge-emerald'
-                            : 'admin-badge-gold'
-                        }`}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        {item.productStatus}
-                      </span>
-                    </button>
-                  </td>
-
-                  {/* Price */}
-                  <td>
-                    {editingPriceVariantId === item.variantId ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <input
-                          type="number"
-                          value={newPriceInput}
-                          onChange={(e) => setNewPriceInput(e.target.value)}
-                          placeholder="Price ₹"
-                          style={{
-                            width: '80px',
-                            padding: '4px 6px',
-                            borderRadius: '4px',
-                            backgroundColor: '#081F18',
-                            border: '1px solid #C5A880',
-                            color: '#FDFBF7',
-                            fontSize: '0.8125rem'
-                          }}
-                        />
-                        <button
-                          onClick={() =>
-                            handlePriceUpdate(item.variantId, parseFloat(newPriceInput))
-                          }
-                          className="admin-btn-primary"
-                          style={{ minHeight: '28px', padding: '4px 8px', fontSize: '0.6875rem' }}
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingPriceVariantId(null)}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#8BAAA0',
-                            cursor: 'pointer',
-                            fontSize: '0.6875rem'
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontWeight: 600, color: '#C5A880' }}>
-                          {formatPrice(item.priceMinor)}
-                        </span>
-                        <button
-                          onClick={() => {
-                            setEditingPriceVariantId(item.variantId);
-                            setNewPriceInput(String(item.priceMinor / 100));
-                          }}
-                          style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#8BAAA0',
-                            cursor: 'pointer',
-                            fontSize: '0.6875rem',
-                            textDecoration: 'underline'
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Stock Level Details */}
-                  <td style={{ textAlign: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <span
-                        style={{
-                          fontSize: '1.125rem',
-                          fontWeight: 700,
-                          color:
-                            item.available <= 0
-                              ? '#F87171'
-                              : item.isLowStock
-                                ? '#FBBF24'
-                                : '#34D399'
-                        }}
-                      >
-                        {item.available}
-                      </span>
-                      <span style={{ fontSize: '0.6875rem', color: '#8BAAA0' }}>
-                        {item.onHand} on hand &bull; {item.reserved} held
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* Quick Restock Buttons */}
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      {[1, 5, 10, 20].map((num) => (
-                        <button
-                          key={num}
-                          onClick={() => handleQuickAdjust(item.variantId, num, 'manual_restock')}
-                          disabled={isLoading}
-                          className="admin-btn-secondary"
-                          style={{
-                            minHeight: '28px',
-                            padding: '3px 8px',
-                            fontSize: '0.75rem',
-                            borderRadius: '6px'
-                          }}
-                          title={`Add +${num} stock`}
-                        >
-                          +{num}
-                        </button>
-                      ))}
-
-                      <button
-                        onClick={() => {
-                          setAdjustModalItem(item);
-                          setCustomDelta(5);
-                          setCustomReason('manual_restock');
-                          setCustomNote('');
-                        }}
-                        className="admin-btn-secondary"
-                        style={{
-                          minHeight: '28px',
-                          padding: '3px 8px',
-                          fontSize: '0.75rem',
-                          borderRadius: '6px',
-                          color: '#C5A880'
-                        }}
-                        title="Custom stock adjustment"
-                      >
-                        Custom &plusmn;
-                      </button>
-                    </div>
-                  </td>
-
-                  {/* Audit Logs */}
-                  <td style={{ textAlign: 'right' }}>
-                    <button
-                      onClick={() =>
-                        setSelectedVariantAuditId(
-                          selectedVariantAuditId === item.variantId ? null : item.variantId
-                        )
-                      }
-                      className="admin-btn-secondary"
-                      style={{
-                        minHeight: '32px',
-                        padding: '4px 10px',
-                        fontSize: '0.75rem',
-                        backgroundColor:
-                          selectedVariantAuditId === item.variantId ? '#164335' : undefined
-                      }}
-                      title="View audit logs"
-                    >
-                      <History style={{ width: '14px', height: '14px' }} />
-                      <span>History</span>
-                    </button>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filteredItems.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 px-4 text-muted-foreground">
+                    <Boxes className="h-8 w-8 text-muted-foreground/50 mx-auto mb-3" />
+                    <div>No inventory items matched your filter.</div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                filteredItems.map((item) => (
+                  <tr key={item.variantId} className="hover:bg-muted/20 transition-colors">
+                    {/* Product & Variant */}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        {item.primaryImageUrl ? (
+                          <img
+                            src={item.primaryImageUrl}
+                            alt={item.productTitle}
+                            className="w-10 h-10 rounded-md object-cover border border-border"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center border border-border">
+                            <Boxes className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div>
+                          <a
+                            href={`/products/${item.productSlug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-foreground hover:text-accent transition-colors block text-sm"
+                          >
+                            {item.productTitle}
+                          </a>
+                          <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                            {item.variantSku} &bull; {item.variantTitle}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Status Toggle */}
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => handleStatusToggle(item.productId, item.productStatus)}
+                        disabled={isLoading}
+                        title="Click to toggle status"
+                        className="cursor-pointer focus:outline-none"
+                      >
+                        <Badge
+                          variant={item.productStatus === 'published' ? 'default' : 'secondary'}
+                          className="capitalize cursor-pointer"
+                        >
+                          {item.productStatus}
+                        </Badge>
+                      </button>
+                    </td>
+
+                    {/* Price */}
+                    <td className="px-4 py-3">
+                      {editingPriceVariantId === item.variantId ? (
+                        <div className="flex items-center gap-1.5">
+                          <Input
+                            type="number"
+                            value={newPriceInput}
+                            onChange={(e) => setNewPriceInput(e.target.value)}
+                            placeholder="Price ₹"
+                            className="w-20 h-7 text-xs px-2"
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handlePriceUpdate(item.variantId, parseFloat(newPriceInput))
+                            }
+                            className="h-7 px-2 text-xs"
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingPriceVariantId(null)}
+                            className="h-7 px-2 text-xs text-muted-foreground"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-accent">
+                            {formatPrice(item.priceMinor)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingPriceVariantId(item.variantId);
+                              setNewPriceInput(String(item.priceMinor / 100));
+                            }}
+                            className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Stock Level Details */}
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex flex-col items-center">
+                        <span
+                          className={cn(
+                            'text-base font-bold',
+                            item.available <= 0
+                              ? 'text-destructive'
+                              : item.isLowStock
+                                ? 'text-amber-500'
+                                : 'text-emerald-600 dark:text-emerald-400'
+                          )}
+                        >
+                          {item.available}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {item.onHand} on hand &bull; {item.reserved} held
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Quick Restock Buttons */}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {[1, 5, 10, 20].map((num) => (
+                          <Button
+                            key={num}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleQuickAdjust(item.variantId, num, 'manual_restock')}
+                            disabled={isLoading}
+                            className="h-7 px-2 text-xs"
+                            title={`Add +${num} stock`}
+                          >
+                            +{num}
+                          </Button>
+                        ))}
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setAdjustModalItem(item);
+                            setCustomDelta(5);
+                            setCustomReason('manual_restock');
+                            setCustomNote('');
+                          }}
+                          className="h-7 px-2 text-xs text-accent border-accent/40 hover:bg-accent/10"
+                          title="Custom stock adjustment"
+                        >
+                          Custom &plusmn;
+                        </Button>
+                      </div>
+                    </td>
+
+                    {/* Audit Logs */}
+                    <td className="px-4 py-3 text-right">
+                      <Button
+                        variant={selectedVariantAuditId === item.variantId ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() =>
+                          setSelectedVariantAuditId(
+                            selectedVariantAuditId === item.variantId ? null : item.variantId
+                          )
+                        }
+                        className="h-7 px-2.5 text-xs gap-1.5"
+                        title="View audit logs"
+                      >
+                        <History className="h-3.5 w-3.5" />
+                        <span>History</span>
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
       {/* Custom Adjustment Modal */}
-      {adjustModalItem && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(4px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 50,
-            padding: '16px'
-          }}
-        >
-          <div
-            className="admin-card"
-            style={{ width: '100%', maxWidth: '440px', position: 'relative' }}
-          >
-            <button
-              onClick={() => setAdjustModalItem(null)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'transparent',
-                border: 'none',
-                color: '#8BAAA0',
-                cursor: 'pointer'
-              }}
-            >
-              <X style={{ width: '18px', height: '18px' }} />
-            </button>
+      <Dialog
+        open={Boolean(adjustModalItem)}
+        onOpenChange={(open) => {
+          if (!open) setAdjustModalItem(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl">Adjust Inventory Stock</DialogTitle>
+            {adjustModalItem && (
+              <DialogDescription className="text-xs">
+                {adjustModalItem.productTitle} &bull;{' '}
+                <span className="font-mono font-medium text-foreground">
+                  {adjustModalItem.variantSku}
+                </span>
+              </DialogDescription>
+            )}
+          </DialogHeader>
 
-            <h3
-              style={{
-                fontSize: '1.25rem',
-                fontFamily: 'serif',
-                color: '#FDFBF7',
-                margin: '0 0 4px'
-              }}
-            >
-              Adjust Inventory Stock
-            </h3>
-            <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: '0 0 16px' }}>
-              {adjustModalItem.productTitle} &bull;{' '}
-              <span style={{ fontFamily: 'monospace' }}>{adjustModalItem.variantSku}</span>
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    color: '#C5A880',
-                    fontWeight: 600,
-                    marginBottom: '6px'
-                  }}
-                >
-                  Units to Adjust (+/-)
-                </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input
-                    type="number"
-                    value={customDelta}
-                    onChange={(e) => setCustomDelta(parseInt(e.target.value) || 0)}
-                    className="admin-search-input"
-                    style={{ width: '100%', fontSize: '1rem', fontWeight: 600 }}
-                  />
-                </div>
-                <div style={{ fontSize: '0.6875rem', color: '#8BAAA0', marginTop: '4px' }}>
+          {adjustModalItem && (
+            <div className="flex flex-col gap-4 py-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-accent">Units to Adjust (+/-)</label>
+                <Input
+                  type="number"
+                  value={customDelta}
+                  onChange={(e) => setCustomDelta(parseInt(e.target.value) || 0)}
+                  className="font-semibold text-base"
+                />
+                <div className="text-[11px] text-muted-foreground">
                   Current on hand: {adjustModalItem.onHand} &bull; Resulting on hand:{' '}
                   {adjustModalItem.onHand + customDelta}
                 </div>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    color: '#C5A880',
-                    fontWeight: 600,
-                    marginBottom: '6px'
-                  }}
-                >
-                  Adjustment Reason
-                </label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-accent">Adjustment Reason</label>
                 <select
                   value={customReason}
                   onChange={(e) => setCustomReason(e.target.value as InventoryAuditReason)}
-                  className="admin-search-input"
-                  style={{ width: '100%', cursor: 'pointer' }}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                 >
                   <option value="manual_restock">Artisan Batch Restock (+)</option>
                   <option value="manual_correction">Count Correction (&plusmn;)</option>
@@ -902,187 +725,125 @@ export default function InventoryManager({
                 </select>
               </div>
 
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.75rem',
-                    color: '#C5A880',
-                    fontWeight: 600,
-                    marginBottom: '6px'
-                  }}
-                >
-                  Note (Optional)
-                </label>
-                <input
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-accent">Note (Optional)</label>
+                <Input
                   type="text"
                   placeholder="e.g. Received shipment from artisan workshop"
                   value={customNote}
                   onChange={(e) => setCustomNote(e.target.value)}
-                  className="admin-search-input"
-                  style={{ width: '100%' }}
                 />
               </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '8px',
-                  marginTop: '8px'
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => setAdjustModalItem(null)}
-                  className="admin-btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleQuickAdjust(
-                      adjustModalItem.variantId,
-                      customDelta,
-                      customReason,
-                      customNote
-                    )
-                  }
-                  disabled={isLoading || customDelta === 0}
-                  className="admin-btn-primary"
-                >
-                  {isLoading ? 'Updating...' : 'Confirm Adjustment'}
-                </button>
-              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setAdjustModalItem(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (adjustModalItem) {
+                  handleQuickAdjust(
+                    adjustModalItem.variantId,
+                    customDelta,
+                    customReason,
+                    customNote
+                  );
+                }
+              }}
+              disabled={isLoading || customDelta === 0}
+            >
+              {isLoading ? 'Updating...' : 'Confirm Adjustment'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Audit Log Timeline Section */}
-      <div className="admin-card">
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '16px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <History style={{ width: '18px', height: '18px', color: '#C5A880' }} />
-            <h2 style={{ fontSize: '1rem', color: '#FDFBF7', margin: 0, fontWeight: 600 }}>
+      <Card className="border-border bg-card shadow-xs">
+        <CardHeader className="p-4 sm:p-5 flex flex-row items-center justify-between space-y-0">
+          <div className="flex items-center gap-2">
+            <History className="h-4 w-4 text-accent" />
+            <CardTitle className="text-base font-semibold">
               {selectedVariantAuditId
                 ? `Audit History for ${items.find((i) => i.variantId === selectedVariantAuditId)?.variantSku}`
                 : 'Recent Inventory Movements'}
-            </h2>
+            </CardTitle>
           </div>
           {selectedVariantAuditId && (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setSelectedVariantAuditId(null)}
-              className="admin-btn-secondary"
-              style={{ minHeight: '30px', padding: '3px 8px', fontSize: '0.75rem' }}
+              className="h-7 px-2.5 text-xs"
             >
               Show All SKUs
-            </button>
+            </Button>
           )}
-        </div>
+        </CardHeader>
+        <CardContent className="p-4 pt-0 sm:p-5 sm:pt-0">
+          {auditLogs.length === 0 ? (
+            <div className="text-muted-foreground text-xs text-center py-6">
+              No stock movements recorded yet.
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {auditLogs
+                .filter(
+                  (log) => !selectedVariantAuditId || log.variantId === selectedVariantAuditId
+                )
+                .slice(0, 15)
+                .map((log) => (
+                  <div
+                    key={log.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20 text-xs"
+                  >
+                    <div className="flex items-center gap-3">
+                      {log.delta > 0 ? (
+                        <div className="w-6 h-6 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                          <ArrowUpRight className="h-3.5 w-3.5" />
+                        </div>
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-destructive/15 text-destructive flex items-center justify-center shrink-0">
+                          <ArrowDownRight className="h-3.5 w-3.5" />
+                        </div>
+                      )}
+                      <div>
+                        <span className="font-semibold text-foreground">{log.productTitle}</span>{' '}
+                        <span className="text-muted-foreground font-mono">({log.variantSku})</span>
+                        <div className="text-[11px] text-muted-foreground mt-0.5">
+                          Reason:{' '}
+                          <span className="text-accent font-medium">
+                            {log.reason.replace(/_/g, ' ')}
+                          </span>
+                          {log.note ? ` &bull; "${log.note}"` : ''}
+                        </div>
+                      </div>
+                    </div>
 
-        {auditLogs.length === 0 ? (
-          <div
-            style={{
-              color: '#8BAAA0',
-              fontSize: '0.8125rem',
-              textAlign: 'center',
-              padding: '16px'
-            }}
-          >
-            No stock movements recorded yet.
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {auditLogs
-              .filter((log) => !selectedVariantAuditId || log.variantId === selectedVariantAuditId)
-              .slice(0, 15)
-              .map((log) => (
-                <div
-                  key={log.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '10px 14px',
-                    borderRadius: '8px',
-                    backgroundColor: '#0A251D',
-                    border: '1px solid #1C4D3E',
-                    fontSize: '0.8125rem'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    {log.delta > 0 ? (
+                    <div className="text-right">
                       <div
-                        style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '50%',
-                          backgroundColor: '#064E3B',
-                          color: '#34D399',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
+                        className={cn(
+                          'font-bold',
+                          log.delta > 0
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-destructive'
+                        )}
                       >
-                        <ArrowUpRight style={{ width: '14px', height: '14px' }} />
+                        {log.delta > 0 ? `+${log.delta}` : log.delta} ({log.previousOnHand} &rarr;{' '}
+                        {log.newOnHand})
                       </div>
-                    ) : (
-                      <div
-                        style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '50%',
-                          backgroundColor: '#451A1A',
-                          color: '#F87171',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <ArrowDownRight style={{ width: '14px', height: '14px' }} />
-                      </div>
-                    )}
-                    <div>
-                      <span style={{ color: '#FDFBF7', fontWeight: 600 }}>{log.productTitle}</span>{' '}
-                      <span style={{ color: '#8BAAA0', fontFamily: 'monospace' }}>
-                        ({log.variantSku})
-                      </span>
-                      <div style={{ fontSize: '0.6875rem', color: '#698D80' }}>
-                        Reason:{' '}
-                        <span style={{ color: '#C5A880' }}>{log.reason.replace(/_/g, ' ')}</span>
-                        {log.note ? ` &bull; "${log.note}"` : ''}
+                      <div className="text-[11px] text-muted-foreground">
+                        {formatDate(log.createdAt)}
                       </div>
                     </div>
                   </div>
-
-                  <div style={{ textAlign: 'right' }}>
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        color: log.delta > 0 ? '#34D399' : '#F87171'
-                      }}
-                    >
-                      {log.delta > 0 ? `+${log.delta}` : log.delta} ({log.previousOnHand} &rarr;{' '}
-                      {log.newOnHand})
-                    </div>
-                    <div style={{ fontSize: '0.6875rem', color: '#8BAAA0' }}>
-                      {formatDate(log.createdAt)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-          </div>
-        )}
-      </div>
+                ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -14,6 +14,12 @@ import {
   Truck
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 import type { StorefrontConfig, StorefrontReassurance } from '@hh/domain';
 
@@ -128,70 +134,42 @@ export default function BrandCustomizerDashboard({ initialConfig }: BrandCustomi
   const renderBadgeIcon = (iconName: string) => {
     switch (iconName) {
       case 'truck':
-        return <Truck size={20} color="#C5A880" />;
+        return <Truck className="h-5 w-5 text-accent" />;
       case 'shield':
-        return <Shield size={20} color="#C5A880" />;
+        return <Shield className="h-5 w-5 text-accent" />;
       case 'clock':
-        return <Clock size={20} color="#C5A880" />;
+        return <Clock className="h-5 w-5 text-accent" />;
       default:
-        return <Sparkles size={20} color="#C5A880" />;
+        return <Sparkles className="h-5 w-5 text-accent" />;
     }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="flex flex-col gap-6">
       {/* Header */}
-      <div
-        className="admin-card"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '16px'
-        }}
-      >
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <Palette style={{ width: '18px', height: '18px', color: '#C5A880' }} />
-            <h2
-              style={{
-                fontSize: '1.25rem',
-                fontFamily: 'serif',
-                fontWeight: 600,
-                color: '#FDFBF7',
-                margin: 0
-              }}
-            >
-              Brand &amp; Storefront Customizer
-            </h2>
-          </div>
-          <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: 0 }}>
-            Instantly update your storefront announcement banner, hero headlines, and luxury value
-            badges without code changes.
-          </p>
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <Palette className="h-5 w-5 text-accent" />
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground tracking-tight">
+            Brand &amp; Storefront Customizer
+          </h1>
         </div>
+        <p className="text-xs sm:text-sm text-muted-foreground">
+          Instantly update your storefront announcement banner, hero headlines, and luxury value
+          badges without code changes.
+        </p>
       </div>
 
       {/* Main Customizer Form */}
-      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <form onSubmit={handleSave} className="flex flex-col gap-6">
         {/* 1. Announcement Bar */}
-        <div className="admin-card">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '16px',
-              borderBottom: '1px solid #1C4D3E',
-              paddingBottom: '10px'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Megaphone style={{ width: '18px', height: '18px', color: '#C5A880' }} />
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 sm:p-5 flex flex-row items-center justify-between border-b border-border space-y-0">
+            <div className="flex items-center gap-2">
+              <Megaphone className="h-4 w-4 text-accent" />
+              <CardTitle className="text-base font-semibold">
                 Storefront Announcement Ribbon
-              </h3>
+              </CardTitle>
             </div>
             <button
               type="button"
@@ -199,224 +177,114 @@ export default function BrandCustomizerDashboard({ initialConfig }: BrandCustomi
               aria-label={
                 announcementEnabled ? 'Disable Announcement Ribbon' : 'Enable Announcement Ribbon'
               }
-              style={{
-                padding: '4px 14px',
-                borderRadius: '6px',
-                border: '1px solid',
-                borderColor: announcementEnabled ? '#10B981' : '#1C4D3E',
-                backgroundColor: announcementEnabled ? '#064E3B' : '#081F18',
-                color: announcementEnabled ? '#6EE7B7' : '#8BAAA0',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
+              className={cn(
+                'rounded-md px-3.5 py-1 text-xs font-semibold transition-colors border',
+                announcementEnabled
+                  ? 'bg-primary/10 border-primary/30 text-primary'
+                  : 'bg-muted border-border text-muted-foreground'
+              )}
             >
               {announcementEnabled ? 'Ribbon Active' : 'Ribbon Hidden'}
             </button>
-          </div>
+          </CardHeader>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px' }}>
+          <CardContent className="p-4 sm:p-5 flex flex-col gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label
                   htmlFor="announcementBadge"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    color: '#FDFBF7',
-                    marginBottom: '6px'
-                  }}
+                  className="block text-xs font-medium text-foreground mb-1.5"
                 >
                   Ribbon Pill Badge
                 </label>
-                <input
+                <Input
                   id="announcementBadge"
                   type="text"
                   value={announcementBadge}
                   onChange={(e) => setAnnouncementBadge(e.target.value)}
                   placeholder="e.g. Signature Drop"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    backgroundColor: '#081F18',
-                    border: '1px solid #1C4D3E',
-                    borderRadius: '6px',
-                    color: '#C5A880',
-                    fontSize: '0.85rem',
-                    outline: 'none'
-                  }}
                 />
               </div>
 
-              <div>
+              <div className="sm:col-span-2">
                 <label
                   htmlFor="announcementText"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    color: '#FDFBF7',
-                    marginBottom: '6px'
-                  }}
+                  className="block text-xs font-medium text-foreground mb-1.5"
                 >
                   Announcement Message
                 </label>
-                <input
+                <Input
                   id="announcementText"
                   type="text"
                   value={announcementText}
                   onChange={(e) => setAnnouncementText(e.target.value)}
                   placeholder="Announcement text..."
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    backgroundColor: '#081F18',
-                    border: '1px solid #1C4D3E',
-                    borderRadius: '6px',
-                    color: '#FDFBF7',
-                    fontSize: '0.85rem',
-                    outline: 'none'
-                  }}
                 />
               </div>
             </div>
 
             {/* Live Announcement Ribbon Preview */}
-            <div style={{ marginTop: '8px' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.75rem',
-                  color: '#8BAAA0',
-                  textTransform: 'uppercase',
-                  marginBottom: '8px'
-                }}
-              >
-                <Eye size={14} color="#C5A880" />
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider">
+                <Eye className="h-3.5 w-3.5 text-accent" />
                 <span>Live Ribbon Preview</span>
               </div>
-              <div
-                style={{
-                  backgroundColor: '#0A2E24',
-                  border: '1px solid #164335',
-                  borderRadius: '6px',
-                  padding: '10px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  color: '#FDFBF7',
-                  fontSize: '0.85rem'
-                }}
-              >
+              <div className="rounded-lg border border-border bg-primary text-primary-foreground p-3 flex items-center justify-center gap-2.5 text-xs sm:text-sm text-center">
                 {announcementBadge && (
-                  <span
-                    style={{
-                      backgroundColor: '#C5A880',
-                      color: '#0A2E24',
-                      fontSize: '0.7rem',
-                      fontWeight: 700,
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.04em'
-                    }}
+                  <Badge
+                    variant="secondary"
+                    className="font-semibold uppercase tracking-wider text-[10px]"
                   >
                     {announcementBadge}
-                  </span>
+                  </Badge>
                 )}
                 <span>{announcementText || 'Your announcement will appear here.'}</span>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* 2. Hero Section */}
-        <div className="admin-card">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '16px',
-              borderBottom: '1px solid #1C4D3E',
-              paddingBottom: '10px'
-            }}
-          >
-            <LayoutTemplate style={{ width: '18px', height: '18px', color: '#C5A880' }} />
-            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 sm:p-5 flex flex-row items-center gap-2 border-b border-border space-y-0">
+            <LayoutTemplate className="h-4 w-4 text-accent" />
+            <CardTitle className="text-base font-semibold">
               Hero Showcase &amp; Call to Action
-            </h3>
-          </div>
+            </CardTitle>
+          </CardHeader>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px' }}>
+          <CardContent className="p-4 sm:p-5 flex flex-col gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label
                   htmlFor="heroEyebrow"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    color: '#FDFBF7',
-                    marginBottom: '6px'
-                  }}
+                  className="block text-xs font-medium text-foreground mb-1.5"
                 >
                   Eyebrow Text
                 </label>
-                <input
+                <Input
                   id="heroEyebrow"
                   type="text"
                   value={heroEyebrow}
                   onChange={(e) => setHeroEyebrow(e.target.value)}
                   placeholder="e.g. H&H Signature Collection"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    backgroundColor: '#081F18',
-                    border: '1px solid #1C4D3E',
-                    borderRadius: '6px',
-                    color: '#C5A880',
-                    fontSize: '0.85rem',
-                    outline: 'none'
-                  }}
                 />
               </div>
 
-              <div>
+              <div className="sm:col-span-2">
                 <label
                   htmlFor="heroTitle"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    color: '#FDFBF7',
-                    marginBottom: '6px'
-                  }}
+                  className="block text-xs font-medium text-foreground mb-1.5"
                 >
                   Main Headline
                 </label>
-                <input
+                <Input
                   id="heroTitle"
                   type="text"
                   value={heroTitle}
                   onChange={(e) => setHeroTitle(e.target.value)}
                   placeholder="e.g. Crafted for Grace & Modesty"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    backgroundColor: '#081F18',
-                    border: '1px solid #1C4D3E',
-                    borderRadius: '6px',
-                    color: '#FDFBF7',
-                    fontFamily: 'serif',
-                    fontWeight: 600,
-                    fontSize: '0.95rem',
-                    outline: 'none'
-                  }}
+                  className="font-serif font-semibold"
                 />
               </div>
             </div>
@@ -424,387 +292,178 @@ export default function BrandCustomizerDashboard({ initialConfig }: BrandCustomi
             <div>
               <label
                 htmlFor="heroSubtitle"
-                style={{
-                  display: 'block',
-                  fontSize: '0.8rem',
-                  fontWeight: 500,
-                  color: '#FDFBF7',
-                  marginBottom: '6px'
-                }}
+                className="block text-xs font-medium text-foreground mb-1.5"
               >
                 Supporting Subtitle
               </label>
-              <textarea
+              <Textarea
                 id="heroSubtitle"
                 rows={2}
                 value={heroSubtitle}
                 onChange={(e) => setHeroSubtitle(e.target.value)}
                 placeholder="Supporting description..."
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  backgroundColor: '#081F18',
-                  border: '1px solid #1C4D3E',
-                  borderRadius: '6px',
-                  color: '#FDFBF7',
-                  fontSize: '0.85rem',
-                  lineHeight: 1.5,
-                  outline: 'none',
-                  resize: 'vertical'
-                }}
+                className="resize-y leading-relaxed"
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label
                   htmlFor="heroCtaText"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    color: '#FDFBF7',
-                    marginBottom: '6px'
-                  }}
+                  className="block text-xs font-medium text-foreground mb-1.5"
                 >
                   Button Label
                 </label>
-                <input
+                <Input
                   id="heroCtaText"
                   type="text"
                   value={heroCtaText}
                   onChange={(e) => setHeroCtaText(e.target.value)}
                   placeholder="e.g. Explore the Collection"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    backgroundColor: '#081F18',
-                    border: '1px solid #1C4D3E',
-                    borderRadius: '6px',
-                    color: '#FDFBF7',
-                    fontSize: '0.85rem',
-                    outline: 'none'
-                  }}
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="heroCtaLink"
-                  style={{
-                    display: 'block',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    color: '#FDFBF7',
-                    marginBottom: '6px'
-                  }}
+                  className="block text-xs font-medium text-foreground mb-1.5"
                 >
                   Button Target Link
                 </label>
-                <input
+                <Input
                   id="heroCtaLink"
                   type="text"
                   value={heroCtaLink}
                   onChange={(e) => setHeroCtaLink(e.target.value)}
                   placeholder="e.g. #catalog or /categories/rings"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    backgroundColor: '#081F18',
-                    border: '1px solid #1C4D3E',
-                    borderRadius: '6px',
-                    color: '#FDFBF7',
-                    fontSize: '0.85rem',
-                    outline: 'none'
-                  }}
                 />
               </div>
             </div>
 
             {/* Live Hero Showcase Preview */}
-            <div style={{ marginTop: '8px' }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  fontSize: '0.75rem',
-                  color: '#8BAAA0',
-                  textTransform: 'uppercase',
-                  marginBottom: '8px'
-                }}
-              >
-                <Eye size={14} color="#C5A880" />
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground uppercase tracking-wider">
+                <Eye className="h-3.5 w-3.5 text-accent" />
                 <span>Live Hero Preview</span>
               </div>
-              <div
-                style={{
-                  backgroundColor: '#081F18',
-                  border: '1px solid #1C4D3E',
-                  borderRadius: '8px',
-                  padding: '32px 24px',
-                  textAlign: 'center'
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    color: '#C5A880',
-                    fontWeight: 600,
-                    display: 'block',
-                    marginBottom: '8px'
-                  }}
-                >
+              <div className="rounded-lg border border-border bg-card p-6 sm:p-10 text-center shadow-xs">
+                <span className="text-xs uppercase tracking-widest text-accent font-semibold block mb-2">
                   {heroEyebrow}
                 </span>
-                <h1
-                  style={{
-                    fontFamily: 'serif',
-                    fontSize: '1.85rem',
-                    color: '#FDFBF7',
-                    margin: '0 0 12px',
-                    fontWeight: 600
-                  }}
-                >
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-foreground mb-3 tracking-tight">
                   {heroTitle}
-                </h1>
-                <p
-                  style={{
-                    fontSize: '0.9rem',
-                    color: '#8BAAA0',
-                    maxWidth: '480px',
-                    margin: '0 auto 20px',
-                    lineHeight: 1.5
-                  }}
-                >
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto mb-6 leading-relaxed">
                   {heroSubtitle}
                 </p>
-                <div
-                  style={{
-                    display: 'inline-block',
-                    padding: '10px 24px',
-                    backgroundColor: '#0A2E24',
-                    border: '1px solid #C5A880',
-                    color: '#C5A880',
-                    borderRadius: '4px',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.04em'
-                  }}
-                >
+                <div className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground font-medium px-6 py-2.5 text-xs sm:text-sm shadow-xs border border-accent/30">
                   {heroCtaText}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* 3. Reassurance Value Badges */}
-        <div className="admin-card">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '16px',
-              borderBottom: '1px solid #1C4D3E',
-              paddingBottom: '10px'
-            }}
-          >
-            <Sparkles style={{ width: '18px', height: '18px', color: '#C5A880' }} />
-            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+        <Card className="border-border bg-card shadow-xs">
+          <CardHeader className="p-4 sm:p-5 flex flex-row items-center gap-2 border-b border-border space-y-0">
+            <Sparkles className="h-4 w-4 text-accent" />
+            <CardTitle className="text-base font-semibold">
               Reassurance Badges (3 Pillars)
-            </h3>
-          </div>
+            </CardTitle>
+          </CardHeader>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '16px'
-            }}
-          >
-            {reassurances.map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  backgroundColor: '#081F18',
-                  border: '1px solid #1C4D3E',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '8px',
-                      backgroundColor: '#164335',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    {renderBadgeIcon(item.icon)}
+          <CardContent className="p-4 sm:p-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {reassurances.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-lg border border-border bg-muted/20 p-4 flex flex-col gap-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-accent/15 flex items-center justify-center shrink-0">
+                      {renderBadgeIcon(item.icon)}
+                    </div>
+                    <select
+                      value={item.icon}
+                      onChange={(e) => handleReassuranceChange(idx, 'icon', e.target.value)}
+                      aria-label={`Pillar ${idx + 1} Icon`}
+                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                    >
+                      <option value="sparkles">Sparkles (Craftsmanship)</option>
+                      <option value="truck">Truck (Direct Courier)</option>
+                      <option value="shield">Shield (Secure Payments)</option>
+                      <option value="clock">Clock (Timely Dispatch)</option>
+                    </select>
                   </div>
-                  <select
-                    value={item.icon}
-                    onChange={(e) => handleReassuranceChange(idx, 'icon', e.target.value)}
-                    aria-label={`Pillar ${idx + 1} Icon`}
-                    style={{
-                      backgroundColor: '#0B2920',
-                      border: '1px solid #1C4D3E',
-                      borderRadius: '4px',
-                      color: '#FDFBF7',
-                      fontSize: '0.8rem',
-                      padding: '4px 8px',
-                      outline: 'none'
-                    }}
-                  >
-                    <option value="sparkles">Sparkles (Craftsmanship)</option>
-                    <option value="truck">Truck (Direct Courier)</option>
-                    <option value="shield">Shield (Secure Payments)</option>
-                    <option value="clock">Clock (Timely Dispatch)</option>
-                  </select>
-                </div>
 
-                <div>
-                  <label
-                    htmlFor={`pillarTitle-${idx}`}
-                    style={{
-                      display: 'block',
-                      fontSize: '0.75rem',
-                      color: '#8BAAA0',
-                      marginBottom: '4px'
-                    }}
-                  >
-                    Pillar {idx + 1} Title
-                  </label>
-                  <input
-                    id={`pillarTitle-${idx}`}
-                    type="text"
-                    value={item.title}
-                    onChange={(e) => handleReassuranceChange(idx, 'title', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '6px 10px',
-                      backgroundColor: '#0B2920',
-                      border: '1px solid #1C4D3E',
-                      borderRadius: '4px',
-                      color: '#FDFBF7',
-                      fontSize: '0.85rem',
-                      outline: 'none'
-                    }}
-                  />
-                </div>
+                  <div>
+                    <label
+                      htmlFor={`pillarTitle-${idx}`}
+                      className="block text-xs text-muted-foreground mb-1"
+                    >
+                      Pillar {idx + 1} Title
+                    </label>
+                    <Input
+                      id={`pillarTitle-${idx}`}
+                      type="text"
+                      value={item.title}
+                      onChange={(e) => handleReassuranceChange(idx, 'title', e.target.value)}
+                      className="h-8 text-xs"
+                    />
+                  </div>
 
-                <div>
-                  <label
-                    htmlFor={`pillarDesc-${idx}`}
-                    style={{
-                      display: 'block',
-                      fontSize: '0.75rem',
-                      color: '#8BAAA0',
-                      marginBottom: '4px'
-                    }}
-                  >
-                    Pillar {idx + 1} Description
-                  </label>
-                  <textarea
-                    id={`pillarDesc-${idx}`}
-                    rows={2}
-                    value={item.description}
-                    onChange={(e) => handleReassuranceChange(idx, 'description', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '6px 10px',
-                      backgroundColor: '#0B2920',
-                      border: '1px solid #1C4D3E',
-                      borderRadius: '4px',
-                      color: '#FDFBF7',
-                      fontSize: '0.8rem',
-                      lineHeight: 1.4,
-                      outline: 'none',
-                      resize: 'none'
-                    }}
-                  />
+                  <div>
+                    <label
+                      htmlFor={`pillarDesc-${idx}`}
+                      className="block text-xs text-muted-foreground mb-1"
+                    >
+                      Pillar {idx + 1} Description
+                    </label>
+                    <Textarea
+                      id={`pillarDesc-${idx}`}
+                      rows={2}
+                      value={item.description}
+                      onChange={(e) => handleReassuranceChange(idx, 'description', e.target.value)}
+                      className="text-xs resize-none"
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Feedback Messages */}
         {saveSuccess && (
-          <div
-            style={{
-              padding: '12px 16px',
-              backgroundColor: '#064E3B',
-              border: '1px solid #059669',
-              borderRadius: '8px',
-              color: '#6EE7B7',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              fontSize: '0.85rem'
-            }}
-          >
-            <CheckCircle2 style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/20 text-primary text-sm flex items-center gap-2 font-medium">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
             <span>Storefront brand configuration published successfully to live website.</span>
           </div>
         )}
 
         {saveError && (
-          <div
-            style={{
-              padding: '12px 16px',
-              backgroundColor: '#451A1A',
-              border: '1px solid #EF4444',
-              borderRadius: '8px',
-              color: '#FCA5A5',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              fontSize: '0.85rem'
-            }}
-          >
-            <AlertTriangle style={{ width: '18px', height: '18px', flexShrink: 0 }} />
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>{saveError}</span>
           </div>
         )}
 
         {/* Form Action Controls */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="admin-btn-primary"
-            style={{
-              padding: '10px 24px',
-              fontSize: '0.875rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
-          >
+        <div className="flex justify-end gap-3">
+          <Button type="submit" disabled={isSaving} size="lg" className="gap-2">
             {isSaving ? (
               <>
-                <RefreshCw className="animate-spin" style={{ width: '16px', height: '16px' }} />
+                <RefreshCw className="h-4 w-4 animate-spin" />
                 <span>Publishing Changes...</span>
               </>
             ) : (
               <>
-                <Sparkles style={{ width: '16px', height: '16px' }} />
+                <Sparkles className="h-4 w-4" />
                 <span>Save &amp; Publish Storefront</span>
               </>
             )}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

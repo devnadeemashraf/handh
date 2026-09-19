@@ -1,4 +1,5 @@
 import { Clock, IndianRupee, ShoppingBag, Truck } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 import { createDbClient, getAdminOrderMetrics, listAdminOrders } from '@hh/db';
 
@@ -27,129 +28,78 @@ export default async function AdminOrdersPage() {
   }).format(metrics.totalRevenueMinor / 100);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1
-          style={{
-            fontSize: '1.75rem',
-            fontFamily: 'serif',
-            color: '#FDFBF7',
-            margin: '0 0 4px'
-          }}
-        >
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-primary">
           Order Queue
         </h1>
-        <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: 0 }}>
+        <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
           Review incoming purchases, dispatch artisanal pieces, and record courier tracking.
         </p>
       </div>
 
       {/* KPI Dashboard Cards */}
-      <div className="admin-kpi-grid">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Captured Revenue */}
-        <div className="admin-kpi-card">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: '#8BAAA0'
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}
-            >
-              Revenue
-            </span>
-            <IndianRupee style={{ width: '16px', height: '16px', color: '#C5A880' }} />
-          </div>
-          <div className="admin-kpi-value">{formattedRevenue}</div>
-          <div style={{ fontSize: '0.6875rem', color: '#698D80' }}>Total captured online</div>
-        </div>
+        <Card className="border-border bg-card shadow-xs">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase font-semibold tracking-wider">Revenue</span>
+              <IndianRupee className="h-4 w-4 text-accent" />
+            </div>
+            <div className="mt-2 font-serif text-2xl font-bold text-primary">
+              {formattedRevenue}
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">Total captured online</div>
+          </CardContent>
+        </Card>
 
         {/* To Pack (Urgent) */}
-        <div className="admin-kpi-card urgent">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: '#C5A880'
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}
-            >
-              To Pack
-            </span>
-            <Clock style={{ width: '16px', height: '16px', color: '#C5A880' }} />
-          </div>
-          <div className="admin-kpi-value">{metrics.toPackCount}</div>
-          <div style={{ fontSize: '0.6875rem', color: '#A08865' }}>Awaiting courier handover</div>
-        </div>
+        <Card className="border-accent/40 bg-secondary/30 shadow-xs">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between text-accent">
+              <span className="text-xs uppercase font-semibold tracking-wider text-primary">
+                To Pack
+              </span>
+              <Clock className="h-4 w-4 text-accent" />
+            </div>
+            <div className="mt-2 font-serif text-2xl font-bold text-primary">
+              {metrics.toPackCount}
+            </div>
+            <div className="mt-1 text-[11px] text-accent-foreground font-medium">
+              Awaiting courier handover
+            </div>
+          </CardContent>
+        </Card>
 
         {/* In Transit */}
-        <div className="admin-kpi-card">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: '#8BAAA0'
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}
-            >
-              In Transit
-            </span>
-            <Truck style={{ width: '16px', height: '16px', color: '#73A796' }} />
-          </div>
-          <div className="admin-kpi-value">{metrics.shippedCount}</div>
-          <div style={{ fontSize: '0.6875rem', color: '#698D80' }}>Dispatched with tracking</div>
-        </div>
+        <Card className="border-border bg-card shadow-xs">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase font-semibold tracking-wider">In Transit</span>
+              <Truck className="h-4 w-4 text-emerald-700" />
+            </div>
+            <div className="mt-2 font-serif text-2xl font-bold text-primary">
+              {metrics.shippedCount}
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">Dispatched with tracking</div>
+          </CardContent>
+        </Card>
 
         {/* Total Orders */}
-        <div className="admin-kpi-card">
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              color: '#8BAAA0'
-            }}
-          >
-            <span
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
-              }}
-            >
-              Total
-            </span>
-            <ShoppingBag style={{ width: '16px', height: '16px', color: '#8BAAA0' }} />
-          </div>
-          <div className="admin-kpi-value">{metrics.totalOrdersCount}</div>
-          <div style={{ fontSize: '0.6875rem', color: '#698D80' }}>All recorded transactions</div>
-        </div>
+        <Card className="border-border bg-card shadow-xs">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-xs uppercase font-semibold tracking-wider">Total</span>
+              <ShoppingBag className="h-4 w-4 text-primary" />
+            </div>
+            <div className="mt-2 font-serif text-2xl font-bold text-primary">
+              {metrics.totalOrdersCount}
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">All recorded transactions</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Orders Table */}

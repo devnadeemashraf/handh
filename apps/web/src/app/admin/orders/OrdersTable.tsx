@@ -1,21 +1,26 @@
 'use client';
 
 import { CheckCircle2, ChevronRight, Clock, Package, Search, Truck, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import * as React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 import type { Order } from '@hh/db';
 
-interface OrdersTableProps {
+export interface OrdersTableProps {
   initialOrders: Array<Order & { itemCount: number }>;
 }
 
 type TabKey = 'all' | 'to_pack' | 'processing' | 'shipped';
 
 export default function OrdersTable({ initialOrders }: OrdersTableProps) {
-  const [activeTab, setActiveTab] = useState<TabKey>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = React.useState<TabKey>('all');
+  const [searchQuery, setSearchQuery] = React.useState('');
 
-  const filteredOrders = useMemo(() => {
+  const filteredOrders = React.useMemo(() => {
     return initialOrders.filter((order) => {
       // 1. Tab Filter
       if (activeTab === 'to_pack') {
@@ -60,93 +65,80 @@ export default function OrdersTable({ initialOrders }: OrdersTableProps) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div className="space-y-6">
       {/* Search & Tabs Controls */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '12px',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}
-      >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Status Filter Tabs */}
-        <div className="admin-tabs-bar">
+        <div className="inline-flex rounded-lg border border-border bg-card p-1 shadow-xs">
           <button
+            type="button"
             onClick={() => setActiveTab('all')}
-            className={`admin-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+            className={cn(
+              'rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none',
+              activeTab === 'all'
+                ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             All Orders ({initialOrders.length})
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('to_pack')}
-            className={`admin-tab-btn urgent ${activeTab === 'to_pack' ? 'active' : ''}`}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none',
+              activeTab === 'to_pack'
+                ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
-            <Clock style={{ width: '14px', height: '14px' }} />
+            <Clock className="h-3.5 w-3.5 text-accent" />
             <span>To Pack</span>
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('processing')}
-            className={`admin-tab-btn ${activeTab === 'processing' ? 'active' : ''}`}
+            className={cn(
+              'rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none',
+              activeTab === 'processing'
+                ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
             Processing
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('shipped')}
-            className={`admin-tab-btn ${activeTab === 'shipped' ? 'active' : ''}`}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-xs font-medium transition-colors select-none',
+              activeTab === 'shipped'
+                ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
           >
-            <Truck style={{ width: '14px', height: '14px' }} />
+            <Truck className="h-3.5 w-3.5" />
             <span>In Transit</span>
           </button>
         </div>
 
         {/* Search Bar */}
-        <div style={{ position: 'relative', flex: '1', maxWidth: '320px', minWidth: '220px' }}>
-          <Search
-            style={{
-              width: '16px',
-              height: '16px',
-              color: '#608578',
-              position: 'absolute',
-              left: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'none'
-            }}
-          />
-          <input
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search order #, phone, name..."
-            className="admin-input"
-            style={{
-              paddingLeft: '38px',
-              paddingRight: searchQuery ? '36px' : '12px',
-              height: '40px',
-              minHeight: '40px',
-              fontSize: '0.8125rem'
-            }}
+            className="pl-9 pr-8 h-10 text-xs"
           />
           {searchQuery && (
             <button
+              type="button"
               onClick={() => setSearchQuery('')}
-              style={{
-                position: 'absolute',
-                right: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                color: '#8BAAA0',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '4px'
-              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
             >
-              <X style={{ width: '14px', height: '14px' }} />
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -154,149 +146,94 @@ export default function OrdersTable({ initialOrders }: OrdersTableProps) {
 
       {/* Orders List */}
       {filteredOrders.length === 0 ? (
-        <div className="admin-card" style={{ textAlign: 'center', padding: '48px 24px' }}>
-          <Package
-            style={{
-              width: '40px',
-              height: '40px',
-              color: '#396253',
-              margin: '0 auto 12px',
-              display: 'block'
-            }}
-          />
-          <h3
-            style={{
-              fontSize: '1rem',
-              fontFamily: 'serif',
-              color: '#FDFBF7',
-              margin: '0 0 6px'
-            }}
-          >
-            No orders in this queue
-          </h3>
-          <p
-            style={{
-              fontSize: '0.8125rem',
-              color: '#8BAAA0',
-              margin: '0 auto',
-              maxWidth: '380px'
-            }}
-          >
-            {searchQuery
-              ? `No orders matching "${searchQuery}". Try searching with a different keyword.`
-              : 'Orders placed and paid by customers will appear here automatically.'}
-          </p>
-        </div>
+        <Card className="border-border bg-card p-12 text-center shadow-xs">
+          <CardContent className="p-0">
+            <Package className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
+            <h3 className="font-serif text-lg font-semibold text-primary mb-1">
+              No orders in this queue
+            </h3>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              {searchQuery
+                ? `No orders matching "${searchQuery}". Try searching with a different keyword.`
+                : 'Orders placed and paid by customers will appear here automatically.'}
+            </p>
+          </CardContent>
+        </Card>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="space-y-3">
           {filteredOrders.map((order) => (
-            <a key={order.id} href={`/admin/orders/${order.id}`} className="admin-order-card">
-              {/* Left: Order identity & customer */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    flexWrap: 'wrap'
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: 'monospace',
-                      fontSize: '0.9375rem',
-                      fontWeight: 700,
-                      color: '#C5A880',
-                      letterSpacing: '0.04em'
-                    }}
-                  >
-                    {order.orderNumber}
-                  </span>
+            <Link key={order.id} href={`/admin/orders/${order.id}`} className="group block">
+              <Card className="border-border bg-card transition-all hover:border-primary/40 hover:shadow-xs">
+                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5">
+                  {/* Left: Order identity & customer */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="font-mono text-sm font-bold text-accent tracking-wider">
+                        {order.orderNumber}
+                      </span>
 
-                  {/* Status Badge */}
-                  {order.status === 'paid' && order.fulfillmentStatus === 'unfulfilled' && (
-                    <span className="admin-badge admin-badge-amber">
-                      <Clock style={{ width: '12px', height: '12px' }} />
-                      Ready to Pack
-                    </span>
-                  )}
+                      {/* Status Badges */}
+                      {order.status === 'paid' && order.fulfillmentStatus === 'unfulfilled' && (
+                        <Badge variant="gold" className="text-[10px] uppercase font-semibold">
+                          <Clock className="mr-1 h-3 w-3" />
+                          <span>Ready to Pack</span>
+                        </Badge>
+                      )}
 
-                  {order.fulfillmentStatus === 'shipped' && (
-                    <span className="admin-badge admin-badge-sky">
-                      <Truck style={{ width: '12px', height: '12px' }} />
-                      Shipped
-                    </span>
-                  )}
+                      {order.fulfillmentStatus === 'shipped' && (
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] uppercase font-semibold bg-sky-100 text-sky-800"
+                        >
+                          <Truck className="mr-1 h-3 w-3" />
+                          <span>Shipped</span>
+                        </Badge>
+                      )}
 
-                  {order.status === 'completed' && (
-                    <span className="admin-badge admin-badge-emerald">
-                      <CheckCircle2 style={{ width: '12px', height: '12px' }} />
-                      Completed
-                    </span>
-                  )}
+                      {order.status === 'completed' && (
+                        <Badge
+                          variant="secondary"
+                          className="text-[10px] uppercase font-semibold bg-emerald-100 text-emerald-800"
+                        >
+                          <CheckCircle2 className="mr-1 h-3 w-3" />
+                          <span>Completed</span>
+                        </Badge>
+                      )}
 
-                  <span style={{ fontSize: '0.75rem', color: '#7B9B90' }}>
-                    {formatDate(order.createdAt)}
-                  </span>
-                </div>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(order.createdAt)}
+                      </span>
+                    </div>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    fontSize: '0.8125rem',
-                    color: '#E8ECE9'
-                  }}
-                >
-                  <span style={{ fontWeight: 600, color: '#FDFBF7' }}>{order.customerName}</span>
-                  <span style={{ color: '#4E7265' }}>•</span>
-                  <span style={{ fontFamily: 'monospace', color: '#A0C0B5' }}>
-                    {order.customerPhone}
-                  </span>
-                </div>
-              </div>
-
-              {/* Right: Items, Price & Chevron */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '16px'
-                }}
-              >
-                <div style={{ textAlign: 'right' }}>
-                  <div
-                    style={{
-                      fontSize: '0.9375rem',
-                      fontWeight: 700,
-                      color: '#FDFBF7'
-                    }}
-                  >
-                    {formatPrice(order.totalMinor)}
+                    <div className="flex items-center gap-2 text-xs text-foreground font-medium">
+                      <span>{order.customerName}</span>
+                      <span className="text-muted-foreground">&bull;</span>
+                      <span className="text-muted-foreground">{order.customerPhone}</span>
+                      <span className="text-muted-foreground">&bull;</span>
+                      <span className="text-muted-foreground">
+                        {order.shippingAddress.city}, {order.shippingAddress.state}
+                      </span>
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.6875rem', color: '#7B9B90' }}>
-                    {order.itemCount} {order.itemCount === 1 ? 'piece' : 'pieces'}
+
+                  {/* Right: Items, Total & Action Arrow */}
+                  <div className="flex items-center justify-between sm:justify-end gap-6 pt-2 sm:pt-0 border-t sm:border-t-0 border-border">
+                    <div className="text-left sm:text-right">
+                      <div className="font-serif text-base font-bold text-primary">
+                        {formatPrice(order.totalMinor)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {order.itemCount} {order.itemCount === 1 ? 'item' : 'items'}
+                      </div>
+                    </div>
+
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                      <ChevronRight className="h-4 w-4" />
+                    </div>
                   </div>
-                </div>
-                <div
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    backgroundColor: '#164335',
-                    color: '#C5A880',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}
-                >
-                  <ChevronRight style={{ width: '16px', height: '16px' }} />
-                </div>
-              </div>
-            </a>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
