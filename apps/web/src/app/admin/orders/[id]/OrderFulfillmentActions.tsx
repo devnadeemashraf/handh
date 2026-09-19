@@ -214,7 +214,8 @@ export default function OrderFulfillmentActions({
     }
   };
 
-  const cleanPhone = order.customerPhone.replace(/\D/g, '');
+  const digits = order.customerPhone.replace(/\D/g, '');
+  const cleanPhone = digits.startsWith('91') && digits.length === 12 ? digits.slice(2) : digits;
   const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
     `Hello ${order.customerName}, this is regarding your H&H order ${order.orderNumber}.`
   )}`;
