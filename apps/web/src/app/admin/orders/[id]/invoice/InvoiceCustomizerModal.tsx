@@ -1,6 +1,5 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, CheckCircle2, AlertTriangle, Sliders } from 'lucide-react';
 import type { InvoiceTemplateConfig } from '@hh/domain';
 
@@ -19,6 +18,15 @@ export default function InvoiceCustomizerModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,9 +47,9 @@ export default function InvoiceCustomizerModal({
 
       setSuccess(true);
       onSave(data.template);
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         onClose();
-      }, 1000);
+      }, 300);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save settings');
     } finally {

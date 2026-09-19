@@ -30,6 +30,10 @@ describe('AdminHeader Component', () => {
     expect(inventoryLink).toBeInTheDocument();
     expect(inventoryLink).toHaveAttribute('href', '/admin/inventory');
 
+    const insightsLink = screen.getByRole('link', { name: /insights/i });
+    expect(insightsLink).toBeInTheDocument();
+    expect(insightsLink).toHaveAttribute('href', '/admin/insights');
+
     const liveStoreLink = screen.getByRole('link', { name: /live store/i });
     expect(liveStoreLink).toBeInTheDocument();
     expect(liveStoreLink).toHaveAttribute('href', '/');

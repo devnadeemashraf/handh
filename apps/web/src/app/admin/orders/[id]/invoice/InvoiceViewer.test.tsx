@@ -157,5 +157,9 @@ describe('InvoiceViewer Component', () => {
         screen.getByRole('heading', { level: 1, name: 'H&H Haute Couture' })
       ).toBeInTheDocument();
     });
+
+    await waitFor(() => {
+      expect(screen.queryByText('Customize Invoice Template')).not.toBeInTheDocument();
+    });
   });
 });
