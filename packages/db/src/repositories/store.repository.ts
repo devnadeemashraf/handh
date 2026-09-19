@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { stores, storeDomains, type Store } from '../schema';
-import type { CreateStoreInput } from '@hh/domain';
+import type { CreateStoreInput, ServiceControlConfig } from '@hh/domain';
+import { resolveServiceControl, NotFoundError } from '@hh/domain';
 import type { DatabaseClient } from '../index';
 
 export async function findStoreById(db: DatabaseClient, id: string): Promise<Store | null> {
@@ -45,4 +46,55 @@ export async function createStore(db: DatabaseClient, input: CreateStoreInput): 
   }
 
   return created;
+}
+
+/**
+ * Retrieves the current operational status and service circuit breaker config.
+ */
+export async function getStoreServiceControl(
+  db: DatabaseClient,
+  slug: string
+): Promise<ServiceControlConfig> {
+  const store = await findStoreBySlug(db, slug);
+  if (!store) {
+    throw new NotFoundError('Store', slug);
+  }
+  return resolveServiceControl(
+    (store.settings as Record<string, unknown> | undefined)?.['serviceControl']
+  );
+}
+
+/**
+ * Atomically updates operational status, checkout/payment killswitches, and customer notices.
+ */
+export async function updateStoreServiceControl(
+  db: DatabaseClient,
+  slug: string,
+  settings: Record<string, unknown>
+): Promise<ServiceControlConfig> {
+  const store = await findStoreBySlug(db, slug);
+  if (!store) {
+    throw new NotFoundError('Store', slug);
+  }
+
+  const current = resolveServiceControl(
+    (store.settings as Record<string, unknown> | undefined)?.['serviceControl']
+  );
+  const updated = resolveServiceControl({
+    ...current,
+    ...settings
+  });
+
+  await db
+    .update(stores)
+    .set({
+      settings: {
+        ...store.settings,
+        serviceControl: updated
+      },
+      updatedAt: new Date()
+    })
+    .where(eq(stores.id, store.id));
+
+  return updated;
 }

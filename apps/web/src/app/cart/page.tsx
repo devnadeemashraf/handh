@@ -1,19 +1,45 @@
 'use client';
-
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { CartItemRow } from '@/components/cart/CartItemRow';
-import { Money } from '@hh/domain';
-import { ShoppingBag, ArrowRight, ArrowLeft, ShieldCheck, Truck, Sparkles } from 'lucide-react';
+import { Money, type ServiceControlConfig } from '@hh/domain';
+import {
+  ShoppingBag,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  Truck,
+  Sparkles,
+  Clock
+} from 'lucide-react';
 
 export default function CartPage() {
   const { cartSummary, updateQuantity, removeItem, isLoading, totalItemCount } = useCart();
+  const [serviceControl, setServiceControl] = useState<ServiceControlConfig | null>(null);
+
+  useEffect(() => {
+    fetch('/api/service-status')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.serviceControl) {
+          setServiceControl(data.serviceControl);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const subtotalFormatted = cartSummary
     ? Money.fromMinor(cartSummary.subtotalMinor, 'INR').format()
     : '₹0';
 
-  const isCheckoutReady = cartSummary?.isValidForCheckout ?? false;
+  const isServicePaused =
+    serviceControl !== null &&
+    (!serviceControl.checkoutEnabled ||
+      !serviceControl.paymentsEnabled ||
+      serviceControl.operatingStatus === 'maintenance');
+
+  const isCheckoutReady = (cartSummary?.isValidForCheckout ?? false) && !isServicePaused;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -180,9 +206,47 @@ export default function CartPage() {
                 </span>
               </div>
 
+              {/* Customer Reassurance Maintenance Banner */}
+              {isServicePaused && serviceControl && (
+                <div
+                  style={{
+                    padding: '14px 16px',
+                    backgroundColor: '#FFFBEB',
+                    border: '1px solid #FDE68A',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      color: '#B45309',
+                      fontWeight: 700,
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <Clock size={16} />
+                    <span>{serviceControl.headline}</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#78350F', lineHeight: 1.4 }}>
+                    {serviceControl.maintenanceNotice}
+                  </p>
+                </div>
+              )}
+
               {/* Checkout CTA */}
               <Link
                 href="/checkout"
+                onClick={(e) => {
+                  if (!isCheckoutReady) {
+                    e.preventDefault();
+                  }
+                }}
                 className={`royale-button-primary ${!isCheckoutReady ? 'disabled' : ''}`}
                 style={{
                   display: 'flex',
@@ -197,11 +261,13 @@ export default function CartPage() {
                   opacity: isCheckoutReady ? 1 : 0.6
                 }}
               >
-                <span>Proceed to Checkout</span>
+                <span>
+                  {isServicePaused ? 'Checkout Temporarily Paused' : 'Proceed to Checkout'}
+                </span>
                 <ArrowRight size={18} />
               </Link>
 
-              {!isCheckoutReady && (
+              {!isCheckoutReady && !isServicePaused && (
                 <p
                   style={{
                     fontSize: '0.8rem',

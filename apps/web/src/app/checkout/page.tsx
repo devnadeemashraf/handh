@@ -7,7 +7,12 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { AddressForm, type AddressFormValues } from '@/components/checkout/AddressForm';
 import { OrderReviewCard } from '@/components/checkout/OrderReviewCard';
-import { ShippingAddressSchema, Money, type CheckoutOrderResult } from '@hh/domain';
+import {
+  ShippingAddressSchema,
+  Money,
+  type CheckoutOrderResult,
+  type ServiceControlConfig
+} from '@hh/domain';
 import {
   ArrowLeft,
   ShoppingBag,
@@ -45,6 +50,24 @@ export default function CheckoutPage() {
   const [orderPlaced, setOrderPlaced] = useState<CheckoutOrderResult | null>(null);
   const [copiedOrderNumber, setCopiedOrderNumber] = useState(false);
   const [reservationRemainingSecs, setReservationRemainingSecs] = useState<number>(15 * 60);
+  const [serviceControl, setServiceControl] = useState<ServiceControlConfig | null>(null);
+
+  useEffect(() => {
+    fetch('/api/service-status')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.serviceControl) {
+          setServiceControl(data.serviceControl);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const isServicePaused =
+    serviceControl !== null &&
+    (!serviceControl.checkoutEnabled ||
+      !serviceControl.paymentsEnabled ||
+      serviceControl.operatingStatus === 'maintenance');
 
   // Client-side idempotency key generation (persists per session until success)
   const [idempotencyKey, setIdempotencyKey] = useState<string>('');
@@ -144,6 +167,14 @@ export default function CheckoutPage() {
 
   // Launch Razorpay gateway modal
   const launchPaymentGateway = async (createdOrder: CheckoutOrderResult) => {
+    if (serviceControl && !serviceControl.paymentsEnabled) {
+      setSubmitError(
+        serviceControl.maintenanceNotice ||
+          'Payment processing is temporarily paused for system maintenance. Your order reservation is safe—please check back shortly.'
+      );
+      return;
+    }
+
     setIsProcessingPayment(true);
     setSubmitError(null);
 
@@ -215,6 +246,14 @@ export default function CheckoutPage() {
 
   const handleSubmit = async () => {
     setSubmitError(null);
+
+    if (isServicePaused) {
+      setSubmitError(
+        serviceControl?.maintenanceNotice ||
+          'Checkout and payment processing is temporarily undergoing maintenance. Please keep items in your bag and check back shortly!'
+      );
+      return;
+    }
 
     // 1. Validate Shipping Address
     const addressValidation = ShippingAddressSchema.safeParse({
@@ -556,7 +595,11 @@ export default function CheckoutPage() {
               <button
                 type="button"
                 onClick={() => launchPaymentGateway(orderPlaced)}
-                disabled={isProcessingPayment || reservationRemainingSecs <= 0}
+                disabled={
+                  isProcessingPayment ||
+                  reservationRemainingSecs <= 0 ||
+                  (serviceControl !== null && !serviceControl.paymentsEnabled)
+                }
                 className="royale-button-primary"
                 style={{
                   width: '100%',
@@ -698,6 +741,37 @@ export default function CheckoutPage() {
           </h1>
         </div>
 
+        {/* Service Control Reassurance Banner */}
+        {isServicePaused && (
+          <div
+            style={{
+              backgroundColor: '#FFFBEB',
+              border: '1px solid #FDE68A',
+              borderRadius: 'var(--radius-sm)',
+              padding: '16px 20px',
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              color: '#92400E'
+            }}
+          >
+            <AlertTriangle
+              size={20}
+              style={{ flexShrink: 0, marginTop: '2px', color: '#D97706' }}
+            />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '4px' }}>
+                Checkout Temporarily Paused
+              </div>
+              <div style={{ fontSize: '0.875rem', lineHeight: 1.5 }}>
+                {serviceControl?.maintenanceNotice ||
+                  'We are currently upgrading our payment & checkout systems. Feel free to browse and keep treasures in your cart—checkout will resume shortly!'}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Global Error Banner */}
         {submitError && (
           <div
@@ -733,7 +807,7 @@ export default function CheckoutPage() {
               values={values}
               errors={errors}
               onChange={handleFieldChange}
-              disabled={isSubmitting || isProcessingPayment}
+              disabled={isSubmitting || isProcessingPayment || isServicePaused}
             />
           </div>
 
@@ -744,6 +818,7 @@ export default function CheckoutPage() {
                 cartSummary={cartSummary}
                 isSubmitting={isSubmitting || isProcessingPayment}
                 onSubmit={handleSubmit}
+                disabled={isServicePaused}
               />
             )}
           </div>

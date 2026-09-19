@@ -1,17 +1,32 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { CartItemRow } from './CartItemRow';
-import { Money } from '@hh/domain';
-import { X, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Money, type ServiceControlConfig } from '@hh/domain';
+import { X, ShoppingBag, ArrowRight, ShieldCheck, Clock } from 'lucide-react';
 
 export function CartDrawer() {
   const { isOpen, closeCart, cartSummary, totalItemCount, updateQuantity, removeItem, isLoading } =
     useCart();
 
   const drawerRef = useRef<HTMLDivElement>(null);
+  const [serviceControl, setServiceControl] = useState<ServiceControlConfig | null>(null);
+
+  // Check live store operating status and service circuit breaker
+  useEffect(() => {
+    if (isOpen) {
+      fetch('/api/service-status')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.serviceControl) {
+            setServiceControl(data.serviceControl);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isOpen]);
 
   // Prevent background scroll when cart drawer is open on mobile
   useEffect(() => {
@@ -42,7 +57,13 @@ export function CartDrawer() {
     ? Money.fromMinor(cartSummary.subtotalMinor, 'INR').format()
     : '₹0';
 
-  const isCheckoutReady = cartSummary?.isValidForCheckout ?? false;
+  const isServicePaused =
+    serviceControl !== null &&
+    (!serviceControl.checkoutEnabled ||
+      !serviceControl.paymentsEnabled ||
+      serviceControl.operatingStatus === 'maintenance');
+
+  const isCheckoutReady = (cartSummary?.isValidForCheckout ?? false) && !isServicePaused;
 
   return (
     <div
@@ -265,10 +286,49 @@ export function CartDrawer() {
               Applicable shipping and taxes are computed at checkout.
             </p>
 
+            {/* Customer Reassurance Maintenance Banner */}
+            {isServicePaused && serviceControl && (
+              <div
+                style={{
+                  padding: '12px 14px',
+                  backgroundColor: '#FFFBEB',
+                  border: '1px solid #FDE68A',
+                  borderRadius: '8px',
+                  marginBottom: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px'
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    color: '#B45309',
+                    fontWeight: 700,
+                    fontSize: '0.8125rem'
+                  }}
+                >
+                  <Clock size={15} />
+                  <span>{serviceControl.headline}</span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.75rem', color: '#78350F', lineHeight: 1.4 }}>
+                  {serviceControl.maintenanceNotice}
+                </p>
+              </div>
+            )}
+
             {/* Checkout Action Button */}
             <Link
               href="/checkout"
-              onClick={closeCart}
+              onClick={(e) => {
+                if (!isCheckoutReady) {
+                  e.preventDefault();
+                } else {
+                  closeCart();
+                }
+              }}
               className={`royale-button-primary ${!isCheckoutReady ? 'disabled' : ''}`}
               style={{
                 display: 'flex',
@@ -283,7 +343,7 @@ export function CartDrawer() {
                 opacity: isCheckoutReady ? 1 : 0.6
               }}
             >
-              <span>Proceed to Checkout</span>
+              <span>{isServicePaused ? 'Checkout Temporarily Paused' : 'Proceed to Checkout'}</span>
               <ArrowRight size={16} />
             </Link>
 

@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
-import { createDbClient, findOrderById, createPaymentAttempt, createGatewayOrder } from '@hh/db';
-import { PaymentOrderRequestSchema } from '@hh/domain';
+import {
+  createDbClient,
+  findOrderById,
+  createPaymentAttempt,
+  createGatewayOrder,
+  findStoreBySlug
+} from '@hh/db';
+import { PaymentOrderRequestSchema, resolveServiceControl } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -46,6 +52,27 @@ export async function POST(request: Request) {
         },
         { status: 400 }
       );
+    }
+
+    const store = await findStoreBySlug(db, 'hh');
+    if (store) {
+      const serviceControl = resolveServiceControl(
+        (store.settings as Record<string, unknown> | undefined)?.['serviceControl']
+      );
+      if (
+        serviceControl.operatingStatus === 'maintenance' ||
+        !serviceControl.checkoutEnabled ||
+        !serviceControl.paymentsEnabled
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            code: 'SERVICE_UNAVAILABLE',
+            error: serviceControl.maintenanceNotice
+          },
+          { status: 503 }
+        );
+      }
     }
 
     const keyId = process.env['RAZORPAY_KEY_ID'] ?? 'rzp_test_placeholder_key_id';

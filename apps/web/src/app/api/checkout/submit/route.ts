@@ -5,7 +5,8 @@ import {
   ConflictError,
   NotFoundError,
   ValidationError,
-  DomainError
+  DomainError,
+  resolveServiceControl
 } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
@@ -45,6 +46,21 @@ export async function POST(request: Request) {
           error: 'Active storefront configuration could not be loaded.'
         },
         { status: 404 }
+      );
+    }
+
+    const serviceControl = resolveServiceControl(
+      (store.settings as Record<string, unknown> | undefined)?.['serviceControl']
+    );
+
+    if (serviceControl.operatingStatus === 'maintenance' || !serviceControl.checkoutEnabled) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'SERVICE_UNAVAILABLE',
+          error: serviceControl.maintenanceNotice
+        },
+        { status: 503 }
       );
     }
 

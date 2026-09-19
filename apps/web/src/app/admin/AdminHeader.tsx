@@ -1,6 +1,14 @@
 'use client';
 
-import { Package, Boxes, BarChart3, ExternalLink, LogOut, ShieldCheck } from 'lucide-react';
+import {
+  Package,
+  Boxes,
+  BarChart3,
+  Sliders,
+  ExternalLink,
+  LogOut,
+  ShieldCheck
+} from 'lucide-react';
 import { useState } from 'react';
 
 export default function AdminHeader() {
@@ -89,6 +97,15 @@ export default function AdminHeader() {
           >
             <BarChart3 style={{ width: '16px', height: '16px', color: '#C5A880' }} />
             <span>Insights</span>
+          </a>
+
+          <a
+            href="/admin/service-control"
+            className="admin-btn-secondary"
+            style={{ minHeight: '40px', padding: '8px 14px' }}
+          >
+            <Sliders style={{ width: '16px', height: '16px', color: '#C5A880' }} />
+            <span>Services</span>
           </a>
 
           <a
