@@ -11,6 +11,7 @@ import {
 } from '@hh/domain';
 
 import { getCurrentUser } from '../../../../lib/auth';
+import { checkoutSubmitRateLimiter } from '../../../../lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -23,6 +24,27 @@ function getDatabase() {
 
 export async function POST(request: Request) {
   try {
+    const ip =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+      request.headers.get('x-real-ip') ??
+      '127.0.0.1';
+
+    const rl = await checkoutSubmitRateLimiter.limit(ip);
+    if (!rl.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'RATE_LIMIT_EXCEEDED',
+          error: 'Too many checkout attempts. Please wait a moment before trying again.'
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(Math.max(1, rl.reset - Math.floor(Date.now() / 1000)))
+          }
+        }
+      );
+    }
     const json = await request.json();
     const parseResult = CheckoutSubmissionSchema.safeParse(json);
 

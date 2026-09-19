@@ -7,6 +7,7 @@ export * from './repositories';
 export * from './schema';
 export * from './services';
 export { schema };
+export { sql } from 'drizzle-orm';
 
 export type DatabaseClient = ReturnType<typeof createDbClient>;
 export type DbTransaction = Parameters<Parameters<DatabaseClient['transaction']>[0]>[0];
