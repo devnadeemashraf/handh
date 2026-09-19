@@ -1,4 +1,4 @@
-import { eq, and, inArray, sql } from 'drizzle-orm';
+import { eq, and, inArray, sql, or, ilike, desc } from 'drizzle-orm';
 import {
   orders,
   orderItems,
@@ -15,6 +15,8 @@ import {
   ConflictError,
   ValidationError,
   NotFoundError,
+  assertCanTransitionOrder,
+  type OrderStatus,
   type CheckoutSubmissionInput,
   type CheckoutOrderResult
 } from '@hh/domain';
@@ -260,4 +262,138 @@ export async function findOrderByOrderNumber(
     ...order,
     items
   };
+}
+
+export interface ListAdminOrdersOptions {
+  storeId?: string;
+  status?: OrderStatus | 'all';
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Lists orders for admin management with status filtering, search, and pagination.
+ */
+export async function listAdminOrders(
+  db: DatabaseClient,
+  options: ListAdminOrdersOptions = {}
+): Promise<Array<Order & { itemCount: number }>> {
+  const { storeId, status = 'all', search, limit = 50, offset = 0 } = options;
+
+  const conditions = [];
+
+  if (storeId) {
+    conditions.push(eq(orders.storeId, storeId));
+  }
+
+  if (status && status !== 'all') {
+    conditions.push(eq(orders.status, status));
+  }
+
+  if (search && search.trim().length > 0) {
+    const term = `%${search.trim()}%`;
+    conditions.push(
+      or(
+        ilike(orders.orderNumber, term),
+        ilike(orders.customerName, term),
+        ilike(orders.customerEmail, term),
+        ilike(orders.customerPhone, term)
+      )
+    );
+  }
+
+  let query = db
+    .select({
+      order: orders,
+      itemCount: sql<number>`cast(count(${orderItems.id}) as integer)`
+    })
+    .from(orders)
+    .leftJoin(orderItems, eq(orders.id, orderItems.orderId));
+
+  if (conditions.length > 0) {
+    query = query.where(and(...conditions)) as typeof query;
+  }
+
+  const orderRows = await query
+    .groupBy(orders.id)
+    .orderBy(desc(orders.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return orderRows.map((r) => ({
+    ...r.order,
+    itemCount: r.itemCount
+  }));
+}
+
+export interface AdminOrderMetrics {
+  totalRevenueMinor: number;
+  toPackCount: number;
+  processingCount: number;
+  shippedCount: number;
+  totalOrdersCount: number;
+}
+
+/**
+ * Aggregates administrative order KPIs and queue metrics.
+ */
+export async function getAdminOrderMetrics(
+  db: DatabaseClient,
+  storeId?: string
+): Promise<AdminOrderMetrics> {
+  let query = db
+    .select({
+      totalRevenueMinor: sql<number>`coalesce(sum(case when ${orders.paymentStatus} = 'captured' then ${orders.totalMinor} else 0 end), 0)`,
+      toPackCount: sql<number>`count(case when ${orders.status} = 'paid' and ${orders.fulfillmentStatus} = 'unfulfilled' then 1 end)`,
+      processingCount: sql<number>`count(case when ${orders.status} = 'processing' then 1 end)`,
+      shippedCount: sql<number>`count(case when ${orders.fulfillmentStatus} = 'shipped' then 1 end)`,
+      totalOrdersCount: sql<number>`count(${orders.id})`
+    })
+    .from(orders);
+
+  if (storeId) {
+    query = query.where(eq(orders.storeId, storeId)) as typeof query;
+  }
+
+  const rows = await query;
+  const stats = rows[0]!;
+  return {
+    totalRevenueMinor: Number(stats.totalRevenueMinor),
+    toPackCount: Number(stats.toPackCount),
+    processingCount: Number(stats.processingCount),
+    shippedCount: Number(stats.shippedCount),
+    totalOrdersCount: Number(stats.totalOrdersCount)
+  };
+}
+
+/**
+ * Transitions an order's status enforcing strict state machine rules.
+ */
+export async function transitionOrderStatus(
+  db: DatabaseClient,
+  orderId: string,
+  newStatus: OrderStatus
+): Promise<Order> {
+  return await db.transaction(async (tx) => {
+    const existingRows = await tx.select().from(orders).where(eq(orders.id, orderId)).for('update');
+
+    const order = existingRows[0];
+    if (!order) {
+      throw new NotFoundError('Order', orderId);
+    }
+
+    assertCanTransitionOrder(order.status, newStatus);
+
+    const updatedRows = await tx
+      .update(orders)
+      .set({
+        status: newStatus,
+        updatedAt: new Date()
+      })
+      .where(eq(orders.id, orderId))
+      .returning();
+
+    return updatedRows[0]!;
+  });
 }

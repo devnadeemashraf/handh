@@ -6,6 +6,7 @@ export * from './catalog';
 export * from './cart';
 export * from './checkout';
 export * from './payment';
+export * from './fulfillment';
 
 export type {
   CategoryTreeItem,

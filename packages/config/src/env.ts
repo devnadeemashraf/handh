@@ -36,6 +36,14 @@ export const serverEnvSchema = z
     ADMIN_SESSION_SECRET: z
       .string({ required_error: 'ADMIN_SESSION_SECRET is required' })
       .min(32, 'ADMIN_SESSION_SECRET must be at least 32 characters long for session encryption'),
+    ADMIN_ACCESS_KEY: z
+      .string()
+      .min(8, 'ADMIN_ACCESS_KEY must be at least 8 characters long')
+      .default('hh_dev_access_key'),
+    ADMIN_PASSWORD: z
+      .string()
+      .min(8, 'ADMIN_PASSWORD must be at least 8 characters long')
+      .default('hh_admin_secret_pass_2026'),
 
     // Storage (S3 / Cloudflare R2 / Local Floci)
     S3_ENDPOINT: z.string().url().optional(),
@@ -62,7 +70,9 @@ export const serverEnvSchema = z
         'RAZORPAY_KEY_SECRET',
         'RAZORPAY_WEBHOOK_SECRET',
         'RESEND_API_KEY',
-        'ADMIN_SESSION_SECRET'
+        'ADMIN_SESSION_SECRET',
+        'ADMIN_ACCESS_KEY',
+        'ADMIN_PASSWORD'
       ] as const;
 
       for (const key of sensitiveKeys) {
@@ -74,6 +84,17 @@ export const serverEnvSchema = z
             path: [key]
           });
         }
+      }
+
+      if (
+        data.ADMIN_ACCESS_KEY === 'hh_dev_access_key' ||
+        data.ADMIN_PASSWORD === 'hh_admin_secret_pass_2026'
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `In ${data.NODE_ENV}, ADMIN_ACCESS_KEY and ADMIN_PASSWORD cannot use default development credentials.`,
+          path: ['ADMIN_ACCESS_KEY']
+        });
       }
     }
   });

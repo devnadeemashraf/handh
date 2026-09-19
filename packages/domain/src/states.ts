@@ -48,6 +48,18 @@ export const VALID_RESERVATION_TRANSITIONS: Readonly<
   released: new Set([]) // Terminal state
 };
 
+/**
+ * Valid state transitions for Fulfillments.
+ */
+export const VALID_FULFILLMENT_TRANSITIONS: Readonly<
+  Record<FulfillmentStatus, ReadonlySet<FulfillmentStatus>>
+> = {
+  unfulfilled: new Set(['partially_fulfilled', 'shipped']),
+  partially_fulfilled: new Set(['shipped']),
+  shipped: new Set(['delivered']),
+  delivered: new Set([]) // Terminal state
+};
+
 export function canTransitionOrder(from: OrderStatus, to: OrderStatus): boolean {
   return VALID_ORDER_TRANSITIONS[from].has(to);
 }
@@ -78,5 +90,18 @@ export function assertCanTransitionReservation(
 ): void {
   if (!canTransitionReservation(from, to)) {
     throw new InvalidStateTransitionError('InventoryReservation', from, to);
+  }
+}
+
+export function canTransitionFulfillment(from: FulfillmentStatus, to: FulfillmentStatus): boolean {
+  return VALID_FULFILLMENT_TRANSITIONS[from].has(to);
+}
+
+export function assertCanTransitionFulfillment(
+  from: FulfillmentStatus,
+  to: FulfillmentStatus
+): void {
+  if (!canTransitionFulfillment(from, to)) {
+    throw new InvalidStateTransitionError('Fulfillment', from, to);
   }
 }

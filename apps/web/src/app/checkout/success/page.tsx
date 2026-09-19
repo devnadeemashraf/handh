@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createDbClient, findOrderByOrderNumber } from '@hh/db';
 import { Money } from '@hh/domain';
-import { CheckCircle2, Package, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, Package, ArrowLeft, Truck, ExternalLink } from 'lucide-react';
 
 interface SuccessPageProps {
   searchParams: Promise<{ orderNumber?: string }>;
@@ -270,17 +270,88 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
             </span>
           </div>
 
-          {/* Actions */}
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
+          {/* Direct Real-Time Tracking Section */}
+          <div
+            style={{
+              backgroundColor: 'rgba(197, 168, 128, 0.08)',
+              border: '1px solid rgba(197, 168, 128, 0.4)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '24px 20px',
+              textAlign: 'center',
+              marginBottom: '32px'
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                marginBottom: '8px'
+              }}
+            >
+              <Truck size={20} style={{ color: 'var(--color-accent-gold)' }} />
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: '1.05rem',
+                  fontFamily: 'var(--font-serif)',
+                  color: 'var(--color-primary-emerald)'
+                }}
+              >
+                Real-Time Order Tracking
+              </h3>
+            </div>
+
+            <p
+              style={{
+                fontSize: '0.85rem',
+                color: 'var(--color-text-muted)',
+                margin: '0 0 16px',
+                maxWidth: '460px',
+                marginLeft: 'auto',
+                marginRight: 'auto'
+              }}
+            >
+              Follow your handcrafted parcel live through workshop preparation, quality inspection,
+              and courier handover.
+            </p>
+
             <Link
-              href="/"
-              className="royale-button-primary"
+              href={`/track/${order.orderNumber}`}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                padding: '14px 32px',
-                textDecoration: 'none'
+                padding: '12px 28px',
+                backgroundColor: 'var(--color-primary-emerald)',
+                color: '#ffffff',
+                border: '1px solid var(--color-primary-emerald)',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                textDecoration: 'none',
+                borderRadius: 'var(--radius-sm)',
+                transition: 'opacity 0.2s ease'
+              }}
+            >
+              <Truck size={16} />
+              <span>Track Order Live</span>
+              <ExternalLink size={14} />
+            </Link>
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Link
+              href="/"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 28px',
+                color: 'var(--color-text-muted)',
+                textDecoration: 'none',
+                fontSize: '0.9rem'
               }}
             >
               <ArrowLeft size={16} />

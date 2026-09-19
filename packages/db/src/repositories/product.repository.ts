@@ -238,7 +238,7 @@ export async function createProductWithVariants(
       createdVariants.push(createdVariant);
     }
 
-    if (input.images.length > 0) {
+    if (input.images && input.images.length > 0) {
       await tx.insert(productImages).values(
         input.images.map((img) => ({
           productId: createdProduct.id,

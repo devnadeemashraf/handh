@@ -161,3 +161,431 @@ img {
     transform: translateX(0);
   }
 }
+
+/* ==========================================================================
+   H&H Workshop Admin & Shipment Tracking (Dark Emerald & Royale Gold Theme)
+   ========================================================================== */
+
+.admin-theme {
+  --admin-bg: #081f18;
+  --admin-surface: #0f2d24;
+  --admin-surface-inner: #0a251d;
+  --admin-border: #1c4d3e;
+  --admin-border-focus: #c5a880;
+  --admin-gold: #c5a880;
+  --admin-text: #fdfbf7;
+  --admin-text-muted: #8baaa0;
+  --admin-text-subtle: #53766a;
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
+  min-height: 100vh;
+}
+
+.admin-container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+}
+
+@media (min-width: 768px) {
+  .admin-container {
+    padding: 32px 24px 80px;
+  }
+}
+
+.admin-header-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: rgba(10, 46, 36, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #1c4d3e;
+  height: 64px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-header-content {
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-card {
+  background-color: #0f2d24;
+  border: 1px solid #1c4d3e;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+@media (min-width: 640px) {
+  .admin-card {
+    padding: 24px;
+  }
+}
+
+.admin-card-inner {
+  background-color: #081f18;
+  border: 1px solid #235847;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* KPI Grid */
+.admin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .admin-kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+.admin-kpi-card {
+  background-color: #0f2d24;
+  border: 1px solid #1c4d3e;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-kpi-card.urgent {
+  border-color: rgba(197, 168, 128, 0.4);
+}
+
+.admin-kpi-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: monospace;
+  color: #fdfbf7;
+}
+
+.admin-kpi-card.urgent .admin-kpi-value {
+  color: #c5a880;
+}
+
+/* Badges */
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.admin-badge-amber {
+  background-color: rgba(217, 119, 6, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(217, 119, 6, 0.35);
+}
+
+.admin-badge-sky {
+  background-color: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+}
+
+.admin-badge-emerald {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.admin-badge-gold {
+  background-color: rgba(197, 168, 128, 0.15);
+  color: #c5a880;
+  border: 1px solid rgba(197, 168, 128, 0.35);
+}
+
+/* Buttons */
+.admin-btn-primary {
+  background-color: #c5a880;
+  color: #081f18;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.admin-btn-primary:hover {
+  background-color: #d4bc96;
+}
+
+.admin-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-btn-secondary {
+  background-color: #164335;
+  color: #fdfbf7;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #235847;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.admin-btn-secondary:hover {
+  background-color: #1e5443;
+}
+
+.admin-btn-wa {
+  background-color: rgba(37, 211, 102, 0.12);
+  color: #25d366;
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.admin-btn-wa:hover {
+  background-color: rgba(37, 211, 102, 0.22);
+}
+
+/* Forms & Inputs */
+.admin-input,
+.admin-select {
+  background-color: #081f18;
+  border: 1px solid #235847;
+  border-radius: 10px;
+  color: #fdfbf7;
+  padding: 12px 14px;
+  font-size: 0.875rem;
+  width: 100%;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.admin-input:focus,
+.admin-select:focus {
+  border-color: #c5a880;
+}
+
+.admin-input::placeholder {
+  color: #53766a;
+}
+
+/* Order Rows */
+.admin-order-card {
+  background-color: #0f2d24;
+  border: 1px solid #1c4d3e;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+.admin-order-card:hover {
+  background-color: #13372c;
+  border-color: #2c6b57;
+}
+
+@media (min-width: 640px) {
+  .admin-order-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* Tabs */
+.admin-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  background-color: #0f2d24;
+  border: 1px solid #1c4d3e;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.admin-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #8baaa0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 40px;
+  transition: all 0.15s ease;
+}
+
+.admin-tab-btn:hover {
+  color: #fdfbf7;
+  background-color: rgba(22, 67, 53, 0.6);
+}
+
+.admin-tab-btn.active {
+  background-color: #1c4d3e;
+  color: #fdfbf7;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.admin-tab-btn.urgent {
+  color: #c5a880;
+}
+
+.admin-tab-btn.urgent.active {
+  background-color: #c5a880;
+  color: #081f18;
+  font-weight: 700;
+}
+
+/* Red / Error Alert Box */
+.admin-alert-error {
+  background-color: rgba(127, 29, 29, 0.3);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #fca5a5;
+  font-size: 0.8125rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.admin-badge-red {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+/* Detail Page Grid */
+.admin-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .admin-detail-grid {
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+  }
+}
+
+/* Public Order Tracking Theme */
+.track-wrapper {
+  min-height: 100vh;
+  background-color: #081f18;
+  color: #fdfbf7;
+  padding: 32px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.track-box {
+  max-width: 600px;
+  width: 100%;
+}
+
+.track-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.track-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  position: relative;
+}
+
+.track-step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 36px;
+  bottom: -12px;
+  width: 2px;
+  background-color: #1c4d3e;
+}
+
+.track-step-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.track-step-icon.done {
+  background-color: #164335;
+  color: #34d399;
+  border: 2px solid #235847;
+}
+
+.track-step-icon.active {
+  background-color: #c5a880;
+  color: #081f18;
+  border: 2px solid #d4bc96;
+}
+
+.track-step-icon.pending {
+  background-color: #081f18;
+  color: #53766a;
+  border: 2px solid #1c4d3e;
+}
