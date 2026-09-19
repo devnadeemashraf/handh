@@ -1,5 +1,11 @@
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
+import {
+  clearStoredAttribution,
+  getStoredAttribution,
+  trackCheckoutInitiated,
+  trackOrderCompleted
+} from '@/lib/analytics';
 
 import type { AddressFormValues } from '@/components/checkout/AddressForm';
 
@@ -246,6 +252,17 @@ export function useCheckoutFlow({
         return;
       }
 
+      // Track order completion and clear attribution window
+      trackOrderCompleted({
+        orderId: params.orderId,
+        orderNumber: params.orderNumber,
+        totalMinor: orderPlaced?.totalMinor ?? 0,
+        paymentMethod: 'razorpay',
+        itemCount: cartSummary?.items.length ?? 0,
+        attribution: getStoredAttribution()
+      });
+      clearStoredAttribution();
+
       // Route directly to the receipt page
       router.push(`/checkout/success?orderNumber=${params.orderNumber}`);
     } catch (err) {
@@ -396,6 +413,14 @@ export function useCheckoutFlow({
     setIsSubmitting(true);
 
     try {
+      const storedAttribution = getStoredAttribution();
+      trackCheckoutInitiated({
+        cartItemCount: cartSummary.items.length,
+        cartTotalMinor: cartSummary.subtotalMinor,
+        ...(appliedCouponCode ? { couponCode: appliedCouponCode } : {}),
+        attribution: storedAttribution
+      });
+
       const payload = {
         items: cartSummary.items.map((i) => ({
           variantId: i.variantId,
@@ -404,7 +429,8 @@ export function useCheckoutFlow({
         shippingAddress: addressValidation.data,
         customerNotes: values.customerNotes ? values.customerNotes.trim() : undefined,
         couponCode: appliedCouponCode || undefined,
-        idempotencyKey: idempotencyKey || generateUUID()
+        idempotencyKey: idempotencyKey || generateUUID(),
+        attribution: storedAttribution || undefined
       };
 
       const res = await fetch('/api/checkout/submit', {

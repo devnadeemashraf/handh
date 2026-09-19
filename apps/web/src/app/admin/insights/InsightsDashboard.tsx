@@ -4,6 +4,8 @@ import {
   AlertTriangle,
   ArrowRight,
   Flame,
+  Globe,
+  Megaphone,
   MessageSquare,
   PackageOpen,
   Receipt,
@@ -392,6 +394,106 @@ export default function InsightsDashboard({ initialInsights }: InsightsDashboard
           </CardContent>
         </Card>
       </div>
+
+      {/* SECTION 2.5: Marketing & Channel Attribution */}
+      {insights.attribution && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Channel Share Card */}
+          <Card className="border-border bg-card shadow-xs">
+            <CardHeader className="p-4 sm:p-5 pb-3 sm:pb-3 flex flex-row items-center gap-3 border-b border-border space-y-0">
+              <div className="w-8 h-8 rounded-lg bg-pink-500/15 flex items-center justify-center text-pink-600">
+                <Globe className="h-4 w-4" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-base font-semibold">
+                  Channel Attribution &amp; Traffic Share
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Revenue breakdown by acquisition channel (Instagram Bio, Reels, Direct, Ads)
+                </p>
+              </div>
+              <Badge
+                variant="outline"
+                className="text-xs font-semibold text-pink-600 border-pink-500/30"
+              >
+                {insights.attribution.channels.find((c) => c.source === 'instagram')?.percentage ?? 0}% Instagram
+              </Badge>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-5">
+              {insights.attribution.channels.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground text-xs">
+                  No attributed orders recorded in this timeframe.
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {insights.attribution.channels.map((ch) => (
+                    <div key={ch.source} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold uppercase tracking-wider text-foreground">
+                          {ch.source === 'instagram' ? 'Instagram (Reel / Bio)' : ch.source}
+                        </span>
+                        <span className="font-mono text-muted-foreground">
+                          {ch.orderCount} orders &bull; {formatPrice(ch.revenueMinor)} (
+                          {ch.percentage}%)
+                        </span>
+                      </div>
+                      <Progress value={ch.percentage} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Top Campaigns & Influencers */}
+          <Card className="border-border bg-card shadow-xs">
+            <CardHeader className="p-4 sm:p-5 pb-3 sm:pb-3 flex flex-row items-center gap-3 border-b border-border space-y-0">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-600">
+                <Megaphone className="h-4 w-4" />
+              </div>
+              <div>
+                <CardTitle className="text-base font-semibold">
+                  Top Campaigns &amp; Influencers
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Highest converting UTM campaigns and creator collaborations
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-5">
+              {insights.attribution.topCampaigns.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground text-xs">
+                  No campaign tags detected on checkout conversions.
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {insights.attribution.topCampaigns.map((camp, idx) => (
+                    <div
+                      key={idx}
+                      className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                          <span>{camp.campaign}</span>
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 uppercase">
+                            {camp.source}
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {camp.orderCount} {camp.orderCount === 1 ? 'order' : 'orders'} generated
+                        </div>
+                      </div>
+                      <div className="font-serif font-bold text-accent text-sm">
+                        {formatPrice(camp.revenueMinor)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* SECTION 3: Product Sales Velocity Leaderboard */}
       <Card className="border-border bg-card shadow-xs">

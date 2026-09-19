@@ -27,6 +27,7 @@ const mockOrders: TestOrder[] = [
       country: 'India'
     },
     couponCode: null,
+    attribution: null,
     notes: null,
     subtotalMinor: 450000,
     shippingMinor: 0,
@@ -56,6 +57,7 @@ const mockOrders: TestOrder[] = [
       country: 'India'
     },
     couponCode: null,
+    attribution: null,
     notes: null,
     subtotalMinor: 1200000,
     shippingMinor: 0,
@@ -85,6 +87,7 @@ const mockOrders: TestOrder[] = [
       country: 'India'
     },
     couponCode: null,
+    attribution: null,
     notes: null,
     subtotalMinor: 890000,
     shippingMinor: 0,

@@ -1,4 +1,5 @@
 import { CartDrawer } from '@/components/cart/CartDrawer';
+import { AttributionTracker } from '@/components/layout/AttributionTracker';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { PwaRegister } from '@/components/layout/PwaRegister';
 import { AuthProvider } from '@/context/AuthContext';
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="min-h-full flex flex-col pb-16 md:pb-0">
         <AuthProvider>
           <CartProvider>
+            <AttributionTracker />
             {children}
             <CartDrawer />
             <MobileNav />

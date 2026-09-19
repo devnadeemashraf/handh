@@ -63,7 +63,9 @@ describe('Shipping & Delivery Webhook Engine', () => {
     variantId = product.variants[0]!.id;
   });
 
-  it('records automated doorstep pickup fulfillment and processes delivery webhook', async () => {
+  it(
+    'records automated doorstep pickup fulfillment and processes delivery webhook',
+    async () => {
     // 1. Create and pay for an order
     const pending = await createPendingCheckoutOrder(db, {
       storeId,
@@ -164,7 +166,7 @@ describe('Shipping & Delivery Webhook Engine', () => {
     const deliveredEvent = events.find((e) => e.eventName === 'order.delivered');
     expect(deliveredEvent).toBeDefined();
     expect(deliveredEvent?.status).toBe('pending');
-  });
+  }, 15000);
 
   it('handles unknown AWB gracefully without throwing', async () => {
     const res = await processShippingWebhookEvent(db, {

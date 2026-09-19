@@ -59,7 +59,31 @@ const mockInsightsData: ExecutiveInsightsData = {
       revenueMinor: 179800,
       currentStock: 1
     }
-  ]
+  ],
+  attribution: {
+    channels: [
+      {
+        source: 'instagram',
+        orderCount: 3,
+        revenueMinor: 363750,
+        percentage: 75
+      },
+      {
+        source: 'direct',
+        orderCount: 1,
+        revenueMinor: 121250,
+        percentage: 25
+      }
+    ],
+    topCampaigns: [
+      {
+        campaign: 'eid_al_fitr_drop',
+        source: 'instagram',
+        orderCount: 3,
+        revenueMinor: 363750
+      }
+    ]
+  }
 };
 
 describe('InsightsDashboard Component', () => {
@@ -120,6 +144,16 @@ describe('InsightsDashboard Component', () => {
     expect(screen.getByText('Silver Crescent Clip')).toBeInTheDocument();
     expect(screen.getByText('CLIP-SLV-01')).toBeInTheDocument();
     expect(screen.getByText('1 left (Low)')).toBeInTheDocument();
+  });
+
+  it('renders marketing channel attribution and top campaign breakdowns', () => {
+    render(<InsightsDashboard initialInsights={mockInsightsData} />);
+
+    expect(screen.getByText('Channel Attribution & Traffic Share')).toBeInTheDocument();
+    expect(screen.getByText('75% Instagram')).toBeInTheDocument();
+    expect(screen.getByText('Instagram (Reel / Bio)')).toBeInTheDocument();
+    expect(screen.getByText('Top Campaigns & Influencers')).toBeInTheDocument();
+    expect(screen.getByText('eid_al_fitr_drop')).toBeInTheDocument();
   });
 
   it('switches timeframes by fetching updated insights data', async () => {

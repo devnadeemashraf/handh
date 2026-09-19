@@ -35,9 +35,29 @@ export interface ProductVelocityRecord {
   currentStock: number;
 }
 
+export interface ChannelAttributionRecord {
+  source: string;
+  orderCount: number;
+  revenueMinor: number;
+  percentage: number;
+}
+
+export interface CampaignAttributionRecord {
+  campaign: string;
+  source: string;
+  orderCount: number;
+  revenueMinor: number;
+}
+
+export interface AttributionInsights {
+  channels: ChannelAttributionRecord[];
+  topCampaigns: CampaignAttributionRecord[];
+}
+
 export interface ExecutiveInsightsData {
   timeframe: InsightTimeframe;
   sales: SalesVolumeScorecard;
   customers: CustomerMetrics;
   productVelocity: ProductVelocityRecord[];
+  attribution?: AttributionInsights;
 }

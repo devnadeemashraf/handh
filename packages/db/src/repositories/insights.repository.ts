@@ -161,6 +161,66 @@ export async function getExecutiveInsights(
     currentStock: Math.max(0, parseInt(r.currentOnHand, 10) - parseInt(r.currentReserved, 10))
   }));
 
+  // 4. Acquisition & Instagram Attribution Intelligence
+  const attributionOrders = await db
+    .select({
+      totalMinor: orders.totalMinor,
+      attribution: orders.attribution
+    })
+    .from(orders)
+    .where(and(...salesConditions));
+
+  const channelMap = new Map<string, { count: number; revenueMinor: number }>();
+  const campaignMap = new Map<string, { source: string; count: number; revenueMinor: number }>();
+
+  for (const row of attributionOrders) {
+    const attr = row.attribution;
+    const source = (attr?.source || 'direct').toLowerCase();
+    const campaign = attr?.campaign;
+
+    const currentChannel = channelMap.get(source) ?? { count: 0, revenueMinor: 0 };
+    channelMap.set(source, {
+      count: currentChannel.count + 1,
+      revenueMinor: currentChannel.revenueMinor + row.totalMinor
+    });
+
+    if (campaign) {
+      const currentCampaign = campaignMap.get(campaign) ?? { source, count: 0, revenueMinor: 0 };
+      campaignMap.set(campaign, {
+        source,
+        count: currentCampaign.count + 1,
+        revenueMinor: currentCampaign.revenueMinor + row.totalMinor
+      });
+    }
+  }
+
+  const totalAttributedRevenue = Array.from(channelMap.values()).reduce(
+    (sum, c) => sum + c.revenueMinor,
+    0
+  );
+
+  const channels = Array.from(channelMap.entries())
+    .map(([source, data]) => ({
+      source,
+      orderCount: data.count,
+      revenueMinor: data.revenueMinor,
+      percentage:
+        totalAttributedRevenue > 0
+          ? Math.round((data.revenueMinor / totalAttributedRevenue) * 100)
+          : 0
+    }))
+    .sort((a, b) => b.revenueMinor - a.revenueMinor);
+
+  const topCampaigns = Array.from(campaignMap.entries())
+    .map(([campaign, data]) => ({
+      campaign,
+      source: data.source,
+      orderCount: data.count,
+      revenueMinor: data.revenueMinor
+    }))
+    .sort((a, b) => b.revenueMinor - a.revenueMinor)
+    .slice(0, 5);
+
   return {
     timeframe,
     sales: {
@@ -175,6 +235,10 @@ export async function getExecutiveInsights(
       repeatRatePercentage,
       topCustomers
     },
-    productVelocity
+    productVelocity,
+    attribution: {
+      channels,
+      topCampaigns
+    }
   };
 }

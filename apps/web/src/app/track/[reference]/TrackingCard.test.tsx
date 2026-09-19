@@ -26,6 +26,7 @@ const mockOrder: Order = {
   customerPhone: '9848012345',
   shippingAddress: mockShippingAddress,
   couponCode: null,
+  attribution: null,
   notes: null,
   subtotalMinor: 1500000,
   shippingMinor: 0,

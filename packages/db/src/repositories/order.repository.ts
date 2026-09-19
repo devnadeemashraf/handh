@@ -225,6 +225,7 @@ export async function createPendingCheckoutOrder(
         discountMinor: financials.discountMinor,
         totalMinor: financials.totalMinor,
         couponCode: appliedCouponCode,
+        attribution: params.attribution ?? null,
         notes: notesContent
       })
       .returning();

@@ -12,12 +12,12 @@ import {
   varchar
 } from 'drizzle-orm/pg-core';
 
-import type { FulfillmentStatus, OrderStatus, PaymentStatus } from '@hh/domain';
+import type { FulfillmentStatus, OrderAttribution, OrderStatus, PaymentStatus } from '@hh/domain';
 
 import { productVariants } from './products';
 import { stores } from './stores';
 import { users } from './users';
-export type { FulfillmentStatus, OrderStatus, PaymentStatus };
+export type { FulfillmentStatus, OrderAttribution, OrderStatus, PaymentStatus };
 
 export interface ShippingAddress {
   line1: string;
@@ -59,6 +59,7 @@ export const orders = pgTable(
     discountMinor: bigint('discount_minor', { mode: 'number' }).notNull().default(0),
     totalMinor: bigint('total_minor', { mode: 'number' }).notNull(),
     couponCode: varchar('coupon_code', { length: 32 }),
+    attribution: jsonb('attribution').$type<OrderAttribution>(),
     notes: text('notes'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()

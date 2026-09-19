@@ -43,6 +43,13 @@
       "when": 1789853646390,
       "tag": "0005_fat_killmonger",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789855019042,
+      "tag": "0006_first_maelstrom",
+      "breakpoints": true
     }
   ]
 }

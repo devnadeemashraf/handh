@@ -69,11 +69,14 @@ export const ShippingAddressSchema = z.object({
 
 export type ShippingAddressInput = z.infer<typeof ShippingAddressSchema>;
 
+import { orderAttributionSchema } from '../analytics/types';
+
 export const CheckoutSubmissionSchema = z.object({
   items: z.array(CartItemInputSchema).min(1, 'Cart cannot be empty').max(50),
   shippingAddress: ShippingAddressSchema,
   customerNotes: z.string().trim().max(500).optional(),
   couponCode: z.string().trim().max(32).optional(),
+  attribution: orderAttributionSchema.optional(),
   idempotencyKey: z.string().uuid('Valid idempotency key is required')
 });
 
