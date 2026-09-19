@@ -23,6 +23,8 @@
     "docker:logs": "docker compose logs -f",
     "db:generate": "pnpm --filter=@hh/db db:generate",
     "db:migrate": "pnpm --filter=@hh/db db:migrate",
+    "db:clean": "pnpm --filter=@hh/db db:clean",
+    "db:reset": "pnpm --filter=@hh/db db:reset",
     "db:seed": "pnpm --filter=@hh/db db:seed",
     "db:push": "pnpm --filter=@hh/db db:push",
     "clean": "pnpm -r --parallel exec rm -rf dist .next .turbo node_modules"

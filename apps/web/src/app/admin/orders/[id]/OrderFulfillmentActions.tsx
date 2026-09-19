@@ -17,7 +17,9 @@ import {
   Building2,
   FileText,
   MapPin,
-  Sparkles
+  Sparkles,
+  Printer,
+  Receipt
 } from 'lucide-react';
 import { COURIER_LABELS, resolveCourierTrackingUrl, type CourierProvider } from '@hh/domain';
 import type { Order, Fulfillment, ShippingAddress } from '@hh/db';
@@ -287,6 +289,81 @@ export default function OrderFulfillmentActions({
               </>
             )}
           </button>
+        </div>
+      </div>
+
+      {/* Printable Invoices & Packing Slips Bar */}
+      <div
+        className="admin-card"
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px',
+          backgroundColor: '#0F2E24',
+          borderColor: '#1C4D3E'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: '#164335',
+              color: '#C5A880',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid #235847'
+            }}
+          >
+            <Printer style={{ width: '18px', height: '18px' }} />
+          </div>
+          <div>
+            <h4 style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+              Order Documentation &amp; Print
+            </h4>
+            <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+              One-click tax invoices (A4) and thermal logistics slips (4x6&quot;) with custom brand
+              details.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <a
+            href={`/admin/orders/${order.id}/invoice`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="admin-btn-secondary"
+            style={{
+              borderColor: '#C5A880',
+              color: '#F5E6D3',
+              padding: '8px 14px',
+              fontSize: '0.8125rem'
+            }}
+          >
+            <Receipt style={{ width: '15px', height: '15px', color: '#C5A880' }} />
+            <span>Print Tax Invoice (A4)</span>
+          </a>
+
+          <a
+            href={`/admin/orders/${order.id}/packing-slip`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="admin-btn-secondary"
+            style={{
+              borderColor: '#1C4D3E',
+              color: '#E8ECE9',
+              padding: '8px 14px',
+              fontSize: '0.8125rem'
+            }}
+          >
+            <FileText style={{ width: '15px', height: '15px', color: '#8BAAA0' }} />
+            <span>Thermal Slip (4x6&quot;)</span>
+          </a>
         </div>
       </div>
 

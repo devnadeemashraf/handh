@@ -589,3 +589,31 @@ img {
   color: #53766a;
   border: 2px solid #1c4d3e;
 }
+
+/* Print Engine & Thermal 4x6 Formatting */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .admin-header-bar,
+  header {
+    display: none !important;
+  }
+  .invoice-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+  }
+  .thermal-slip-container {
+    width: 4in !important;
+    height: 6in !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    page-break-after: always;
+  }
+}

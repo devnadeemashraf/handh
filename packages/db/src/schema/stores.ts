@@ -1,7 +1,7 @@
 import { pgTable, uuid, varchar, text, boolean, jsonb, timestamp } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-import type { StorefrontConfig } from '@hh/domain';
+import type { StorefrontConfig, InvoiceTemplateConfig } from '@hh/domain';
 
 export interface StoreSettings {
   contactEmail?: string | undefined;
@@ -10,6 +10,7 @@ export interface StoreSettings {
   orderNotificationEmails?: string[] | undefined;
   enableCoupons?: boolean | undefined;
   storefront?: StorefrontConfig | undefined;
+  invoice?: InvoiceTemplateConfig | undefined;
 }
 
 export const stores = pgTable('stores', {

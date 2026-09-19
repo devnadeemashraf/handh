@@ -86,6 +86,18 @@ describe('OrderFulfillmentActions Component', () => {
     });
   });
 
+  it('renders quick action buttons for tax invoice and thermal packing slip', () => {
+    render(<OrderFulfillmentActions order={mockOrder} initialFulfillments={[]} />);
+
+    const invoiceLink = screen.getByRole('link', { name: /print tax invoice/i });
+    expect(invoiceLink).toHaveAttribute('href', '/admin/orders/order-123/invoice');
+    expect(invoiceLink).toHaveAttribute('target', '_blank');
+
+    const packingSlipLink = screen.getByRole('link', { name: /thermal slip/i });
+    expect(packingSlipLink).toHaveAttribute('href', '/admin/orders/order-123/packing-slip');
+    expect(packingSlipLink).toHaveAttribute('target', '_blank');
+  });
+
   it('renders existing fulfillments with label download button and live scan status', () => {
     render(
       <OrderFulfillmentActions order={mockOrder} initialFulfillments={[mockInitialFulfillment]} />

@@ -6,6 +6,9 @@ import {
   products,
   inventoryLevels,
   inventoryReservations,
+  stores,
+  paymentAttempts,
+  fulfillments,
   type Order,
   type OrderItem
 } from '../schema';
@@ -16,9 +19,12 @@ import {
   ValidationError,
   NotFoundError,
   assertCanTransitionOrder,
+  resolveInvoiceTemplate,
   type OrderStatus,
   type CheckoutSubmissionInput,
-  type CheckoutOrderResult
+  type CheckoutOrderResult,
+  type InvoiceData,
+  type InvoiceTemplateConfig
 } from '@hh/domain';
 import type { DatabaseClient } from '../index';
 
@@ -396,4 +402,139 @@ export async function transitionOrderStatus(
 
     return updatedRows[0]!;
   });
+}
+
+/**
+ * Resolves complete invoice and thermal packing slip data with customizable brand template.
+ */
+export async function getOrderInvoiceData(
+  db: DatabaseClient,
+  orderId: string
+): Promise<InvoiceData | null> {
+  const orderWithItems = await findOrderById(db, orderId);
+  if (!orderWithItems) return null;
+
+  // Find store settings
+  const [store] = await db
+    .select({ settings: stores.settings })
+    .from(stores)
+    .where(eq(stores.id, orderWithItems.storeId))
+    .limit(1);
+
+  const template = resolveInvoiceTemplate(
+    (store?.settings as Record<string, unknown> | undefined)?.['invoice']
+  );
+
+  // Find latest payment attempt
+  const paymentRows = await db
+    .select({
+      provider: paymentAttempts.provider,
+      providerPaymentId: paymentAttempts.providerPaymentId,
+      status: paymentAttempts.status
+    })
+    .from(paymentAttempts)
+    .where(eq(paymentAttempts.orderId, orderWithItems.id))
+    .orderBy(desc(paymentAttempts.createdAt))
+    .limit(1);
+
+  // Find fulfillment if shipped
+  const fulfillmentsRows = await db
+    .select({
+      trackingNumber: fulfillments.trackingNumber,
+      courierProvider: fulfillments.courierProvider
+    })
+    .from(fulfillments)
+    .where(eq(fulfillments.orderId, orderWithItems.id))
+    .orderBy(desc(fulfillments.createdAt))
+    .limit(1);
+
+  const cleanNum = orderWithItems.orderNumber.replace(/[^0-9]/g, '') || orderWithItems.orderNumber;
+  const invoiceNumber = `${template.invoicePrefix}${cleanNum}`;
+
+  const invoiceData: InvoiceData = {
+    invoiceNumber,
+    orderNumber: orderWithItems.orderNumber,
+    orderDate: orderWithItems.createdAt.toISOString(),
+    paymentStatus: orderWithItems.paymentStatus,
+    paymentMethod:
+      paymentRows[0]?.provider === 'razorpay'
+        ? 'Razorpay Online (UPI / Card / NetBanking)'
+        : 'Online Payment',
+    fulfillmentStatus: orderWithItems.fulfillmentStatus,
+    customer: {
+      name: orderWithItems.customerName,
+      email: orderWithItems.customerEmail,
+      phone: orderWithItems.customerPhone,
+      address: {
+        line1: orderWithItems.shippingAddress.line1,
+        city: orderWithItems.shippingAddress.city,
+        state: orderWithItems.shippingAddress.state,
+        postalCode: orderWithItems.shippingAddress.postalCode,
+        country: orderWithItems.shippingAddress.country
+      }
+    },
+    items: orderWithItems.items.map((it) => ({
+      title: it.productNameSnapshot,
+      variantTitle: it.variantNameSnapshot,
+      sku: it.skuSnapshot,
+      quantity: it.quantity,
+      unitPriceMinor: Number(it.unitPriceMinor),
+      totalMinor: Number(it.totalPriceMinor)
+    })),
+    subtotalMinor: Number(orderWithItems.subtotalMinor),
+    deliveryFeeMinor: Number(orderWithItems.shippingMinor),
+    discountMinor: Number(orderWithItems.discountMinor),
+    totalAmountMinor: Number(orderWithItems.totalMinor),
+    template
+  };
+
+  if (orderWithItems.shippingAddress.line2) {
+    invoiceData.customer.address.line2 = orderWithItems.shippingAddress.line2;
+  }
+  if (paymentRows[0]?.providerPaymentId) {
+    invoiceData.paymentId = paymentRows[0].providerPaymentId;
+  }
+  if (fulfillmentsRows[0]?.trackingNumber) {
+    invoiceData.trackingNumber = fulfillmentsRows[0].trackingNumber;
+  }
+  if (fulfillmentsRows[0]?.courierProvider) {
+    invoiceData.courierName = fulfillmentsRows[0].courierProvider.toUpperCase();
+  }
+
+  return invoiceData;
+}
+
+/**
+ * Updates customizable invoice template in store settings.
+ */
+export async function updateStoreInvoiceSettings(
+  db: DatabaseClient,
+  storeSlug: string,
+  settings: Record<string, unknown>
+): Promise<InvoiceTemplateConfig> {
+  const [store] = await db.select().from(stores).where(eq(stores.slug, storeSlug)).limit(1);
+  if (!store) {
+    throw new NotFoundError('Store', storeSlug);
+  }
+
+  const currentTemplate = resolveInvoiceTemplate(
+    (store.settings as Record<string, unknown> | undefined)?.['invoice']
+  );
+  const updatedTemplate = resolveInvoiceTemplate({
+    ...currentTemplate,
+    ...settings
+  });
+
+  await db
+    .update(stores)
+    .set({
+      settings: {
+        ...store.settings,
+        invoice: updatedTemplate
+      },
+      updatedAt: new Date()
+    })
+    .where(eq(stores.id, store.id));
+
+  return updatedTemplate;
 }

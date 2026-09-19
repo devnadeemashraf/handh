@@ -9,6 +9,7 @@ export * from './payment';
 export * from './fulfillment';
 export * from './shipping';
 export * from './inventory';
+export * from './invoice';
 
 export type {
   CategoryTreeItem,
