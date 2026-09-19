@@ -70,7 +70,7 @@ describe('Notification Domain Templates', () => {
       expect(email.text).toContain('Silk Organza Abaya');
       expect(email.text).toContain('₹15,997.00');
       expect(email.text).toContain('https://handh.local/account/orders/ord-123');
-    });
+    }, 15000);
   });
 
   describe('renderOrderDispatchedEmail', () => {

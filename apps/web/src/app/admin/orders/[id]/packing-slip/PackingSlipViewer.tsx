@@ -1,6 +1,8 @@
 'use client';
 
 import { ArrowLeft, FileText, Printer } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 import type { InvoiceData } from '@hh/domain';
 
@@ -9,244 +11,127 @@ interface PackingSlipViewerProps {
   orderId: string;
 }
 
+const BARCODE_WIDTHS = [
+  'w-[3px]',
+  'w-[1px]',
+  'w-[4px]',
+  'w-[1px]',
+  'w-[2px]',
+  'w-[5px]',
+  'w-[2px]',
+  'w-[1px]',
+  'w-[4px]',
+  'w-[2px]',
+  'w-[1px]',
+  'w-[3px]',
+  'w-[2px]',
+  'w-[4px]',
+  'w-[1px]',
+  'w-[2px]',
+  'w-[5px]',
+  'w-[1px]',
+  'w-[3px]',
+  'w-[2px]',
+  'w-[4px]',
+  'w-[1px]',
+  'w-[2px]',
+  'w-[3px]',
+  'w-[1px]',
+  'w-[4px]',
+  'w-[2px]',
+  'w-[1px]',
+  'w-[3px]',
+  'w-[2px]'
+];
+
 export default function PackingSlipViewer({ invoiceData, orderId }: PackingSlipViewerProps) {
   const template = invoiceData.template;
   const address = invoiceData.customer.address;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+    <div className="flex flex-col gap-5 items-center">
       {/* Top Floating Controls (Hidden on Print) */}
-      <div
-        className="no-print"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          padding: '12px 16px',
-          backgroundColor: '#0F2D24',
-          borderRadius: '12px',
-          border: '1px solid #1C4D3E',
-          width: '100%',
-          maxWidth: '500px'
-        }}
-      >
-        <a
+      <div className="no-print flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-card border border-border shadow-xs w-full max-w-[500px]">
+        <Link
           href={`/admin/orders/${orderId}`}
-          className="admin-btn-secondary"
-          style={{ minHeight: '36px', padding: '6px 12px', fontSize: '0.8125rem' }}
+          className="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-md border border-border bg-background hover:bg-muted text-foreground transition-colors"
         >
-          <ArrowLeft style={{ width: '16px', height: '16px' }} />
+          <ArrowLeft className="h-4 w-4" />
           <span>Order</span>
-        </a>
+        </Link>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <a
+        <div className="flex items-center gap-2">
+          <Link
             href={`/admin/orders/${orderId}/invoice`}
-            className="admin-btn-secondary"
-            style={{ minHeight: '36px', padding: '6px 12px', fontSize: '0.8125rem' }}
+            className="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-md border border-border bg-background hover:bg-muted text-foreground transition-colors"
           >
-            <FileText style={{ width: '15px', height: '15px', color: '#C5A880' }} />
+            <FileText className="h-3.5 w-3.5 text-accent" />
             <span>A4 Tax Invoice</span>
-          </a>
+          </Link>
 
-          <button
-            onClick={() => window.print()}
-            className="admin-btn-primary"
-            style={{ minHeight: '36px', padding: '6px 14px', fontSize: '0.8125rem' }}
-          >
-            <Printer style={{ width: '16px', height: '16px' }} />
+          <Button size="sm" onClick={() => window.print()} className="h-9 gap-1.5 text-xs">
+            <Printer className="h-4 w-4" />
             <span>Print 4x6 Thermal</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* 4x6" Thermal Shipping Slip Container */}
-      <div
-        className="thermal-slip-container"
-        style={{
-          backgroundColor: '#FFFFFF',
-          color: '#000000',
-          width: '384px', // approx 4 inches at 96 DPI
-          minHeight: '576px', // approx 6 inches at 96 DPI
-          padding: '20px',
-          border: '2px solid #000000',
-          borderRadius: '4px',
-          boxSizing: 'border-box',
-          fontFamily: 'monospace, sans-serif'
-        }}
-      >
+      <div className="thermal-slip-container bg-white text-black w-96 min-h-[576px] p-5 border-2 border-black rounded font-mono shadow-md">
         {/* Top Header & Courier Identification */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderBottom: '2px solid #000000',
-            paddingBottom: '10px',
-            marginBottom: '12px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div
-              style={{
-                backgroundColor: '#000000',
-                color: '#FFFFFF',
-                padding: '3px 6px',
-                fontWeight: 900,
-                fontSize: '0.875rem'
-              }}
-            >
-              H&amp;H
-            </div>
-            <span style={{ fontWeight: 800, fontSize: '0.875rem', letterSpacing: '0.05em' }}>
-              EXPRESS DISPATCH
-            </span>
+        <div className="flex justify-between items-center border-b-2 border-black pb-2.5 mb-3">
+          <div className="flex items-center gap-1.5">
+            <div className="bg-black text-white px-1.5 py-0.5 font-black text-sm">H&amp;H</div>
+            <span className="font-extrabold text-sm tracking-wider">EXPRESS DISPATCH</span>
           </div>
-          <div
-            style={{
-              border: '2px solid #000000',
-              padding: '2px 8px',
-              fontWeight: 900,
-              fontSize: '0.8125rem',
-              textTransform: 'uppercase'
-            }}
-          >
+          <div className="border-2 border-black py-0.5 px-2 font-black text-xs uppercase">
             {invoiceData.courierName || 'DTDC / SPEED POST'}
           </div>
         </div>
 
         {/* Tracking AWB Barcode Simulation */}
-        <div
-          style={{
-            textAlign: 'center',
-            borderBottom: '2px dashed #000000',
-            paddingBottom: '12px',
-            marginBottom: '12px'
-          }}
-        >
-          <div style={{ fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.1em' }}>
-            TRACKING AWB NUMBER
-          </div>
-          <div
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: 900,
-              letterSpacing: '0.15em',
-              margin: '4px 0'
-            }}
-          >
+        <div className="text-center border-b-2 border-dashed border-black pb-3 mb-3">
+          <div className="text-[11px] font-bold tracking-widest">TRACKING AWB NUMBER</div>
+          <div className="text-xl font-black tracking-widest my-1">
             {invoiceData.trackingNumber || invoiceData.orderNumber}
           </div>
           {/* Visual Barcode Bars simulation */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: '2px',
-              height: '32px',
-              margin: '4px 0'
-            }}
-          >
-            {[
-              3, 1, 4, 1, 2, 5, 2, 1, 4, 2, 1, 3, 2, 4, 1, 2, 5, 1, 3, 2, 4, 1, 2, 3, 1, 4, 2, 1, 3,
-              2
-            ].map((width, idx) => (
-              <div
-                key={idx}
-                style={{
-                  width: `${width}px`,
-                  height: '100%',
-                  backgroundColor: '#000000'
-                }}
-              />
+          <div className="flex justify-center items-center gap-0.5 h-8 my-1">
+            {BARCODE_WIDTHS.map((widthClass, idx) => (
+              <div key={idx} className={`${widthClass} h-full bg-black`} />
             ))}
           </div>
-          <div style={{ fontSize: '0.625rem' }}>
-            ORDER: {invoiceData.orderNumber} &bull; PREPAID
-          </div>
+          <div className="text-[10px]">ORDER: {invoiceData.orderNumber} &bull; PREPAID</div>
         </div>
 
         {/* Massive Delivery Destination Box */}
-        <div
-          style={{
-            border: '2px solid #000000',
-            padding: '10px',
-            marginBottom: '12px',
-            backgroundColor: '#FAFAFA'
-          }}
-        >
-          <div
-            style={{
-              fontSize: '0.625rem',
-              fontWeight: 900,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: '4px'
-            }}
-          >
+        <div className="border-2 border-black p-2.5 mb-3 bg-zinc-50">
+          <div className="text-[10px] font-black uppercase tracking-widest mb-1">
             SHIP TO DESTINATION:
           </div>
-          <div style={{ fontSize: '1.125rem', fontWeight: 900 }}>{invoiceData.customer.name}</div>
-          <div style={{ fontSize: '0.875rem', fontWeight: 700, margin: '2px 0' }}>
-            TEL: {invoiceData.customer.phone}
-          </div>
-          <div style={{ fontSize: '0.8125rem', lineHeight: '1.3' }}>
+          <div className="text-lg font-black">{invoiceData.customer.name}</div>
+          <div className="text-sm font-bold my-0.5">TEL: {invoiceData.customer.phone}</div>
+          <div className="text-xs leading-tight">
             {address.line1}
             {address.line2 ? `, ${address.line2}` : ''}
             <br />
             {address.city}, {address.state}
           </div>
-          <div
-            style={{
-              fontSize: '1.5rem',
-              fontWeight: 900,
-              marginTop: '4px',
-              letterSpacing: '0.05em'
-            }}
-          >
-            PIN: {address.postalCode}
-          </div>
+          <div className="text-2xl font-black mt-1 tracking-wider">PIN: {address.postalCode}</div>
         </div>
 
         {/* Workshop Packing Checklist */}
-        <div style={{ marginBottom: '14px' }}>
-          <div
-            style={{
-              fontSize: '0.6875rem',
-              fontWeight: 800,
-              borderBottom: '1px solid #000000',
-              paddingBottom: '2px',
-              marginBottom: '6px'
-            }}
-          >
+        <div className="mb-3.5">
+          <div className="text-[11px] font-extrabold border-b border-black pb-0.5 mb-1.5">
             WORKSHOP PACKING CHECKLIST ({invoiceData.items.length} ITEMS)
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div className="flex flex-col gap-1.5">
             {invoiceData.items.map((item, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '8px',
-                  fontSize: '0.75rem'
-                }}
-              >
-                <div
-                  style={{
-                    width: '14px',
-                    height: '14px',
-                    border: '1.5px solid #000000',
-                    flexShrink: 0,
-                    marginTop: '2px'
-                  }}
-                />
+              <div key={idx} className="flex items-start gap-2 text-xs">
+                <div className="w-3.5 h-3.5 border-[1.5px] border-black shrink-0 mt-0.5" />
                 <div>
                   <strong>{item.quantity}x</strong> {item.title} ({item.variantTitle})
-                  <div style={{ fontSize: '0.625rem', color: '#4B5563' }}>SKU: {item.sku}</div>
+                  <div className="text-[10px] text-zinc-600">SKU: {item.sku}</div>
                 </div>
               </div>
             ))}
@@ -254,14 +139,7 @@ export default function PackingSlipViewer({ invoiceData, orderId }: PackingSlipV
         </div>
 
         {/* Return Origin Address */}
-        <div
-          style={{
-            borderTop: '1px dashed #000000',
-            paddingTop: '8px',
-            fontSize: '0.625rem',
-            lineHeight: '1.3'
-          }}
-        >
+        <div className="border-t border-dashed border-black pt-2 text-[10px] leading-tight">
           <strong>RETURN ORIGIN (IF UNDELIVERED):</strong>
           <br />
           {template.brandName} &bull; {template.addressLine1}, {template.city}, {template.state} -{' '}

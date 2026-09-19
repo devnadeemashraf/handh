@@ -1,7 +1,9 @@
 'use client';
 
 import { ArrowLeft, Printer, Sliders, Tag } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 import type { InvoiceData } from '@hh/domain';
 
@@ -36,146 +38,73 @@ export default function InvoiceViewer({ initialInvoiceData, orderId }: InvoiceVi
   const template = invoiceData.template;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="flex flex-col gap-5">
       {/* Top Floating Action Bar (Hidden on Print) */}
-      <div
-        className="no-print"
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '12px',
-          padding: '12px 16px',
-          backgroundColor: '#0F2D24',
-          borderRadius: '12px',
-          border: '1px solid #1C4D3E'
-        }}
-      >
-        <a
+      <div className="no-print flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-card border border-border shadow-xs">
+        <Link
           href={`/admin/orders/${orderId}`}
-          className="admin-btn-secondary"
-          style={{ minHeight: '36px', padding: '6px 12px', fontSize: '0.8125rem' }}
+          className="inline-flex items-center gap-2 h-9 px-3 text-xs font-medium rounded-md border border-border bg-background hover:bg-muted text-foreground transition-colors"
         >
-          <ArrowLeft style={{ width: '16px', height: '16px' }} />
+          <ArrowLeft className="h-4 w-4" />
           <span>Back to Order</span>
-        </a>
+        </Link>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setIsCustomizerOpen(true)}
-            className="admin-btn-secondary"
-            style={{ minHeight: '36px', padding: '6px 12px', fontSize: '0.8125rem' }}
+            className="h-9 gap-1.5 text-xs text-accent border-accent/40 hover:bg-accent/10"
             title="Edit brand name, address, GSTIN, and notes"
           >
-            <Sliders style={{ width: '15px', height: '15px', color: '#C5A880' }} />
+            <Sliders className="h-4 w-4" />
             <span>Customize Template</span>
-          </button>
+          </Button>
 
-          <a
+          <Link
             href={`/admin/orders/${orderId}/packing-slip`}
-            className="admin-btn-secondary"
-            style={{ minHeight: '36px', padding: '6px 12px', fontSize: '0.8125rem' }}
+            className="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-medium rounded-md border border-border bg-background hover:bg-muted text-foreground transition-colors"
           >
-            <Tag style={{ width: '15px', height: '15px', color: '#73A796' }} />
+            <Tag className="h-4 w-4 text-primary" />
             <span>Switch to 4x6 Thermal Slip</span>
-          </a>
+          </Link>
 
-          <button
-            onClick={() => window.print()}
-            className="admin-btn-primary"
-            style={{ minHeight: '36px', padding: '6px 14px', fontSize: '0.8125rem' }}
-          >
-            <Printer style={{ width: '16px', height: '16px' }} />
+          <Button size="sm" onClick={() => window.print()} className="h-9 gap-1.5 text-xs">
+            <Printer className="h-4 w-4" />
             <span>Print / Save PDF (A4)</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* A4 Printable Sheet Container */}
-      <div
-        className="invoice-container"
-        style={{
-          backgroundColor: '#FFFFFF',
-          color: '#111827',
-          padding: '40px',
-          borderRadius: '8px',
-          maxWidth: '840px',
-          margin: '0 auto',
-          width: '100%',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
-          fontFamily: 'system-ui, -apple-system, sans-serif'
-        }}
-      >
+      <div className="invoice-container bg-white text-zinc-900 p-8 sm:p-10 rounded-lg max-w-[840px] mx-auto w-full shadow-md border border-zinc-200">
         {/* Header Block */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            borderBottom: '2px solid #E5E7EB',
-            paddingBottom: '24px',
-            marginBottom: '24px'
-          }}
-        >
+        <div className="flex justify-between items-start border-b-2 border-zinc-200 pb-6 mb-6">
           {/* Brand Info */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <div
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '6px',
-                  backgroundColor: '#0A2E24',
-                  color: '#C5A880',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.75rem',
-                  fontWeight: 800
-                }}
-              >
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-7 h-7 rounded-md bg-[#0A2E24] text-[#C5A880] flex items-center justify-center text-xs font-extrabold shadow-xs">
                 H&amp;H
               </div>
-              <h1
-                style={{
-                  fontSize: '1.5rem',
-                  fontFamily: 'serif',
-                  fontWeight: 700,
-                  color: '#0A2E24',
-                  margin: 0
-                }}
-              >
+              <h1 className="text-2xl font-serif font-bold text-[#0A2E24] m-0">
                 {template.brandName}
               </h1>
             </div>
 
             {template.legalName && (
-              <div style={{ fontSize: '0.75rem', color: '#4B5563', fontWeight: 600 }}>
-                {template.legalName}
-              </div>
+              <div className="text-xs text-zinc-600 font-semibold">{template.legalName}</div>
             )}
-            <div
-              style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '2px', maxWidth: '300px' }}
-            >
+            <div className="text-xs text-zinc-500 mt-0.5 max-w-xs leading-relaxed">
               {template.addressLine1}
               {template.addressLine2 ? `, ${template.addressLine2}` : ''}
               <br />
               {template.city}, {template.state} - {template.postalCode}, {template.country}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '4px' }}>
+            <div className="text-xs text-zinc-500 mt-1">
               Email: {template.supportEmail} &bull; Tel: {template.supportPhone}
             </div>
             {template.gstin && (
-              <div
-                style={{
-                  fontSize: '0.6875rem',
-                  color: '#111827',
-                  fontWeight: 700,
-                  marginTop: '4px',
-                  fontFamily: 'monospace'
-                }}
-              >
+              <div className="text-[11px] text-zinc-900 font-bold mt-1 font-mono">
                 GSTIN: {template.gstin}
                 {template.pan ? ` | PAN: ${template.pan}` : ''}
               </div>
@@ -183,46 +112,24 @@ export default function InvoiceViewer({ initialInvoiceData, orderId }: InvoiceVi
           </div>
 
           {/* Invoice Meta */}
-          <div style={{ textAlign: 'right' }}>
-            <span
-              style={{
-                display: 'inline-block',
-                padding: '4px 10px',
-                borderRadius: '4px',
-                backgroundColor: '#0A2E24',
-                color: '#C5A880',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                marginBottom: '8px'
-              }}
-            >
+          <div className="text-right">
+            <span className="inline-block py-1 px-2.5 rounded bg-[#0A2E24] text-[#C5A880] text-xs font-bold tracking-wider uppercase mb-2">
               Tax Invoice
             </span>
-            <div
-              style={{
-                fontSize: '1.125rem',
-                fontWeight: 700,
-                color: '#111827',
-                fontFamily: 'monospace'
-              }}
-            >
+            <div className="text-lg font-bold text-zinc-900 font-mono">
               {invoiceData.invoiceNumber}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#4B5563', marginTop: '2px' }}>
-              Order Ref: <strong style={{ color: '#111827' }}>{invoiceData.orderNumber}</strong>
+            <div className="text-xs text-zinc-600 mt-0.5">
+              Order Ref: <strong className="text-zinc-900">{invoiceData.orderNumber}</strong>
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '2px' }}>
+            <div className="text-xs text-zinc-500 mt-0.5">
               Date: {formatDate(invoiceData.orderDate)}
             </div>
-            <div
-              style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 600, marginTop: '4px' }}
-            >
+            <div className="text-xs text-emerald-700 font-semibold mt-1">
               Payment: {invoiceData.paymentStatus.toUpperCase()} (Captured)
             </div>
             {invoiceData.paymentId && (
-              <div style={{ fontSize: '0.6875rem', color: '#6B7280', fontFamily: 'monospace' }}>
+              <div className="text-[11px] text-zinc-500 font-mono">
                 Ref: {invoiceData.paymentId}
               </div>
             )}
@@ -230,53 +137,21 @@ export default function InvoiceViewer({ initialInvoiceData, orderId }: InvoiceVi
         </div>
 
         {/* Billed To & Shipped To */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '24px',
-            backgroundColor: '#F9FAFB',
-            padding: '16px',
-            borderRadius: '6px',
-            border: '1px solid #E5E7EB',
-            marginBottom: '24px',
-            fontSize: '0.8125rem'
-          }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-zinc-50 p-4 rounded-md border border-zinc-200 mb-6 text-xs sm:text-sm">
           <div>
-            <div
-              style={{
-                fontSize: '0.6875rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#6B7280',
-                marginBottom: '6px'
-              }}
-            >
+            <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
               Customer &amp; Billed To
             </div>
-            <div style={{ fontWeight: 700, color: '#111827', fontSize: '0.875rem' }}>
-              {invoiceData.customer.name}
-            </div>
-            <div style={{ color: '#4B5563', marginTop: '2px' }}>{invoiceData.customer.phone}</div>
-            <div style={{ color: '#4B5563' }}>{invoiceData.customer.email}</div>
+            <div className="font-bold text-zinc-900 text-sm">{invoiceData.customer.name}</div>
+            <div className="text-zinc-600 mt-0.5">{invoiceData.customer.phone}</div>
+            <div className="text-zinc-600">{invoiceData.customer.email}</div>
           </div>
 
           <div>
-            <div
-              style={{
-                fontSize: '0.6875rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: '#6B7280',
-                marginBottom: '6px'
-              }}
-            >
+            <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
               Dispatch Destination (Ship To)
             </div>
-            <div style={{ color: '#111827', lineHeight: '1.4' }}>
+            <div className="text-zinc-900 leading-relaxed text-xs sm:text-sm">
               {invoiceData.customer.address.line1}
               {invoiceData.customer.address.line2 ? `, ${invoiceData.customer.address.line2}` : ''}
               <br />
@@ -286,114 +161,44 @@ export default function InvoiceViewer({ initialInvoiceData, orderId }: InvoiceVi
               {invoiceData.customer.address.country}
             </div>
             {invoiceData.trackingNumber && (
-              <div style={{ marginTop: '4px', fontSize: '0.75rem', color: '#047857' }}>
+              <div className="mt-1 text-xs text-emerald-700 font-medium">
                 Courier: <strong>{invoiceData.courierName || 'DTDC'}</strong> &bull; AWB:{' '}
-                <strong style={{ fontFamily: 'monospace' }}>{invoiceData.trackingNumber}</strong>
+                <strong className="font-mono">{invoiceData.trackingNumber}</strong>
               </div>
             )}
           </div>
         </div>
 
         {/* Itemized Table */}
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            marginBottom: '24px',
-            fontSize: '0.8125rem'
-          }}
-        >
+        <table className="w-full border-collapse mb-6 text-xs sm:text-sm">
           <thead>
-            <tr style={{ backgroundColor: '#F3F4F6', borderBottom: '2px solid #D1D5DB' }}>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '10px 12px',
-                  fontWeight: 700,
-                  color: '#374151'
-                }}
-              >
-                #
-              </th>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '10px 12px',
-                  fontWeight: 700,
-                  color: '#374151'
-                }}
-              >
+            <tr className="bg-zinc-100 border-b-2 border-zinc-300">
+              <th className="text-left py-2.5 px-3 font-bold text-zinc-700">#</th>
+              <th className="text-left py-2.5 px-3 font-bold text-zinc-700">
                 Artisanal Piece Description
               </th>
-              <th
-                style={{
-                  textAlign: 'left',
-                  padding: '10px 12px',
-                  fontWeight: 700,
-                  color: '#374151'
-                }}
-              >
-                SKU
-              </th>
-              <th
-                style={{
-                  textAlign: 'center',
-                  padding: '10px 12px',
-                  fontWeight: 700,
-                  color: '#374151'
-                }}
-              >
-                Qty
-              </th>
-              <th
-                style={{
-                  textAlign: 'right',
-                  padding: '10px 12px',
-                  fontWeight: 700,
-                  color: '#374151'
-                }}
-              >
-                Unit Price
-              </th>
-              <th
-                style={{
-                  textAlign: 'right',
-                  padding: '10px 12px',
-                  fontWeight: 700,
-                  color: '#374151'
-                }}
-              >
-                Total (₹)
-              </th>
+              <th className="text-left py-2.5 px-3 font-bold text-zinc-700">SKU</th>
+              <th className="text-center py-2.5 px-3 font-bold text-zinc-700">Qty</th>
+              <th className="text-right py-2.5 px-3 font-bold text-zinc-700">Unit Price</th>
+              <th className="text-right py-2.5 px-3 font-bold text-zinc-700">Total (₹)</th>
             </tr>
           </thead>
           <tbody>
             {invoiceData.items.map((item, index) => (
-              <tr key={index} style={{ borderBottom: '1px solid #E5E7EB' }}>
-                <td style={{ padding: '12px', color: '#6B7280' }}>{index + 1}</td>
-                <td style={{ padding: '12px' }}>
-                  <div style={{ fontWeight: 600, color: '#111827' }}>{item.title}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>{item.variantTitle}</div>
+              <tr key={index} className="border-b border-zinc-200">
+                <td className="py-3 px-3 text-zinc-500">{index + 1}</td>
+                <td className="py-3 px-3">
+                  <div className="font-semibold text-zinc-900">{item.title}</div>
+                  <div className="text-xs text-zinc-500">{item.variantTitle}</div>
                 </td>
-                <td style={{ padding: '12px', fontFamily: 'monospace', color: '#4B5563' }}>
-                  {item.sku}
-                </td>
-                <td
-                  style={{
-                    padding: '12px',
-                    textAlign: 'center',
-                    fontWeight: 600,
-                    color: '#111827'
-                  }}
-                >
+                <td className="py-3 px-3 font-mono text-zinc-600">{item.sku}</td>
+                <td className="py-3 px-3 text-center font-semibold text-zinc-900">
                   {item.quantity}
                 </td>
-                <td style={{ padding: '12px', textAlign: 'right', color: '#4B5563' }}>
+                <td className="py-3 px-3 text-right text-zinc-600">
                   {formatPrice(item.unitPriceMinor)}
                 </td>
-                <td
-                  style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: '#111827' }}
-                >
+                <td className="py-3 px-3 text-right font-semibold text-zinc-900">
                   {formatPrice(item.totalMinor)}
                 </td>
               </tr>
@@ -402,28 +207,14 @@ export default function InvoiceViewer({ initialInvoiceData, orderId }: InvoiceVi
         </table>
 
         {/* Financial Breakdown */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '32px' }}>
-          <div style={{ width: '280px', fontSize: '0.8125rem' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '6px 0',
-                color: '#4B5563'
-              }}
-            >
+        <div className="flex justify-end mb-8">
+          <div className="w-72 text-xs sm:text-sm">
+            <div className="flex justify-between py-1.5 text-zinc-600">
               <span>Subtotal</span>
               <span>{formatPrice(invoiceData.subtotalMinor)}</span>
             </div>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '6px 0',
-                color: '#4B5563'
-              }}
-            >
+            <div className="flex justify-between py-1.5 text-zinc-600">
               <span>Courier Delivery</span>
               <span>
                 {invoiceData.deliveryFeeMinor === 0
@@ -433,74 +224,37 @@ export default function InvoiceViewer({ initialInvoiceData, orderId }: InvoiceVi
             </div>
 
             {invoiceData.discountMinor > 0 && (
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '6px 0',
-                  color: '#059669'
-                }}
-              >
+              <div className="flex justify-between py-1.5 text-emerald-600 font-medium">
                 <span>Discount Applied</span>
                 <span>-{formatPrice(invoiceData.discountMinor)}</span>
               </div>
             )}
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '10px 0',
-                borderTop: '2px solid #111827',
-                marginTop: '6px',
-                fontSize: '1rem',
-                fontWeight: 800,
-                color: '#0A2E24'
-              }}
-            >
+            <div className="flex justify-between py-2.5 border-t-2 border-zinc-900 mt-1.5 text-base font-extrabold text-[#0A2E24]">
               <span>Grand Total</span>
               <span>{formatPrice(invoiceData.totalAmountMinor)}</span>
             </div>
-            <div style={{ fontSize: '0.6875rem', color: '#6B7280', textAlign: 'right' }}>
+            <div className="text-[11px] text-zinc-500 text-right">
               Inclusive of all taxes &amp; packaging
             </div>
           </div>
         </div>
 
         {/* Footer Guarantee & Notes */}
-        <div
-          style={{
-            borderTop: '1px solid #E5E7EB',
-            paddingTop: '16px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            fontSize: '0.75rem',
-            color: '#6B7280'
-          }}
-        >
-          <div style={{ maxWidth: '480px' }}>
-            <div style={{ fontWeight: 600, color: '#374151', marginBottom: '2px' }}>
+        <div className="border-t border-zinc-200 pt-4 flex justify-between items-end text-xs text-zinc-500">
+          <div className="max-w-md">
+            <div className="font-semibold text-zinc-700 mb-0.5">
               Authenticity &amp; Care Guarantee
             </div>
-            <p style={{ margin: 0, lineHeight: '1.4' }}>{template.footerNote}</p>
-            <div style={{ marginTop: '8px', fontSize: '0.6875rem', color: '#9CA3AF' }}>
+            <p className="m-0 leading-relaxed">{template.footerNote}</p>
+            <div className="mt-2 text-[11px] text-zinc-400">
               This is a computer-generated tax invoice. No signature required.
             </div>
           </div>
 
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#111827' }}>
-              For {template.brandName}
-            </div>
-            <div
-              style={{
-                marginTop: '24px',
-                borderTop: '1px solid #9CA3AF',
-                paddingTop: '4px',
-                fontSize: '0.6875rem'
-              }}
-            >
+          <div className="text-right">
+            <div className="text-xs font-semibold text-zinc-900">For {template.brandName}</div>
+            <div className="mt-6 border-t border-zinc-400 pt-1 text-[11px]">
               Authorized Signatory
             </div>
           </div>

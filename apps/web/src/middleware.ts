@@ -17,13 +17,23 @@ export function middleware(request: NextRequest) {
   const hasSession = Boolean(adminCookie || userCookie);
   const accessKey = process.env['ADMIN_ACCESS_KEY'] ?? 'hh_dev_access_key';
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-admin-pathname', pathname);
+
+  const forwardNext = () =>
+    NextResponse.next({
+      request: {
+        headers: requestHeaders
+      }
+    });
+
   // 1. Gateway Entry Gate: /admin/login
   if (pathname === '/admin/login') {
     const keyParam = searchParams.get('key');
 
-    // If already authenticated with a session cookie, allow through
+    // If already authenticated with a session cookie, redirect to /admin/orders
     if (hasSession) {
-      return NextResponse.next();
+      return NextResponse.redirect(new URL('/admin/orders', request.url));
     }
 
     // Must supply valid secret access key in query param
@@ -32,7 +42,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.rewrite(new URL('/_not-found', request.url));
     }
 
-    return NextResponse.next();
+    return forwardNext();
   }
 
   // 2. All Protected Admin Routes (/admin, /admin/orders, etc.)
@@ -41,5 +51,5 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(new URL('/_not-found', request.url));
   }
 
-  return NextResponse.next();
+  return forwardNext();
 }

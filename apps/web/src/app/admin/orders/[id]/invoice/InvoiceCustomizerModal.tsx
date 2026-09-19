@@ -1,6 +1,19 @@
 'use client';
-import { AlertTriangle, CheckCircle2, Sliders, X } from 'lucide-react';
+
+import { AlertTriangle, CheckCircle2, Sliders } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 import type { InvoiceTemplateConfig } from '@hh/domain';
 
@@ -59,406 +72,203 @@ export default function InvoiceCustomizerModal({
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(4px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 60,
-        padding: '16px'
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
       }}
     >
-      <div
-        className="admin-card"
-        style={{
-          width: '100%',
-          maxWidth: '560px',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          position: 'relative'
-        }}
-      >
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute',
-            top: '16px',
-            right: '16px',
-            background: 'transparent',
-            border: 'none',
-            color: '#8BAAA0',
-            cursor: 'pointer'
-          }}
-          title="Close modal"
-        >
-          <X style={{ width: '20px', height: '20px' }} />
-        </button>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-          <Sliders style={{ width: '20px', height: '20px', color: '#C5A880' }} />
-          <h2
-            style={{
-              fontSize: '1.25rem',
-              fontFamily: 'serif',
-              color: '#FDFBF7',
-              margin: 0
-            }}
-          >
-            Customize Invoice Template
-          </h2>
-        </div>
-        <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: '0 0 16px' }}>
-          Personalize brand details, tax identification, and custom messaging across all customer
-          invoices.
-        </p>
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <Sliders className="h-5 w-5 text-accent" />
+            <DialogTitle className="font-serif text-xl">Customize Invoice Template</DialogTitle>
+          </div>
+          <DialogDescription className="text-xs">
+            Personalize brand details, tax identification, and custom messaging across all customer
+            invoices.
+          </DialogDescription>
+        </DialogHeader>
 
         {error && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              backgroundColor: '#3B1313',
-              border: '1px solid #7F1D1D',
-              color: '#F87171',
-              fontSize: '0.8125rem',
-              marginBottom: '14px'
-            }}
-          >
-            <AlertTriangle style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+          <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-xs">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              backgroundColor: '#0F392B',
-              border: '1px solid #165D46',
-              color: '#6EE7B7',
-              fontSize: '0.8125rem',
-              marginBottom: '14px'
-            }}
-          >
-            <CheckCircle2 style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+          <div className="flex items-center gap-2 p-3 rounded-md bg-primary/10 border border-primary/20 text-primary text-xs font-medium">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
             <span>Template saved and applied!</span>
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-        >
+        <form onSubmit={handleSubmit} className="space-y-4 py-2">
           {/* Brand Name & Legal Name */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                Brand Display Name *
-              </label>
-              <input
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">Brand Display Name *</Label>
+              <Input
                 type="text"
                 value={template.brandName}
                 onChange={(e) => setTemplate({ ...template, brandName: e.target.value })}
                 required
-                className="admin-search-input"
-                style={{ width: '100%' }}
+                className="h-9 text-xs"
               />
             </div>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                Legal Entity / Company Name
-              </label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">Legal Entity / Company Name</Label>
+              <Input
                 type="text"
                 value={template.legalName || ''}
                 onChange={(e) => setTemplate({ ...template, legalName: e.target.value })}
                 placeholder="e.g. H&H Luxury Goods Pvt. Ltd."
-                className="admin-search-input"
-                style={{ width: '100%' }}
+                className="h-9 text-xs"
               />
             </div>
           </div>
 
           {/* Tagline & Invoice Prefix */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                Brand Tagline
-              </label>
-              <input
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">Brand Tagline</Label>
+              <Input
                 type="text"
                 value={template.tagline || ''}
                 onChange={(e) => setTemplate({ ...template, tagline: e.target.value })}
                 placeholder="e.g. Crafted for Grace & Modesty"
-                className="admin-search-input"
-                style={{ width: '100%' }}
+                className="h-9 text-xs"
               />
             </div>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                Invoice Number Prefix
-              </label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">Invoice Number Prefix</Label>
+              <Input
                 type="text"
                 value={template.invoicePrefix}
                 onChange={(e) => setTemplate({ ...template, invoicePrefix: e.target.value })}
                 placeholder="INV-HH-"
-                className="admin-search-input"
-                style={{ width: '100%', fontFamily: 'monospace' }}
+                className="h-9 text-xs font-mono"
               />
             </div>
           </div>
 
           {/* Tax / GSTIN */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                GSTIN / Tax ID
-              </label>
-              <input
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">GSTIN / Tax ID</Label>
+              <Input
                 type="text"
                 value={template.gstin || ''}
                 onChange={(e) => setTemplate({ ...template, gstin: e.target.value })}
                 placeholder="27AABCH1234F1Z5"
-                className="admin-search-input"
-                style={{ width: '100%', fontFamily: 'monospace' }}
+                className="h-9 text-xs font-mono"
               />
             </div>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                PAN (Optional)
-              </label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">PAN (Optional)</Label>
+              <Input
                 type="text"
                 value={template.pan || ''}
                 onChange={(e) => setTemplate({ ...template, pan: e.target.value })}
                 placeholder="AABCH1234F"
-                className="admin-search-input"
-                style={{ width: '100%', fontFamily: 'monospace' }}
+                className="h-9 text-xs font-mono"
               />
             </div>
           </div>
 
           {/* Dispatch Origin Address */}
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                color: '#C5A880',
-                marginBottom: '4px'
-              }}
-            >
-              Workshop / Dispatch Address Line 1 *
-            </label>
-            <input
+          <div className="space-y-1">
+            <Label className="text-xs text-accent">Workshop / Dispatch Address Line 1 *</Label>
+            <Input
               type="text"
               value={template.addressLine1}
               onChange={(e) => setTemplate({ ...template, addressLine1: e.target.value })}
               required
-              className="admin-search-input"
-              style={{ width: '100%' }}
+              className="h-9 text-xs"
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                City *
-              </label>
-              <input
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">City *</Label>
+              <Input
                 type="text"
                 value={template.city}
                 onChange={(e) => setTemplate({ ...template, city: e.target.value })}
                 required
-                className="admin-search-input"
-                style={{ width: '100%' }}
+                className="h-9 text-xs"
               />
             </div>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                State *
-              </label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">State *</Label>
+              <Input
                 type="text"
                 value={template.state}
                 onChange={(e) => setTemplate({ ...template, state: e.target.value })}
                 required
-                className="admin-search-input"
-                style={{ width: '100%' }}
+                className="h-9 text-xs"
               />
             </div>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                PIN Code *
-              </label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">PIN Code *</Label>
+              <Input
                 type="text"
                 value={template.postalCode}
                 onChange={(e) => setTemplate({ ...template, postalCode: e.target.value })}
                 required
-                className="admin-search-input"
-                style={{ width: '100%' }}
+                className="h-9 text-xs font-mono"
               />
             </div>
           </div>
 
           {/* Support Email & Phone */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                Customer Support Email *
-              </label>
-              <input
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">Customer Support Email *</Label>
+              <Input
                 type="email"
                 value={template.supportEmail}
                 onChange={(e) => setTemplate({ ...template, supportEmail: e.target.value })}
                 required
-                className="admin-search-input"
-                style={{ width: '100%' }}
+                className="h-9 text-xs"
               />
             </div>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#C5A880',
-                  marginBottom: '4px'
-                }}
-              >
-                Support Helpline Phone *
-              </label>
-              <input
+            <div className="space-y-1">
+              <Label className="text-xs text-accent">Support Helpline Phone *</Label>
+              <Input
                 type="text"
                 value={template.supportPhone}
                 onChange={(e) => setTemplate({ ...template, supportPhone: e.target.value })}
                 required
-                className="admin-search-input"
-                style={{ width: '100%' }}
+                className="h-9 text-xs"
               />
             </div>
           </div>
 
           {/* Custom Footer Note */}
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                color: '#C5A880',
-                marginBottom: '4px'
-              }}
-            >
+          <div className="space-y-1">
+            <Label className="text-xs text-accent">
               Invoice Footer Greeting &amp; Authenticity Note
-            </label>
-            <textarea
+            </Label>
+            <Textarea
               rows={2}
               value={template.footerNote}
               onChange={(e) => setTemplate({ ...template, footerNote: e.target.value })}
-              className="admin-search-input"
-              style={{ width: '100%', resize: 'vertical' }}
+              className="text-xs resize-y"
             />
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '8px',
-              marginTop: '12px'
-            }}
-          >
-            <button type="button" onClick={onClose} className="admin-btn-secondary">
+          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+            <Button type="button" variant="outline" onClick={onClose}>
               Cancel
-            </button>
-            <button type="submit" disabled={isLoading} className="admin-btn-primary">
+            </Button>
+            <Button type="submit" disabled={isLoading}>
               {isLoading ? 'Saving...' : 'Save Template'}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

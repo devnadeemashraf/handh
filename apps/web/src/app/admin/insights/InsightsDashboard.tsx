@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
 import { buildVipWhatsAppUrl } from '@hh/domain';
@@ -271,14 +272,10 @@ export default function InsightsDashboard({ initialInsights }: InsightsDashboard
               </div>
 
               {/* Visual Retention Progress Bar */}
-              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-emerald-600 dark:bg-emerald-400 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.min(100, Math.max(0, customers.repeatRatePercentage))}%`
-                  }}
-                />
-              </div>
+              <Progress
+                value={Math.min(100, Math.max(0, customers.repeatRatePercentage))}
+                className="h-2"
+              />
 
               <div className="flex justify-between pt-2 border-t border-border text-xs text-muted-foreground">
                 <div>
