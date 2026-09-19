@@ -36,6 +36,7 @@ import type { DatabaseClient } from '../index';
 
 export interface CreateOrderParams extends CheckoutSubmissionInput {
   storeId: string;
+  userId?: string | undefined;
 }
 
 /**
@@ -210,6 +211,7 @@ export async function createPendingCheckoutOrder(
       .values({
         orderNumber,
         storeId,
+        userId: params.userId ?? null,
         status: 'pending_payment',
         paymentStatus: 'unpaid',
         fulfillmentStatus: 'unfulfilled',
@@ -588,3 +590,38 @@ export async function updateStoreInvoiceSettings(
 
   return updatedTemplate;
 }
+
+/**
+ * Lists all orders placed by a specific authenticated customer.
+ */
+export async function listOrdersByUserId(
+  db: DatabaseClient,
+  userId: string
+): Promise<Array<Order & { items: OrderItem[] }>> {
+  const userOrders = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.userId, userId))
+    .orderBy(desc(orders.createdAt));
+
+  if (userOrders.length === 0) return [];
+
+  const orderIds = userOrders.map((o) => o.id);
+  const items = await db
+    .select()
+    .from(orderItems)
+    .where(inArray(orderItems.orderId, orderIds));
+
+  const itemsByOrderId = new Map<string, OrderItem[]>();
+  for (const item of items) {
+    const list = itemsByOrderId.get(item.orderId) ?? [];
+    list.push(item);
+    itemsByOrderId.set(item.orderId, list);
+  }
+
+  return userOrders.map((order) => ({
+    ...order,
+    items: itemsByOrderId.get(order.id) ?? []
+  }));
+}
+
