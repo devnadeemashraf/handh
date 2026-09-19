@@ -13,6 +13,13 @@ build/
 .env
 .env.*
 !.env.example
+!.env.production.example
+
+# Database backups
+backups/
+
+# Local file uploads
+apps/web/public/uploads/
 
 # Logs and Diagnostics
 logs/
