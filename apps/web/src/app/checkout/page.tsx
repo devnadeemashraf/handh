@@ -9,23 +9,28 @@ import {
   Copy,
   CreditCard,
   Loader2,
+  MapPin,
   ShieldCheck,
-  ShoppingBag
+  ShoppingBag,
+  User as UserIcon
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import React, { useEffect, useState } from 'react';
-import { AddressForm, type AddressFormValues } from '@/components/checkout/AddressForm';
-import { OrderReviewCard } from '@/components/checkout/OrderReviewCard';
-import { useCart } from '@/context/CartContext';
 
 import {
   type CheckoutOrderResult,
   Money,
   type ServiceControlConfig,
-  ShippingAddressSchema
+  ShippingAddressSchema,
+  type UserAddress
 } from '@hh/domain';
+
+import { AddressForm, type AddressFormValues } from '../../components/checkout/AddressForm';
+import { OrderReviewCard } from '../../components/checkout/OrderReviewCard';
+import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 
 interface RazorpayResponse {
   razorpay_payment_id: string;
@@ -44,6 +49,7 @@ declare global {
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { user, openAuthModal } = useAuth();
   const { cartSummary, isLoading: isCartLoading, clearCart, refreshCart } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -52,6 +58,11 @@ export default function CheckoutPage() {
   const [copiedOrderNumber, setCopiedOrderNumber] = useState(false);
   const [reservationRemainingSecs, setReservationRemainingSecs] = useState<number>(15 * 60);
   const [serviceControl, setServiceControl] = useState<ServiceControlConfig | null>(null);
+
+  // Saved addresses state for authenticated users
+  const [savedAddresses, setSavedAddresses] = useState<UserAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [isManualAddress, setIsManualAddress] = useState(false);
 
   useEffect(() => {
     fetch('/api/service-status')
@@ -63,6 +74,83 @@ export default function CheckoutPage() {
       })
       .catch(() => {});
   }, []);
+
+  // Fetch and auto-select saved address when authenticated
+  useEffect(() => {
+    if (!user) {
+      setSavedAddresses([]);
+      setSelectedAddressId(null);
+      return;
+    }
+
+    fetch('/api/user/addresses')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.addresses) && data.addresses.length > 0) {
+          setSavedAddresses(data.addresses);
+          const defaultAddr =
+            data.addresses.find((a: UserAddress) => a.isDefault) || data.addresses[0];
+          if (defaultAddr && !isManualAddress) {
+            setSelectedAddressId(defaultAddr.id);
+            setValues((prev) => ({
+              ...prev,
+              fullName: defaultAddr.recipientName,
+              phone: defaultAddr.phone,
+              line1: defaultAddr.line1,
+              line2: defaultAddr.line2 || '',
+              city: defaultAddr.city,
+              state: defaultAddr.state,
+              postalCode: defaultAddr.postalCode,
+              country: 'IN',
+              email: prev.email || user.email || ''
+            }));
+          }
+        } else {
+          // Pre-fill profile info if available
+          setValues((prev) => ({
+            ...prev,
+            fullName: prev.fullName || user.name || '',
+            phone: prev.phone || user.phone || '',
+            email: prev.email || user.email || ''
+          }));
+        }
+      })
+      .catch(() => {});
+  }, [user]);
+
+  const handleSelectSavedAddress = (addr: UserAddress) => {
+    setSelectedAddressId(addr.id);
+    setIsManualAddress(false);
+    setValues((prev) => ({
+      ...prev,
+      fullName: addr.recipientName,
+      phone: addr.phone,
+      line1: addr.line1,
+      line2: addr.line2 || '',
+      city: addr.city,
+      state: addr.state,
+      postalCode: addr.postalCode,
+      country: 'IN'
+    }));
+    setErrors({});
+  };
+
+  const handleSwitchToManualAddress = () => {
+    setIsManualAddress(true);
+    setSelectedAddressId(null);
+    setValues((prev) => ({
+      ...prev,
+      fullName: user?.name || '',
+      phone: user?.phone || '',
+      email: prev.email || user?.email || '',
+      line1: '',
+      line2: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: 'IN'
+    }));
+  };
 
   const isServicePaused =
     serviceControl !== null &&
@@ -292,6 +380,18 @@ export default function CheckoutPage() {
       return;
     }
 
+    // 2. Account Required to Place Order (User Platform Rule)
+    if (!user) {
+      openAuthModal({
+        reason: 'An account is required to place and track your handcrafted order.',
+        initialPhone: values.phone,
+        onSuccess: () => {
+          handleSubmit(appliedCouponCode);
+        }
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -315,6 +415,18 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
+        if (res.status === 401) {
+          openAuthModal({
+            reason: 'Please verify your mobile number to complete your order reservation.',
+            initialPhone: values.phone,
+            onSuccess: () => {
+              handleSubmit(appliedCouponCode);
+            }
+          });
+          setIsSubmitting(false);
+          return;
+        }
+
         if (res.status === 409) {
           setSubmitError(
             data.error || 'Inventory was reserved by another shopper. Refreshing cart...'
@@ -805,6 +917,213 @@ export default function CheckoutPage() {
         >
           {/* Left: Address & Customer Details */}
           <div>
+            {!user && (
+              <div
+                style={{
+                  backgroundColor: '#F5EFE6',
+                  border: '1px solid #E4DCCF',
+                  borderRadius: 'var(--radius-md, 8px)',
+                  padding: '16px 20px',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      backgroundColor: '#0A2E24',
+                      color: '#C5A880',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                  >
+                    <UserIcon size={18} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0A2E24' }}>
+                      Checkout as H&amp;H Patron
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#5C6460', marginTop: '2px' }}>
+                      Sign in with your mobile number to use saved addresses and track orders seamlessly.
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    openAuthModal({
+                      reason: 'Sign in to access your saved addresses.',
+                      initialPhone: values.phone
+                    })
+                  }
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: '6px',
+                    border: '1px solid #0A2E24',
+                    backgroundColor: 'transparent',
+                    color: '#0A2E24',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Sign In / Register
+                </button>
+              </div>
+            )}
+
+            {user && savedAddresses.length > 0 && (
+              <div
+                style={{
+                  backgroundColor: 'var(--color-surface)',
+                  borderRadius: 'var(--radius-md, 8px)',
+                  border: '1px solid var(--color-border)',
+                  padding: '20px',
+                  marginBottom: '20px'
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '14px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <MapPin size={18} color="var(--color-primary-emerald)" />
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: '1rem',
+                        fontWeight: 600,
+                        color: 'var(--color-primary-emerald)'
+                      }}
+                    >
+                      Deliver to Saved Address
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={
+                      isManualAddress
+                        ? () => {
+                            const defaultAddr =
+                              savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
+                            if (defaultAddr) handleSelectSavedAddress(defaultAddr);
+                          }
+                        : handleSwitchToManualAddress
+                    }
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--color-primary-emerald)',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      textDecoration: 'underline',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {isManualAddress ? '← Choose Saved Address' : '+ New Address'}
+                  </button>
+                </div>
+
+                {!isManualAddress && (
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                      gap: '12px'
+                    }}
+                  >
+                    {savedAddresses.map((addr) => {
+                      const isSelected = selectedAddressId === addr.id;
+                      return (
+                        <div
+                          key={addr.id}
+                          onClick={() => handleSelectSavedAddress(addr)}
+                          style={{
+                            padding: '14px',
+                            borderRadius: '8px',
+                            border: '2px solid',
+                            borderColor: isSelected
+                              ? 'var(--color-primary-emerald)'
+                              : 'var(--color-border)',
+                            backgroundColor: isSelected
+                              ? 'rgba(10, 46, 36, 0.04)'
+                              : '#FFFFFF',
+                            cursor: 'pointer',
+                            position: 'relative'
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              marginBottom: '6px'
+                            }}
+                          >
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0A2E24' }}>
+                              {addr.label}
+                            </span>
+                            {addr.isDefault && (
+                              <span
+                                style={{
+                                  fontSize: '0.65rem',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  backgroundColor: '#F5EFE6',
+                                  color: '#C5A880',
+                                  fontWeight: 600,
+                                  textTransform: 'uppercase'
+                                }}
+                              >
+                                Default
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 500, color: '#171A19' }}>
+                            {addr.recipientName}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: '0.8rem',
+                              color: '#5C6460',
+                              marginTop: '2px',
+                              lineHeight: 1.4
+                            }}
+                          >
+                            {addr.line1}
+                            {addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}, {addr.state} -{' '}
+                            {addr.postalCode}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: '0.78rem',
+                              color: '#8BAAA0',
+                              marginTop: '4px'
+                            }}
+                          >
+                            {addr.phone}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             <AddressForm
               values={values}
               errors={errors}

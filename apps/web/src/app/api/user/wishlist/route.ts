@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { addToWishlist, createDbClient, listWishlistItems } from '@hh/db';
+import { addToWishlist, createDbClient, listWishlistItemsWithDetails } from '@hh/db';
 
 import { requireUser } from '../../../../lib/auth';
 
@@ -17,7 +17,7 @@ export async function GET() {
   try {
     const user = await requireUser();
     const db = getDatabase();
-    const items = await listWishlistItems(db, user.id);
+    const items = await listWishlistItemsWithDetails(db, user.id);
 
     return NextResponse.json({ success: true, wishlist: items });
   } catch (err: unknown) {

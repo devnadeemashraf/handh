@@ -180,6 +180,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
             <ProductPurchaseCard
               variants={product.variants}
               initialVariantId={primaryVariant?.id}
+              productId={product.id}
             />
 
             {/* Craftsmanship, Shipping & Care Accordion */}

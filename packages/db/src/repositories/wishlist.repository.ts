@@ -1,8 +1,19 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 
-import type { WishlistItem } from '@hh/domain';
+import type {
+  CurrencyCode,
+  WishlistItem,
+  WishlistItemWithDetails,
+  WishlistProductInfo
+} from '@hh/domain';
 
-import { type WishlistItemRecord, wishlistItems } from '../schema';
+import {
+  productImages,
+  products,
+  productVariants,
+  type WishlistItemRecord,
+  wishlistItems
+} from '../schema';
 
 import type { DatabaseClient } from '../index';
 
@@ -27,6 +38,85 @@ export async function listWishlistItems(
     .orderBy(desc(wishlistItems.addedAt));
 
   return rows.map(toDomainWishlistItem);
+}
+
+export async function listWishlistItemsWithDetails(
+  db: DatabaseClient,
+  userId: string
+): Promise<WishlistItemWithDetails[]> {
+  const rows = await db
+    .select()
+    .from(wishlistItems)
+    .where(eq(wishlistItems.userId, userId))
+    .orderBy(desc(wishlistItems.addedAt));
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const productIds = Array.from(new Set(rows.map((r) => r.productId)));
+
+  const [prods, variants, images] = await Promise.all([
+    db.select().from(products).where(inArray(products.id, productIds)),
+    db
+      .select()
+      .from(productVariants)
+      .where(and(inArray(productVariants.productId, productIds), eq(productVariants.isActive, true)))
+      .orderBy(asc(productVariants.sortOrder)),
+    db
+      .select()
+      .from(productImages)
+      .where(inArray(productImages.productId, productIds))
+      .orderBy(asc(productImages.sortOrder))
+  ]);
+
+  const productMap = new Map<string, (typeof prods)[number]>();
+  for (const prod of prods) {
+    productMap.set(prod.id, prod);
+  }
+
+  const defaultVariantMap = new Map<string, (typeof variants)[number]>();
+  for (const v of variants) {
+    if (!defaultVariantMap.has(v.productId)) {
+      defaultVariantMap.set(v.productId, v);
+    }
+  }
+
+  const primaryImageMap = new Map<string, string>();
+  for (const img of images) {
+    if (!primaryImageMap.has(img.productId)) {
+      primaryImageMap.set(img.productId, img.url);
+    }
+  }
+
+  return rows.map((row) => {
+    const item = toDomainWishlistItem(row);
+    const prod = productMap.get(row.productId);
+    if (!prod) {
+      return { ...item, product: null };
+    }
+
+    const matchedVariant = row.variantId
+      ? variants.find((v) => v.id === row.variantId) || defaultVariantMap.get(row.productId)
+      : defaultVariantMap.get(row.productId);
+
+    const productInfo: WishlistProductInfo = {
+      id: prod.id,
+      title: prod.title,
+      slug: prod.slug,
+      priceMinor: matchedVariant ? matchedVariant.priceMinor : 0,
+      compareAtPriceMinor: matchedVariant?.compareAtPriceMinor ?? null,
+      currency: (matchedVariant?.currency as CurrencyCode) ?? 'INR',
+      imageUrl: primaryImageMap.get(prod.id) ?? null,
+      isAvailable: Boolean(matchedVariant && matchedVariant.isActive),
+      defaultVariantId: matchedVariant?.id
+    };
+
+    return {
+      ...item,
+      product: productInfo
+    };
+  });
 }
 
 export async function addToWishlist(

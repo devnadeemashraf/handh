@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 import { IndianPostalCodeSchema } from '../checkout/types';
 
+import type { CurrencyCode } from '../money';
+
 export const USER_ROLES = ['customer', 'admin', 'super_admin'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
@@ -139,6 +141,22 @@ export interface WishlistItem {
   productId: string;
   variantId?: string | null | undefined;
   addedAt: string;
+}
+
+export interface WishlistProductInfo {
+  id: string;
+  title: string;
+  slug: string;
+  priceMinor: number;
+  compareAtPriceMinor?: number | null | undefined;
+  currency: CurrencyCode;
+  imageUrl?: string | null | undefined;
+  isAvailable: boolean;
+  defaultVariantId?: string | undefined;
+}
+
+export interface WishlistItemWithDetails extends WishlistItem {
+  product?: WishlistProductInfo | null | undefined;
 }
 
 export const RequestOTPSchema = z.object({

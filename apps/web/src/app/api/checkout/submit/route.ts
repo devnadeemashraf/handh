@@ -10,6 +10,8 @@ import {
   ValidationError
 } from '@hh/domain';
 
+import { getCurrentUser } from '../../../../lib/auth';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -65,8 +67,21 @@ export async function POST(request: Request) {
       );
     }
 
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'AUTH_REQUIRED',
+          error: 'An account is required to place an order. Please verify your mobile number.'
+        },
+        { status: 401 }
+      );
+    }
+
     const orderResult = await createPendingCheckoutOrder(db, {
       storeId: store.id,
+      userId: currentUser.id,
       ...parseResult.data
     });
 

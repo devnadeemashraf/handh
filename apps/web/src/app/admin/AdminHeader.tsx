@@ -9,7 +9,8 @@ import {
   Palette,
   ShieldCheck,
   Sliders,
-  Tag
+  Tag,
+  Users
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -126,6 +127,15 @@ export default function AdminHeader() {
           >
             <Sliders style={{ width: '16px', height: '16px', color: '#C5A880' }} />
             <span>Services</span>
+          </a>
+
+          <a
+            href="/admin/users"
+            className="admin-btn-secondary"
+            style={{ minHeight: '40px', padding: '8px 14px' }}
+          >
+            <Users style={{ width: '16px', height: '16px', color: '#C5A880' }} />
+            <span>Users</span>
           </a>
 
           <a

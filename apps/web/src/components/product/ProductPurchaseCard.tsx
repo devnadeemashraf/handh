@@ -1,17 +1,21 @@
 'use client';
 
 import { Check, ShieldCheck, ShoppingBag, Sparkles, Truck } from 'lucide-react';
-import { useState } from 'react';
-import { useCart } from '@/context/CartContext';
+import React, { useState } from 'react';
 
 import { Money, type PublicVariantItem } from '@hh/domain';
 
+import { useCart } from '../../context/CartContext';
+import { WishlistButton } from './WishlistButton';
+
 export function ProductPurchaseCard({
   variants,
-  initialVariantId
+  initialVariantId,
+  productId
 }: {
   variants: PublicVariantItem[];
   initialVariantId?: string | undefined;
+  productId?: string | undefined;
 }) {
   const [selectedVariantId, setSelectedVariantId] = useState<string>(
     initialVariantId ?? variants[0]?.id ?? ''
@@ -230,6 +234,16 @@ export function ProductPurchaseCard({
           </>
         )}
       </button>
+
+      {productId && (
+        <div style={{ marginTop: '12px' }}>
+          <WishlistButton
+            productId={productId}
+            variantId={selectedVariantId}
+            variant="button"
+          />
+        </div>
+      )}
 
       {/* Trust Reassurances */}
       <div

@@ -3,14 +3,21 @@ import Link from 'next/link';
 
 import { Money, type PublicProductListItem } from '@hh/domain';
 
+import { WishlistButton } from '../product/WishlistButton';
+
 export function ProductCard({ product }: { product: PublicProductListItem }) {
   const formattedPrice = Money.fromMinor(product.startingPriceMinor, 'INR').format('en-IN');
 
   return (
     <article
       className="royale-card"
-      style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+      style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}
     >
+      {/* Wishlist Button floating top-right */}
+      <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 3 }}>
+        <WishlistButton productId={product.id} size={18} />
+      </div>
+
       <Link href={`/products/${product.slug}`} style={{ display: 'block', position: 'relative' }}>
         {/* 3:4 Luxury Aspect Ratio Image Wrapper */}
         <div

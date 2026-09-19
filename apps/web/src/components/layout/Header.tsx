@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { CategoryTreeItem } from '@hh/domain';
 
 import { HeaderCartButton } from './HeaderCartButton';
+import { HeaderUserButton } from './HeaderUserButton';
 
 export function Header({
   storeName,
@@ -91,8 +92,9 @@ export function Header({
           </Link>
         </div>
 
-        {/* Right Actions: Bag / Cart */}
+        {/* Right Actions: Bag / Cart / User Account */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <HeaderUserButton />
           <HeaderCartButton />
         </div>
       </div>
