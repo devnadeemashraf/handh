@@ -1,3 +1,4 @@
+export * from './auth';
 export * from './cart';
 export type {
   CategoryTreeItem,

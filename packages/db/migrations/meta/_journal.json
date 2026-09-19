@@ -29,6 +29,13 @@
       "when": 1789805133866,
       "tag": "0003_brave_nehzno",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789828721525,
+      "tag": "0004_high_cannonball",
+      "breakpoints": true
     }
   ]
 }

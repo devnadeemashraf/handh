@@ -16,6 +16,7 @@ import type { FulfillmentStatus, OrderStatus, PaymentStatus } from '@hh/domain';
 
 import { productVariants } from './products';
 import { stores } from './stores';
+import { users } from './users';
 export type { FulfillmentStatus, OrderStatus, PaymentStatus };
 
 export interface ShippingAddress {
@@ -35,6 +36,7 @@ export const orders = pgTable(
     storeId: uuid('store_id')
       .notNull()
       .references(() => stores.id, { onDelete: 'restrict' }),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
     status: varchar('status', { length: 32 })
       .$type<OrderStatus>()
       .notNull()
@@ -67,6 +69,7 @@ export const orders = pgTable(
     check('chk_orders_discount_minor', sql`${table.discountMinor} >= 0`),
     check('chk_orders_total_minor', sql`${table.totalMinor} >= 0`),
     index('idx_orders_customer_email').on(table.customerEmail),
+    index('idx_orders_user_id').on(table.userId),
     index('idx_orders_status').on(table.status),
     index('idx_orders_created_at').on(table.createdAt)
   ]

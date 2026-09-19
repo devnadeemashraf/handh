@@ -7,3 +7,4 @@ export * from './outbox';
 export * from './payments';
 export * from './products';
 export * from './stores';
+export * from './users';

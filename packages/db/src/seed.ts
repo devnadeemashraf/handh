@@ -7,6 +7,7 @@ import { createProductWithVariants } from './repositories';
 import {
   categories,
   coupons,
+  familyMembers,
   fulfillments,
   inventoryLevels,
   orderItems,
@@ -14,7 +15,10 @@ import {
   paymentAttempts,
   products,
   storeDomains,
-  stores
+  stores,
+  userAddresses,
+  users,
+  wishlistItems
 } from './schema';
 
 async function seed(): Promise<void> {
@@ -558,6 +562,89 @@ async function seed(): Promise<void> {
     ]);
     console.log('  ✓ Seeded promotional coupons: WELCOME10 (10% off) and ROYAL150 (₹150 off)');
   }
+
+  // 7. Seed Initial Super Admin & Sample Customer
+  await db
+    .insert(users)
+    .values({
+      storeId: store.id,
+      phone: '+919999999999',
+      phoneVerified: true,
+      email: 'admin@handh.in',
+      emailVerified: true,
+      name: 'H&H Super Admin',
+      role: 'super_admin',
+      whatsappOptIn: true
+    })
+    .onConflictDoNothing()
+    .returning();
+
+  const [customer] = await db
+    .insert(users)
+    .values({
+      storeId: store.id,
+      phone: '+919876543210',
+      phoneVerified: true,
+      email: 'fatima@example.com',
+      emailVerified: true,
+      name: 'Fatima Al-Zahra',
+      role: 'customer',
+      whatsappOptIn: true
+    })
+    .onConflictDoNothing()
+    .returning();
+
+  if (customer) {
+    await db.insert(userAddresses).values({
+      userId: customer.id,
+      label: 'Home',
+      recipientName: 'Fatima Al-Zahra',
+      phone: '+919876543210',
+      line1: 'Flat 402, Royal Palms Apartments',
+      line2: 'Banjara Hills Road No. 12',
+      city: 'Hyderabad',
+      state: 'Telangana',
+      postalCode: '500034',
+      country: 'IN',
+      isDefault: true
+    });
+
+    await db.insert(familyMembers).values([
+      {
+        userId: customer.id,
+        name: 'Fatima (Self)',
+        relationship: 'Self',
+        preferences: {
+          sizes: { abaya: 'M', hijab: 'Chiffon 75x180' },
+          style: {
+            preferredColors: ['Emerald Green', 'Royal Gold'],
+            modestyLevel: 'full_coverage'
+          },
+          notes: 'Allergic to nickel plating'
+        }
+      },
+      {
+        userId: customer.id,
+        name: 'Maryam',
+        relationship: 'Daughter',
+        preferences: {
+          sizes: { abaya: 'S', ring: '6' },
+          style: { preferredColors: ['Dusty Rose', 'Pearl White'] }
+        }
+      }
+    ]);
+
+    const firstProduct = await db.select({ id: products.id }).from(products).limit(1);
+    if (firstProduct[0]) {
+      await db.insert(wishlistItems).values({
+        userId: customer.id,
+        productId: firstProduct[0].id
+      });
+    }
+  }
+  console.log(
+    '  ✓ Seeded super_admin (+919999999999) and sample customer (+919876543210) with preferences'
+  );
 
   // Sanity check
   const inventorySum = await db.select().from(inventoryLevels);

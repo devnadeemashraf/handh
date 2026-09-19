@@ -18,6 +18,7 @@ const mockOrder: Order & { shippingAddress: ShippingAddress } = {
   id: 'order-123',
   orderNumber: 'HH-2026-00123',
   storeId: 'store-1',
+  userId: null,
   status: 'paid',
   paymentStatus: 'captured',
   fulfillmentStatus: 'unfulfilled',
