@@ -2,8 +2,8 @@ import { pgTable, uuid, integer, varchar, timestamp, check, index } from 'drizzl
 import { sql, relations } from 'drizzle-orm';
 import { productVariants } from './products';
 
-import type { ReservationStatus } from '@hh/domain';
-export type { ReservationStatus };
+import type { ReservationStatus, InventoryAuditReason } from '@hh/domain';
+export type { ReservationStatus, InventoryAuditReason };
 
 export const inventoryLevels = pgTable(
   'inventory_levels',
@@ -48,6 +48,23 @@ export const inventoryReservations = pgTable(
   ]
 );
 
+export const inventoryAuditLogs = pgTable(
+  'inventory_audit_logs',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    variantId: uuid('variant_id')
+      .notNull()
+      .references(() => productVariants.id, { onDelete: 'cascade' }),
+    previousOnHand: integer('previous_on_hand').notNull(),
+    newOnHand: integer('new_on_hand').notNull(),
+    delta: integer('delta').notNull(),
+    reason: varchar('reason', { length: 64 }).$type<InventoryAuditReason>().notNull(),
+    note: varchar('note', { length: 255 }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => [index('idx_inventory_audit_variant_created').on(table.variantId, table.createdAt)]
+);
+
 export const inventoryLevelsRelations = relations(inventoryLevels, ({ one }) => ({
   variant: one(productVariants, {
     fields: [inventoryLevels.variantId],
@@ -62,7 +79,16 @@ export const inventoryReservationsRelations = relations(inventoryReservations, (
   })
 }));
 
+export const inventoryAuditLogsRelations = relations(inventoryAuditLogs, ({ one }) => ({
+  variant: one(productVariants, {
+    fields: [inventoryAuditLogs.variantId],
+    references: [productVariants.id]
+  })
+}));
+
 export type InventoryLevel = typeof inventoryLevels.$inferSelect;
 export type NewInventoryLevel = typeof inventoryLevels.$inferInsert;
 export type InventoryReservation = typeof inventoryReservations.$inferSelect;
 export type NewInventoryReservation = typeof inventoryReservations.$inferInsert;
+export type InventoryAuditLog = typeof inventoryAuditLogs.$inferSelect;
+export type NewInventoryAuditLog = typeof inventoryAuditLogs.$inferInsert;

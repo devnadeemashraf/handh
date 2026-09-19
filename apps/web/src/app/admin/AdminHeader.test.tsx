@@ -19,12 +19,16 @@ describe('AdminHeader Component', () => {
     expect(screen.getByText('Protected Portal')).toBeInTheDocument();
   });
 
-  it('renders navigation links to orders and live storefront', () => {
+  it('renders navigation links to orders, inventory, and live storefront', () => {
     render(<AdminHeader />);
 
     const ordersLink = screen.getByRole('link', { name: /orders/i });
     expect(ordersLink).toBeInTheDocument();
     expect(ordersLink).toHaveAttribute('href', '/admin/orders');
+
+    const inventoryLink = screen.getByRole('link', { name: /inventory/i });
+    expect(inventoryLink).toBeInTheDocument();
+    expect(inventoryLink).toHaveAttribute('href', '/admin/inventory');
 
     const liveStoreLink = screen.getByRole('link', { name: /live store/i });
     expect(liveStoreLink).toBeInTheDocument();

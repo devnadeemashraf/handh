@@ -15,6 +15,13 @@
       "when": 1789793734473,
       "tag": "0001_round_leech",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789800362581,
+      "tag": "0002_open_norman_osborn",
+      "breakpoints": true
     }
   ]
 }

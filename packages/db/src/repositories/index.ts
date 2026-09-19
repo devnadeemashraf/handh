@@ -5,3 +5,4 @@ export * from './cart.repository';
 export * from './order.repository';
 export * from './payment.repository';
 export * from './fulfillment.repository';
+export * from './inventory.repository';
