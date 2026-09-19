@@ -1,16 +1,18 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { eq } from 'drizzle-orm';
+import { beforeAll, describe, expect, it } from 'vitest';
+
+import { ConflictError, NotFoundError, ValidationError } from '@hh/domain';
+
 import { createDbClient } from './index';
 import {
-  createStore,
   createCategory,
-  createProductWithVariants,
   createPendingCheckoutOrder,
+  createProductWithVariants,
+  createStore,
   findOrderById,
   findOrderByOrderNumber
 } from './repositories';
-import { eq } from 'drizzle-orm';
 import { inventoryLevels } from './schema';
-import { ConflictError, NotFoundError, ValidationError } from '@hh/domain';
 
 describe('Order Repository Integration', () => {
   const databaseUrl =

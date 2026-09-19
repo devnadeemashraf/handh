@@ -1,4 +1,5 @@
-import { Money, type CurrencyCode } from '../money';
+import { type CurrencyCode, Money } from '../money';
+
 import type { CheckoutFinancialBreakdown } from './types';
 
 export const DEFAULT_SHIPPING_FEE_MINOR = 9900; // ₹99.00

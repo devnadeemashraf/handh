@@ -1,8 +1,9 @@
 import { z } from 'zod';
+
 import type {
   StockAdjustmentInput,
-  UpdateVariantPriceInput,
-  UpdateProductStatusInput
+  UpdateProductStatusInput,
+  UpdateVariantPriceInput
 } from './types';
 
 export const StockAdjustmentSchema = z.object({

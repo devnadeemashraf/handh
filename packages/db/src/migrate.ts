@@ -1,8 +1,8 @@
-import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
-import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import postgres from 'postgres';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

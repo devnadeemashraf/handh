@@ -1,9 +1,10 @@
-import { pgTable, uuid, integer, varchar, timestamp, check, index } from 'drizzle-orm/pg-core';
-import { sql, relations } from 'drizzle-orm';
-import { productVariants } from './products';
+import { relations, sql } from 'drizzle-orm';
+import { check, index, integer, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-import type { ReservationStatus, InventoryAuditReason } from '@hh/domain';
-export type { ReservationStatus, InventoryAuditReason };
+import type { InventoryAuditReason, ReservationStatus } from '@hh/domain';
+
+import { productVariants } from './products';
+export type { InventoryAuditReason, ReservationStatus };
 
 export const inventoryLevels = pgTable(
   'inventory_levels',

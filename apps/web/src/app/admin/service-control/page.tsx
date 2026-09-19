@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
-import { createDbClient, getStoreServiceControl } from '@hh/db';
 import { getAdminSession } from '@/lib/admin-auth';
+
+import { createDbClient, getStoreServiceControl } from '@hh/db';
+
 import ServiceControlDashboard from './ServiceControlDashboard';
 
 export const dynamic = 'force-dynamic';

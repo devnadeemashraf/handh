@@ -1,7 +1,7 @@
 'use client';
 
+import { AlertCircle, ArrowRight, Key, Loader2, Lock } from 'lucide-react';
 import { useState } from 'react';
-import { Lock, Key, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 
 export default function AdminLoginForm({ initialKey }: { initialKey: string }) {
   const [key, setKey] = useState(initialKey);

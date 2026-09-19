@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createDbClient, getExecutiveInsights } from '@hh/db';
-import type { InsightTimeframe } from '@hh/domain';
 import { getAdminSession } from '@/lib/admin-auth';
+
+import { createDbClient, getExecutiveInsights } from '@hh/db';
+
+import type { InsightTimeframe } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

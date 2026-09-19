@@ -1,13 +1,14 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+
 import { createDbClient } from './index';
 import {
-  createStore,
-  findStoreBySlug,
   createCategory,
-  getCategoryTree,
   createProductWithVariants,
-  listPublishedProducts,
-  findProductBySlug
+  createStore,
+  findProductBySlug,
+  findStoreBySlug,
+  getCategoryTree,
+  listPublishedProducts
 } from './repositories';
 
 describe('Catalog Domain Integration', () => {

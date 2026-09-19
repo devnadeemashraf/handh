@@ -1,6 +1,7 @@
-import Link from 'next/link';
-import type { StorefrontHero } from '@hh/domain';
 import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+
+import type { StorefrontHero } from '@hh/domain';
 
 export function HeroSection({ hero }: { hero: StorefrontHero }) {
   return (

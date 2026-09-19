@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
-import { createDbClient, getExecutiveInsights } from '@hh/db';
 import { getAdminSession } from '@/lib/admin-auth';
+
+import { createDbClient, getExecutiveInsights } from '@hh/db';
+
 import InsightsDashboard from './InsightsDashboard';
 
 export const dynamic = 'force-dynamic';

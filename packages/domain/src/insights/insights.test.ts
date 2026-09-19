@@ -1,9 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
-  calculateAov,
-  calculateRepeatRate,
   buildTimeframeDateRange,
-  buildVipWhatsAppUrl
+  buildVipWhatsAppUrl,
+  calculateAov,
+  calculateRepeatRate
 } from './calculations';
 
 describe('Executive Insights Domain Calculations', () => {

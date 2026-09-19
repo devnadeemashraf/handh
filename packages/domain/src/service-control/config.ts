@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import type { ServiceControlConfig } from './types';
 
 export const defaultServiceControlConfig: ServiceControlConfig = {

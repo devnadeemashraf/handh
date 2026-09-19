@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import BrandCustomizerDashboard from './BrandCustomizerDashboard';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import { DEFAULT_STOREFRONT_CONFIG } from '@hh/domain';
+
+import BrandCustomizerDashboard from './BrandCustomizerDashboard';
 
 describe('BrandCustomizerDashboard Component', () => {
   beforeEach(() => {

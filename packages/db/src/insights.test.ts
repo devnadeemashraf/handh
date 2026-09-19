@@ -1,12 +1,13 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+
 import { createDbClient } from './index';
 import {
-  createStore,
   createCategory,
   createProductWithVariants,
+  createStore,
   getExecutiveInsights
 } from './repositories';
-import { orders, orderItems } from './schema/orders';
+import { orderItems, orders } from './schema/orders';
 
 describe('Executive Insights Repository Integration', () => {
   const databaseUrl =

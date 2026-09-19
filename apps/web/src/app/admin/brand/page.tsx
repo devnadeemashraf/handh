@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
-import { createDbClient, getStorefrontConfig } from '@hh/db';
 import { getAdminSession } from '@/lib/admin-auth';
+
+import { createDbClient, getStorefrontConfig } from '@hh/db';
+
 import BrandCustomizerDashboard from './BrandCustomizerDashboard';
 
 export const dynamic = 'force-dynamic';

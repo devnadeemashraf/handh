@@ -1,18 +1,19 @@
+import { relations, sql } from 'drizzle-orm';
 import {
-  pgTable,
-  uuid,
-  varchar,
-  text,
-  boolean,
-  integer,
   bigint,
+  boolean,
+  check,
+  integer,
+  pgTable,
+  text,
   timestamp,
   unique,
-  check
+  uuid,
+  varchar
 } from 'drizzle-orm/pg-core';
-import { sql, relations } from 'drizzle-orm';
-import { stores } from './stores';
+
 import { categories } from './categories';
+import { stores } from './stores';
 
 export type ProductStatus = 'draft' | 'published' | 'archived';
 

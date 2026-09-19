@@ -1,6 +1,7 @@
 'use client';
 
-import { Printer, ArrowLeft, FileText } from 'lucide-react';
+import { ArrowLeft, FileText, Printer } from 'lucide-react';
+
 import type { InvoiceData } from '@hh/domain';
 
 interface PackingSlipViewerProps {

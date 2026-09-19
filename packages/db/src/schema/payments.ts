@@ -1,19 +1,20 @@
+import { relations, sql } from 'drizzle-orm';
 import {
-  pgTable,
-  uuid,
-  varchar,
-  text,
   bigint,
-  jsonb,
-  timestamp,
   check,
+  index,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
   unique,
-  index
+  uuid,
+  varchar
 } from 'drizzle-orm/pg-core';
-import { sql, relations } from 'drizzle-orm';
-import { orders } from './orders';
 
 import type { WebhookStatus } from '@hh/domain';
+
+import { orders } from './orders';
 export type { WebhookStatus };
 export type PaymentAttemptStatus = 'initiated' | 'authorized' | 'captured' | 'failed';
 

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { ArrowRight, Clock, ShieldCheck, ShoppingBag, X } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import { CartItemRow } from './CartItemRow';
+
 import { Money, type ServiceControlConfig } from '@hh/domain';
-import { X, ShoppingBag, ArrowRight, ShieldCheck, Clock } from 'lucide-react';
+
+import { CartItemRow } from './CartItemRow';
 
 export function CartDrawer() {
   const { isOpen, closeCart, cartSummary, totalItemCount, updateQuantity, removeItem, isLoading } =

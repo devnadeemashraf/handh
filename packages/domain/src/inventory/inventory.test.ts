@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
   StockAdjustmentSchema,
-  UpdateVariantPriceSchema,
-  UpdateProductStatusSchema
+  UpdateProductStatusSchema,
+  UpdateVariantPriceSchema
 } from './validation';
 
 describe('Inventory Domain Validations', () => {

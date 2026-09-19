@@ -1,10 +1,11 @@
-import type { ShippingProviderAdapter } from './adapter';
 import { ManualShippingAdapter } from './adapters/manual.adapter';
 import { ShiprocketAdapter, type ShiprocketAdapterConfig } from './adapters/shiprocket.adapter';
 import {
   TrackingMoreAdapter,
   type TrackingMoreAdapterConfig
 } from './adapters/trackingmore.adapter';
+
+import type { ShippingProviderAdapter } from './adapter';
 
 export interface DefaultRegistryConfig {
   manualSecret?: string | undefined;

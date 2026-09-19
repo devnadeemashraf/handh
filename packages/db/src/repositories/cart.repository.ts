@@ -1,11 +1,14 @@
-import { inArray, eq, and, asc } from 'drizzle-orm';
-import { products, productVariants, inventoryLevels, productImages } from '../schema';
+import { and, asc, eq, inArray } from 'drizzle-orm';
+
 import {
   buildCartSummary,
-  type CartItemInput,
   type CartItemDetail,
+  type CartItemInput,
   type CartSummary
 } from '@hh/domain';
+
+import { inventoryLevels, productImages, products, productVariants } from '../schema';
+
 import type { DatabaseClient } from '../index';
 
 export async function validateCartItems(

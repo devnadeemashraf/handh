@@ -1,19 +1,20 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import {
-  Palette,
-  Eye,
-  CheckCircle2,
   AlertTriangle,
-  RefreshCw,
-  Sparkles,
-  Truck,
-  Shield,
+  CheckCircle2,
   Clock,
+  Eye,
+  LayoutTemplate,
   Megaphone,
-  LayoutTemplate
+  Palette,
+  RefreshCw,
+  Shield,
+  Sparkles,
+  Truck
 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
 import type { StorefrontConfig, StorefrontReassurance } from '@hh/domain';
 
 interface BrandCustomizerDashboardProps {

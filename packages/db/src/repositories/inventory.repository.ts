@@ -1,22 +1,25 @@
-import { eq, desc, and, asc } from 'drizzle-orm';
-import {
-  products,
-  productVariants,
-  productImages,
-  inventoryLevels,
-  inventoryAuditLogs,
-  type InventoryLevel,
-  type InventoryAuditLog,
-  type ProductStatus
-} from '../schema';
+import { and, asc, desc, eq } from 'drizzle-orm';
+
 import type {
   AdminInventoryItem,
   AdminInventorySummary,
   InventoryAuditLogItem,
   StockAdjustmentInput,
-  UpdateVariantPriceInput,
-  UpdateProductStatusInput
+  UpdateProductStatusInput,
+  UpdateVariantPriceInput
 } from '@hh/domain';
+
+import {
+  type InventoryAuditLog,
+  inventoryAuditLogs,
+  type InventoryLevel,
+  inventoryLevels,
+  productImages,
+  products,
+  type ProductStatus,
+  productVariants
+} from '../schema';
+
 import type { DatabaseClient } from '../index';
 
 export async function listAdminInventory(

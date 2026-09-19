@@ -1,16 +1,19 @@
-import { eq, and, inArray, gte, sql } from 'drizzle-orm';
-import type { DatabaseClient } from '../index';
-import { orders, orderItems } from '../schema/orders';
-import { inventoryLevels } from '../schema/inventory';
-import { stores } from '../schema/stores';
+import { and, eq, gte, inArray, sql } from 'drizzle-orm';
+
 import { NotFoundError } from '@hh/domain';
 import {
-  type InsightTimeframe,
-  type ExecutiveInsightsData,
+  buildTimeframeDateRange,
   calculateAov,
   calculateRepeatRate,
-  buildTimeframeDateRange
+  type ExecutiveInsightsData,
+  type InsightTimeframe
 } from '@hh/domain';
+
+import { inventoryLevels } from '../schema/inventory';
+import { orderItems, orders } from '../schema/orders';
+import { stores } from '../schema/stores';
+
+import type { DatabaseClient } from '../index';
 
 /**
  * Retrieves executive insights, financial scoreboard, customer frequency metrics,

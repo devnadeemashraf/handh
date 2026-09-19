@@ -1,30 +1,31 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Script from 'next/script';
-import { useRouter } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
-import { AddressForm, type AddressFormValues } from '@/components/checkout/AddressForm';
-import { OrderReviewCard } from '@/components/checkout/OrderReviewCard';
 import {
-  ShippingAddressSchema,
-  Money,
-  type CheckoutOrderResult,
-  type ServiceControlConfig
-} from '@hh/domain';
-import {
+  AlertTriangle,
   ArrowLeft,
-  ShoppingBag,
+  Check,
   CheckCircle2,
   Clock,
-  AlertTriangle,
   Copy,
-  Check,
   CreditCard,
   Loader2,
-  ShieldCheck
+  ShieldCheck,
+  ShoppingBag
 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Script from 'next/script';
+import React, { useEffect, useState } from 'react';
+import { AddressForm, type AddressFormValues } from '@/components/checkout/AddressForm';
+import { OrderReviewCard } from '@/components/checkout/OrderReviewCard';
+import { useCart } from '@/context/CartContext';
+
+import {
+  type CheckoutOrderResult,
+  Money,
+  type ServiceControlConfig,
+  ShippingAddressSchema
+} from '@hh/domain';
 
 interface RazorpayResponse {
   razorpay_payment_id: string;

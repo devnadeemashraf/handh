@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import CouponsDashboard from './CouponsDashboard';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import type { Coupon } from '@hh/domain';
+
+import CouponsDashboard from './CouponsDashboard';
 
 const mockCoupons: Coupon[] = [
   {

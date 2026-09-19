@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Search, ChevronRight, Package, Truck, CheckCircle2, Clock, X } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Clock, Package, Search, Truck, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+
 import type { Order } from '@hh/db';
 
 interface OrdersTableProps {

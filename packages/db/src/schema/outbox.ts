@@ -1,12 +1,12 @@
 import {
-  pgTable,
-  uuid,
-  varchar,
-  text,
+  index,
   integer,
   jsonb,
+  pgTable,
+  text,
   timestamp,
-  index
+  uuid,
+  varchar
 } from 'drizzle-orm/pg-core';
 
 export type OutboxStatus = 'pending' | 'published' | 'failed';

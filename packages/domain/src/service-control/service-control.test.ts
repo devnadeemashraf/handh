@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
   defaultServiceControlConfig,
-  ServiceControlConfigSchema,
-  resolveServiceControl
+  resolveServiceControl,
+  ServiceControlConfigSchema
 } from './config';
 
 describe('Service Control Domain Config & Resolver', () => {

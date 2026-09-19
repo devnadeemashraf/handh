@@ -1,6 +1,8 @@
-import { createDbClient, listAdminOrders, getAdminOrderMetrics } from '@hh/db';
+import { Clock, IndianRupee, ShoppingBag, Truck } from 'lucide-react';
+
+import { createDbClient, getAdminOrderMetrics, listAdminOrders } from '@hh/db';
+
 import OrdersTable from './OrdersTable';
-import { IndianRupee, Clock, Truck, ShoppingBag } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 

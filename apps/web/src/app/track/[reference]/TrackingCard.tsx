@@ -1,21 +1,23 @@
 'use client';
 
-import { useState } from 'react';
 import {
-  Truck,
-  Copy,
-  Check,
-  ExternalLink,
-  MessageCircle,
-  MapPin,
   Calendar,
-  ShieldCheck,
+  Check,
+  CheckCircle2,
   Clock,
-  Sparkles,
+  Copy,
+  ExternalLink,
+  MapPin,
+  MessageCircle,
   PackageCheck,
-  CheckCircle2
+  ShieldCheck,
+  Sparkles,
+  Truck
 } from 'lucide-react';
-import { COURIER_LABELS, resolveCourierTrackingUrl, type CourierProvider } from '@hh/domain';
+import { useState } from 'react';
+
+import { COURIER_LABELS, type CourierProvider, resolveCourierTrackingUrl } from '@hh/domain';
+
 import type { Fulfillment, Order, ShippingAddress } from '@hh/db';
 
 interface TrackingCardProps {

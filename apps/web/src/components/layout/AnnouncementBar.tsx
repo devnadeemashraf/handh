@@ -1,5 +1,6 @@
-import type { StorefrontAnnouncement } from '@hh/domain';
 import Link from 'next/link';
+
+import type { StorefrontAnnouncement } from '@hh/domain';
 
 export function AnnouncementBar({ announcement }: { announcement: StorefrontAnnouncement }) {
   if (!announcement.enabled || !announcement.text) {

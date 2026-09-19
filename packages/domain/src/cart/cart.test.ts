@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { buildCartSummary } from './cart';
-import { CartItemInputSchema, CartValidationInputSchema, type CartItemDetail } from './types';
+import { type CartItemDetail, CartItemInputSchema, CartValidationInputSchema } from './types';
 
 describe('Cart Domain Calculations & Reconciliation', () => {
   it('correctly calculates subtotal and line totals in minor units (paise)', () => {

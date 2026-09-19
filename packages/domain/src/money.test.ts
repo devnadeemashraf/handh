@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { Money } from './money';
+import { describe, expect, it } from 'vitest';
+
 import { ValidationError } from './errors';
+import { Money } from './money';
 
 describe('Money Value Object', () => {
   describe('creation and validation', () => {

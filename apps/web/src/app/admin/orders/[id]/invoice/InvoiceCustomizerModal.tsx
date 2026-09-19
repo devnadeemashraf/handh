@@ -1,6 +1,7 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
-import { X, CheckCircle2, AlertTriangle, Sliders } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Sliders, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
 import type { InvoiceTemplateConfig } from '@hh/domain';
 
 interface InvoiceCustomizerModalProps {

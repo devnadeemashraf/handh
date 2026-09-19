@@ -1,7 +1,9 @@
+import { CartDrawer } from '@/components/cart/CartDrawer';
+import { CartProvider } from '@/context/CartContext';
+
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import { CartProvider } from '@/context/CartContext';
-import { CartDrawer } from '@/components/cart/CartDrawer';
+
 import './globals.css';
 
 export const metadata: Metadata = {

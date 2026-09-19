@@ -1,14 +1,15 @@
-import { createDbClient } from '@hh/db';
-import { findStoreBySlug, listPublishedProducts, getCategoryTree } from '@hh/db';
-import { resolveStorefrontConfig } from '@hh/domain';
-import { ThemeInjector } from '@/components/layout/ThemeInjector';
-import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { HeroSection } from '@/components/home/HeroSection';
 import { CategoryFilter } from '@/components/catalog/CategoryFilter';
 import { ProductCard } from '@/components/catalog/ProductCard';
+import { HeroSection } from '@/components/home/HeroSection';
 import { ReassuranceSection } from '@/components/home/ReassuranceSection';
+import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { ThemeInjector } from '@/components/layout/ThemeInjector';
+
+import { createDbClient } from '@hh/db';
+import { findStoreBySlug, getCategoryTree, listPublishedProducts } from '@hh/db';
+import { resolveStorefrontConfig } from '@hh/domain';
 
 interface HomePageProps {
   searchParams: Promise<{ category?: string }>;

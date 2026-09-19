@@ -1,6 +1,9 @@
-import { eq, and, asc } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
+
+import type { CategoryTreeItem, CreateCategoryInput } from '@hh/domain';
+
 import { categories, type Category } from '../schema';
-import type { CreateCategoryInput, CategoryTreeItem } from '@hh/domain';
+
 import type { DatabaseClient } from '../index';
 
 export async function listCategoriesByStore(

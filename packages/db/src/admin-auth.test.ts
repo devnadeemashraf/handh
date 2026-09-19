@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
-  verifyAdminPassword,
-  verifyAdminAccessKey,
   createAdminSessionToken,
+  verifyAdminAccessKey,
+  verifyAdminPassword,
   verifyAdminSessionToken
 } from './services/admin-auth.service';
 

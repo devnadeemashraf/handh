@@ -1,35 +1,27 @@
-export * from './money';
-export * from './errors';
-export * from './result';
-export * from './states';
-export * from './catalog';
 export * from './cart';
-export * from './checkout';
-export * from './payment';
-export * from './fulfillment';
-export * from './shipping';
-export * from './inventory';
-export * from './invoice';
-export * from './insights';
-export * from './service-control';
-export * from './coupon';
-
 export type {
   CategoryTreeItem,
-  PublicVariantItem,
+  PublicProductDetail,
   PublicProductImage,
   PublicProductListItem,
-  PublicProductDetail
+  PublicVariantItem
 } from './catalog';
-
+export * from './catalog';
 export type {
-  ShippingAddressInput,
-  CheckoutSubmissionInput,
   CheckoutFinancialBreakdown,
   CheckoutOrderResult,
-  IndianState
+  CheckoutSubmissionInput,
+  IndianState,
+  ShippingAddressInput
 } from './checkout';
-
+export * from './checkout';
+export * from './coupon';
+export * from './errors';
+export * from './fulfillment';
+export * from './insights';
+export * from './inventory';
+export * from './invoice';
+export * from './money';
 export type {
   PaymentOrderRequestInput,
   PaymentVerificationInput,
@@ -38,3 +30,8 @@ export type {
   RazorpayPaymentModalOptions,
   RazorpayWebhookEvent
 } from './payment';
+export * from './payment';
+export * from './result';
+export * from './service-control';
+export * from './shipping';
+export * from './states';

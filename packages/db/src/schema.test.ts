@@ -1,33 +1,35 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
-  stores,
   categories,
-  products,
-  productVariants,
+  fulfillments,
   inventoryLevels,
   inventoryReservations,
-  orders,
   orderItems,
+  orders,
+  outboxEvents,
   paymentAttempts,
-  webhookEvents,
-  fulfillments,
-  outboxEvents
+  products,
+  productVariants,
+  stores,
+  webhookEvents
 } from './schema';
+
 import type {
-  Store,
   Category,
-  Product,
-  ProductVariant,
+  Fulfillment,
+  FulfillmentStatus,
   InventoryLevel,
   Order,
   OrderItem,
-  PaymentAttempt,
-  WebhookEvent,
-  Fulfillment,
-  OutboxEvent,
   OrderStatus,
+  OutboxEvent,
+  PaymentAttempt,
   PaymentStatus,
-  FulfillmentStatus
+  Product,
+  ProductVariant,
+  Store,
+  WebhookEvent
 } from './schema';
 
 describe('Database Schema Definitions & Inferred Types', () => {

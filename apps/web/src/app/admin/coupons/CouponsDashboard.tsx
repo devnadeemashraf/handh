@@ -1,17 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import {
-  Tag,
-  Plus,
-  CheckCircle2,
-  RefreshCw,
-  Copy,
-  Check,
-  X,
-  Sparkles,
-  Search
-} from 'lucide-react';
+import { Check, CheckCircle2, Copy, Plus, RefreshCw, Search, Sparkles, Tag, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
 import type { Coupon, DiscountType } from '@hh/domain';
 
 interface CouponsDashboardProps {

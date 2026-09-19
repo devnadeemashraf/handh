@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import ServiceControlDashboard from './ServiceControlDashboard';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import type { ServiceControlConfig } from '@hh/domain';
+
+import ServiceControlDashboard from './ServiceControlDashboard';
 
 const mockDefaultConfig: ServiceControlConfig = {
   operatingStatus: 'active',

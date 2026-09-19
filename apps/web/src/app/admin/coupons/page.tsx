@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
-import { createDbClient, listCoupons } from '@hh/db';
 import { getAdminSession } from '@/lib/admin-auth';
+
+import { createDbClient, listCoupons } from '@hh/db';
+
 import CouponsDashboard from './CouponsDashboard';
 
 export const dynamic = 'force-dynamic';

@@ -1,18 +1,19 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useCart } from '@/context/CartContext';
-import { CartItemRow } from '@/components/cart/CartItemRow';
-import { Money, type ServiceControlConfig } from '@hh/domain';
 import {
-  ShoppingBag,
-  ArrowRight,
   ArrowLeft,
+  ArrowRight,
+  Clock,
   ShieldCheck,
-  Truck,
+  ShoppingBag,
   Sparkles,
-  Clock
+  Truck
 } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { CartItemRow } from '@/components/cart/CartItemRow';
+import { useCart } from '@/context/CartContext';
+
+import { Money, type ServiceControlConfig } from '@hh/domain';
 
 export default function CartPage() {
   const { cartSummary, updateQuantity, removeItem, isLoading, totalItemCount } = useCart();

@@ -1,17 +1,18 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import {
-  Sliders,
-  Power,
-  ShieldCheck,
   AlertTriangle,
-  CreditCard,
-  ShoppingBag,
   CheckCircle2,
+  CreditCard,
+  Eye,
+  Power,
   RefreshCw,
-  Eye
+  ShieldCheck,
+  ShoppingBag,
+  Sliders
 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
 import type { ServiceControlConfig, StoreOperatingStatus } from '@hh/domain';
 
 interface ServiceControlDashboardProps {

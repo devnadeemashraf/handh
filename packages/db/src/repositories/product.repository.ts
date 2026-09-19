@@ -1,19 +1,22 @@
-import { eq, and, asc, min } from 'drizzle-orm';
+import { and, asc, eq, min } from 'drizzle-orm';
+
+import type {
+  CreateProductInput,
+  PublicProductDetail,
+  PublicProductListItem,
+  PublicVariantItem
+} from '@hh/domain';
+
 import {
-  products,
-  productVariants,
-  productImages,
   categories,
   inventoryLevels,
   type Product,
-  type ProductVariant
+  productImages,
+  products,
+  type ProductVariant,
+  productVariants
 } from '../schema';
-import type {
-  CreateProductInput,
-  PublicProductListItem,
-  PublicProductDetail,
-  PublicVariantItem
-} from '@hh/domain';
+
 import type { DatabaseClient } from '../index';
 
 export async function listPublishedProducts(

@@ -1,7 +1,7 @@
 /// <reference types="@testing-library/jest-dom/vitest" />
-import * as matchers from '@testing-library/jest-dom/matchers';
 import React from 'react';
-import { vi, afterEach, expect } from 'vitest';
+import { afterEach, expect, vi } from 'vitest';
+import * as matchers from '@testing-library/jest-dom/matchers';
 import { cleanup } from '@testing-library/react';
 
 expect.extend(matchers);

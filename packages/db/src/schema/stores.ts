@@ -1,7 +1,7 @@
-import { pgTable, uuid, varchar, text, boolean, jsonb, timestamp } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { boolean, jsonb, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-import type { StorefrontConfig, InvoiceTemplateConfig, ServiceControlConfig } from '@hh/domain';
+import type { InvoiceTemplateConfig, ServiceControlConfig, StorefrontConfig } from '@hh/domain';
 
 export interface StoreSettings {
   contactEmail?: string | undefined;

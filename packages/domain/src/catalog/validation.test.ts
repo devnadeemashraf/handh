@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
-  createStoreSchema,
   createCategorySchema,
   createProductSchema,
+  createStoreSchema,
   slugSchema
 } from './validation';
 

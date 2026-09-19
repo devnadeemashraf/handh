@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
-import { INDIAN_STATES, type ShippingAddressInput } from '@hh/domain';
 import { MapPin } from 'lucide-react';
+import React from 'react';
+
+import { INDIAN_STATES, type ShippingAddressInput } from '@hh/domain';
 
 export interface AddressFormValues extends ShippingAddressInput {
   customerNotes?: string;

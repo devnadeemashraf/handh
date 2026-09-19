@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import InsightsDashboard from './InsightsDashboard';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import type { ExecutiveInsightsData } from '@hh/domain';
+
+import InsightsDashboard from './InsightsDashboard';
 
 const mockInsightsData: ExecutiveInsightsData = {
   timeframe: 'week',

@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import InventoryManager from './InventoryManager';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import type { AdminInventoryItem, AdminInventorySummary, InventoryAuditLogItem } from '@hh/domain';
+
+import InventoryManager from './InventoryManager';
 
 describe('InventoryManager Component', () => {
   const mockItems: AdminInventoryItem[] = [

@@ -1,15 +1,15 @@
 'use client';
 
 import {
-  Package,
-  Boxes,
   BarChart3,
-  Sliders,
-  Tag,
-  Palette,
+  Boxes,
   ExternalLink,
   LogOut,
-  ShieldCheck
+  Package,
+  Palette,
+  ShieldCheck,
+  Sliders,
+  Tag
 } from 'lucide-react';
 import { useState } from 'react';
 

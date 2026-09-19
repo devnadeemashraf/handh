@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
+import type { Fulfillment, Order, ShippingAddress } from '@hh/db';
+
 import OrderFulfillmentActions from './OrderFulfillmentActions';
-import type { Order, Fulfillment, ShippingAddress } from '@hh/db';
 
 const mockShippingAddress: ShippingAddress = {
   line1: 'Flat 402, Lotus Residency',

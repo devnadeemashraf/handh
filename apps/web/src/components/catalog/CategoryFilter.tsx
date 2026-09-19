@@ -1,4 +1,5 @@
 import Link from 'next/link';
+
 import type { CategoryTreeItem } from '@hh/domain';
 
 export function CategoryFilter({

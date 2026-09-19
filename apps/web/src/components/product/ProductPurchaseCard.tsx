@@ -1,9 +1,10 @@
 'use client';
 
+import { Check, ShieldCheck, ShoppingBag, Sparkles, Truck } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
+
 import { Money, type PublicVariantItem } from '@hh/domain';
-import { ShoppingBag, Check, ShieldCheck, Truck, Sparkles } from 'lucide-react';
 
 export function ProductPurchaseCard({
   variants,

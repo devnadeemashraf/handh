@@ -1,9 +1,10 @@
-import React from 'react';
+import { ArrowLeft, CheckCircle2, ExternalLink, Package, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import React from 'react';
+
 import { createDbClient, findOrderByOrderNumber } from '@hh/db';
 import { Money } from '@hh/domain';
-import { CheckCircle2, Package, ArrowLeft, Truck, ExternalLink } from 'lucide-react';
 
 interface SuccessPageProps {
   searchParams: Promise<{ orderNumber?: string }>;

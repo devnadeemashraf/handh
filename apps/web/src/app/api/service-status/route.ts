@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+
 import { createDbClient, getStoreServiceControl } from '@hh/db';
 
 export const dynamic = 'force-dynamic';

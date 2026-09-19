@@ -1,10 +1,10 @@
 import type {
-  ShippingProviderId,
   BookPickupRequest,
   BookPickupResult,
+  NormalizedTrackingEvent,
   RegisterCounterAwbRequest,
   RegisterCounterAwbResult,
-  NormalizedTrackingEvent
+  ShippingProviderId
 } from './types';
 
 /**

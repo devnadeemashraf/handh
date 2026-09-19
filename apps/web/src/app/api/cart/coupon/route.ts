@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+
 import { createDbClient, findCouponByCode } from '@hh/db';
 import { validateCoupon } from '@hh/domain';
 
@@ -17,7 +18,11 @@ function parseValidateCouponRequest(
   if (typeof json !== 'object' || json === null) return { ok: false };
   const obj = json as Record<string, unknown>;
   if (typeof obj['code'] !== 'string' || obj['code'].length === 0) return { ok: false };
-  if (typeof obj['subtotalMinor'] !== 'number' || !Number.isInteger(obj['subtotalMinor']) || obj['subtotalMinor'] < 0)
+  if (
+    typeof obj['subtotalMinor'] !== 'number' ||
+    !Number.isInteger(obj['subtotalMinor']) ||
+    obj['subtotalMinor'] < 0
+  )
     return { ok: false };
   return { ok: true, code: obj['code'], subtotalMinor: obj['subtotalMinor'] };
 }

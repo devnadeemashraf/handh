@@ -1,6 +1,8 @@
 import Link from 'next/link';
-import { HeaderCartButton } from './HeaderCartButton';
+
 import type { CategoryTreeItem } from '@hh/domain';
+
+import { HeaderCartButton } from './HeaderCartButton';
 
 export function Header({
   storeName,

@@ -1,9 +1,10 @@
-import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+
 import * as schema from './schema';
 
-export * from './schema';
 export * from './repositories';
+export * from './schema';
 export * from './services';
 export { schema };
 

@@ -1,4 +1,5 @@
-import { pgTable, uuid, varchar, integer, boolean, timestamp, index } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+
 import { stores } from './stores';
 
 export const coupons = pgTable(

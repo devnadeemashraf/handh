@@ -1,8 +1,10 @@
 'use client';
 
+import { ArrowLeft, Printer, Sliders, Tag } from 'lucide-react';
 import { useState } from 'react';
-import { Printer, Sliders, ArrowLeft, Tag } from 'lucide-react';
+
 import type { InvoiceData } from '@hh/domain';
+
 import InvoiceCustomizerModal from './InvoiceCustomizerModal';
 
 interface InvoiceViewerProps {

@@ -1,12 +1,13 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+
 import { createDbClient } from './index';
 import {
-  createStore,
   createCoupon,
+  createStore,
   findCouponByCode,
+  incrementCouponUsage,
   listCoupons,
-  updateCoupon,
-  incrementCouponUsage
+  updateCoupon
 } from './repositories';
 
 describe('Coupon Repository Integration', () => {

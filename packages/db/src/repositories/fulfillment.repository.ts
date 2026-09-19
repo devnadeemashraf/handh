@@ -1,13 +1,16 @@
-import { eq, desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
+
+import { generateTrackingReference, NotFoundError, ValidationError } from '@hh/domain';
+
 import {
-  fulfillments,
-  orders,
-  outboxEvents,
+  type CourierProvider,
   type Fulfillment,
+  fulfillments,
   type Order,
-  type CourierProvider
+  orders,
+  outboxEvents
 } from '../schema';
-import { generateTrackingReference, ValidationError, NotFoundError } from '@hh/domain';
+
 import type { DatabaseClient } from '../index';
 
 export interface CreateOrderFulfillmentOptions {

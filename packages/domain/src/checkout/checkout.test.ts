@@ -1,11 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
+import { calculateCheckoutFinancials, generateOrderNumber } from './calculations';
 import {
+  CheckoutSubmissionSchema,
   IndianPhoneSchema,
   IndianPostalCodeSchema,
-  ShippingAddressSchema,
-  CheckoutSubmissionSchema
+  ShippingAddressSchema
 } from './types';
-import { calculateCheckoutFinancials, generateOrderNumber } from './calculations';
 
 describe('Checkout Domain Validation', () => {
   it('validates 10-digit Indian mobile numbers', () => {

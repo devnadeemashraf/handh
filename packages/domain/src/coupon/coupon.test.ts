@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { calculateDiscount, validateCoupon } from './calculations';
+
 import type { Coupon } from './types';
 
 const baseCoupon: Coupon = {

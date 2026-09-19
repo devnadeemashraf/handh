@@ -1,5 +1,6 @@
-import { pgTable, uuid, varchar, text, timestamp, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { index, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+
 import { orders } from './orders';
 
 export type CourierProvider = 'india_post' | 'dtdc' | 'delhivery' | 'bluedart' | 'other';

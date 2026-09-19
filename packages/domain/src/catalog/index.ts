@@ -1,11 +1,10 @@
-export * from './validation';
-export * from './types';
 export * from './storefront-config';
-
 export type {
   CategoryTreeItem,
-  PublicVariantItem,
+  PublicProductDetail,
   PublicProductImage,
   PublicProductListItem,
-  PublicProductDetail
+  PublicVariantItem
 } from './types';
+export * from './types';
+export * from './validation';

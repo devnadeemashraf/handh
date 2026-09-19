@@ -1,5 +1,6 @@
+import { Clock, Shield, Sparkles, Truck } from 'lucide-react';
+
 import type { StorefrontReassurance } from '@hh/domain';
-import { Sparkles, Truck, Shield, Clock } from 'lucide-react';
 
 export function ReassuranceSection({ items }: { items: StorefrontReassurance[] }) {
   if (items.length === 0) return null;

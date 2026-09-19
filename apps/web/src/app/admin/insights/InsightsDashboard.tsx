@@ -1,21 +1,23 @@
 'use client';
 
-import { useState } from 'react';
 import {
-  TrendingUp,
-  ShoppingBag,
-  Receipt,
-  PackageOpen,
-  Users,
-  MessageSquare,
+  AlertTriangle,
   ArrowRight,
   Flame,
+  MessageSquare,
+  PackageOpen,
+  Receipt,
   RefreshCw,
+  ShoppingBag,
   Sparkles,
-  AlertTriangle
+  TrendingUp,
+  Users
 } from 'lucide-react';
-import type { ExecutiveInsightsData, InsightTimeframe } from '@hh/domain';
+import { useState } from 'react';
+
 import { buildVipWhatsAppUrl } from '@hh/domain';
+
+import type { ExecutiveInsightsData, InsightTimeframe } from '@hh/domain';
 
 interface InsightsDashboardProps {
   initialInsights: ExecutiveInsightsData;

@@ -1,8 +1,8 @@
 'use client';
 
+import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
-import { ShoppingBag } from 'lucide-react';
 
 export function HeaderCartButton() {
   const { totalItemCount, openCart } = useCart();

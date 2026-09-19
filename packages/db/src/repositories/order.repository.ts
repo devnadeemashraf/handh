@@ -1,34 +1,37 @@
-import { eq, and, inArray, sql, or, ilike, desc } from 'drizzle-orm';
+import { and, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
+
 import {
-  orders,
-  orderItems,
-  productVariants,
-  products,
+  assertCanTransitionOrder,
+  calculateCheckoutFinancials,
+  type CheckoutOrderResult,
+  type CheckoutSubmissionInput,
+  ConflictError,
+  type Coupon,
+  generateOrderNumber,
+  type InvoiceData,
+  type InvoiceTemplateConfig,
+  NotFoundError,
+  type OrderStatus,
+  resolveInvoiceTemplate,
+  validateCoupon,
+  ValidationError
+} from '@hh/domain';
+
+import {
+  coupons,
+  fulfillments,
   inventoryLevels,
   inventoryReservations,
-  stores,
-  paymentAttempts,
-  fulfillments,
-  coupons,
   type Order,
-  type OrderItem
+  type OrderItem,
+  orderItems,
+  orders,
+  paymentAttempts,
+  products,
+  productVariants,
+  stores
 } from '../schema';
-import {
-  calculateCheckoutFinancials,
-  generateOrderNumber,
-  validateCoupon,
-  type Coupon,
-  ConflictError,
-  ValidationError,
-  NotFoundError,
-  assertCanTransitionOrder,
-  resolveInvoiceTemplate,
-  type OrderStatus,
-  type CheckoutSubmissionInput,
-  type CheckoutOrderResult,
-  type InvoiceData,
-  type InvoiceTemplateConfig
-} from '@hh/domain';
+
 import type { DatabaseClient } from '../index';
 
 export interface CreateOrderParams extends CheckoutSubmissionInput {

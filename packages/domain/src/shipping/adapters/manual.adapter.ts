@@ -1,3 +1,5 @@
+import { type CourierProvider, resolveCourierTrackingUrl } from '../../fulfillment';
+
 import type { ShippingProviderAdapter } from '../adapter';
 import type {
   NormalizedTrackingEvent,
@@ -5,7 +7,6 @@ import type {
   RegisterCounterAwbRequest,
   RegisterCounterAwbResult
 } from '../types';
-import { resolveCourierTrackingUrl, type CourierProvider } from '../../fulfillment';
 
 export interface ManualAdapterConfig {
   webhookSecret?: string | undefined;

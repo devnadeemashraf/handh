@@ -1,19 +1,21 @@
-import { eq, and } from 'drizzle-orm';
-import { createDbClient } from './index';
-import {
-  stores,
-  storeDomains,
-  categories,
-  products,
-  inventoryLevels,
-  orders,
-  orderItems,
-  fulfillments,
-  paymentAttempts,
-  coupons
-} from './schema';
-import { createProductWithVariants } from './repositories';
+import { and, eq } from 'drizzle-orm';
+
 import { defaultInvoiceTemplate } from '@hh/domain';
+
+import { createDbClient } from './index';
+import { createProductWithVariants } from './repositories';
+import {
+  categories,
+  coupons,
+  fulfillments,
+  inventoryLevels,
+  orderItems,
+  orders,
+  paymentAttempts,
+  products,
+  storeDomains,
+  stores
+} from './schema';
 
 async function seed(): Promise<void> {
   const databaseUrl =

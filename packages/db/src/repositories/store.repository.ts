@@ -1,7 +1,11 @@
 import { eq } from 'drizzle-orm';
-import { stores, storeDomains, type Store } from '../schema';
+
+import { NotFoundError, resolveServiceControl, resolveStorefrontConfig } from '@hh/domain';
+
 import type { CreateStoreInput, ServiceControlConfig, StorefrontConfig } from '@hh/domain';
-import { resolveServiceControl, resolveStorefrontConfig, NotFoundError } from '@hh/domain';
+
+import { type Store, storeDomains, stores } from '../schema';
+
 import type { DatabaseClient } from '../index';
 
 export async function findStoreById(db: DatabaseClient, id: string): Promise<Store | null> {

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { getAdminSession } from '@/lib/admin-auth';
+
 import { createDbClient, updateCoupon } from '@hh/db';
 import { UpdateCouponSchema } from '@hh/domain';
-import { getAdminSession } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

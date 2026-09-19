@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import InvoiceViewer from './InvoiceViewer';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+
 import type { InvoiceData } from '@hh/domain';
+
+import InvoiceViewer from './InvoiceViewer';
 
 const mockInvoiceData: InvoiceData = {
   invoiceNumber: 'INV-HH-2026-00001',

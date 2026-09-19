@@ -1,12 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import {
-  resolveCourierTrackingUrl,
-  isAllowlistedCourierUrl,
-  generateTrackingReference,
-  CreateFulfillmentRequestSchema,
-  canTransitionFulfillment,
   assertCanTransitionFulfillment,
-  InvalidStateTransitionError
+  canTransitionFulfillment,
+  CreateFulfillmentRequestSchema,
+  generateTrackingReference,
+  InvalidStateTransitionError,
+  isAllowlistedCourierUrl,
+  resolveCourierTrackingUrl
 } from '../index';
 
 describe('Fulfillment Domain', () => {

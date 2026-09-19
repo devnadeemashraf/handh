@@ -1,17 +1,19 @@
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
 import Link from 'next/link';
-import { createDbClient } from '@hh/db';
-import { findStoreBySlug, findProductBySlug, getCategoryTree } from '@hh/db';
-import { resolveStorefrontConfig } from '@hh/domain';
-import { ThemeInjector } from '@/components/layout/ThemeInjector';
+import { notFound } from 'next/navigation';
+import { ReassuranceSection } from '@/components/home/ReassuranceSection';
 import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
-import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { ThemeInjector } from '@/components/layout/ThemeInjector';
+import { ProductAccordion } from '@/components/product/ProductAccordion';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductPurchaseCard } from '@/components/product/ProductPurchaseCard';
-import { ProductAccordion } from '@/components/product/ProductAccordion';
-import { ReassuranceSection } from '@/components/home/ReassuranceSection';
+
+import type { Metadata } from 'next';
+
+import { createDbClient } from '@hh/db';
+import { findProductBySlug, findStoreBySlug, getCategoryTree } from '@hh/db';
+import { resolveStorefrontConfig } from '@hh/domain';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;

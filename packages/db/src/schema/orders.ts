@@ -1,21 +1,22 @@
+import { relations, sql } from 'drizzle-orm';
 import {
-  pgTable,
-  uuid,
-  varchar,
-  text,
-  integer,
   bigint,
-  jsonb,
-  timestamp,
   check,
-  index
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar
 } from 'drizzle-orm/pg-core';
-import { sql, relations } from 'drizzle-orm';
-import { stores } from './stores';
-import { productVariants } from './products';
 
-import type { OrderStatus, PaymentStatus, FulfillmentStatus } from '@hh/domain';
-export type { OrderStatus, PaymentStatus, FulfillmentStatus };
+import type { FulfillmentStatus, OrderStatus, PaymentStatus } from '@hh/domain';
+
+import { productVariants } from './products';
+import { stores } from './stores';
+export type { FulfillmentStatus, OrderStatus, PaymentStatus };
 
 export interface ShippingAddress {
   line1: string;

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import { Clock, Loader2, ShieldCheck, Sparkles, Tag, Truck, X } from 'lucide-react';
 import Image from 'next/image';
-import { Money, calculateCheckoutFinancials, type CartSummary } from '@hh/domain';
-import { ShieldCheck, Clock, Truck, Sparkles, Loader2, Tag, X } from 'lucide-react';
+import React, { useState } from 'react';
+
+import { calculateCheckoutFinancials, type CartSummary, Money } from '@hh/domain';
 
 interface OrderReviewCardProps {
   cartSummary: CartSummary;

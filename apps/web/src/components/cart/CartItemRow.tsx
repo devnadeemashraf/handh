@@ -1,9 +1,10 @@
 'use client';
 
+import { AlertCircle, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Money, type CartItemDetail } from '@hh/domain';
-import { Minus, Plus, Trash2, AlertCircle } from 'lucide-react';
+
+import { type CartItemDetail, Money } from '@hh/domain';
 
 interface CartItemRowProps {
   item: CartItemDetail;

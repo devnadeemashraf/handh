@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import type { InvoiceTemplateConfig } from './types';
 
 export const defaultInvoiceTemplate: InvoiceTemplateConfig = {

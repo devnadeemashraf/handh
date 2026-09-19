@@ -1,13 +1,14 @@
-import { describe, it, expect } from 'vitest';
-import {
-  canTransitionOrder,
-  assertCanTransitionOrder,
-  canTransitionPayment,
-  assertCanTransitionPayment,
-  canTransitionReservation,
-  assertCanTransitionReservation
-} from './states';
+import { describe, expect, it } from 'vitest';
+
 import { InvalidStateTransitionError } from './errors';
+import {
+  assertCanTransitionOrder,
+  assertCanTransitionPayment,
+  assertCanTransitionReservation,
+  canTransitionOrder,
+  canTransitionPayment,
+  canTransitionReservation
+} from './states';
 
 describe('State Machine Transitions', () => {
   describe('Order state transitions', () => {

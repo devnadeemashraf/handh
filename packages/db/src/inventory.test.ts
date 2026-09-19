@@ -1,17 +1,18 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { eq } from 'drizzle-orm';
+import { beforeAll, describe, expect, it } from 'vitest';
+
 import { createDbClient } from './index';
 import {
-  createStore,
+  adjustStock,
   createCategory,
   createProductWithVariants,
+  createStore,
   listAdminInventory,
-  adjustStock,
-  updateVariantPrice,
+  listInventoryAuditLogs,
   updateProductStatus,
-  listInventoryAuditLogs
+  updateVariantPrice
 } from './repositories';
 import { inventoryLevels } from './schema';
-import { eq } from 'drizzle-orm';
 
 describe('Inventory Repository Integration', () => {
   const databaseUrl =

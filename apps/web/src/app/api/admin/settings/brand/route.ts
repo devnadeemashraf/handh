@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { getAdminSession } from '@/lib/admin-auth';
+
 import { createDbClient, getStorefrontConfig, updateStorefrontConfig } from '@hh/db';
 import { storefrontConfigSchema } from '@hh/domain';
-import { getAdminSession } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

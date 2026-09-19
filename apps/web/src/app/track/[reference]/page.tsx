@@ -1,6 +1,8 @@
+import { MessageCircle, PackageX } from 'lucide-react';
+
 import { createDbClient, findFulfillmentByReference } from '@hh/db';
+
 import TrackingCard from './TrackingCard';
-import { PackageX, MessageCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
