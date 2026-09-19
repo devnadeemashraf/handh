@@ -1,0 +1,39 @@
+{
+    # Global options
+    email {$ACME_EMAIL:admin@handh.com}
+    admin off
+}
+
+{$DOMAIN:localhost} {
+    # Automatic compression (Zstd, Gzip)
+    encode zstd gzip
+
+    # Reverse proxy to Next.js application
+    reverse_proxy web:3000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+
+        # Health check to backend web service
+        health_uri /api/health
+        health_interval 15s
+        health_timeout 5s
+    }
+
+    # Security Headers
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+
+    # Access logging
+    log {
+        output stdout
+        format console
+    }
+}

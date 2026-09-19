@@ -1,0 +1,54 @@
+# syntax=docker/dockerfile:1
+FROM node:22-alpine AS base
+
+RUN apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Stage 1: Install all workspace dependencies
+FROM base AS deps
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/config/package.json ./packages/config/
+COPY packages/domain/package.json ./packages/domain/
+COPY packages/db/package.json ./packages/db/
+COPY apps/worker/package.json ./apps/worker/
+
+RUN pnpm install --frozen-lockfile
+
+# Stage 2: Build Worker and packages
+FROM base AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/packages/config/node_modules ./packages/config/node_modules
+COPY --from=deps /app/packages/domain/node_modules ./packages/domain/node_modules
+COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
+COPY --from=deps /app/apps/worker/node_modules ./apps/worker/node_modules
+
+COPY . .
+
+RUN pnpm --filter @hh/worker build
+
+# Stage 3: Minimal production runner
+FROM node:22-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 workeruser
+
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/config ./packages/config
+COPY --from=builder /app/packages/domain ./packages/domain
+COPY --from=builder /app/packages/db ./packages/db
+COPY --from=builder /app/apps/worker/dist ./apps/worker/dist
+COPY --from=builder /app/apps/worker/package.json ./apps/worker/
+
+USER workeruser
+
+CMD ["node", "apps/worker/dist/index.js"]
