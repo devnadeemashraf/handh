@@ -17,6 +17,7 @@
     "lint": "eslint .",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "docker:up": "docker compose up -d postgres redis",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
