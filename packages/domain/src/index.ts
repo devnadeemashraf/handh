@@ -23,6 +23,7 @@ export * from './insights';
 export * from './inventory';
 export * from './invoice';
 export * from './money';
+export * from './notification';
 export type {
   PaymentOrderRequestInput,
   PaymentVerificationInput,

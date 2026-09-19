@@ -115,6 +115,7 @@ export async function createOrderFulfillment(
         customerName: order.customerName,
         customerEmail: order.customerEmail,
         customerPhone: order.customerPhone,
+        userId: order.userId,
         shippedAt: fulfillment.shippedAt.toISOString()
       },
       status: 'pending',
@@ -245,6 +246,8 @@ export async function processShippingWebhookEvent(
           providerId: event.providerId,
           customerEmail: order.customerEmail,
           customerName: order.customerName,
+          customerPhone: order.customerPhone,
+          userId: order.userId,
           deliveredAt: (deliveredAt ?? new Date()).toISOString()
         },
         status: 'pending',

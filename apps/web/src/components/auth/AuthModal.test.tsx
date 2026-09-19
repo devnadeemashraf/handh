@@ -9,9 +9,7 @@ describe('AuthModal Component', () => {
   });
 
   it('renders nothing when isOpen is false', () => {
-    const { container } = render(
-      <AuthModal isOpen={false} onClose={vi.fn()} />
-    );
+    const { container } = render(<AuthModal isOpen={false} onClose={vi.fn()} />);
 
     expect(container.firstChild).toBeNull();
   });
@@ -95,7 +93,9 @@ describe('AuthModal Component', () => {
     global.fetch = fetchMock;
 
     const onSuccess = vi.fn();
-    render(<AuthModal isOpen={true} onClose={vi.fn()} onSuccess={onSuccess} initialPhone="9876543210" />);
+    render(
+      <AuthModal isOpen={true} onClose={vi.fn()} onSuccess={onSuccess} initialPhone="9876543210" />
+    );
 
     // Step 1: Request OTP
     fireEvent.click(screen.getByRole('button', { name: /send verification code/i }));

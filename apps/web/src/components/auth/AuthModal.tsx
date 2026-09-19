@@ -315,10 +315,19 @@ export function AuthModal({
                   style={{ marginTop: '3px', accentColor: '#0A2E24' }}
                 />
                 <div style={{ fontSize: '0.8rem', color: '#5C6460', lineHeight: 1.4 }}>
-                  <span style={{ fontWeight: 600, color: '#0A2E24', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span
+                    style={{
+                      fontWeight: 600,
+                      color: '#0A2E24',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
                     <MessageSquare size={14} color="#164335" /> WhatsApp Concierge Updates
                   </span>
-                  Receive order confirmation, live courier dispatch, and delivery tracking via our WhatsApp bot.
+                  Receive order confirmation, live courier dispatch, and delivery tracking via our
+                  WhatsApp bot.
                 </div>
               </label>
 
@@ -360,7 +369,9 @@ export function AuthModal({
                     justifyContent: 'space-between'
                   }}
                 >
-                  <span>Development OTP: <strong>{devCode}</strong></span>
+                  <span>
+                    Development OTP: <strong>{devCode}</strong>
+                  </span>
                   <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Auto-filled</span>
                 </div>
               )}

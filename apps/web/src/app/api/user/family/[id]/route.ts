@@ -14,10 +14,7 @@ function getDatabase() {
   return createDbClient(databaseUrl);
 }
 
-export async function PATCH(
-  request: Request,
-  props: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireUser();
     const { id: memberId } = await props.params;
@@ -46,10 +43,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  _request: Request,
-  props: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_request: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireUser();
     const { id: memberId } = await props.params;

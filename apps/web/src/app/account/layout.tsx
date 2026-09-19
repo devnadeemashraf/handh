@@ -84,7 +84,8 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
               margin: '0 0 24px'
             }}
           >
-            Please sign in with your mobile number to view your order history, manage saved delivery addresses, and tailor family size preferences.
+            Please sign in with your mobile number to view your order history, manage saved delivery
+            addresses, and tailor family size preferences.
           </p>
 
           <button
@@ -144,7 +145,9 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
             <ArrowLeft size={14} /> Back to Store
           </Link>
           <span style={{ color: '#D1C9BE' }}>•</span>
-          <span style={{ fontSize: '0.82rem', color: '#0A2E24', fontWeight: 600 }}>Patron Account</span>
+          <span style={{ fontSize: '0.82rem', color: '#0A2E24', fontWeight: 600 }}>
+            Patron Account
+          </span>
         </div>
 
         {/* 2-Column Responsive Layout */}

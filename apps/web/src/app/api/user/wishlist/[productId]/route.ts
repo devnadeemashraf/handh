@@ -13,10 +13,7 @@ function getDatabase() {
   return createDbClient(databaseUrl);
 }
 
-export async function DELETE(
-  _request: Request,
-  props: { params: Promise<{ productId: string }> }
-) {
+export async function DELETE(_request: Request, props: { params: Promise<{ productId: string }> }) {
   try {
     const user = await requireUser();
     const { productId } = await props.params;

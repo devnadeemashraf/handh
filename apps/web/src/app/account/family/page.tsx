@@ -19,7 +19,9 @@ export default function AccountFamilyPage() {
   const [hijabPref, setHijabPref] = useState('');
   const [ringSize, setRingSize] = useState('');
   const [shoeSize, setShoeSize] = useState('');
-  const [modestyLevel, setModestyLevel] = useState<'full_coverage' | 'moderate' | 'light'>('full_coverage');
+  const [modestyLevel, setModestyLevel] = useState<'full_coverage' | 'moderate' | 'light'>(
+    'full_coverage'
+  );
   const [colorsInput, setColorsInput] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -161,7 +163,8 @@ export default function AccountFamilyPage() {
             Family Members & Size Profiles
           </h1>
           <p style={{ margin: 0, fontSize: '0.85rem', color: '#5C6460' }}>
-            Store bespoke measurements, modest styling nuances, and size preferences for yourself and loved ones.
+            Store bespoke measurements, modest styling nuances, and size preferences for yourself
+            and loved ones.
           </p>
         </div>
 
@@ -210,7 +213,8 @@ export default function AccountFamilyPage() {
             No Family Profiles Saved
           </p>
           <p style={{ fontSize: '0.85rem', color: '#5C6460', margin: '0 0 16px' }}>
-            Add sizes for yourself, your daughter, spouse, or mother to make gifting and sizing effortless.
+            Add sizes for yourself, your daughter, spouse, or mother to make gifting and sizing
+            effortless.
           </p>
           <button
             onClick={handleOpenAdd}
@@ -229,7 +233,13 @@ export default function AccountFamilyPage() {
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: '20px'
+          }}
+        >
           {members.map((mem) => {
             const sizes = mem.preferences?.sizes || {};
             const style = mem.preferences?.style || {};
@@ -245,7 +255,14 @@ export default function AccountFamilyPage() {
                   boxShadow: '0 2px 8px rgba(10, 46, 36, 0.02)'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '12px'
+                  }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontWeight: 700, fontSize: '1.05rem', color: '#0A2E24' }}>
                       {mem.name}
@@ -270,14 +287,26 @@ export default function AccountFamilyPage() {
                     <button
                       onClick={() => handleOpenEdit(mem)}
                       aria-label="Edit profile"
-                      style={{ background: 'none', border: 'none', color: '#5C6460', cursor: 'pointer', padding: '4px' }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#5C6460',
+                        cursor: 'pointer',
+                        padding: '4px'
+                      }}
                     >
                       <Edit2 size={15} />
                     </button>
                     <button
                       onClick={() => handleDelete(mem.id)}
                       aria-label="Delete profile"
-                      style={{ background: 'none', border: 'none', color: '#991B1B', cursor: 'pointer', padding: '4px' }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#991B1B',
+                        cursor: 'pointer',
+                        padding: '4px'
+                      }}
                     >
                       <Trash2 size={15} />
                     </button>
@@ -285,24 +314,58 @@ export default function AccountFamilyPage() {
                 </div>
 
                 {/* Sizes Pill Grid */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
+                <div
+                  style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}
+                >
                   {sizes.abaya && (
-                    <span style={{ fontSize: '0.78rem', backgroundColor: '#FBF9F5', border: '1px solid #EBE7DF', padding: '4px 8px', borderRadius: '6px' }}>
+                    <span
+                      style={{
+                        fontSize: '0.78rem',
+                        backgroundColor: '#FBF9F5',
+                        border: '1px solid #EBE7DF',
+                        padding: '4px 8px',
+                        borderRadius: '6px'
+                      }}
+                    >
                       Abaya: <strong>{sizes.abaya}</strong>
                     </span>
                   )}
                   {sizes.hijab && (
-                    <span style={{ fontSize: '0.78rem', backgroundColor: '#FBF9F5', border: '1px solid #EBE7DF', padding: '4px 8px', borderRadius: '6px' }}>
+                    <span
+                      style={{
+                        fontSize: '0.78rem',
+                        backgroundColor: '#FBF9F5',
+                        border: '1px solid #EBE7DF',
+                        padding: '4px 8px',
+                        borderRadius: '6px'
+                      }}
+                    >
                       Hijab: <strong>{sizes.hijab}</strong>
                     </span>
                   )}
                   {sizes.ring && (
-                    <span style={{ fontSize: '0.78rem', backgroundColor: '#FBF9F5', border: '1px solid #EBE7DF', padding: '4px 8px', borderRadius: '6px' }}>
+                    <span
+                      style={{
+                        fontSize: '0.78rem',
+                        backgroundColor: '#FBF9F5',
+                        border: '1px solid #EBE7DF',
+                        padding: '4px 8px',
+                        borderRadius: '6px'
+                      }}
+                    >
                       Ring: <strong>{sizes.ring}</strong>
                     </span>
                   )}
                   {sizes.shoe && (
-                    <span style={{ fontSize: '0.78rem', backgroundColor: '#FBF9F5', border: '1px solid #EBE7DF', padding: '4px 8px', borderRadius: '6px' }}>
+                    <span
+                      style={{
+                        fontSize: '0.78rem',
+                        backgroundColor: '#FBF9F5',
+                        border: '1px solid #EBE7DF',
+                        padding: '4px 8px',
+                        borderRadius: '6px'
+                      }}
+                    >
                       Shoe: <strong>{sizes.shoe}</strong>
                     </span>
                   )}
@@ -319,7 +382,15 @@ export default function AccountFamilyPage() {
                 )}
 
                 {style.preferredColors && style.preferredColors.length > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      flexWrap: 'wrap',
+                      marginBottom: '8px'
+                    }}
+                  >
                     <span style={{ fontSize: '0.75rem', color: '#8C928F' }}>Favorite Tones:</span>
                     {style.preferredColors.map((col) => (
                       <span
@@ -406,10 +477,21 @@ export default function AccountFamilyPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form
+              onSubmit={handleSubmit}
+              style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#171A19',
+                      marginBottom: '4px'
+                    }}
+                  >
                     Name
                   </label>
                   <input
@@ -418,17 +500,36 @@ export default function AccountFamilyPage() {
                     placeholder="e.g. Fatima (Self) or Maryam"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #EBE7DF',
+                      borderRadius: '6px'
+                    }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#171A19',
+                      marginBottom: '4px'
+                    }}
+                  >
                     Relationship
                   </label>
                   <select
                     value={relationship}
                     onChange={(e) => setRelationship(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px', backgroundColor: '#FFFFFF' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #EBE7DF',
+                      borderRadius: '6px',
+                      backgroundColor: '#FFFFFF'
+                    }}
                   >
                     <option value="Self">Self</option>
                     <option value="Daughter">Daughter</option>
@@ -441,13 +542,35 @@ export default function AccountFamilyPage() {
               </div>
 
               {/* Sizing Subsection */}
-              <div style={{ padding: '12px', backgroundColor: '#FBF9F5', borderRadius: '8px', border: '1px solid #F0ECE4' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0A2E24', display: 'block', marginBottom: '10px' }}>
+              <div
+                style={{
+                  padding: '12px',
+                  backgroundColor: '#FBF9F5',
+                  borderRadius: '8px',
+                  border: '1px solid #F0ECE4'
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    color: '#0A2E24',
+                    display: 'block',
+                    marginBottom: '10px'
+                  }}
+                >
                   Standard Measurements & Fit
                 </span>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#5C6460', marginBottom: '2px' }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '0.75rem',
+                        color: '#5C6460',
+                        marginBottom: '2px'
+                      }}
+                    >
                       Abaya Size
                     </label>
                     <select
@@ -455,7 +578,13 @@ export default function AccountFamilyPage() {
                       onChange={(e) =>
                         setAbayaSize(e.target.value as 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL' | '')
                       }
-                      style={{ width: '100%', padding: '8px', border: '1px solid #EBE7DF', borderRadius: '6px', backgroundColor: '#FFFFFF' }}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '1px solid #EBE7DF',
+                        borderRadius: '6px',
+                        backgroundColor: '#FFFFFF'
+                      }}
                     >
                       <option value="">None specified</option>
                       <option value="XS">XS</option>
@@ -467,7 +596,14 @@ export default function AccountFamilyPage() {
                     </select>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#5C6460', marginBottom: '2px' }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '0.75rem',
+                        color: '#5C6460',
+                        marginBottom: '2px'
+                      }}
+                    >
                       Hijab Preference / Size
                     </label>
                     <input
@@ -475,11 +611,23 @@ export default function AccountFamilyPage() {
                       placeholder="e.g. Chiffon 75x180"
                       value={hijabPref}
                       onChange={(e) => setHijabPref(e.target.value)}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '1px solid #EBE7DF',
+                        borderRadius: '6px'
+                      }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#5C6460', marginBottom: '2px' }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '0.75rem',
+                        color: '#5C6460',
+                        marginBottom: '2px'
+                      }}
+                    >
                       Ring Size (US)
                     </label>
                     <input
@@ -487,11 +635,23 @@ export default function AccountFamilyPage() {
                       placeholder="e.g. 6 or 7"
                       value={ringSize}
                       onChange={(e) => setRingSize(e.target.value)}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '1px solid #EBE7DF',
+                        borderRadius: '6px'
+                      }}
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', color: '#5C6460', marginBottom: '2px' }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '0.75rem',
+                        color: '#5C6460',
+                        marginBottom: '2px'
+                      }}
+                    >
                       Shoe Size (EU/UK)
                     </label>
                     <input
@@ -499,7 +659,12 @@ export default function AccountFamilyPage() {
                       placeholder="e.g. EU 38"
                       value={shoeSize}
                       onChange={(e) => setShoeSize(e.target.value)}
-                      style={{ width: '100%', padding: '8px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                      style={{
+                        width: '100%',
+                        padding: '8px',
+                        border: '1px solid #EBE7DF',
+                        borderRadius: '6px'
+                      }}
                     />
                   </div>
                 </div>
@@ -507,7 +672,15 @@ export default function AccountFamilyPage() {
 
               {/* Style & Colors */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#171A19',
+                    marginBottom: '4px'
+                  }}
+                >
                   Modesty Silhouette
                 </label>
                 <select
@@ -515,16 +688,32 @@ export default function AccountFamilyPage() {
                   onChange={(e) =>
                     setModestyLevel(e.target.value as 'full_coverage' | 'moderate' | 'light')
                   }
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px', backgroundColor: '#FFFFFF' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #EBE7DF',
+                    borderRadius: '6px',
+                    backgroundColor: '#FFFFFF'
+                  }}
                 >
-                  <option value="full_coverage">Full Coverage (Classic modesty, flowing drape)</option>
+                  <option value="full_coverage">
+                    Full Coverage (Classic modesty, flowing drape)
+                  </option>
                   <option value="moderate">Moderate Modesty (Tailored contemporary)</option>
                   <option value="light">Light (Minimalist everyday essentials)</option>
                 </select>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#171A19',
+                    marginBottom: '4px'
+                  }}
+                >
                   Preferred Colors / Tones (comma-separated)
                 </label>
                 <input
@@ -532,12 +721,25 @@ export default function AccountFamilyPage() {
                   placeholder="e.g. Emerald Green, Dusty Rose, Pearl White"
                   value={colorsInput}
                   onChange={(e) => setColorsInput(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #EBE7DF',
+                    borderRadius: '6px'
+                  }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#171A19',
+                    marginBottom: '4px'
+                  }}
+                >
                   Personal Notes / Fabric Sensitivities
                 </label>
                 <textarea
@@ -545,21 +747,47 @@ export default function AccountFamilyPage() {
                   placeholder="e.g. Allergic to nickel; prefers breathable organic crepe for monsoon"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #EBE7DF',
+                    borderRadius: '6px'
+                  }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '10px',
+                  marginTop: '8px'
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  style={{ padding: '10px 16px', border: '1px solid #EBE7DF', borderRadius: '6px', background: 'none', cursor: 'pointer' }}
+                  style={{
+                    padding: '10px 16px',
+                    border: '1px solid #EBE7DF',
+                    borderRadius: '6px',
+                    background: 'none',
+                    cursor: 'pointer'
+                  }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  style={{ padding: '10px 20px', backgroundColor: '#0A2E24', color: '#FDFBF7', border: 'none', borderRadius: '6px', fontWeight: 600, cursor: 'pointer' }}
+                  style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#0A2E24',
+                    color: '#FDFBF7',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
                 >
                   {editingMember ? 'Update Profile' : 'Save Profile'}
                 </button>

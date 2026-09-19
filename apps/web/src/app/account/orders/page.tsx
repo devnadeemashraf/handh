@@ -59,7 +59,9 @@ export default function AccountOrdersPage() {
         boxShadow: '0 4px 12px rgba(10, 46, 36, 0.03)'
       }}
     >
-      <div style={{ borderBottom: '1px solid #F0ECE4', paddingBottom: '16px', marginBottom: '24px' }}>
+      <div
+        style={{ borderBottom: '1px solid #F0ECE4', paddingBottom: '16px', marginBottom: '24px' }}
+      >
         <h1
           style={{
             fontFamily: 'var(--font-serif)',
@@ -71,7 +73,8 @@ export default function AccountOrdersPage() {
           Order History & Tracking
         </h1>
         <p style={{ margin: 0, fontSize: '0.85rem', color: '#5C6460' }}>
-          Review your previous bespoke orders, view line item details, and track live courier shipments.
+          Review your previous bespoke orders, view line item details, and track live courier
+          shipments.
         </p>
       </div>
 
@@ -166,28 +169,40 @@ export default function AccountOrdersPage() {
                   }}
                 >
                   <div>
-                    <span style={{ fontSize: '0.75rem', color: '#8C928F', textTransform: 'uppercase' }}>
+                    <span
+                      style={{ fontSize: '0.75rem', color: '#8C928F', textTransform: 'uppercase' }}
+                    >
                       Order Placed
                     </span>
-                    <p style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: '#0A2E24' }}>
+                    <p
+                      style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: '#0A2E24' }}
+                    >
                       {dateStr}
                     </p>
                   </div>
 
                   <div>
-                    <span style={{ fontSize: '0.75rem', color: '#8C928F', textTransform: 'uppercase' }}>
+                    <span
+                      style={{ fontSize: '0.75rem', color: '#8C928F', textTransform: 'uppercase' }}
+                    >
                       Order Reference
                     </span>
-                    <p style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: '#0A2E24' }}>
+                    <p
+                      style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: '#0A2E24' }}
+                    >
                       {ord.orderNumber}
                     </p>
                   </div>
 
                   <div>
-                    <span style={{ fontSize: '0.75rem', color: '#8C928F', textTransform: 'uppercase' }}>
+                    <span
+                      style={{ fontSize: '0.75rem', color: '#8C928F', textTransform: 'uppercase' }}
+                    >
                       Total Amount
                     </span>
-                    <p style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: '#0A2E24' }}>
+                    <p
+                      style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: '#0A2E24' }}
+                    >
                       {Money.fromMinor(ord.totalMinor, 'INR').format('en-IN')}
                     </p>
                   </div>
@@ -228,7 +243,14 @@ export default function AccountOrdersPage() {
                 </div>
 
                 {/* Items */}
-                <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div
+                  style={{
+                    padding: '16px 18px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px'
+                  }}
+                >
                   {ord.items.map((item) => (
                     <div
                       key={item.id}
@@ -241,24 +263,35 @@ export default function AccountOrdersPage() {
                       }}
                     >
                       <div>
-                        <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem', color: '#171A19' }}>
+                        <p
+                          style={{
+                            margin: 0,
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            color: '#171A19'
+                          }}
+                        >
                           {item.productNameSnapshot}
                         </p>
                         <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#5C6460' }}>
-                          Variant: {item.variantNameSnapshot} • SKU: {item.skuSnapshot} • Qty: {item.quantity}
+                          Variant: {item.variantNameSnapshot} • SKU: {item.skuSnapshot} • Qty:{' '}
+                          {item.quantity}
                         </p>
                       </div>
 
                       <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0A2E24' }}>
-                        {Money.fromMinor(item.unitPriceMinor * item.quantity, 'INR').format('en-IN')}
+                        {Money.fromMinor(item.unitPriceMinor * item.quantity, 'INR').format(
+                          'en-IN'
+                        )}
                       </div>
                     </div>
                   ))}
 
                   {/* Destination */}
                   <div style={{ fontSize: '0.8rem', color: '#5C6460', marginTop: '4px' }}>
-                    <strong>Delivery Address:</strong> {ord.shippingAddress.line1}, {ord.shippingAddress.city},{' '}
-                    {ord.shippingAddress.state} - {ord.shippingAddress.postalCode}
+                    <strong>Delivery Address:</strong> {ord.shippingAddress.line1},{' '}
+                    {ord.shippingAddress.city}, {ord.shippingAddress.state} -{' '}
+                    {ord.shippingAddress.postalCode}
                   </div>
                 </div>
               </div>

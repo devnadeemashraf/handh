@@ -15,10 +15,7 @@ function getDatabase() {
   return createDbClient(databaseUrl);
 }
 
-export async function PATCH(
-  request: Request,
-  props: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const isAuthed = await getAdminSession();
     if (!isAuthed) {

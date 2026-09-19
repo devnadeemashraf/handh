@@ -607,10 +607,7 @@ export async function listOrdersByUserId(
   if (userOrders.length === 0) return [];
 
   const orderIds = userOrders.map((o) => o.id);
-  const items = await db
-    .select()
-    .from(orderItems)
-    .where(inArray(orderItems.orderId, orderIds));
+  const items = await db.select().from(orderItems).where(inArray(orderItems.orderId, orderIds));
 
   const itemsByOrderId = new Map<string, OrderItem[]>();
   for (const item of items) {
@@ -624,4 +621,3 @@ export async function listOrdersByUserId(
     items: itemsByOrderId.get(order.id) ?? []
   }));
 }
-

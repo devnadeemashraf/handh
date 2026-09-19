@@ -31,13 +31,13 @@ export function AccountNav() {
         boxShadow: '0 4px 12px rgba(10, 46, 36, 0.03)'
       }}
     >
-      <div style={{ padding: '8px 12px 14px', borderBottom: '1px solid #F0ECE4', marginBottom: '6px' }}>
+      <div
+        style={{ padding: '8px 12px 14px', borderBottom: '1px solid #F0ECE4', marginBottom: '6px' }}
+      >
         <p style={{ margin: 0, fontWeight: 700, fontSize: '0.95rem', color: '#0A2E24' }}>
           {user?.name || 'H&H Patron'}
         </p>
-        <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#5C6460' }}>
-          {user?.phone}
-        </p>
+        <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#5C6460' }}>{user?.phone}</p>
       </div>
 
       {links.map((link) => {

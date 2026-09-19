@@ -6,6 +6,7 @@
   "main": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "build": "tsc",
     "start": "node dist/index.js"
   },
@@ -14,7 +15,8 @@
     "@hh/db": "workspace:*",
     "@hh/domain": "workspace:*",
     "bullmq": "^5.41.6",
-    "ioredis": "^5.6.0"
+    "ioredis": "^5.6.0",
+    "resend": "^6.28.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",

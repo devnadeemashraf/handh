@@ -28,6 +28,7 @@ describe('AccountNav Component', () => {
       phone: '+919876543210',
       name: 'Zahra Khan',
       phoneVerified: true,
+      emailVerified: false,
       role: 'customer',
       whatsappOptIn: true,
       createdAt: new Date().toISOString(),
@@ -42,10 +43,22 @@ describe('AccountNav Component', () => {
     expect(screen.getByText('+919876543210')).toBeInTheDocument();
 
     expect(screen.getByRole('link', { name: /my profile/i })).toHaveAttribute('href', '/account');
-    expect(screen.getByRole('link', { name: /order history/i })).toHaveAttribute('href', '/account/orders');
-    expect(screen.getByRole('link', { name: /saved addresses/i })).toHaveAttribute('href', '/account/addresses');
-    expect(screen.getByRole('link', { name: /family & sizes/i })).toHaveAttribute('href', '/account/family');
-    expect(screen.getByRole('link', { name: /saved wishlist/i })).toHaveAttribute('href', '/account/wishlist');
+    expect(screen.getByRole('link', { name: /order history/i })).toHaveAttribute(
+      'href',
+      '/account/orders'
+    );
+    expect(screen.getByRole('link', { name: /saved addresses/i })).toHaveAttribute(
+      'href',
+      '/account/addresses'
+    );
+    expect(screen.getByRole('link', { name: /family & sizes/i })).toHaveAttribute(
+      'href',
+      '/account/family'
+    );
+    expect(screen.getByRole('link', { name: /saved wishlist/i })).toHaveAttribute(
+      'href',
+      '/account/wishlist'
+    );
   });
 
   it('renders staff portal link when role is admin or super_admin', () => {

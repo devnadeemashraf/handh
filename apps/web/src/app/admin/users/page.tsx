@@ -21,10 +21,7 @@ export default async function AdminUsersPage() {
   }
 
   const db = getDatabase();
-  const [users, session] = await Promise.all([
-    listUsers(db, 'hh'),
-    getUserSession()
-  ]);
+  const [users, session] = await Promise.all([listUsers(db, 'hh'), getUserSession()]);
 
   const currentUserRole = session?.user.role ?? 'admin';
   const currentUserId = session?.user.id;

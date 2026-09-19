@@ -219,7 +219,14 @@ export default function UsersDashboard({
             padding: '16px 20px'
           }}
         >
-          <span style={{ fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span
+            style={{
+              fontSize: '0.75rem',
+              color: '#8BAAA0',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}
+          >
             Total Registered
           </span>
           <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#FDFBF7', marginTop: '4px' }}>
@@ -235,7 +242,14 @@ export default function UsersDashboard({
             padding: '16px 20px'
           }}
         >
-          <span style={{ fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span
+            style={{
+              fontSize: '0.75rem',
+              color: '#8BAAA0',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}
+          >
             Phone Verified
           </span>
           <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#4ADE80', marginTop: '4px' }}>
@@ -251,7 +265,14 @@ export default function UsersDashboard({
             padding: '16px 20px'
           }}
         >
-          <span style={{ fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span
+            style={{
+              fontSize: '0.75rem',
+              color: '#8BAAA0',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}
+          >
             WhatsApp Concierge Opted
           </span>
           <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#C5A880', marginTop: '4px' }}>
@@ -267,7 +288,14 @@ export default function UsersDashboard({
             padding: '16px 20px'
           }}
         >
-          <span style={{ fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <span
+            style={{
+              fontSize: '0.75rem',
+              color: '#8BAAA0',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}
+          >
             Store Administrators
           </span>
           <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#60A5FA', marginTop: '4px' }}>
@@ -411,23 +439,72 @@ export default function UsersDashboard({
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #1F5242', backgroundColor: '#09231B' }}>
-                <th style={{ padding: '14px 18px', fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <th
+                  style={{
+                    padding: '14px 18px',
+                    fontSize: '0.75rem',
+                    color: '#8BAAA0',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   Patron / Contact
                 </th>
-                <th style={{ padding: '14px 18px', fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <th
+                  style={{
+                    padding: '14px 18px',
+                    fontSize: '0.75rem',
+                    color: '#8BAAA0',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   Role &amp; Permissions
                 </th>
-                <th style={{ padding: '14px 18px', fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <th
+                  style={{
+                    padding: '14px 18px',
+                    fontSize: '0.75rem',
+                    color: '#8BAAA0',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   WhatsApp Concierge
                 </th>
-                <th style={{ padding: '14px 18px', fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <th
+                  style={{
+                    padding: '14px 18px',
+                    fontSize: '0.75rem',
+                    color: '#8BAAA0',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   Last Active
                 </th>
-                <th style={{ padding: '14px 18px', fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <th
+                  style={{
+                    padding: '14px 18px',
+                    fontSize: '0.75rem',
+                    color: '#8BAAA0',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   Registered
                 </th>
                 {isSuperAdmin && (
-                  <th style={{ padding: '14px 18px', fontSize: '0.75rem', color: '#8BAAA0', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>
+                  <th
+                    style={{
+                      padding: '14px 18px',
+                      fontSize: '0.75rem',
+                      color: '#8BAAA0',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      textAlign: 'right'
+                    }}
+                  >
                     Access Control
                   </th>
                 )}
@@ -493,10 +570,22 @@ export default function UsersDashboard({
                                 </span>
                               )}
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#8BAAA0', marginTop: '2px' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontSize: '0.8rem',
+                                color: '#8BAAA0',
+                                marginTop: '2px'
+                              }}
+                            >
                               <span>{u.phone}</span>
                               {u.phoneVerified && (
-                                <span title="Verified mobile number" style={{ color: '#4ADE80', display: 'inline-flex' }}>
+                                <span
+                                  title="Verified mobile number"
+                                  style={{ color: '#4ADE80', display: 'inline-flex' }}
+                                >
                                   <CheckCircle2 size={13} />
                                 </span>
                               )}
@@ -587,9 +676,7 @@ export default function UsersDashboard({
                             <span>Subscribed</span>
                           </span>
                         ) : (
-                          <span style={{ fontSize: '0.8rem', color: '#8BAAA0' }}>
-                            Unsubscribed
-                          </span>
+                          <span style={{ fontSize: '0.8rem', color: '#8BAAA0' }}>Unsubscribed</span>
                         )}
                       </td>
 
@@ -663,16 +750,28 @@ export default function UsersDashboard({
               boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+            <div
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}
+            >
               <Shield size={22} style={{ color: '#C5A880' }} />
               <h2 style={{ fontFamily: 'serif', fontSize: '1.25rem', color: '#FDFBF7', margin: 0 }}>
                 Modify Access Role
               </h2>
             </div>
 
-            <p style={{ fontSize: '0.875rem', color: '#8BAAA0', lineHeight: 1.6, marginBottom: '20px' }}>
+            <p
+              style={{
+                fontSize: '0.875rem',
+                color: '#8BAAA0',
+                lineHeight: 1.6,
+                marginBottom: '20px'
+              }}
+            >
               Configure operational clearance for{' '}
-              <strong style={{ color: '#FDFBF7' }}>{selectedUser.name || selectedUser.phone}</strong>.
+              <strong style={{ color: '#FDFBF7' }}>
+                {selectedUser.name || selectedUser.phone}
+              </strong>
+              .
             </p>
 
             <div style={{ marginBottom: '24px' }}>
@@ -695,7 +794,8 @@ export default function UsersDashboard({
                   const descriptions: Record<UserRole, string> = {
                     customer: 'Standard storefront access, profile, wishlist & order history.',
                     admin: 'Workshop operations, order fulfillment, inventory & catalog control.',
-                    super_admin: 'Full master governance including role assignment and brand policies.'
+                    super_admin:
+                      'Full master governance including role assignment and brand policies.'
                   };
 
                   return (
@@ -722,7 +822,13 @@ export default function UsersDashboard({
                         style={{ marginTop: '2px', accentColor: '#C5A880' }}
                       />
                       <div>
-                        <div style={{ fontWeight: 600, color: isSelected ? '#C5A880' : '#FDFBF7', fontSize: '0.85rem' }}>
+                        <div
+                          style={{
+                            fontWeight: 600,
+                            color: isSelected ? '#C5A880' : '#FDFBF7',
+                            fontSize: '0.85rem'
+                          }}
+                        >
                           {r.replace('_', ' ').toUpperCase()}
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#8BAAA0', marginTop: '2px' }}>

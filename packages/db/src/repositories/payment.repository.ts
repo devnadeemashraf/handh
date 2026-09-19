@@ -12,7 +12,9 @@ import {
   inventoryLevels,
   inventoryReservations,
   type Order,
+  orderItems,
   orders,
+  outboxEvents,
   type PaymentAttempt,
   paymentAttempts,
   type WebhookEvent,
@@ -224,6 +226,51 @@ export async function confirmPaymentAndCaptureOrder(
         })
         .where(eq(inventoryLevels.variantId, res.variantId));
     }
+
+    // 6. Record outbox event for transactional customer & admin notification
+    const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, order.id));
+
+    const itemsSnapshot = items.map((it) => ({
+      title: it.productNameSnapshot,
+      variantTitle: it.variantNameSnapshot,
+      quantity: it.quantity,
+      unitPriceMinor: it.unitPriceMinor,
+      subtotalMinor: it.totalPriceMinor
+    }));
+
+    const shippingAddressSnapshot = {
+      recipientName: order.customerName,
+      line1: order.shippingAddress.line1,
+      line2: order.shippingAddress.line2 ?? null,
+      city: order.shippingAddress.city,
+      state: order.shippingAddress.state,
+      postalCode: order.shippingAddress.postalCode,
+      country: order.shippingAddress.country,
+      phone: order.customerPhone
+    };
+
+    await tx.insert(outboxEvents).values({
+      eventName: 'order.paid',
+      aggregateType: 'order',
+      aggregateId: order.id,
+      payload: {
+        orderId: order.id,
+        storeId: order.storeId,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone,
+        totalMinor: order.totalMinor,
+        currency: order.currency,
+        itemsSnapshot,
+        shippingAddressSnapshot,
+        userId: order.userId,
+        paymentProvider: attempt.provider,
+        paidAt: now.toISOString()
+      },
+      status: 'pending',
+      scheduledAt: now
+    });
 
     return {
       order: updatedOrder!,

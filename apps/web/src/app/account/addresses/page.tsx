@@ -207,9 +207,7 @@ export default function AccountAddressesPage() {
       ) : addresses.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <MapPin size={32} color="#C5A880" style={{ margin: '0 auto 12px' }} />
-          <p style={{ fontWeight: 600, color: '#0A2E24', margin: '0 0 4px' }}>
-            No Saved Addresses
-          </p>
+          <p style={{ fontWeight: 600, color: '#0A2E24', margin: '0 0 4px' }}>No Saved Addresses</p>
           <p style={{ fontSize: '0.85rem', color: '#5C6460', margin: '0 0 16px' }}>
             Save your home or work address for seamless doorstep delivery.
           </p>
@@ -287,7 +285,14 @@ export default function AccountAddressesPage() {
                 )}
               </div>
 
-              <p style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '0.95rem', color: '#171A19' }}>
+              <p
+                style={{
+                  margin: '0 0 4px',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  color: '#171A19'
+                }}
+              >
                 {addr.recipientName}
               </p>
               <p style={{ margin: '0 0 2px', fontSize: '0.85rem', color: '#5C6460' }}>
@@ -301,7 +306,14 @@ export default function AccountAddressesPage() {
               <p style={{ margin: '0 0 6px', fontSize: '0.85rem', color: '#5C6460' }}>
                 {addr.city}, {addr.state} — {addr.postalCode}
               </p>
-              <p style={{ margin: '0 0 16px', fontSize: '0.82rem', color: '#0A2E24', fontWeight: 600 }}>
+              <p
+                style={{
+                  margin: '0 0 16px',
+                  fontSize: '0.82rem',
+                  color: '#0A2E24',
+                  fontWeight: 600
+                }}
+              >
                 Phone: {addr.phone}
               </p>
 
@@ -413,10 +425,21 @@ export default function AccountAddressesPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form
+              onSubmit={handleSubmit}
+              style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#171A19',
+                      marginBottom: '4px'
+                    }}
+                  >
                     Label
                   </label>
                   <input
@@ -425,11 +448,24 @@ export default function AccountAddressesPage() {
                     placeholder="Home / Work"
                     value={formData.label}
                     onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #EBE7DF',
+                      borderRadius: '6px'
+                    }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#171A19',
+                      marginBottom: '4px'
+                    }}
+                  >
                     Recipient Name
                   </label>
                   <input
@@ -438,13 +474,26 @@ export default function AccountAddressesPage() {
                     placeholder="Full recipient name"
                     value={formData.recipientName}
                     onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #EBE7DF',
+                      borderRadius: '6px'
+                    }}
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#171A19',
+                    marginBottom: '4px'
+                  }}
+                >
                   Delivery Contact Phone (+91)
                 </label>
                 <input
@@ -453,12 +502,25 @@ export default function AccountAddressesPage() {
                   placeholder="+919876543210"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #EBE7DF',
+                    borderRadius: '6px'
+                  }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#171A19',
+                    marginBottom: '4px'
+                  }}
+                >
                   Address Line 1
                 </label>
                 <input
@@ -467,12 +529,25 @@ export default function AccountAddressesPage() {
                   placeholder="Flat / Villa / Street"
                   value={formData.line1}
                   onChange={(e) => setFormData({ ...formData, line1: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #EBE7DF',
+                    borderRadius: '6px'
+                  }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    color: '#171A19',
+                    marginBottom: '4px'
+                  }}
+                >
                   Address Line 2 (Optional)
                 </label>
                 <input
@@ -480,13 +555,26 @@ export default function AccountAddressesPage() {
                   placeholder="Apartment name, Landmark"
                   value={formData.line2}
                   onChange={(e) => setFormData({ ...formData, line2: e.target.value })}
-                  style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #EBE7DF',
+                    borderRadius: '6px'
+                  }}
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#171A19',
+                      marginBottom: '4px'
+                    }}
+                  >
                     City
                   </label>
                   <input
@@ -495,17 +583,36 @@ export default function AccountAddressesPage() {
                     placeholder="City"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #EBE7DF',
+                      borderRadius: '6px'
+                    }}
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#171A19',
+                      marginBottom: '4px'
+                    }}
+                  >
                     State
                   </label>
                   <select
                     value={formData.state}
                     onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px', backgroundColor: '#FFFFFF' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #EBE7DF',
+                      borderRadius: '6px',
+                      backgroundColor: '#FFFFFF'
+                    }}
                   >
                     {INDIAN_STATES.map((st) => (
                       <option key={st} value={st}>
@@ -515,7 +622,15 @@ export default function AccountAddressesPage() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#171A19', marginBottom: '4px' }}>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      color: '#171A19',
+                      marginBottom: '4px'
+                    }}
+                  >
                     PIN Code
                   </label>
                   <input
@@ -525,22 +640,44 @@ export default function AccountAddressesPage() {
                     placeholder="6 digits"
                     value={formData.postalCode}
                     onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #EBE7DF', borderRadius: '6px' }}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #EBE7DF',
+                      borderRadius: '6px'
+                    }}
                   />
                 </div>
               </div>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginTop: '4px' }}>
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  marginTop: '4px'
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={formData.isDefault}
                   onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
                   style={{ accentColor: '#0A2E24' }}
                 />
-                <span style={{ fontSize: '0.85rem', color: '#171A19' }}>Make this my default shipping address</span>
+                <span style={{ fontSize: '0.85rem', color: '#171A19' }}>
+                  Make this my default shipping address
+                </span>
               </label>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: '10px',
+                  marginTop: '8px'
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}

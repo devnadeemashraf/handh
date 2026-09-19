@@ -58,7 +58,9 @@ export default function AccountProfilePage() {
         boxShadow: '0 4px 12px rgba(10, 46, 36, 0.03)'
       }}
     >
-      <div style={{ borderBottom: '1px solid #F0ECE4', paddingBottom: '16px', marginBottom: '24px' }}>
+      <div
+        style={{ borderBottom: '1px solid #F0ECE4', paddingBottom: '16px', marginBottom: '24px' }}
+      >
         <h1
           style={{
             fontFamily: 'var(--font-serif)',
@@ -70,7 +72,8 @@ export default function AccountProfilePage() {
           My Profile & Preferences
         </h1>
         <p style={{ margin: 0, fontSize: '0.85rem', color: '#5C6460' }}>
-          Manage your personal details, email receipts, and WhatsApp concierge communication preferences.
+          Manage your personal details, email receipts, and WhatsApp concierge communication
+          preferences.
         </p>
       </div>
 
@@ -160,7 +163,9 @@ export default function AccountProfilePage() {
               <Check size={12} /> Verified
             </span>
           </div>
-          <span style={{ fontSize: '0.75rem', color: '#8C928F', marginTop: '4px', display: 'block' }}>
+          <span
+            style={{ fontSize: '0.75rem', color: '#8C928F', marginTop: '4px', display: 'block' }}
+          >
             Primary account identifier used for OTP verification and WhatsApp delivery updates.
           </span>
         </div>
@@ -240,7 +245,9 @@ export default function AccountProfilePage() {
             borderRadius: '8px'
           }}
         >
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+          <label
+            style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}
+          >
             <input
               type="checkbox"
               checked={whatsappOptIn}
@@ -262,7 +269,8 @@ export default function AccountProfilePage() {
                 <MessageSquare size={15} color="#164335" /> WhatsApp Concierge Updates
               </span>
               <p style={{ margin: 0, fontSize: '0.82rem', color: '#5C6460', lineHeight: 1.4 }}>
-                Receive instant order placement confirmations, live DTDC / India Post courier scan alerts, and doorstep delivery notifications directly to your WhatsApp.
+                Receive instant order placement confirmations, live DTDC / India Post courier scan
+                alerts, and doorstep delivery notifications directly to your WhatsApp.
               </p>
             </div>
           </label>

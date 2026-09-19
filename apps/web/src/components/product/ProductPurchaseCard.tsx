@@ -237,11 +237,7 @@ export function ProductPurchaseCard({
 
       {productId && (
         <div style={{ marginTop: '12px' }}>
-          <WishlistButton
-            productId={productId}
-            variantId={selectedVariantId}
-            variant="button"
-          />
+          <WishlistButton productId={productId} variantId={selectedVariantId} variant="button" />
         </div>
       )}
 

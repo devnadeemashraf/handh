@@ -953,7 +953,8 @@ export default function CheckoutPage() {
                       Checkout as H&amp;H Patron
                     </div>
                     <div style={{ fontSize: '0.8rem', color: '#5C6460', marginTop: '2px' }}>
-                      Sign in with your mobile number to use saved addresses and track orders seamlessly.
+                      Sign in with your mobile number to use saved addresses and track orders
+                      seamlessly.
                     </div>
                   </div>
                 </div>
@@ -1058,9 +1059,7 @@ export default function CheckoutPage() {
                             borderColor: isSelected
                               ? 'var(--color-primary-emerald)'
                               : 'var(--color-border)',
-                            backgroundColor: isSelected
-                              ? 'rgba(10, 46, 36, 0.04)'
-                              : '#FFFFFF',
+                            backgroundColor: isSelected ? 'rgba(10, 46, 36, 0.04)' : '#FFFFFF',
                             cursor: 'pointer',
                             position: 'relative'
                           }}
@@ -1073,7 +1072,9 @@ export default function CheckoutPage() {
                               marginBottom: '6px'
                             }}
                           >
-                            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0A2E24' }}>
+                            <span
+                              style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0A2E24' }}
+                            >
                               {addr.label}
                             </span>
                             {addr.isDefault && (

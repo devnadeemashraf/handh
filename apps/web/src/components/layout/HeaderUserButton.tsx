@@ -38,7 +38,9 @@ export function HeaderUserButton() {
   if (!user) {
     return (
       <button
-        onClick={() => openAuthModal({ reason: 'Sign in to access your saved orders, addresses, and wishlist.' })}
+        onClick={() =>
+          openAuthModal({ reason: 'Sign in to access your saved orders, addresses, and wishlist.' })
+        }
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -145,9 +147,7 @@ export function HeaderUserButton() {
             <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', color: '#0A2E24' }}>
               {user.name || 'H&H Patron'}
             </p>
-            <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#5C6460' }}>
-              {user.phone}
-            </p>
+            <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: '#5C6460' }}>{user.phone}</p>
           </div>
 
           {/* Links */}

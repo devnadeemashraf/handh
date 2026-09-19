@@ -61,7 +61,9 @@ export async function listWishlistItemsWithDetails(
     db
       .select()
       .from(productVariants)
-      .where(and(inArray(productVariants.productId, productIds), eq(productVariants.isActive, true)))
+      .where(
+        and(inArray(productVariants.productId, productIds), eq(productVariants.isActive, true))
+      )
       .orderBy(asc(productVariants.sortOrder)),
     db
       .select()

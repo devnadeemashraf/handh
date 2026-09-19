@@ -124,7 +124,9 @@ export function WishlistButton({
           borderRadius: '9999px',
           border: '1px solid var(--color-border, #E4DCCF)',
           backgroundColor: isWishlisted ? 'rgba(197, 168, 128, 0.15)' : '#ffffff',
-          color: isWishlisted ? 'var(--color-primary, #0A2E24)' : 'var(--color-text-muted, #71717A)',
+          color: isWishlisted
+            ? 'var(--color-primary, #0A2E24)'
+            : 'var(--color-text-muted, #71717A)',
           fontSize: '0.8rem',
           fontWeight: 500,
           cursor: isBusy ? 'not-allowed' : 'pointer',

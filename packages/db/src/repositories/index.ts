@@ -8,6 +8,7 @@ export * from './insights.repository';
 export * from './inventory.repository';
 export * from './order.repository';
 export * from './otp.repository';
+export * from './outbox.repository';
 export * from './payment.repository';
 export * from './product.repository';
 export * from './session.repository';
