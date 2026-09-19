@@ -12,6 +12,7 @@ interface InventoryToolbarProps {
   totalCount: number;
   lowStockCount: number;
   outOfStockCount: number;
+  onOpenAddProduct?: () => void;
 }
 
 export function InventoryToolbar({
@@ -21,7 +22,8 @@ export function InventoryToolbar({
   setSearchQuery,
   totalCount,
   lowStockCount,
-  outOfStockCount
+  outOfStockCount,
+  onOpenAddProduct
 }: InventoryToolbarProps) {
   const needsRestockTotal = lowStockCount + outOfStockCount;
 
@@ -81,24 +83,37 @@ export function InventoryToolbar({
         </button>
       </div>
 
-      {/* Search Input */}
-      <div className="relative w-full sm:max-w-xs">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-        <Input
-          type="text"
-          placeholder="Search piece by title or SKU..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 pr-8 h-10 text-xs"
-        />
-        {searchQuery && (
+      {/* Actions: Search & Add Piece Button */}
+      <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            type="text"
+            placeholder="Search piece by title or SKU..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 pr-8 h-10 text-xs"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+              title="Clear search"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        {onOpenAddProduct && (
           <button
             type="button"
-            onClick={() => setSearchQuery('')}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
-            title="Clear search"
+            onClick={onOpenAddProduct}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 h-10 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors shrink-0"
           >
-            <X className="h-3.5 w-3.5" />
+            <span className="text-base leading-none font-normal">+</span>
+            <span>Add Piece</span>
           </button>
         )}
       </div>

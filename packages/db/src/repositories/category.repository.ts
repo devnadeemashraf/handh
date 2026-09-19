@@ -75,7 +75,10 @@ export async function getCategoryTree(
       id: c.id,
       slug: c.slug,
       name: c.name,
+      path: c.path,
+      depth: c.depth,
       description: c.description,
+      applicableFilterKeys: c.applicableFilterKeys ?? [],
       subcategories: buildTree(c.id)
     }));
   }

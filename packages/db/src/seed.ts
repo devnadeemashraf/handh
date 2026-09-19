@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 
-import { DEFAULT_STOREFRONT_CONFIG, defaultInvoiceTemplate } from '@hh/domain';
+import { DEFAULT_STOREFRONT_CONFIG, defaultInvoiceTemplate, flattenTaxonomyTree } from '@hh/domain';
 
 import { createDbClient } from './index';
 import { createProductWithVariants } from './repositories';
@@ -94,7 +94,54 @@ async function seed(): Promise<void> {
     console.log(`  ✓ Updated existing store settings: ${store.name} (${store.slug})`);
   }
 
-  // 2. Standard Taxonomy Categories
+  // 2. Multi-Vertical Enterprise Taxonomy Seeding (Departments -> Categories -> Sub-Categories)
+  console.log('  🌳 Seeding multi-vertical taxonomy tree...');
+  const flatTree = flattenTaxonomyTree();
+  const pathToCategoryId = new Map<string, string>();
+
+  for (const rec of flatTree) {
+    const parentId = rec.parentPath ? (pathToCategoryId.get(rec.parentPath) ?? null) : null;
+
+    const [existingCat] = await db
+      .select()
+      .from(categories)
+      .where(and(eq(categories.storeId, store.id), eq(categories.slug, rec.slug)))
+      .limit(1);
+
+    if (existingCat) {
+      await db
+        .update(categories)
+        .set({
+          name: rec.name,
+          path: rec.path,
+          depth: rec.depth,
+          parentId: parentId ?? existingCat.parentId,
+          applicableFilterKeys: rec.applicableFilterKeys
+        })
+        .where(eq(categories.id, existingCat.id));
+      pathToCategoryId.set(rec.path, existingCat.id);
+    } else {
+      const [created] = await db
+        .insert(categories)
+        .values({
+          storeId: store.id,
+          parentId,
+          slug: rec.slug,
+          name: rec.name,
+          path: rec.path,
+          depth: rec.depth,
+          description: `${rec.name} collection for H&H.`,
+          sortOrder: rec.depth * 10,
+          applicableFilterKeys: rec.applicableFilterKeys,
+          isActive: true
+        })
+        .returning();
+      pathToCategoryId.set(rec.path, created!.id);
+    }
+  }
+  console.log(`  ✓ Seeded ${flatTree.length} taxonomy categories across 5 departments.`);
+
+  // Maintain backwards-compatible mappings for legacy categories
   let [accessoriesCat] = await db
     .select()
     .from(categories)
@@ -108,16 +155,17 @@ async function seed(): Promise<void> {
         storeId: store.id,
         slug: 'accessories',
         name: 'Accessories',
+        path: '/accessories',
+        depth: 0,
         description: 'Finely crafted accents and statement adornments.',
         sortOrder: 10,
+        applicableFilterKeys: ['metal_finish', 'stone_type'],
         isActive: true
       })
       .returning();
     accessoriesCat = created!;
-    console.log(`  ✓ Created top-level category: ${accessoriesCat.name}`);
   }
 
-  // Sub-Category: Jewelry (Nose Pieces & Clips)
   let [jewelryCat] = await db
     .select()
     .from(categories)
@@ -132,16 +180,17 @@ async function seed(): Promise<void> {
         parentId: accessoriesCat.id,
         slug: 'jewelry',
         name: 'Nose Pieces & Clips',
+        path: '/accessories/jewelry',
+        depth: 1,
         description: 'Intricately designed nose pieces, clips, and delicate modest-wear jewelry.',
         sortOrder: 10,
+        applicableFilterKeys: ['metal_finish', 'stone_type'],
         isActive: true
       })
       .returning();
     jewelryCat = created!;
-    console.log(`  ✓ Created sub-category: ${jewelryCat.name} (under ${accessoriesCat.name})`);
   }
 
-  // Sub-Category: Hijab Accents
   let [hijabCat] = await db
     .select()
     .from(categories)
@@ -156,16 +205,17 @@ async function seed(): Promise<void> {
         parentId: accessoriesCat.id,
         slug: 'hijab-accents',
         name: 'Hijab & Abaya Accents',
+        path: '/women/essentials/pins-clips',
+        depth: 2,
         description: 'Magnetic pins, artisanal brooches, and luxury modest-wear clasps.',
         sortOrder: 20,
+        applicableFilterKeys: ['metal_finish', 'stone_type'],
         isActive: true
       })
       .returning();
     hijabCat = created!;
-    console.log(`  ✓ Created sub-category: ${hijabCat.name}`);
   }
 
-  // Sub-Category: Statement Rings & Bands
   let [ringsCat] = await db
     .select()
     .from(categories)
@@ -180,20 +230,23 @@ async function seed(): Promise<void> {
         parentId: accessoriesCat.id,
         slug: 'rings-bands',
         name: 'Rings & Bangles',
+        path: '/accessories/rings-bands',
+        depth: 1,
         description: 'Hand-hammered silver bands and artisanal brass cuffs.',
         sortOrder: 30,
+        applicableFilterKeys: ['metal_purity', 'metal_finish'],
         isActive: true
       })
       .returning();
     ringsCat = created!;
-    console.log(`  ✓ Created sub-category: ${ringsCat.name}`);
   }
 
-  // 3. Rich Product Catalog (10 Handcrafted Pieces with Diverse Stock Tiers)
+  // 3. Rich Multi-Vertical Product Catalog
   const catalog = [
-    // Nose Pieces & Clips
+    // --- NOSE PIECES & CLIPS (Original Collection) ---
     {
       categoryId: jewelryCat.id,
+      department: 'accessories',
       slug: 'pearl-glow-nose-piece',
       title: 'Pearl Glow Nose Piece',
       description:
@@ -201,12 +254,17 @@ async function seed(): Promise<void> {
       sku: 'HH-ACC-NP-01',
       variantTitle: 'Warm Gold / Pearl',
       priceMinor: 59900,
-      initialQuantity: 15, // Abundant stock
+      initialQuantity: 15,
       imageUrl:
-        'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { metal_finish: 'Warm Gold Polish', stone_type: 'Freshwater Pearl' },
+      tags: ['jewelry', 'nose-piece', 'pearl', 'gold', 'accessories'],
+      options: [{ name: 'Finish', value: 'Warm Gold' }]
     },
     {
       categoryId: jewelryCat.id,
+      department: 'accessories',
       slug: 'minimalist-silver-nose-piece',
       title: 'Minimalist Silver Nose Piece',
       description:
@@ -216,10 +274,15 @@ async function seed(): Promise<void> {
       priceMinor: 49900,
       initialQuantity: 8,
       imageUrl:
-        'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { metal_purity: '925 Sterling Silver', metal_finish: 'High Polish' },
+      tags: ['jewelry', 'nose-piece', 'silver', 'minimalist'],
+      options: [{ name: 'Material', value: '925 Silver' }]
     },
     {
       categoryId: jewelryCat.id,
+      department: 'accessories',
       slug: 'crystal-floral-nose-piece',
       title: 'Crystal Floral Nose Piece',
       description:
@@ -229,10 +292,15 @@ async function seed(): Promise<void> {
       priceMinor: 64900,
       initialQuantity: 12,
       imageUrl:
-        'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { metal_finish: 'Silver Polish', stone_type: 'Cubic Zirconia' },
+      tags: ['jewelry', 'nose-piece', 'crystal', 'floral'],
+      options: [{ name: 'Finish', value: 'Silver Polish' }]
     },
     {
       categoryId: jewelryCat.id,
+      department: 'accessories',
       slug: 'vintage-filigree-nose-piece',
       title: 'Vintage Filigree Nose Piece',
       description:
@@ -242,10 +310,15 @@ async function seed(): Promise<void> {
       priceMinor: 59900,
       initialQuantity: 5,
       imageUrl:
-        'https://images.unsplash.com/photo-1611591475825-9d33bdfc5453?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1611591475825-9d33bdfc5453?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { metal_finish: 'Antiqued Brass' },
+      tags: ['jewelry', 'nose-piece', 'vintage', 'filigree'],
+      options: [{ name: 'Material', value: 'Antiqued Brass' }]
     },
     {
       categoryId: jewelryCat.id,
+      department: 'accessories',
       slug: 'ameera-freshwater-pearl-stud',
       title: 'Ameera Natural Pearl Nose Stud',
       description:
@@ -253,12 +326,17 @@ async function seed(): Promise<void> {
       sku: 'HH-ACC-NP-05',
       variantTitle: 'Freshwater Pearl / Silver',
       priceMinor: 79900,
-      initialQuantity: 3, // Low Stock (<= 3)
+      initialQuantity: 3,
       imageUrl:
-        'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { stone_type: 'Freshwater Pearl', metal_purity: '925 Sterling Silver' },
+      tags: ['jewelry', 'nose-stud', 'pearl', 'silver'],
+      options: [{ name: 'Stone', value: 'Freshwater Pearl' }]
     },
     {
       categoryId: jewelryCat.id,
+      department: 'accessories',
       slug: 'zahra-cz-solitaire-ring',
       title: 'Zahra Solitaire CZ Nose Ring',
       description:
@@ -266,14 +344,19 @@ async function seed(): Promise<void> {
       sku: 'HH-ACC-NP-06',
       variantTitle: 'Rhodium Silver / CZ',
       priceMinor: 54900,
-      initialQuantity: 0, // Sold Out (0)
+      initialQuantity: 0,
       imageUrl:
-        'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { stone_type: 'Cubic Zirconia', metal_finish: 'Rhodium Plated' },
+      tags: ['jewelry', 'nose-ring', 'solitaire', 'cz'],
+      options: [{ name: 'Finish', value: 'Rhodium Silver' }]
     },
 
-    // Hijab & Abaya Accents
+    // --- HIJAB & ABAYA ACCENTS ---
     {
       categoryId: hijabCat.id,
+      department: 'women',
       slug: 'safiya-magnetic-hijab-pins',
       title: 'Safiya Magnetic Hijab Pins (Set of 4)',
       description:
@@ -281,12 +364,17 @@ async function seed(): Promise<void> {
       sku: 'HH-ACC-HP-01',
       variantTitle: 'Matte Gold & Gunmetal Pack',
       priceMinor: 39900,
-      initialQuantity: 25, // Plentiful stock
+      initialQuantity: 25,
       imageUrl:
-        'https://images.unsplash.com/photo-1598560917505-59a3ad559071?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1598560917505-59a3ad559071?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { metal_finish: 'Matte Gold / Gunmetal' },
+      tags: ['hijab-accessories', 'magnetic-pins', 'modest-essentials'],
+      options: [{ name: 'Pack', value: '4-Piece Set' }]
     },
     {
       categoryId: hijabCat.id,
+      department: 'women',
       slug: 'layla-crystal-brooch',
       title: 'Layla Crystal Floral Brooch',
       description:
@@ -296,12 +384,17 @@ async function seed(): Promise<void> {
       priceMinor: 89900,
       initialQuantity: 6,
       imageUrl:
-        'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { metal_finish: 'Champagne Gold', stone_type: 'Micro Zircon' },
+      tags: ['brooch', 'crystal', 'abaya-accents', 'ceremonial'],
+      options: [{ name: 'Finish', value: 'Champagne Gold' }]
     },
 
-    // Rings & Bangles
+    // --- RINGS & BANGLES ---
     {
       categoryId: ringsCat.id,
+      department: 'accessories',
       slug: 'qamar-crescent-cuff',
       title: 'Qamar Crescent Cuff Bracelet',
       description:
@@ -311,20 +404,243 @@ async function seed(): Promise<void> {
       priceMinor: 129900,
       initialQuantity: 4,
       imageUrl:
-        'https://images.unsplash.com/photo-1611591475825-9d33bdfc5453?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1611591475825-9d33bdfc5453?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { metal_purity: '18k Gold Vermeil', metal_finish: 'Hand-Hammered Polish' },
+      tags: ['jewelry', 'bracelet', 'cuff', 'gold'],
+      options: [{ name: 'Finish', value: '18k Gold Vermeil' }]
     },
     {
       categoryId: ringsCat.id,
+      department: 'accessories',
       slug: 'medina-silver-band',
       title: 'Medina Hand-Hammered Silver Band',
       description:
-        'Chiseled solid 925 sterling silver band with organic organic facets that catch ambient light.',
+        'Chiseled solid 925 sterling silver band with organic facets that catch ambient light.',
       sku: 'HH-ACC-JW-02',
       variantTitle: 'Solid 925 Silver',
       priceMinor: 149900,
-      initialQuantity: 2, // Low stock (<= 3)
+      initialQuantity: 2,
       imageUrl:
-        'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=800&auto=format&fit=crop&q=80'
+        'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: { metal_purity: '925 Sterling Silver', metal_finish: 'Chiseled Matte' },
+      tags: ['jewelry', 'ring', 'silver', 'handcrafted'],
+      options: [{ name: 'Size', value: 'Adjustable' }]
+    },
+
+    // --- MULTI-VERTICAL EXPANSION: MEN'S APPAREL & FOOTWEAR ---
+    {
+      categoryId: pathToCategoryId.get('/men/apparel/t-shirts') ?? jewelryCat.id,
+      department: 'men',
+      slug: 'artisanal-oversized-graphic-tee',
+      title: 'Artisanal Oversized Heavyweight Graphic T-Shirt',
+      description:
+        'Heavyweight 240 GSM combed cotton oversized tee with drop-shoulder silhouette and reinforced ribbed collar. Available as a signature drop or customized with your personal bespoke typography or artwork.',
+      sku: 'HH-MEN-TS-01',
+      variantTitle: 'Noir Black / L',
+      priceMinor: 129900,
+      initialQuantity: 30,
+      imageUrl:
+        'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: true,
+      customizationConfig: {
+        allowCustomText: true,
+        allowImageUpload: true,
+        maxCharacters: 30,
+        surchargeMinor: 15000,
+        customizationNotesPlaceholder: 'Specify text or artwork placement (front chest or back)',
+        productionDays: 3
+      },
+      specifications: {
+        fabric: 'Combed Cotton',
+        gsm: 240,
+        fit: 'Oversized Drop Shoulder',
+        neckline: 'Crew Neck',
+        pattern: 'Graphic Print'
+      },
+      tags: ['streetwear', 'heavyweight', 'custom-print', 'men', 'apparel'],
+      options: [
+        { name: 'Color', value: 'Noir Black' },
+        { name: 'Size', value: 'L' }
+      ]
+    },
+    {
+      categoryId: pathToCategoryId.get('/men/footwear/slip-ons') ?? jewelryCat.id,
+      department: 'men',
+      slug: 'handcrafted-leather-slip-ons',
+      title: 'Handcrafted Buff Leather Slip-On Mules',
+      description:
+        'Artisanal vegetable-tanned buff leather slip-ons with cushioned arch support, breathable leather lining, and durable rubberized soles for effortless formal and casual elegance.',
+      sku: 'HH-MEN-FW-01',
+      variantTitle: 'Cognac Tan / EU 42',
+      priceMinor: 299900,
+      initialQuantity: 10,
+      imageUrl:
+        'https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: {
+        sole_material: 'Vegetable Tanned Leather & Rubber',
+        color: 'Cognac Tan',
+        footwear_size: 'EU 42'
+      },
+      tags: ['footwear', 'leather', 'slip-ons', 'handcrafted', 'luxury'],
+      options: [
+        { name: 'Color', value: 'Cognac Tan' },
+        { name: 'Size', value: 'EU 42' }
+      ]
+    },
+
+    // --- MULTI-VERTICAL EXPANSION: WOMEN'S MODEST WEAR & ESSENTIALS ---
+    {
+      categoryId: pathToCategoryId.get('/women/modest-wear/abayas') ?? jewelryCat.id,
+      department: 'women',
+      slug: 'midnight-velvet-embroidered-abaya',
+      title: 'Midnight Royale Velvet Hand-Embroidered Abaya',
+      description:
+        'Sumptuous midnight black micro-velvet open abaya embellished with delicate antique gold zardozi and thread embroidery along the cuffs and sweeping lapels. Includes matching chiffon sheyla.',
+      sku: 'HH-WMN-AB-01',
+      variantTitle: 'Midnight Black / Free Size 56"',
+      priceMinor: 449900,
+      initialQuantity: 6,
+      imageUrl:
+        'https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: true,
+      customizationConfig: {
+        allowCustomText: true,
+        allowImageUpload: false,
+        maxCharacters: 20,
+        surchargeMinor: 25000,
+        customizationNotesPlaceholder: 'Custom length (e.g. 54", 56", 58") or inner hem monogram',
+        productionDays: 5
+      },
+      specifications: {
+        fabric: 'Micro Velvet',
+        abaya_length: '56 inches',
+        fit: 'Flowing Silhouette',
+        color: 'Midnight Black'
+      },
+      tags: ['abaya', 'modest-wear', 'luxury', 'velvet', 'embroidery'],
+      options: [
+        { name: 'Color', value: 'Midnight Black' },
+        { name: 'Length', value: '56"' }
+      ]
+    },
+    {
+      categoryId: pathToCategoryId.get('/women/essentials/eye-veils') ?? jewelryCat.id,
+      department: 'women',
+      slug: 'breathable-chiffon-eye-veil',
+      title: 'Pure Breathable Double-Layer Chiffon Eye Veil',
+      description:
+        'Ultra-lightweight, skin-friendly Korean chiffon eye veil with discreet ribbon ties and reinforced eye opening. Maximum breathability and graceful modesty.',
+      sku: 'HH-WMN-EV-01',
+      variantTitle: 'Pitch Black',
+      priceMinor: 34900,
+      initialQuantity: 20,
+      imageUrl:
+        'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: {
+        fabric: 'Korean Chiffon',
+        veil_coverage: 'Double Layer',
+        color: 'Pitch Black'
+      },
+      tags: ['eye-veil', 'niqab', 'modest-essentials', 'chiffon'],
+      options: [{ name: 'Color', value: 'Pitch Black' }]
+    },
+
+    // --- MULTI-VERTICAL EXPANSION: TECH PROTECTION ---
+    {
+      categoryId:
+        pathToCategoryId.get('/tech/phone-accessories/tempered-glass') ?? accessoriesCat.id,
+      department: 'tech',
+      slug: '9h-sapphire-edge-tempered-glass',
+      title: '9H Sapphire Oleophobic Edge-to-Edge Tempered Glass',
+      description:
+        'Diamond-hardened 9H sapphire tempered glass with electroplated oleophobic coating, 99.9% optical transparency, and dust-free auto-alignment installation frame.',
+      sku: 'HH-TCH-TG-01',
+      variantTitle: 'iPhone 15 / 15 Pro',
+      priceMinor: 49900,
+      initialQuantity: 50,
+      imageUrl:
+        'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: false,
+      specifications: {
+        glass_type: '9H Sapphire Tempered',
+        device_brand: 'Apple',
+        device_model: 'iPhone 15 / 15 Pro'
+      },
+      tags: ['tempered-glass', 'screen-protector', 'apple', 'iphone', 'tech-protection'],
+      options: [{ name: 'Device', value: 'iPhone 15 / 15 Pro' }]
+    },
+    {
+      categoryId: pathToCategoryId.get('/tech/phone-accessories/back-covers') ?? accessoriesCat.id,
+      department: 'tech',
+      slug: 'custom-printed-matte-shockproof-case',
+      title: 'Custom Printed Matte Shockproof Armor Phone Case',
+      description:
+        'Dual-layer military-grade drop-tested case with anti-scratch matte backplate and shock-absorbing TPU bumper. Personalize with your custom photograph, calligraphy, or monogram.',
+      sku: 'HH-TCH-BC-01',
+      variantTitle: 'iPhone 15 Pro / Custom Print',
+      priceMinor: 79900,
+      initialQuantity: 40,
+      imageUrl:
+        'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: true,
+      customizationConfig: {
+        allowCustomText: true,
+        allowImageUpload: true,
+        maxCharacters: 40,
+        surchargeMinor: 20000,
+        customizationNotesPlaceholder:
+          'Upload your high-resolution image (PNG/JPG) or enter desired text/monogram',
+        productionDays: 2
+      },
+      specifications: {
+        case_material: 'Hybrid TPU + Polycarbonate',
+        case_finish: 'Matte Anti-Scratch',
+        device_brand: 'Apple',
+        device_model: 'iPhone 15 Pro'
+      },
+      tags: ['phone-case', 'custom-print', 'back-cover', 'shockproof', 'on-demand'],
+      options: [
+        { name: 'Device', value: 'iPhone 15 Pro' },
+        { name: 'Finish', value: 'Matte Shockproof' }
+      ]
+    },
+
+    // --- MULTI-VERTICAL EXPANSION: CUSTOM MERCHANDISE ---
+    {
+      categoryId:
+        pathToCategoryId.get('/custom-merch/print-on-demand/custom-bags') ?? accessoriesCat.id,
+      department: 'custom-merch',
+      slug: 'heavyweight-organic-custom-tote-bag',
+      title: 'Heavyweight Organic Canvas Bespoke Tote Bag',
+      description:
+        'Crafted from 380 GSM GOTS-certified organic unbleached cotton canvas. Reinforced box-stitched handles and interior pocket. Perfect canvas for custom art, brand logos, or personal statements.',
+      sku: 'HH-MRC-BG-01',
+      variantTitle: 'Natural Ecru / 380 GSM',
+      priceMinor: 69900,
+      initialQuantity: 25,
+      imageUrl:
+        'https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80',
+      isCustomizable: true,
+      customizationConfig: {
+        allowCustomText: true,
+        allowImageUpload: true,
+        maxCharacters: 50,
+        surchargeMinor: 15000,
+        customizationNotesPlaceholder: 'Specify typography, quotes, or upload graphic artwork',
+        productionDays: 2
+      },
+      specifications: {
+        fabric: 'Organic Unbleached Cotton Canvas',
+        gsm: 380,
+        print_technique: 'Direct-to-Film (DTF) / Screen Print',
+        color: 'Natural Ecru'
+      },
+      tags: ['tote-bag', 'custom-merch', 'organic-cotton', 'canvas', 'on-demand'],
+      options: [{ name: 'Color', value: 'Natural Ecru' }]
     }
   ];
 
@@ -338,23 +654,40 @@ async function seed(): Promise<void> {
       .limit(1);
 
     if (existing[0]) {
-      console.log(`  ↳ Product already exists: ${item.title}`);
+      await db
+        .update(products)
+        .set({
+          categoryId: item.categoryId,
+          department: item.department,
+          isCustomizable: item.isCustomizable ?? false,
+          customizationConfig: item.customizationConfig ?? null,
+          specifications: item.specifications ?? {},
+          tags: item.tags ?? []
+        })
+        .where(eq(products.id, existing[0].id));
+      console.log(`  ↳ Product metadata updated: ${item.title}`);
       continue;
     }
 
     const { product, variants } = await createProductWithVariants(db, {
       storeId: store.id,
       categoryId: item.categoryId,
+      department: item.department,
       slug: item.slug,
       title: item.title,
       description: item.description,
       status: 'published',
+      isCustomizable: item.isCustomizable ?? false,
+      customizationConfig: item.customizationConfig ?? null,
+      specifications: item.specifications ?? {},
+      tags: item.tags ?? [],
       variants: [
         {
           sku: item.sku,
           title: item.variantTitle,
           priceMinor: item.priceMinor,
           currency: 'INR',
+          options: item.options ?? [],
           weightGrams: 20,
           sortOrder: 0,
           isActive: true,

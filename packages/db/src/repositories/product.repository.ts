@@ -2,6 +2,7 @@ import { and, asc, eq, min } from 'drizzle-orm';
 
 import type {
   CreateProductInput,
+  ProductCustomizationRule,
   PublicProductDetail,
   PublicProductListItem,
   PublicVariantItem
@@ -43,6 +44,9 @@ export async function listPublishedProducts(
       id: products.id,
       slug: products.slug,
       title: products.title,
+      department: products.department,
+      isCustomizable: products.isCustomizable,
+      tags: products.tags,
       categoryName: categories.name
     })
     .from(products)
@@ -84,6 +88,9 @@ export async function listPublishedProducts(
       id: prod.id,
       slug: prod.slug,
       title: prod.title,
+      department: prod.department ?? undefined,
+      isCustomizable: prod.isCustomizable ?? false,
+      tags: (prod.tags as string[]) ?? [],
       startingPriceMinor: Number(variantStats[0]?.minPrice ?? 0),
       currency: 'INR',
       primaryImageUrl: image[0]?.url ?? null,
@@ -106,6 +113,11 @@ export async function findProductBySlug(
       slug: products.slug,
       title: products.title,
       description: products.description,
+      department: products.department,
+      isCustomizable: products.isCustomizable,
+      customizationConfig: products.customizationConfig,
+      specifications: products.specifications,
+      tags: products.tags,
       seoTitle: products.seoTitle,
       seoDescription: products.seoDescription,
       categoryId: categories.id,
@@ -128,6 +140,7 @@ export async function findProductBySlug(
       priceMinor: productVariants.priceMinor,
       compareAtPriceMinor: productVariants.compareAtPriceMinor,
       currency: productVariants.currency,
+      options: productVariants.options,
       onHand: inventoryLevels.onHand,
       reserved: inventoryLevels.reserved
     })
@@ -159,6 +172,7 @@ export async function findProductBySlug(
       priceMinor: Number(v.priceMinor),
       compareAtPriceMinor: v.compareAtPriceMinor ? Number(v.compareAtPriceMinor) : null,
       currency: v.currency,
+      options: (v.options as { name: string; value: string }[]) ?? undefined,
       isAvailable: available > 0,
       availableQuantity: available
     };
@@ -169,7 +183,12 @@ export async function findProductBySlug(
     slug: product.slug,
     title: product.title,
     description: product.description,
+    department: product.department ?? undefined,
     currency: variants[0]?.currency ?? 'INR',
+    isCustomizable: product.isCustomizable ?? false,
+    customizationConfig: (product.customizationConfig as ProductCustomizationRule | null) ?? null,
+    specifications: (product.specifications as Record<string, string | number | boolean>) ?? {},
+    tags: (product.tags as string[]) ?? [],
     category: product.categoryId
       ? {
           id: product.categoryId,
@@ -196,10 +215,15 @@ export async function createProductWithVariants(
       .values({
         storeId: input.storeId,
         categoryId: input.categoryId,
+        department: input.department ?? 'unisex',
         slug: input.slug,
         title: input.title,
         description: input.description,
         status: input.status,
+        isCustomizable: input.isCustomizable ?? false,
+        customizationConfig: input.customizationConfig ?? null,
+        specifications: input.specifications ?? {},
+        tags: input.tags ?? [],
         seoTitle: input.seoTitle,
         seoDescription: input.seoDescription
       })
@@ -221,6 +245,7 @@ export async function createProductWithVariants(
           priceMinor: v.priceMinor,
           compareAtPriceMinor: v.compareAtPriceMinor,
           currency: v.currency,
+          options: v.options ?? [],
           weightGrams: v.weightGrams,
           sortOrder: v.sortOrder,
           isActive: v.isActive

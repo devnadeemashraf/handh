@@ -79,6 +79,15 @@ export const createVariantInputSchema = z.object({
   weightGrams: z.number().int().nonnegative().default(0),
   sortOrder: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
+  options: z
+    .array(
+      z.object({
+        name: z.string(),
+        value: z.string()
+      })
+    )
+    .optional()
+    .default([]),
   initialQuantity: z
     .number()
     .int('Initial quantity must be an integer')
@@ -89,10 +98,18 @@ export const createVariantInputSchema = z.object({
 export const createProductSchema = z.object({
   storeId: z.string().uuid('Invalid store ID'),
   categoryId: z.string().uuid('Invalid category ID').optional(),
+  department: z.string().optional().default('unisex'),
   slug: slugSchema,
   title: z.string().min(1, 'Product title is required').max(255),
   description: z.string().default(''),
   status: z.enum(['draft', 'published', 'archived']).default('draft'),
+  isCustomizable: z.boolean().optional().default(false),
+  customizationConfig: z.record(z.any()).optional().nullable(),
+  specifications: z
+    .record(z.union([z.string(), z.number(), z.boolean()]))
+    .optional()
+    .default({}),
+  tags: z.array(z.string()).optional().default([]),
   seoTitle: z.string().max(255).optional(),
   seoDescription: z.string().max(500).optional(),
   variants: z.array(createVariantInputSchema).min(1, 'Product must have at least one variant'),
@@ -112,5 +129,5 @@ export type CreateStoreInput = z.infer<typeof createStoreSchema>;
 export type UpdateStoreInput = z.infer<typeof updateStoreSchema>;
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
-export type CreateVariantInput = z.infer<typeof createVariantInputSchema>;
-export type CreateProductInput = z.infer<typeof createProductSchema>;
+export type CreateVariantInput = z.input<typeof createVariantInputSchema>;
+export type CreateProductInput = z.input<typeof createProductSchema>;

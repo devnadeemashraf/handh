@@ -4,6 +4,7 @@ import {
   boolean,
   check,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -25,10 +26,19 @@ export const products = pgTable(
       .notNull()
       .references(() => stores.id, { onDelete: 'restrict' }),
     categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
+    department: varchar('department', { length: 64 }).notNull().default('unisex'),
     slug: varchar('slug', { length: 255 }).notNull(),
     title: varchar('title', { length: 255 }).notNull(),
     description: text('description').notNull().default(''),
     status: varchar('status', { length: 32 }).$type<ProductStatus>().notNull().default('draft'),
+    isCustomizable: boolean('is_customizable').notNull().default(false),
+    customizationConfig: jsonb('customization_config').$type<Record<string, unknown>>(),
+    specifications: jsonb('specifications')
+      .$type<Record<string, string | number | boolean>>()
+      .$defaultFn(() => ({})),
+    tags: jsonb('tags')
+      .$type<string[]>()
+      .$defaultFn(() => []),
     seoTitle: varchar('seo_title', { length: 255 }),
     seoDescription: text('seo_description'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -46,6 +56,9 @@ export const productVariants = pgTable(
       .references(() => products.id, { onDelete: 'cascade' }),
     sku: varchar('sku', { length: 64 }).notNull().unique(),
     title: varchar('title', { length: 128 }).notNull(),
+    options: jsonb('options')
+      .$type<{ name: string; value: string }[]>()
+      .$defaultFn(() => []),
     priceMinor: bigint('price_minor', { mode: 'number' }).notNull(),
     compareAtPriceMinor: bigint('compare_at_price_minor', { mode: 'number' }),
     currency: varchar('currency', { length: 3 }).notNull().default('INR'),

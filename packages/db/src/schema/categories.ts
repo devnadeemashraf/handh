@@ -3,6 +3,7 @@ import {
   boolean,
   foreignKey,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -21,6 +22,9 @@ export const categories = pgTable(
       .notNull()
       .references(() => stores.id, { onDelete: 'restrict' }),
     parentId: uuid('parent_id'),
+    path: varchar('path', { length: 512 }).notNull().default(''),
+    depth: integer('depth').notNull().default(0),
+    applicableFilterKeys: jsonb('applicable_filter_keys').$type<string[]>().default([]),
     slug: varchar('slug', { length: 128 }).notNull(),
     name: varchar('name', { length: 128 }).notNull(),
     description: text('description'),

@@ -2,6 +2,7 @@
 
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 
+import { AddProductDialog } from './components/AddProductDialog';
 import { InventoryAuditTimeline } from './components/InventoryAuditTimeline';
 import { InventoryKpiCards } from './components/InventoryKpiCards';
 import { InventoryTable } from './components/InventoryTable';
@@ -42,6 +43,9 @@ export default function InventoryManager({
     setNewPriceInput,
     selectedVariantAuditId,
     setSelectedVariantAuditId,
+    isAddProductOpen,
+    setIsAddProductOpen,
+    handleProductCreated,
     handleQuickAdjust,
     handlePriceUpdate,
     handleStatusToggle
@@ -87,6 +91,7 @@ export default function InventoryManager({
         totalCount={items.length}
         lowStockCount={summary.lowStockCount}
         outOfStockCount={summary.outOfStockCount}
+        onOpenAddProduct={() => setIsAddProductOpen(true)}
       />
 
       {/* Inventory Table */}
@@ -128,6 +133,13 @@ export default function InventoryManager({
             handleQuickAdjust(adjustModalItem.variantId, customDelta, customReason, customNote);
           }
         }}
+      />
+
+      {/* Add New Product / Inventory Item Dialog */}
+      <AddProductDialog
+        isOpen={isAddProductOpen}
+        onClose={() => setIsAddProductOpen(false)}
+        onSuccess={handleProductCreated}
       />
 
       {/* Audit Log Timeline Section */}

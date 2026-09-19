@@ -43,6 +43,9 @@ export function useInventoryManager({
   // Audit Logs Drawer State
   const [selectedVariantAuditId, setSelectedVariantAuditId] = useState<string | null>(null);
 
+  // Add Product Dialog State
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+
   // Filter items
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -223,6 +226,42 @@ export function useInventoryManager({
     }
   };
 
+  const handleProductCreated = (
+    product: Record<string, unknown>,
+    newVariants: Record<string, unknown>[]
+  ) => {
+    setActionSuccess(
+      `Successfully added piece: ${String(product['title'] || 'New Piece')} with ${newVariants.length} SKU(s).`
+    );
+    const newItems: AdminInventoryItem[] = newVariants.map((v) => ({
+      productId: String(product['id'] || ''),
+      productTitle: String(product['title'] || ''),
+      productSlug: String(product['slug'] || ''),
+      productStatus: (product['status'] as 'draft' | 'published' | 'archived') || 'published',
+      variantId: String(v['id'] || ''),
+      variantSku: String(v['sku'] || ''),
+      variantTitle: String(v['title'] || ''),
+      priceMinor: Number(v['priceMinor'] || 0),
+      compareAtPriceMinor: v['compareAtPriceMinor'] ? Number(v['compareAtPriceMinor']) : undefined,
+      currency: String(v['currency'] || 'INR'),
+      onHand: 10,
+      reserved: 0,
+      available: 10,
+      isLowStock: false,
+      isOutOfStock: false,
+      primaryImageUrl: null,
+      updatedAt: new Date().toISOString()
+    }));
+
+    setItems((prev) => [...newItems, ...prev]);
+    setSummary((prev) => ({
+      ...prev,
+      totalVariants: prev.totalVariants + newVariants.length,
+      totalOnHand: prev.totalOnHand + newVariants.length * 10,
+      totalAvailable: prev.totalAvailable + newVariants.length * 10
+    }));
+  };
+
   return {
     items,
     summary,
@@ -249,6 +288,9 @@ export function useInventoryManager({
     setNewPriceInput,
     selectedVariantAuditId,
     setSelectedVariantAuditId,
+    isAddProductOpen,
+    setIsAddProductOpen,
+    handleProductCreated,
     handleQuickAdjust,
     handlePriceUpdate,
     handleStatusToggle

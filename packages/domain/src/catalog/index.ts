@@ -1,4 +1,7 @@
+export * from './customization';
+export * from './specification-registry';
 export * from './storefront-config';
+export * from './taxonomy';
 export type {
   CategoryTreeItem,
   PublicProductDetail,
