@@ -21,6 +21,7 @@ import React, { useEffect, useState } from 'react';
 
 import {
   type CheckoutOrderResult,
+  generateUUID,
   Money,
   type ServiceControlConfig,
   ShippingAddressSchema,
@@ -163,7 +164,7 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!idempotencyKey && typeof window !== 'undefined') {
-      setIdempotencyKey(crypto.randomUUID());
+      setIdempotencyKey(generateUUID());
     }
   }, [idempotencyKey]);
 
@@ -403,7 +404,7 @@ export default function CheckoutPage() {
         shippingAddress: addressValidation.data,
         customerNotes: values.customerNotes ? values.customerNotes.trim() : undefined,
         couponCode: appliedCouponCode || undefined,
-        idempotencyKey: idempotencyKey || crypto.randomUUID()
+        idempotencyKey: idempotencyKey || generateUUID()
       };
 
       const res = await fetch('/api/checkout/submit', {

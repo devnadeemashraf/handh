@@ -5,6 +5,7 @@ import { CartProvider } from '@/context/CartContext';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
+import '../lib/polyfill-crypto';
 import './globals.css';
 
 export const metadata: Metadata = {

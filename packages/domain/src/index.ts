@@ -37,3 +37,4 @@ export * from './result';
 export * from './service-control';
 export * from './shipping';
 export * from './states';
+export * from './uuid';
