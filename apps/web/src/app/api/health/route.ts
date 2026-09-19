@@ -65,7 +65,8 @@ export async function GET() {
   const memory = process.memoryUsage();
   const uptimeSeconds = Math.floor(process.uptime());
 
-  const isHealthy = dbStatus === 'connected' && (redisStatus === 'connected' || redisStatus === 'not_configured');
+  const isHealthy =
+    dbStatus === 'connected' && (redisStatus === 'connected' || redisStatus === 'not_configured');
   const isDegraded = dbStatus === 'connected' && redisStatus === 'error';
   const overallStatus = isHealthy ? 'healthy' : isDegraded ? 'degraded' : 'unhealthy';
 

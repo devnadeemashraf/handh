@@ -22,7 +22,10 @@ class ConsoleAnalyticsAdapter implements AnalyticsProvider {
 
   page(url?: string, properties?: Record<string, unknown>): void {
     if (this.isDev) {
-      console.log(`[Analytics:Page] ${url ?? (typeof window !== 'undefined' ? window.location.pathname : '')}`, properties ?? {});
+      console.log(
+        `[Analytics:Page] ${url ?? (typeof window !== 'undefined' ? window.location.pathname : '')}`,
+        properties ?? {}
+      );
     }
   }
 
@@ -50,7 +53,16 @@ class PostHogAnalyticsAdapter implements AnalyticsProvider {
 
     try {
       // Dynamic import / global posthog if available on window
-      const globalPosthog = (window as unknown as { posthog?: { init: (key: string, opts: unknown) => void; identify: (id: string, t?: unknown) => void; capture: (e: string, p?: unknown) => void; reset: () => void } }).posthog;
+      const globalPosthog = (
+        window as unknown as {
+          posthog?: {
+            init: (key: string, opts: unknown) => void;
+            identify: (id: string, t?: unknown) => void;
+            capture: (e: string, p?: unknown) => void;
+            reset: () => void;
+          };
+        }
+      ).posthog;
       if (globalPosthog) {
         globalPosthog.init(apiKey, {
           api_host: host,
@@ -67,13 +79,19 @@ class PostHogAnalyticsAdapter implements AnalyticsProvider {
 
   identify(userId: string, traits?: Record<string, unknown>): void {
     if (this.initialized && this.posthogInstance) {
-      (this.posthogInstance as { identify: (id: string, t?: unknown) => void }).identify(userId, traits);
+      (this.posthogInstance as { identify: (id: string, t?: unknown) => void }).identify(
+        userId,
+        traits
+      );
     }
   }
 
   track(event: string, properties?: Record<string, unknown>): void {
     if (this.initialized && this.posthogInstance) {
-      (this.posthogInstance as { capture: (e: string, p?: unknown) => void }).capture(event, properties);
+      (this.posthogInstance as { capture: (e: string, p?: unknown) => void }).capture(
+        event,
+        properties
+      );
     }
   }
 

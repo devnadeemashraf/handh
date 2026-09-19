@@ -5,8 +5,7 @@ export interface ErrorContext {
 }
 
 export function captureException(error: unknown, context?: ErrorContext): void {
-  const dsn =
-    process.env['SENTRY_DSN'] ?? process.env['NEXT_PUBLIC_SENTRY_DSN'];
+  const dsn = process.env['SENTRY_DSN'] ?? process.env['NEXT_PUBLIC_SENTRY_DSN'];
 
   if (!dsn) {
     if (process.env.NODE_ENV !== 'production') {
@@ -41,8 +40,7 @@ export function captureMessage(
   level: 'info' | 'warning' | 'error' = 'info',
   context?: ErrorContext
 ): void {
-  const dsn =
-    process.env['SENTRY_DSN'] ?? process.env['NEXT_PUBLIC_SENTRY_DSN'];
+  const dsn = process.env['SENTRY_DSN'] ?? process.env['NEXT_PUBLIC_SENTRY_DSN'];
 
   if (!dsn) {
     if (process.env.NODE_ENV !== 'production') {

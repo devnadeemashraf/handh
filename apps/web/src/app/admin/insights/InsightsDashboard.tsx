@@ -416,7 +416,9 @@ export default function InsightsDashboard({ initialInsights }: InsightsDashboard
                 variant="outline"
                 className="text-xs font-semibold text-pink-600 border-pink-500/30"
               >
-                {insights.attribution.channels.find((c) => c.source === 'instagram')?.percentage ?? 0}% Instagram
+                {insights.attribution.channels.find((c) => c.source === 'instagram')?.percentage ??
+                  0}
+                % Instagram
               </Badge>
             </CardHeader>
             <CardContent className="p-4 sm:p-5">

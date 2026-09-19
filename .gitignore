@@ -48,3 +48,7 @@ coverage/
 # Temporary files
 tmp/
 scratch/
+
+# Architecture & Technical Design Documents (Untracked Architectural Blueprint)
+docs/SYSTEM_ARCHITECTURE_DESIGN.md
+SYSTEM_ARCHITECTURE_DESIGN.md

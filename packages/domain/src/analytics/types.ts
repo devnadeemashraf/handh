@@ -23,7 +23,10 @@ export const orderAttributionSchema = z.object({
   landingPage: z.string().optional(),
   influencerCode: z.string().optional(),
   deviceType: z.enum(['mobile', 'tablet', 'desktop', 'unknown']).optional().default('unknown'),
-  capturedAt: z.string().datetime().default(() => new Date().toISOString())
+  capturedAt: z
+    .string()
+    .datetime()
+    .default(() => new Date().toISOString())
 });
 
 export type AnalyticsEventType =

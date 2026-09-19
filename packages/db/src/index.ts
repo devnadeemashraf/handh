@@ -26,3 +26,34 @@ export function createDbClient(databaseUrl: string, options: Parameters<typeof p
 
   return drizzle(queryClient, { schema });
 }
+
+const globalForDb = globalThis as unknown as {
+  hhPostgresClients?: Map<string, { queryClient: ReturnType<typeof postgres>; db: DatabaseClient }>;
+};
+
+/**
+ * Returns a cached, shared PostgreSQL connection pool wrapped with Drizzle ORM.
+ * Prevents connection starvation, socket exhaustion, and latency spikes across concurrent requests.
+ */
+export function getSharedDbClient(
+  databaseUrl: string,
+  options: Parameters<typeof postgres>[1] = {}
+): DatabaseClient {
+  if (!globalForDb.hhPostgresClients) {
+    globalForDb.hhPostgresClients = new Map();
+  }
+
+  const existing = globalForDb.hhPostgresClients.get(databaseUrl);
+  if (existing) {
+    return existing.db;
+  }
+
+  const db = createDbClient(databaseUrl, options);
+  // Store reference in connection cache
+  globalForDb.hhPostgresClients.set(databaseUrl, {
+    queryClient: (db as unknown as { session: { client: ReturnType<typeof postgres> } })?.session
+      ?.client,
+    db
+  });
+  return db;
+}

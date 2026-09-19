@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Suspense,useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { captureAttributionFromBrowser, trackPageView } from '@/lib/analytics';
 
 function AttributionCaptureInner() {

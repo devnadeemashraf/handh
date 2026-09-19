@@ -335,18 +335,47 @@ export async function recordAndProcessWebhookEvent(
   if (existing[0]) {
     webhookRecord = existing[0];
   } else {
-    // Insert new pending webhook record
-    const [inserted] = await db
-      .insert(webhookEvents)
-      .values({
-        provider,
-        eventId,
-        eventType,
-        payload,
-        status: 'pending'
-      })
-      .returning();
-    webhookRecord = inserted!;
+    // Insert new pending webhook record with concurrency conflict handling
+    try {
+      const [inserted] = await db
+        .insert(webhookEvents)
+        .values({
+          provider,
+          eventId,
+          eventType,
+          payload,
+          status: 'pending'
+        })
+        .onConflictDoNothing({ target: [webhookEvents.provider, webhookEvents.eventId] })
+        .returning();
+
+      if (!inserted) {
+        // Concurrent thread inserted this exact webhook event
+        const recheck = await db
+          .select()
+          .from(webhookEvents)
+          .where(and(eq(webhookEvents.provider, provider), eq(webhookEvents.eventId, eventId)))
+          .limit(1);
+
+        if (recheck[0]?.status === 'processed') {
+          return { processed: true, duplicate: true };
+        }
+        webhookRecord = recheck[0]!;
+      } else {
+        webhookRecord = inserted;
+      }
+    } catch {
+      const recheck = await db
+        .select()
+        .from(webhookEvents)
+        .where(and(eq(webhookEvents.provider, provider), eq(webhookEvents.eventId, eventId)))
+        .limit(1);
+
+      if (recheck[0]?.status === 'processed') {
+        return { processed: true, duplicate: true };
+      }
+      webhookRecord = recheck[0]!;
+    }
   }
 
   try {

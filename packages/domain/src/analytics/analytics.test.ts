@@ -8,7 +8,12 @@ describe('Analytics & Instagram Attribution Domain', () => {
     expect(isInstagramTraffic('https://l.instagram.com/')).toBe(true);
     expect(isInstagramTraffic('http://instagram.com/p/12345')).toBe(true);
     expect(isInstagramTraffic('https://ig.me/share')).toBe(true);
-    expect(isInstagramTraffic(undefined, 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 Instagram 280.0.0.17.112')).toBe(true);
+    expect(
+      isInstagramTraffic(
+        undefined,
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 Instagram 280.0.0.17.112'
+      )
+    ).toBe(true);
     expect(isInstagramTraffic('https://google.com/search')).toBe(false);
     expect(isInstagramTraffic()).toBe(false);
   });

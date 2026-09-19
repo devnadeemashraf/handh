@@ -89,31 +89,23 @@ export class RedisRateLimiter implements RateLimiter {
         await redis.connect().catch(() => {});
       }
 
-      // Atomic increment and expiry
-      const pipeline = redis.pipeline();
-      pipeline.incr(fullKey);
-      pipeline.ttl(fullKey);
+      // Atomic increment and TTL enforcement via single-trip Lua script
+      const luaScript = `
+        local current = redis.call('INCR', KEYS[1])
+        if current == 1 then
+          redis.call('EXPIRE', KEYS[1], ARGV[1])
+        end
+        local ttl = redis.call('TTL', KEYS[1])
+        return {current, ttl}
+      `;
 
-      const results = await pipeline.exec();
-      if (!results || results.length < 2) {
-        return this.memoryFallback.limit(key);
-      }
+      const result = (await redis.eval(luaScript, 1, fullKey, this.windowSeconds)) as [
+        number,
+        number
+      ];
 
-      const [incrErr, countResult] = results[0] as [Error | null, number];
-      const [ttlErr, ttlResult] = results[1] as [Error | null, number];
-
-      if (incrErr || ttlErr) {
-        return this.memoryFallback.limit(key);
-      }
-
-      const count = Number(countResult);
-      let ttl = Number(ttlResult);
-
-      // If key is newly created (ttl === -1), set expiry
-      if (ttl === -1) {
-        await redis.expire(fullKey, this.windowSeconds);
-        ttl = this.windowSeconds;
-      }
+      const count = Number(result[0]);
+      const ttl = Number(result[1]);
 
       const reset = now + (ttl > 0 ? ttl : this.windowSeconds);
       const remaining = Math.max(0, this.maxRequests - count);

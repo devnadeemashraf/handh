@@ -28,19 +28,27 @@ export async function insertOutboxEvent(
 /**
  * Fetches pending outbox events whose scheduledAt has arrived.
  * Orders by scheduledAt ascending (oldest first).
+ * Supports optional `skipLocked: true` for multi-worker distributed concurrency.
  */
 export async function fetchPendingOutboxEvents(
-  db: DatabaseClient,
-  limit = 50
+  db: DatabaseClient | DbTransaction,
+  limit = 50,
+  options: { skipLocked?: boolean } = {}
 ): Promise<OutboxEvent[]> {
   const now = new Date();
 
-  return await db
+  const baseQuery = db
     .select()
     .from(outboxEvents)
     .where(and(eq(outboxEvents.status, 'pending'), lte(outboxEvents.scheduledAt, now)))
     .orderBy(asc(outboxEvents.scheduledAt))
     .limit(limit);
+
+  if (options.skipLocked) {
+    return await baseQuery.for('update', { skipLocked: true });
+  }
+
+  return await baseQuery;
 }
 
 /**

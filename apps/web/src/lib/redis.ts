@@ -21,7 +21,10 @@ export function getRedisClient(): Redis | null {
     redisInstance.on('error', (err) => {
       // Gracefully log transient Redis connection warning
       if (process.env.NODE_ENV !== 'test') {
-        console.warn('Redis client transient warning:', err instanceof Error ? err.message : String(err));
+        console.warn(
+          'Redis client transient warning:',
+          err instanceof Error ? err.message : String(err)
+        );
       }
     });
 

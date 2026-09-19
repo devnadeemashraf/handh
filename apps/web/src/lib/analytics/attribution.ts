@@ -2,7 +2,8 @@ import {
   isInstagramTraffic,
   type OrderAttribution,
   orderAttributionSchema,
-  parseUtmParameters} from '@hh/domain';
+  parseUtmParameters
+} from '@hh/domain';
 
 const ATTRIBUTION_STORAGE_KEY = 'hh_attribution_v1';
 const ATTRIBUTION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30-day attribution window

@@ -63,9 +63,7 @@ describe('Shipping & Delivery Webhook Engine', () => {
     variantId = product.variants[0]!.id;
   });
 
-  it(
-    'records automated doorstep pickup fulfillment and processes delivery webhook',
-    async () => {
+  it('records automated doorstep pickup fulfillment and processes delivery webhook', async () => {
     // 1. Create and pay for an order
     const pending = await createPendingCheckoutOrder(db, {
       storeId,
