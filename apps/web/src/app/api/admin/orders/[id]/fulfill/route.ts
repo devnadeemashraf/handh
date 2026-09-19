@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createDbClient, createOrderFulfillment } from '@hh/db';
 import { CreateFulfillmentRequestSchema } from '@hh/domain';
 import { getAdminSession } from '../../../../../../lib/admin-auth';
+import { getShippingRegistry } from '../../../../../../lib/shipping';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -38,7 +39,34 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
     }
 
     const db = getDatabase();
-    const result = await createOrderFulfillment(db, parseResult.data);
+    const { orderId, courierProvider, trackingNumber, notes } = parseResult.data;
+    const registerWithTracker = json.registerWithTracker !== false;
+
+    let shippingProviderId = 'manual';
+    if (registerWithTracker) {
+      try {
+        const registry = getShippingRegistry();
+        const tracker = registry.get('trackingmore') || registry.get('manual');
+        if (tracker?.registerCounterAwb) {
+          await tracker.registerCounterAwb({
+            awb: trackingNumber,
+            courierSlug: courierProvider
+          });
+          shippingProviderId = tracker.providerId;
+        }
+      } catch {
+        // Fallback to manual if external registration fails
+        shippingProviderId = 'manual';
+      }
+    }
+
+    const result = await createOrderFulfillment(db, {
+      orderId,
+      courierProvider,
+      trackingNumber,
+      shippingProviderId,
+      notes
+    });
 
     return NextResponse.json({
       success: true,

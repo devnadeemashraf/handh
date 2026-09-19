@@ -7,28 +7,42 @@ import {
   type Order,
   type CourierProvider
 } from '../schema';
-import {
-  generateTrackingReference,
-  ValidationError,
-  NotFoundError,
-  type CreateFulfillmentRequest
-} from '@hh/domain';
+import { generateTrackingReference, ValidationError, NotFoundError } from '@hh/domain';
 import type { DatabaseClient } from '../index';
 
-export interface CreateFulfillmentResult {
+export interface CreateOrderFulfillmentOptions {
+  orderId: string;
+  courierProvider: CourierProvider;
+  trackingNumber: string;
+  shippingProviderId?: string | undefined;
+  labelUrl?: string | undefined;
+  pickupToken?: string | undefined;
+  notes?: string | undefined;
+}
+
+export interface CreateOrderFulfillmentResult {
   fulfillment: Fulfillment;
   order: Order;
 }
 
 /**
- * Atomically records a manual shipment fulfillment, transitions order fulfillment status to 'shipped',
- * and registers an asynchronous outbox event for customer dispatch notifications.
+ * Atomically records a shipment fulfillment (manual drop-off or doorstep pickup),
+ * transitions order fulfillment status to 'shipped', and registers an asynchronous
+ * outbox event for customer dispatch notifications.
  */
 export async function createOrderFulfillment(
   db: DatabaseClient,
-  params: CreateFulfillmentRequest
-): Promise<CreateFulfillmentResult> {
-  const { orderId, courierProvider, trackingNumber, notes } = params;
+  params: CreateOrderFulfillmentOptions
+): Promise<CreateOrderFulfillmentResult> {
+  const {
+    orderId,
+    courierProvider,
+    trackingNumber,
+    shippingProviderId = 'manual',
+    labelUrl,
+    pickupToken,
+    notes
+  } = params;
 
   return await db.transaction(async (tx) => {
     // 1. Fetch order with row-lock
@@ -55,8 +69,11 @@ export async function createOrderFulfillment(
       .values({
         orderId: order.id,
         courierProvider: courierProvider as CourierProvider,
+        shippingProviderId,
         trackingNumber: trackingNumber.trim(),
         trackingReference,
+        labelUrl: labelUrl ?? null,
+        pickupToken: pickupToken ?? null,
         status: 'shipped',
         shippedAt: new Date(),
         notes: notes ? notes.trim() : null
@@ -90,6 +107,8 @@ export async function createOrderFulfillment(
         courierProvider,
         trackingNumber: trackingNumber.trim(),
         trackingReference,
+        shippingProviderId,
+        labelUrl: labelUrl ?? null,
         customerName: order.customerName,
         customerEmail: order.customerEmail,
         customerPhone: order.customerPhone,
@@ -102,6 +121,139 @@ export async function createOrderFulfillment(
     return {
       fulfillment,
       order: updatedOrder
+    };
+  });
+}
+
+/**
+ * Finds fulfillment details and associated order by courier tracking number (AWB).
+ */
+export async function findFulfillmentByTrackingNumber(
+  db: DatabaseClient,
+  trackingNumber: string
+): Promise<{ fulfillment: Fulfillment; order: Order } | null> {
+  const cleanAwb = trackingNumber.trim();
+  const rows = await db
+    .select({
+      fulfillment: fulfillments,
+      order: orders
+    })
+    .from(fulfillments)
+    .innerJoin(orders, eq(fulfillments.orderId, orders.id))
+    .where(eq(fulfillments.trackingNumber, cleanAwb))
+    .orderBy(desc(fulfillments.createdAt))
+    .limit(1);
+
+  if (!rows[0]) return null;
+
+  return {
+    fulfillment: rows[0].fulfillment,
+    order: rows[0].order
+  };
+}
+
+/**
+ * Processes an incoming normalized shipping webhook event.
+ * Automatically updates fulfillment milestone scan status, and if the parcel is
+ * marked 'delivered', atomically completes the order and writes an Outbox event.
+ */
+export async function processShippingWebhookEvent(
+  db: DatabaseClient,
+  event: {
+    awb: string;
+    providerId: string;
+    status:
+      'manifested' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'failed_attempt' | 'rto';
+    timestamp?: Date | undefined;
+    location?: string | undefined;
+    description?: string | undefined;
+    rawPayload?: Record<string, unknown> | undefined;
+  }
+): Promise<{
+  processed: boolean;
+  orderCompleted: boolean;
+  fulfillmentId?: string | undefined;
+  orderId?: string | undefined;
+  reason?: string | undefined;
+}> {
+  return await db.transaction(async (tx) => {
+    // 1. Locate fulfillment by AWB with row lock
+    const lookup = await tx
+      .select({
+        fulfillment: fulfillments,
+        order: orders
+      })
+      .from(fulfillments)
+      .innerJoin(orders, eq(fulfillments.orderId, orders.id))
+      .where(eq(fulfillments.trackingNumber, event.awb.trim()))
+      .for('update')
+      .limit(1);
+
+    if (!lookup[0]) {
+      return {
+        processed: false,
+        orderCompleted: false,
+        reason: `No fulfillment record found matching AWB: '${event.awb}'`
+      };
+    }
+
+    const { fulfillment, order } = lookup[0];
+
+    // 2. Determine new status
+    const isDelivered = event.status === 'delivered';
+    const newFulfillmentStatus = isDelivered ? 'delivered' : fulfillment.status;
+    const deliveredAt = isDelivered ? (event.timestamp ?? new Date()) : fulfillment.deliveredAt;
+
+    // 3. Update fulfillment milestone
+    await tx
+      .update(fulfillments)
+      .set({
+        status: newFulfillmentStatus,
+        deliveredAt,
+        latestEvent: event.description || event.location || event.status,
+        rawWebhookPayload: event.rawPayload ? JSON.stringify(event.rawPayload) : null,
+        updatedAt: new Date()
+      })
+      .where(eq(fulfillments.id, fulfillment.id));
+
+    // 4. If delivered, transition order to 'completed'
+    let orderCompleted = false;
+    if (isDelivered && order.status !== 'completed') {
+      await tx
+        .update(orders)
+        .set({
+          status: 'completed',
+          updatedAt: new Date()
+        })
+        .where(eq(orders.id, order.id));
+
+      orderCompleted = true;
+
+      // 5. Emit transactional outbox event
+      await tx.insert(outboxEvents).values({
+        eventName: 'order.delivered',
+        aggregateType: 'order',
+        aggregateId: order.id,
+        payload: {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          fulfillmentId: fulfillment.id,
+          awb: event.awb,
+          providerId: event.providerId,
+          customerEmail: order.customerEmail,
+          customerName: order.customerName,
+          deliveredAt: (deliveredAt ?? new Date()).toISOString()
+        },
+        status: 'pending',
+        scheduledAt: new Date()
+      });
+    }
+
+    return {
+      processed: true,
+      orderCompleted,
+      fulfillmentId: fulfillment.id,
+      orderId: order.id
     };
   });
 }

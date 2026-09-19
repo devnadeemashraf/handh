@@ -19,6 +19,12 @@ export const fulfillments = pgTable(
       .$type<FulfillmentRecordStatus>()
       .notNull()
       .default('shipped'),
+    shippingProviderId: varchar('shipping_provider_id', { length: 32 }).notNull().default('manual'),
+    labelUrl: text('label_url'),
+    pickupToken: varchar('pickup_token', { length: 128 }),
+    latestEvent: text('latest_event'),
+    deliveredAt: timestamp('delivered_at', { withTimezone: true }),
+    rawWebhookPayload: text('raw_webhook_payload'),
     shippedAt: timestamp('shipped_at', { withTimezone: true }).notNull().defaultNow(),
     notes: text('notes'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -26,7 +32,8 @@ export const fulfillments = pgTable(
   },
   (table) => [
     index('idx_fulfillments_order_id').on(table.orderId),
-    index('idx_fulfillments_tracking_reference').on(table.trackingReference)
+    index('idx_fulfillments_tracking_reference').on(table.trackingReference),
+    index('idx_fulfillments_tracking_number').on(table.trackingNumber)
   ]
 );
 

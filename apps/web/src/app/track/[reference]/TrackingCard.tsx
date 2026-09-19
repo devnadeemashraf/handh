@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   Clock,
   Sparkles,
-  PackageCheck
+  PackageCheck,
+  CheckCircle2
 } from 'lucide-react';
 import { COURIER_LABELS, resolveCourierTrackingUrl, type CourierProvider } from '@hh/domain';
 import type { Fulfillment, Order, ShippingAddress } from '@hh/db';
@@ -381,6 +382,151 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             Verified Dispatch
           </span>
         </div>
+
+        {/* Live 4-Stage Stepper */}
+        <div className="track-step-list">
+          {/* Step 1: Confirmed */}
+          <div className="track-step-item">
+            <div className="track-step-icon done">
+              <PackageCheck style={{ width: '18px', height: '18px' }} />
+            </div>
+            <div style={{ paddingTop: '6px' }}>
+              <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+                Order Confirmed &amp; Payment Captured
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+                Payment verified on {formatDate(order.createdAt)}
+              </p>
+            </div>
+          </div>
+
+          {/* Step 2: Packed */}
+          <div className="track-step-item">
+            <div className="track-step-icon done">
+              <Sparkles style={{ width: '18px', height: '18px' }} />
+            </div>
+            <div style={{ paddingTop: '6px' }}>
+              <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+                Handcrafted &amp; Packed at Hyderabad Atelier
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+                Artisanal inspection completed and dispatched on {formatDate(fulfillment.shippedAt)}
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3: In Transit */}
+          <div className="track-step-item">
+            <div
+              className={`track-step-icon ${
+                fulfillment.status === 'delivered' ? 'done' : 'active'
+              }`}
+            >
+              <Truck style={{ width: '18px', height: '18px' }} />
+            </div>
+            <div style={{ paddingTop: '6px' }}>
+              <p
+                style={{
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: fulfillment.status === 'delivered' ? '#FDFBF7' : '#C5A880',
+                  margin: 0
+                }}
+              >
+                {fulfillment.status === 'delivered'
+                  ? 'Courier Transit Completed'
+                  : 'In Transit with Courier Partner'}
+              </p>
+              <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+                Handed to{' '}
+                {COURIER_LABELS[fulfillment.courierProvider as CourierProvider] ||
+                  fulfillment.courierProvider}{' '}
+                (AWB: {fulfillment.trackingNumber})
+              </p>
+            </div>
+          </div>
+
+          {/* Step 4: Delivered */}
+          <div className="track-step-item">
+            <div
+              className={`track-step-icon ${
+                fulfillment.status === 'delivered' ? 'done' : 'pending'
+              }`}
+            >
+              <CheckCircle2 style={{ width: '18px', height: '18px' }} />
+            </div>
+            <div style={{ paddingTop: '6px' }}>
+              <p
+                style={{
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: fulfillment.status === 'delivered' ? '#34D399' : '#53766A',
+                  margin: 0
+                }}
+              >
+                {fulfillment.status === 'delivered'
+                  ? 'Delivered to Customer'
+                  : 'Final Delivery to Destination'}
+              </p>
+              <p
+                style={{
+                  fontSize: '0.75rem',
+                  color: fulfillment.status === 'delivered' ? '#8BAAA0' : '#53766A',
+                  margin: '2px 0 0'
+                }}
+              >
+                {fulfillment.status === 'delivered'
+                  ? `Successfully delivered on ${formatDate(fulfillment.deliveredAt || fulfillment.updatedAt)}`
+                  : `Delivering to ${shippingAddr.city}, ${shippingAddr.state} (${shippingAddr.postalCode})`}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Real-time Courier Webhook Event Banner */}
+        {fulfillment.latestEvent && (
+          <div
+            style={{
+              padding: '12px 14px',
+              borderRadius: '10px',
+              backgroundColor: 'rgba(22, 67, 53, 0.6)',
+              border: '1px solid #235847',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}
+          >
+            <div
+              style={{
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                backgroundColor: fulfillment.status === 'delivered' ? '#34D399' : '#C5A880',
+                boxShadow:
+                  fulfillment.status === 'delivered'
+                    ? '0 0 8px rgba(52, 211, 153, 0.8)'
+                    : '0 0 8px rgba(197, 168, 128, 0.8)',
+                flexShrink: 0
+              }}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <span
+                style={{
+                  fontSize: '0.6875rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: '#8BAAA0',
+                  fontWeight: 600
+                }}
+              >
+                Latest Courier Scan Update
+              </span>
+              <span style={{ fontSize: '0.875rem', color: '#FDFBF7', fontWeight: 500 }}>
+                {fulfillment.latestEvent}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Courier Details Grid */}
         <div

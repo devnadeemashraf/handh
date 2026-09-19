@@ -13,7 +13,11 @@ import {
   AlertCircle,
   Clock,
   CheckCircle2,
-  Send
+  Send,
+  Building2,
+  FileText,
+  MapPin,
+  Sparkles
 } from 'lucide-react';
 import { COURIER_LABELS, resolveCourierTrackingUrl, type CourierProvider } from '@hh/domain';
 import type { Order, Fulfillment, ShippingAddress } from '@hh/db';
@@ -33,15 +37,36 @@ export default function OrderFulfillmentActions({
   const [orderStatus, setOrderStatus] = useState(order.status);
   const [fulfillmentStatus, setFulfillmentStatus] = useState(order.fulfillmentStatus);
 
+  // Active Dispatch Mode: 'doorstep' | 'counter'
+  const [dispatchMode, setDispatchMode] = useState<'doorstep' | 'counter'>('doorstep');
+
   // Address copy state
   const [hasCopiedAddress, setHasCopiedAddress] = useState(false);
 
-  // Fulfillment form state
+  // Mode 1: Doorstep Pickup Form State
+  const [doorstepProvider, setDoorstepProvider] = useState<'shiprocket' | 'delhivery'>(
+    'shiprocket'
+  );
+  const [weightGrams, setWeightGrams] = useState(200);
+  const [lengthCm, setLengthCm] = useState(15);
+  const [widthCm, setWidthCm] = useState(10);
+  const [heightCm, setHeightCm] = useState(5);
+  const [doorstepNotes, setDoorstepNotes] = useState('');
+  const [isBookingPickup, setIsBookingPickup] = useState(false);
+  const [pickupError, setPickupError] = useState<string | null>(null);
+  const [pickupSuccess, setPickupSuccess] = useState<{
+    awb: string;
+    labelUrl?: string | undefined;
+    pickupToken?: string | undefined;
+  } | null>(null);
+
+  // Mode 2: Counter Drop-Off Form State
   const [courierProvider, setCourierProvider] = useState<CourierProvider>('dtdc');
   const [trackingNumber, setTrackingNumber] = useState('');
-  const [notes, setNotes] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fulfillmentError, setFulfillmentError] = useState<string | null>(null);
+  const [counterNotes, setCounterNotes] = useState('');
+  const [registerWithTracker, setRegisterWithTracker] = useState(true);
+  const [isSubmittingCounter, setIsSubmittingCounter] = useState(false);
+  const [counterError, setCounterError] = useState<string | null>(null);
 
   // Status transition state
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -70,13 +95,61 @@ export default function OrderFulfillmentActions({
     }
   };
 
-  // Submit manual courier fulfillment
-  const handleFulfillSubmit = async (e: React.FormEvent) => {
+  // Submit Mode 1: Automated Doorstep Pickup Booking
+  const handleDoorstepSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsBookingPickup(true);
+    setPickupError(null);
+    setPickupSuccess(null);
+
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/book-pickup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerId: doorstepProvider,
+          weightGrams,
+          lengthCm,
+          widthCm,
+          heightCm,
+          notes: doorstepNotes.trim() || undefined
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setPickupError(data.error || 'Failed to schedule doorstep courier pickup.');
+        setIsBookingPickup(false);
+        return;
+      }
+
+      setFulfillments((prev) => [data.fulfillment, ...prev]);
+      setFulfillmentStatus('shipped');
+      if (orderStatus === 'paid') {
+        setOrderStatus('processing');
+      }
+
+      setPickupSuccess({
+        awb: data.pickupResult.awb,
+        labelUrl: data.pickupResult.labelUrl,
+        pickupToken: data.pickupResult.pickupToken
+      });
+      setIsBookingPickup(false);
+      setDoorstepNotes('');
+      router.refresh();
+    } catch {
+      setPickupError('A network error occurred while booking doorstep pickup.');
+      setIsBookingPickup(false);
+    }
+  };
+
+  // Submit Mode 2: Manual Counter Drop-Off
+  const handleCounterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingNumber.trim()) return;
 
-    setIsSubmitting(true);
-    setFulfillmentError(null);
+    setIsSubmittingCounter(true);
+    setCounterError(null);
 
     try {
       const res = await fetch(`/api/admin/orders/${order.id}/fulfill`, {
@@ -85,18 +158,18 @@ export default function OrderFulfillmentActions({
         body: JSON.stringify({
           courierProvider,
           trackingNumber: trackingNumber.trim(),
-          notes: notes.trim() || undefined
+          registerWithTracker,
+          notes: counterNotes.trim() || undefined
         })
       });
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        setFulfillmentError(data.error || 'Failed to record fulfillment.');
-        setIsSubmitting(false);
+        setCounterError(data.error || 'Failed to record counter fulfillment.');
+        setIsSubmittingCounter(false);
         return;
       }
 
-      // Append fulfillment & update status locally
       setFulfillments((prev) => [data.fulfillment, ...prev]);
       setFulfillmentStatus('shipped');
       if (orderStatus === 'paid') {
@@ -104,12 +177,12 @@ export default function OrderFulfillmentActions({
       }
 
       setTrackingNumber('');
-      setNotes('');
-      setIsSubmitting(false);
+      setCounterNotes('');
+      setIsSubmittingCounter(false);
       router.refresh();
     } catch {
-      setFulfillmentError('A network error occurred while recording fulfillment.');
-      setIsSubmitting(false);
+      setCounterError('A network error occurred while recording counter dispatch.');
+      setIsSubmittingCounter(false);
     }
   };
 
@@ -252,12 +325,12 @@ export default function OrderFulfillmentActions({
                   margin: 0
                 }}
               >
-                Shipment &amp; Courier Tracking
+                Shipment &amp; Courier Logistics
               </h3>
               <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
                 {fulfillments.length === 0
-                  ? 'Parcel has not yet been assigned a courier tracking number.'
-                  : `${fulfillments.length} courier dispatch recorded.`}
+                  ? 'Parcel has not yet been dispatched.'
+                  : `${fulfillments.length} courier dispatch record(s) active.`}
               </p>
             </div>
           </div>
@@ -275,7 +348,7 @@ export default function OrderFulfillmentActions({
           )}
         </div>
 
-        {/* Existing Fulfillments List */}
+        {/* Existing Fulfillments List with PDF Label & Live Webhook Scan */}
         {fulfillments.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {fulfillments.map((fulf) => {
@@ -299,7 +372,14 @@ export default function OrderFulfillmentActions({
                     }}
                   >
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          flexWrap: 'wrap'
+                        }}
+                      >
                         <span
                           style={{
                             fontSize: '0.8125rem',
@@ -307,7 +387,7 @@ export default function OrderFulfillmentActions({
                             color: '#FDFBF7'
                           }}
                         >
-                          {COURIER_LABELS[fulf.courierProvider]}
+                          {COURIER_LABELS[fulf.courierProvider] || fulf.courierProvider}
                         </span>
                         <span
                           className="admin-badge admin-badge-gold"
@@ -315,6 +395,22 @@ export default function OrderFulfillmentActions({
                         >
                           AWB: {fulf.trackingNumber}
                         </span>
+                        {fulf.shippingProviderId && fulf.shippingProviderId !== 'manual' && (
+                          <span
+                            className="admin-badge admin-badge-sky"
+                            style={{ textTransform: 'capitalize', fontSize: '0.6875rem' }}
+                          >
+                            Adapter: {fulf.shippingProviderId}
+                          </span>
+                        )}
+                        {fulf.pickupToken && (
+                          <span
+                            className="admin-badge admin-badge-emerald"
+                            style={{ fontFamily: 'monospace', fontSize: '0.6875rem' }}
+                          >
+                            Pickup Token: {fulf.pickupToken}
+                          </span>
+                        )}
                       </div>
                       <p
                         style={{
@@ -324,11 +420,37 @@ export default function OrderFulfillmentActions({
                           margin: 0
                         }}
                       >
-                        Ref: {fulf.trackingReference}
+                        Tracking Ref: {fulf.trackingReference}
                       </p>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        flexWrap: 'wrap'
+                      }}
+                    >
+                      {fulf.labelUrl && (
+                        <a
+                          href={fulf.labelUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="admin-btn-secondary"
+                          style={{
+                            minHeight: '36px',
+                            padding: '6px 12px',
+                            color: '#34D399',
+                            borderColor: 'rgba(52, 211, 153, 0.4)'
+                          }}
+                          title="Print or download courier shipping label"
+                        >
+                          <FileText style={{ width: '13px', height: '13px' }} />
+                          <span>Download Label</span>
+                        </a>
+                      )}
+
                       <a
                         href={`/track/${fulf.trackingReference}`}
                         target="_blank"
@@ -360,6 +482,31 @@ export default function OrderFulfillmentActions({
                     </div>
                   </div>
 
+                  {/* Real-time Webhook Scan Milestone */}
+                  {fulf.latestEvent && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        backgroundColor: 'rgba(22, 67, 53, 0.4)',
+                        border: '1px solid #1C4D3E',
+                        fontSize: '0.75rem',
+                        color: '#E8ECE9'
+                      }}
+                    >
+                      <Sparkles
+                        style={{ width: '13px', height: '13px', color: '#C5A880', flexShrink: 0 }}
+                      />
+                      <span>
+                        <strong style={{ color: '#C5A880' }}>Latest Courier Scan:</strong>{' '}
+                        {fulf.latestEvent}
+                      </span>
+                    </div>
+                  )}
+
                   {fulf.notes && (
                     <p
                       style={{
@@ -380,143 +527,443 @@ export default function OrderFulfillmentActions({
           </div>
         )}
 
-        {/* Manual Fulfillment Entry Form */}
-        <form
-          onSubmit={handleFulfillSubmit}
-          style={{
-            borderTop: '1px solid #1C4D3E',
-            paddingTop: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '16px'
-          }}
-        >
-          <h4
-            style={{
-              fontSize: '0.75rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: '#A0C0B5',
-              fontWeight: 600,
-              margin: 0
-            }}
-          >
-            {fulfillments.length === 0 ? 'Dispatch Shipment' : 'Add Additional Tracking'}
-          </h4>
-
-          {fulfillmentError && (
-            <div className="admin-alert-error">
-              <AlertCircle
-                style={{
-                  width: '16px',
-                  height: '16px',
-                  flexShrink: 0,
-                  color: '#F87171'
-                }}
-              />
-              <span>{fulfillmentError}</span>
-            </div>
-          )}
-
+        {/* Dual-Mode Dispatch Selection Tabs */}
+        <div style={{ borderTop: '1px solid #1C4D3E', paddingTop: '20px' }}>
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '12px'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '14px',
+              flexWrap: 'wrap',
+              gap: '8px'
             }}
           >
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#8BAAA0',
-                  marginBottom: '6px'
-                }}
-              >
-                Courier Provider
-              </label>
-              <select
-                value={courierProvider}
-                onChange={(e) => setCourierProvider(e.target.value as CourierProvider)}
-                className="admin-select"
-              >
-                <option value="dtdc">DTDC Express</option>
-                <option value="india_post">India Post (Speed Post)</option>
-                <option value="delhivery">Delhivery</option>
-                <option value="bluedart">Blue Dart</option>
-                <option value="other">Other / Local Courier</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '0.75rem',
-                  color: '#8BAAA0',
-                  marginBottom: '6px'
-                }}
-              >
-                Tracking Number (AWB / Consignment #)
-              </label>
-              <input
-                type="text"
-                required
-                value={trackingNumber}
-                onChange={(e) => setTrackingNumber(e.target.value)}
-                placeholder="e.g. DTDC12345678 or EM123456789IN"
-                className="admin-input"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
+            <h4
               style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                color: '#8BAAA0',
-                marginBottom: '6px'
+                fontSize: '0.8125rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: '#A0C0B5',
+                fontWeight: 600,
+                margin: 0
               }}
             >
-              Dispatch Notes (Internal / Optional)
-            </label>
-            <input
-              type="text"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Handed over at Hyderabad Jubilee Hills branch"
-              className="admin-input"
-            />
+              {fulfillments.length === 0 ? 'Dispatch Shipment' : 'Add Additional Tracking'}
+            </h4>
+
+            <div className="admin-tabs-bar">
+              <button
+                type="button"
+                onClick={() => setDispatchMode('doorstep')}
+                className={`admin-tab-btn ${dispatchMode === 'doorstep' ? 'active' : ''}`}
+              >
+                <Truck style={{ width: '14px', height: '14px' }} />
+                <span>Doorstep Pickup</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDispatchMode('counter')}
+                className={`admin-tab-btn ${dispatchMode === 'counter' ? 'active' : ''}`}
+              >
+                <Building2 style={{ width: '14px', height: '14px' }} />
+                <span>Counter Drop-Off</span>
+              </button>
+            </div>
           </div>
 
-          <div style={{ paddingTop: '4px' }}>
-            <button
-              type="submit"
-              disabled={isSubmitting || !trackingNumber.trim()}
-              className="admin-btn-primary"
+          {/* MODE 1: Doorstep Pickup Booking Form */}
+          {dispatchMode === 'doorstep' && (
+            <form
+              onSubmit={handleDoorstepSubmit}
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2
-                    style={{
-                      width: '16px',
-                      height: '16px',
-                      animation: 'spin 1s linear infinite'
-                    }}
+              {pickupError && (
+                <div className="admin-alert-error">
+                  <AlertCircle
+                    style={{ width: '16px', height: '16px', flexShrink: 0, color: '#F87171' }}
                   />
-                  <span>Recording Shipment...</span>
-                </>
-              ) : (
-                <>
-                  <Send style={{ width: '14px', height: '14px' }} />
-                  <span>Mark as Dispatched &amp; Generate Tracking Link</span>
-                </>
+                  <span>{pickupError}</span>
+                </div>
               )}
-            </button>
-          </div>
-        </form>
+
+              {pickupSuccess && (
+                <div
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: '8px',
+                    backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                    border: '1px solid rgba(52, 211, 153, 0.3)',
+                    color: '#34D399',
+                    fontSize: '0.8125rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                    flexWrap: 'wrap'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <CheckCircle2 style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+                    <span>
+                      Pickup booked! AWB: <strong>{pickupSuccess.awb}</strong>
+                      {pickupSuccess.pickupToken && ` (Token: ${pickupSuccess.pickupToken})`}
+                    </span>
+                  </div>
+                  {pickupSuccess.labelUrl && (
+                    <a
+                      href={pickupSuccess.labelUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="admin-btn-secondary"
+                      style={{
+                        padding: '4px 10px',
+                        minHeight: '32px',
+                        color: '#34D399',
+                        borderColor: 'rgba(52, 211, 153, 0.5)',
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      <FileText style={{ width: '12px', height: '12px' }} />
+                      <span>Print Label</span>
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Origin Atelier Callout */}
+              <div
+                style={{
+                  padding: '12px 14px',
+                  borderRadius: '8px',
+                  backgroundColor: '#0A251D',
+                  border: '1px solid #1C4D3E',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '10px'
+                }}
+              >
+                <MapPin
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    color: '#C5A880',
+                    flexShrink: 0,
+                    marginTop: '2px'
+                  }}
+                />
+                <div style={{ fontSize: '0.75rem', color: '#8BAAA0', lineHeight: 1.5 }}>
+                  <strong style={{ color: '#FDFBF7' }}>Hyderabad Atelier Dispatch Origin:</strong>
+                  <br />
+                  H&amp;H Artisan Atelier, Banjara Hills Road No 10, Hyderabad, Telangana - 500034
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '12px'
+                }}
+              >
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      color: '#8BAAA0',
+                      marginBottom: '6px'
+                    }}
+                  >
+                    Courier Logistics Provider
+                  </label>
+                  <select
+                    value={doorstepProvider}
+                    onChange={(e) =>
+                      setDoorstepProvider(e.target.value as 'shiprocket' | 'delhivery')
+                    }
+                    className="admin-select"
+                  >
+                    <option value="shiprocket">Shiprocket (Multi-Courier Aggregator)</option>
+                    <option value="delhivery">Delhivery Direct Express</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      color: '#8BAAA0',
+                      marginBottom: '6px'
+                    }}
+                  >
+                    Package Weight (Grams)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={weightGrams}
+                    onChange={(e) => setWeightGrams(parseInt(e.target.value, 10) || 200)}
+                    className="admin-input"
+                  />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                  gap: '12px'
+                }}
+              >
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      color: '#8BAAA0',
+                      marginBottom: '6px'
+                    }}
+                  >
+                    Length (cm)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={lengthCm}
+                    onChange={(e) => setLengthCm(parseInt(e.target.value, 10) || 15)}
+                    className="admin-input"
+                  />
+                </div>
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      color: '#8BAAA0',
+                      marginBottom: '6px'
+                    }}
+                  >
+                    Width (cm)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={widthCm}
+                    onChange={(e) => setWidthCm(parseInt(e.target.value, 10) || 10)}
+                    className="admin-input"
+                  />
+                </div>
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      color: '#8BAAA0',
+                      marginBottom: '6px'
+                    }}
+                  >
+                    Height (cm)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={heightCm}
+                    onChange={(e) => setHeightCm(parseInt(e.target.value, 10) || 5)}
+                    className="admin-input"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    color: '#8BAAA0',
+                    marginBottom: '6px'
+                  }}
+                >
+                  Pickup &amp; Handling Instructions (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={doorstepNotes}
+                  onChange={(e) => setDoorstepNotes(e.target.value)}
+                  placeholder="e.g. Fragile silver jewelry, collect after 2 PM"
+                  className="admin-input"
+                />
+              </div>
+
+              <div style={{ paddingTop: '4px' }}>
+                <button
+                  type="submit"
+                  disabled={
+                    isBookingPickup || (orderStatus !== 'paid' && orderStatus !== 'processing')
+                  }
+                  className="admin-btn-primary"
+                >
+                  {isBookingPickup ? (
+                    <>
+                      <Loader2
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          animation: 'spin 1s linear infinite'
+                        }}
+                      />
+                      <span>Booking Courier Pickup...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Truck style={{ width: '15px', height: '15px' }} />
+                      <span>Schedule Doorstep Pickup &amp; Generate Label</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* MODE 2: Counter Drop-Off Form */}
+          {dispatchMode === 'counter' && (
+            <form
+              onSubmit={handleCounterSubmit}
+              style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+            >
+              {counterError && (
+                <div className="admin-alert-error">
+                  <AlertCircle
+                    style={{ width: '16px', height: '16px', flexShrink: 0, color: '#F87171' }}
+                  />
+                  <span>{counterError}</span>
+                </div>
+              )}
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: '12px'
+                }}
+              >
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      color: '#8BAAA0',
+                      marginBottom: '6px'
+                    }}
+                  >
+                    Counter Courier Partner
+                  </label>
+                  <select
+                    value={courierProvider}
+                    onChange={(e) => setCourierProvider(e.target.value as CourierProvider)}
+                    className="admin-select"
+                  >
+                    <option value="dtdc">DTDC Express</option>
+                    <option value="india_post">India Post (Speed Post)</option>
+                    <option value="delhivery">Delhivery</option>
+                    <option value="bluedart">Blue Dart</option>
+                    <option value="other">Other / Local Courier</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: '0.75rem',
+                      color: '#8BAAA0',
+                      marginBottom: '6px'
+                    }}
+                  >
+                    Tracking Number (AWB / Consignment #)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={trackingNumber}
+                    onChange={(e) => setTrackingNumber(e.target.value)}
+                    placeholder="e.g. DTDC12345678 or EM123456789IN"
+                    className="admin-input"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    color: '#8BAAA0',
+                    marginBottom: '6px'
+                  }}
+                >
+                  Counter Dispatch Notes (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={counterNotes}
+                  onChange={(e) => setCounterNotes(e.target.value)}
+                  placeholder="e.g. Handed over at Banjara Hills post office counter"
+                  className="admin-input"
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                  type="checkbox"
+                  id="enableWebhookTracker"
+                  checked={registerWithTracker}
+                  onChange={(e) => setRegisterWithTracker(e.target.checked)}
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    accentColor: '#C5A880',
+                    cursor: 'pointer'
+                  }}
+                />
+                <label
+                  htmlFor="enableWebhookTracker"
+                  style={{ fontSize: '0.75rem', color: '#E8ECE9', cursor: 'pointer' }}
+                >
+                  Enable automated delivery tracking via universal courier webhook adapter
+                </label>
+              </div>
+
+              <div style={{ paddingTop: '4px' }}>
+                <button
+                  type="submit"
+                  disabled={isSubmittingCounter || !trackingNumber.trim()}
+                  className="admin-btn-primary"
+                >
+                  {isSubmittingCounter ? (
+                    <>
+                      <Loader2
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          animation: 'spin 1s linear infinite'
+                        }}
+                      />
+                      <span>Recording Dispatch...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send style={{ width: '14px', height: '14px' }} />
+                      <span>Record Counter Dispatch &amp; Link Tracking</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
 
       {/* Order State Transition Controls */}
