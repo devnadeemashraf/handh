@@ -45,7 +45,10 @@ export const storefrontHeroSchema = z.object({
     ),
   ctaText: z.string().default('Explore the Collection'),
   ctaLink: z.string().default('#catalog'),
-  badgeText: z.string().optional()
+  badgeText: z.string().optional(),
+  variant: z.enum(['luxury', 'split', 'minimal']).default('luxury'),
+  ctaVariant: z.enum(['default', 'gold', 'outline']).default('default'),
+  alignment: z.enum(['left', 'center']).default('center')
 });
 
 export const storefrontAnnouncementSchema = z.object({
@@ -56,13 +59,16 @@ export const storefrontAnnouncementSchema = z.object({
       'Handcrafted in limited batches • Express courier dispatch across India via India Post & DTDC'
     ),
   badge: z.string().default('Signature Drop'),
-  link: z.string().optional()
+  link: z.string().optional(),
+  variant: z.enum(['default', 'emerald', 'gold', 'subtle']).default('default'),
+  badgeVariant: z.enum(['default', 'secondary', 'outline', 'gold']).default('gold')
 });
 
 export const storefrontReassuranceSchema = z.object({
   title: z.string(),
   description: z.string(),
-  icon: z.enum(['sparkles', 'truck', 'shield', 'clock']).default('sparkles')
+  icon: z.enum(['sparkles', 'truck', 'shield', 'clock']).default('sparkles'),
+  cardStyle: z.enum(['default', 'card', 'outline']).default('default')
 });
 
 export const storefrontConfigSchema = z.object({
@@ -73,17 +79,20 @@ export const storefrontConfigSchema = z.object({
     {
       icon: 'sparkles',
       title: 'Artisanal Craftsmanship',
-      description: 'Meticulously shaped in limited quantities for unmatched grace.'
+      description: 'Meticulously shaped in limited quantities for unmatched grace.',
+      cardStyle: 'default'
     },
     {
       icon: 'truck',
       title: 'Direct Courier Dispatch',
-      description: 'Carefully packaged and shipped with verifiable tracking.'
+      description: 'Carefully packaged and shipped with verifiable tracking.',
+      cardStyle: 'default'
     },
     {
       icon: 'shield',
       title: 'Secure Online Payments',
-      description: 'End-to-end encrypted checkout powered by Razorpay.'
+      description: 'End-to-end encrypted checkout powered by Razorpay.',
+      cardStyle: 'default'
     }
   ])
 });
@@ -105,4 +114,46 @@ export function resolveStorefrontConfig(rawConfig?: unknown): StorefrontConfig {
     return result.data;
   }
   return DEFAULT_STOREFRONT_CONFIG;
+}
+
+/**
+ * Converts a hex color string (#RRGGBB or #RGB) into an HSL string triplet ("H S% L%").
+ * Used for dynamic CSS variable injection compatible with Tailwind and shadcn/ui.
+ */
+export function hexToHsl(hex: string): string {
+  let cleanHex = hex.replace('#', '');
+  if (cleanHex.length === 3) {
+    cleanHex = cleanHex
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  }
+  const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
+  const g = parseInt(cleanHex.substring(2, 4), 16) / 255;
+  const b = parseInt(cleanHex.substring(4, 6), 16) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+    h /= 6;
+  }
+
+  return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }

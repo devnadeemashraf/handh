@@ -2,11 +2,16 @@
 
 import { Clock, Loader2, ShieldCheck, Sparkles, Tag, Truck, X } from 'lucide-react';
 import Image from 'next/image';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
-import { calculateCheckoutFinancials, type CartSummary, Money } from '@hh/domain';
+import { calculateCheckoutFinancials, Money } from '@hh/domain';
 
-interface OrderReviewCardProps {
+import type { CartSummary } from '@hh/domain';
+
+export interface OrderReviewCardProps {
   cartSummary: CartSummary;
   isSubmitting: boolean;
   onSubmit: (couponCode?: string) => void;
@@ -19,13 +24,13 @@ export function OrderReviewCard({
   onSubmit,
   disabled = false
 }: OrderReviewCardProps) {
-  const [couponInput, setCouponInput] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState<{
+  const [couponInput, setCouponInput] = React.useState('');
+  const [appliedCoupon, setAppliedCoupon] = React.useState<{
     code: string;
     discountMinor: number;
   } | null>(null);
-  const [couponLoading, setCouponLoading] = useState(false);
-  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponLoading, setCouponLoading] = React.useState(false);
+  const [couponError, setCouponError] = React.useState<string | null>(null);
 
   const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,399 +88,189 @@ export function OrderReviewCard({
   ).format();
 
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--color-surface)',
-        borderRadius: 'var(--radius-md)',
-        border: '1px solid var(--color-border)',
-        padding: '24px 20px',
-        position: 'sticky',
-        top: '96px'
-      }}
-    >
-      <h2
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '1.25rem',
-          color: 'var(--color-primary-emerald)',
-          margin: '0 0 16px',
-          borderBottom: '1px solid var(--color-border)',
-          paddingBottom: '12px'
-        }}
-      >
-        Order Summary ({cartSummary.totalQuantity}{' '}
-        {cartSummary.totalQuantity === 1 ? 'piece' : 'pieces'})
-      </h2>
+    <Card className="sticky top-24 border-border bg-card shadow-sm">
+      <CardContent className="p-6">
+        <h2 className="mb-4 border-b border-border pb-3 font-serif text-xl font-semibold text-primary">
+          Order Summary ({cartSummary.totalQuantity}{' '}
+          {cartSummary.totalQuantity === 1 ? 'piece' : 'pieces'})
+        </h2>
 
-      {/* Items Preview List */}
-      <div
-        style={{
-          maxHeight: '260px',
-          overflowY: 'auto',
-          marginBottom: '20px',
-          paddingRight: '4px'
-        }}
-      >
-        {cartSummary.items.map((item) => (
-          <div
-            key={item.variantId}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '10px 0',
-              borderBottom: '1px solid var(--color-border)'
-            }}
-          >
-            {/* Thumbnail */}
-            <div
-              style={{
-                position: 'relative',
-                width: '48px',
-                height: '48px',
-                flexShrink: 0,
-                borderRadius: 'var(--radius-sm)',
-                overflow: 'hidden',
-                backgroundColor: '#F5EFE6',
-                border: '1px solid var(--color-border)'
-              }}
-            >
-              {item.primaryImageUrl ? (
-                <Image
-                  src={item.primaryImageUrl}
-                  alt={item.productTitle}
-                  fill
-                  sizes="48px"
-                  style={{ objectFit: 'cover' }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--color-accent-gold)',
-                    fontSize: '10px',
-                    fontWeight: 600
-                  }}
-                >
-                  H&H
+        {/* Items Preview List */}
+        <div className="max-h-64 overflow-y-auto pr-1 divide-y divide-border mb-4">
+          {cartSummary.items.map((item) => (
+            <div key={item.variantId} className="flex items-center gap-3 py-2.5">
+              {/* Thumbnail */}
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md border border-border bg-secondary/40">
+                {item.primaryImageUrl ? (
+                  <Image
+                    src={item.primaryImageUrl}
+                    alt={item.productTitle}
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-accent">
+                    H&amp;H
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              <div className="flex-1 min-w-0">
+                <div className="truncate text-sm font-medium text-foreground">
+                  {item.productTitle}
                 </div>
-              )}
-            </div>
-
-            {/* Description */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  color: 'var(--color-text-primary)',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}
-              >
-                {item.productTitle}
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {item.variantTitle &&
+                  item.variantTitle !== 'Default' &&
+                  item.variantTitle !== 'Default Variant'
+                    ? `${item.variantTitle} · `
+                    : ''}
+                  Qty: {item.effectiveQuantity}
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: '0.75rem',
-                  color: 'var(--color-text-muted)',
-                  marginTop: '2px'
-                }}
-              >
-                {item.variantTitle &&
-                item.variantTitle !== 'Default' &&
-                item.variantTitle !== 'Default Variant'
-                  ? `${item.variantTitle} · `
-                  : ''}
-                Qty: {item.effectiveQuantity}
+
+              {/* Price */}
+              <div className="text-sm font-semibold text-foreground">
+                {Money.fromMinor(item.lineTotalMinor, 'INR').format()}
               </div>
             </div>
-
-            {/* Price */}
-            <div
-              style={{
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                color: 'var(--color-text-primary)'
-              }}
-            >
-              {Money.fromMinor(item.lineTotalMinor, 'INR').format()}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Free Delivery Incentive Prompt */}
-      {!financials.isFreeDelivery && financials.remainingForFreeDeliveryMinor > 0 && (
-        <div
-          style={{
-            backgroundColor: 'var(--color-accent-light)',
-            border: '1px solid rgba(197, 168, 128, 0.4)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '10px 12px',
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontSize: '0.8rem',
-            color: '#7d5926'
-          }}
-        >
-          <Sparkles size={16} style={{ flexShrink: 0 }} />
-          <span>
-            Add <strong>{remainingForFreeFormatted}</strong> more to your order to unlock{' '}
-            <strong>Free Express Delivery</strong>!
-          </span>
+          ))}
         </div>
-      )}
 
-      {/* Coupon Code Entry Form */}
-      <div style={{ marginBottom: '18px' }}>
-        {!appliedCoupon ? (
-          <form
-            onSubmit={handleApplyCoupon}
-            style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
-          >
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input
-                type="text"
-                placeholder="PROMO CODE (e.g. WELCOME10)"
-                value={couponInput}
-                onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                disabled={disabled || isSubmitting || couponLoading}
-                aria-label="Promotional Code"
-                style={{
-                  flex: 1,
-                  padding: '10px 12px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-bg)',
-                  fontSize: '0.85rem',
-                  fontFamily: 'monospace',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  outline: 'none'
-                }}
-              />
+        {/* Free Delivery Incentive Prompt */}
+        {!financials.isFreeDelivery && financials.remainingForFreeDeliveryMinor > 0 && (
+          <div className="mb-4 flex items-center gap-2 rounded-md border border-accent/40 bg-secondary/60 p-2.5 text-xs text-secondary-foreground">
+            <Sparkles className="h-4 w-4 shrink-0 text-accent" />
+            <span>
+              Add <strong>{remainingForFreeFormatted}</strong> more to your order to unlock{' '}
+              <strong>Free Express Delivery</strong>!
+            </span>
+          </div>
+        )}
+
+        {/* Coupon Code Entry Form */}
+        <div className="mb-4">
+          {!appliedCoupon ? (
+            <form onSubmit={handleApplyCoupon} className="space-y-1.5">
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="PROMO CODE (e.g. WELCOME10)"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  disabled={disabled || isSubmitting || couponLoading}
+                  aria-label="Promotional Code"
+                  className="font-mono text-xs uppercase tracking-wider h-10"
+                />
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  disabled={!couponInput.trim() || disabled || isSubmitting || couponLoading}
+                  className="shrink-0 h-10 text-xs font-semibold px-4"
+                >
+                  {couponLoading ? 'Checking...' : 'Apply'}
+                </Button>
+              </div>
+              {couponError && <div className="text-xs text-destructive mt-1">{couponError}</div>}
+            </form>
+          ) : (
+            <div className="flex items-center justify-between rounded-md border border-emerald-300 bg-emerald-50 p-2.5 text-xs text-emerald-900">
+              <div className="flex items-center gap-2 font-semibold">
+                <Tag className="h-4 w-4 text-emerald-700" />
+                <span>{appliedCoupon.code} applied</span>
+              </div>
               <button
-                type="submit"
-                disabled={!couponInput.trim() || disabled || isSubmitting || couponLoading}
-                className="royale-button-secondary"
-                style={{
-                  padding: '10px 16px',
-                  fontSize: '0.85rem',
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap',
-                  cursor: 'pointer'
-                }}
+                type="button"
+                onClick={handleRemoveCoupon}
+                aria-label="Remove promo code"
+                className="text-muted-foreground hover:text-foreground p-1 transition-colors"
               >
-                {couponLoading ? 'Checking...' : 'Apply'}
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
-            {couponError && (
-              <div style={{ fontSize: '0.78rem', color: '#DC2626', marginTop: '2px' }}>
-                {couponError}
+          )}
+        </div>
+
+        {/* Financial Breakdown Table */}
+        <div className="space-y-2.5 text-sm mb-4">
+          <div className="flex justify-between text-muted-foreground">
+            <span>Subtotal</span>
+            <span className="font-semibold text-foreground">{subtotalFormatted}</span>
+          </div>
+
+          {/* Applied Coupon Discount Row */}
+          {financials.discountMinor > 0 && (
+            <div className="flex justify-between text-emerald-700 font-medium">
+              <div className="flex items-center gap-1.5">
+                <Tag className="h-3.5 w-3.5" />
+                <span>Coupon Discount ({appliedCoupon?.code})</span>
               </div>
-            )}
-          </form>
-        ) : (
-          <div
-            style={{
-              padding: '10px 14px',
-              backgroundColor: 'rgba(5, 150, 105, 0.08)',
-              border: '1px solid #A7F3D0',
-              borderRadius: 'var(--radius-sm)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Tag size={16} color="#059669" />
-              <span style={{ fontSize: '0.85rem', color: '#065F46', fontWeight: 600 }}>
-                {appliedCoupon.code} applied
-              </span>
+              <span>&minus; {Money.fromMinor(financials.discountMinor, 'INR').format()}</span>
             </div>
-            <button
-              type="button"
-              onClick={handleRemoveCoupon}
-              aria-label="Remove promo code"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#6B7280',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '4px'
-              }}
-            >
-              <X size={15} />
-            </button>
-          </div>
-        )}
-      </div>
+          )}
 
-      {/* Financial Breakdown Table */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.9rem',
-            color: 'var(--color-text-muted)'
-          }}
-        >
-          <span>Subtotal</span>
-          <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
-            {subtotalFormatted}
-          </span>
-        </div>
-
-        {/* Applied Coupon Discount Row */}
-        {financials.discountMinor > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontSize: '0.9rem',
-              color: '#059669',
-              fontWeight: 600
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Tag size={14} />
-              <span>Coupon Discount ({appliedCoupon?.code})</span>
+          <div className="flex justify-between text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <Truck className="h-3.5 w-3.5" />
+              <span>Standard Courier Delivery</span>
             </div>
-            <span>- {Money.fromMinor(financials.discountMinor, 'INR').format()}</span>
-          </div>
-        )}
-
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.9rem',
-            color: 'var(--color-text-muted)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Truck size={15} />
-            <span>Standard Courier Delivery</span>
-          </div>
-          <span
-            style={{
-              fontWeight: 600,
-              color: financials.isFreeDelivery ? '#059669' : 'var(--color-text-primary)'
-            }}
-          >
-            {shippingFormatted}
-          </span>
-        </div>
-
-        <div
-          style={{
-            borderTop: '1px solid var(--color-border)',
-            paddingTop: '14px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline'
-          }}
-        >
-          <div>
             <span
-              style={{
-                fontSize: '1rem',
-                fontWeight: 600,
-                color: 'var(--color-text-primary)'
-              }}
+              className={
+                financials.isFreeDelivery
+                  ? 'font-semibold text-emerald-700'
+                  : 'font-semibold text-foreground'
+              }
             >
-              Total to Pay
+              {shippingFormatted}
             </span>
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-              Inclusive of all taxes & delivery
-            </div>
           </div>
-          <span
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.4rem',
-              fontWeight: 700,
-              color: 'var(--color-primary-emerald)'
-            }}
-          >
-            {totalFormatted}
+
+          <div className="border-t border-border pt-3 flex items-baseline justify-between">
+            <div>
+              <span className="font-semibold text-foreground text-base">Total to Pay</span>
+              <div className="text-[11px] text-muted-foreground">
+                Inclusive of all taxes &amp; delivery
+              </div>
+            </div>
+            <span className="font-serif text-2xl font-bold text-primary">{totalFormatted}</span>
+          </div>
+        </div>
+
+        {/* Inventory Lock Guarantee */}
+        <div className="mb-5 flex items-start gap-2 rounded-md border border-primary/10 bg-primary/5 p-2.5 text-xs text-primary leading-relaxed">
+          <Clock className="h-4 w-4 shrink-0 mt-0.5" />
+          <span>
+            <strong>15-Minute Reservation:</strong> Stock is reserved exclusively for you once order
+            is initiated, preventing overselling.
           </span>
         </div>
-      </div>
 
-      {/* Inventory Lock Guarantee */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: '8px',
-          padding: '10px 12px',
-          backgroundColor: 'rgba(10, 46, 36, 0.04)',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid rgba(10, 46, 36, 0.1)',
-          marginBottom: '20px',
-          fontSize: '0.78rem',
-          color: 'var(--color-primary-emerald)',
-          lineHeight: 1.4
-        }}
-      >
-        <Clock size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-        <span>
-          <strong>15-Minute Reservation:</strong> Stock is reserved exclusively for you once order
-          is initiated, preventing overselling.
-        </span>
-      </div>
+        {/* Primary Submit Button */}
+        <Button
+          type="button"
+          onClick={() => onSubmit(appliedCoupon?.code)}
+          disabled={disabled || isSubmitting || !cartSummary.isValidForCheckout}
+          size="lg"
+          className="w-full text-base font-semibold shadow-md min-h-12"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <span>Securing Stock &amp; Placing Order...</span>
+            </>
+          ) : (
+            <span>Place Order &amp; Proceed to Pay</span>
+          )}
+        </Button>
 
-      {/* Primary Submit Button */}
-      <button
-        type="button"
-        onClick={() => onSubmit(appliedCoupon?.code)}
-        disabled={disabled || isSubmitting || !cartSummary.isValidForCheckout}
-        className="royale-button-primary"
-        style={{
-          width: '100%',
-          minHeight: '52px',
-          fontSize: '1rem',
-          fontWeight: 600,
-          boxShadow: '0 4px 14px rgba(10, 46, 36, 0.15)'
-        }}
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 size={18} className="animate-spin" />
-            <span>Securing Stock & Placing Order...</span>
-          </>
-        ) : (
-          <span>Place Order & Proceed to Pay</span>
-        )}
-      </button>
-
-      {/* Security & Reassurance */}
-      <div
-        style={{
-          marginTop: '18px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px',
-          fontSize: '0.75rem',
-          color: 'var(--color-text-muted)'
-        }}
-      >
-        <ShieldCheck size={14} color="var(--color-primary-emerald)" />
-        <span>256-Bit Encrypted Secure Checkout</span>
-      </div>
-    </div>
+        {/* Security & Reassurance */}
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+          <span>256-Bit Encrypted Secure Checkout</span>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

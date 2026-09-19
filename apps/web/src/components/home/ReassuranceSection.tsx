@@ -1,4 +1,6 @@
 import { Clock, Shield, Sparkles, Truck } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 import type { StorefrontReassurance } from '@hh/domain';
 
@@ -8,83 +10,50 @@ export function ReassuranceSection({ items }: { items: StorefrontReassurance[] }
   const renderIcon = (iconName: string) => {
     switch (iconName) {
       case 'truck':
-        return <Truck size={22} style={{ color: 'var(--color-primary)' }} />;
+        return <Truck className="h-5 w-5 text-primary" />;
       case 'shield':
-        return <Shield size={22} style={{ color: 'var(--color-primary)' }} />;
+        return <Shield className="h-5 w-5 text-primary" />;
       case 'clock':
-        return <Clock size={22} style={{ color: 'var(--color-primary)' }} />;
+        return <Clock className="h-5 w-5 text-primary" />;
       case 'sparkles':
       default:
-        return <Sparkles size={22} style={{ color: 'var(--color-accent)' }} />;
+        return <Sparkles className="h-5 w-5 text-accent" />;
     }
   };
 
   return (
-    <section
-      style={{
-        paddingTop: '48px',
-        paddingBottom: '48px',
-        borderTop: '1px solid var(--color-border)',
-        borderBottom: '1px solid var(--color-border)',
-        backgroundColor: 'var(--color-surface)',
-        marginTop: '64px'
-      }}
-    >
-      <div className="royale-container">
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: '32px'
-          }}
-        >
-          {items.map((item, idx) => (
-            <div
-              key={idx}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '16px',
-                padding: '12px'
-              }}
-            >
-              <div
-                style={{
-                  padding: '10px',
-                  backgroundColor: 'var(--color-bg)',
-                  borderRadius: 'var(--radius-md)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}
+    <section className="my-16 border-y border-border bg-card/60 py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {items.map((item, idx) => {
+            const isCard = item.cardStyle === 'card';
+            const isOutline = item.cardStyle === 'outline';
+
+            return (
+              <Card
+                key={idx}
+                className={cn(
+                  'border-0 shadow-none bg-transparent',
+                  isCard && 'border border-border bg-card shadow-sm',
+                  isOutline && 'border border-border/80 bg-transparent'
+                )}
               >
-                {renderIcon(item.icon)}
-              </div>
-              <div>
-                <h4
-                  style={{
-                    margin: '0 0 4px 0',
-                    fontSize: '0.95rem',
-                    fontWeight: 600,
-                    color: 'var(--color-primary)'
-                  }}
-                >
-                  {item.title}
-                </h4>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '0.85rem',
-                    color: 'var(--color-text-muted)',
-                    lineHeight: 1.5
-                  }}
-                >
-                  {item.description}
-                </p>
-              </div>
-            </div>
-          ))}
+                <CardContent className="flex items-start gap-4 p-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                    {renderIcon(item.icon)}
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm text-primary leading-tight mb-1">
+                      {item.title}
+                    </h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 import type { CategoryTreeItem } from '@hh/domain';
 
@@ -22,16 +23,7 @@ export function CategoryFilter({
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        gap: '8px',
-        margin: '40px 0 32px'
-      }}
-    >
+    <div className="my-8 flex items-center justify-start sm:justify-center overflow-x-auto pb-2 scrollbar-none gap-2 px-1">
       {flatTabs.map((tab) => {
         const isActive = tab.slug === '' ? isAllActive : activeCategory === tab.slug;
         const href = tab.slug ? `/?category=${tab.slug}#catalog` : '/#catalog';
@@ -40,19 +32,12 @@ export function CategoryFilter({
           <Link
             key={tab.slug}
             href={href}
-            style={{
-              display: 'inline-block',
-              padding: '8px 18px',
-              fontSize: '0.85rem',
-              fontWeight: 500,
-              letterSpacing: '0.04em',
-              borderRadius: '9999px',
-              border: '1px solid',
-              borderColor: isActive ? 'var(--color-primary)' : 'var(--color-border)',
-              backgroundColor: isActive ? 'var(--color-primary)' : 'var(--color-surface)',
-              color: isActive ? '#ffffff' : 'var(--color-text)',
-              transition: 'all 0.15s ease'
-            }}
+            className={cn(
+              'inline-flex shrink-0 items-center justify-center rounded-full px-4 py-2 text-xs font-medium tracking-wider uppercase transition-all select-none',
+              isActive
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'border border-border bg-card/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
+            )}
           >
             {tab.label}
           </Link>

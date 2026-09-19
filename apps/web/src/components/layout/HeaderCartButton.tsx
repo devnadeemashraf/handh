@@ -3,6 +3,7 @@
 import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { cn } from '@/lib/utils';
 
 export function HeaderCartButton() {
   const { totalItemCount, openCart } = useCart();
@@ -17,40 +18,15 @@ export function HeaderCartButton() {
           openCart();
         }
       }}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '8px 12px',
-        borderRadius: 'var(--radius-sm)',
-        color: 'var(--color-primary)',
-        textDecoration: 'none',
-        minHeight: '44px',
-        minWidth: '44px',
-        justifyContent: 'center'
-      }}
+      className={cn(
+        'inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md p-2 text-primary transition-colors hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+      )}
       aria-label={`Shopping Bag with ${totalItemCount} items`}
     >
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-        <ShoppingBag size={22} color="currentColor" strokeWidth={2} />
+      <div className="relative flex items-center">
+        <ShoppingBag className="h-5 w-5" strokeWidth={2} />
         {totalItemCount > 0 && (
-          <span
-            style={{
-              position: 'absolute',
-              top: '-6px',
-              right: '-8px',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              backgroundColor: 'var(--color-primary)',
-              color: '#ffffff',
-              padding: '1px 5px',
-              borderRadius: '9999px',
-              minWidth: '18px',
-              textAlign: 'center',
-              lineHeight: '1.2',
-              boxShadow: '0 0 0 2px var(--color-surface)'
-            }}
-          >
+          <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.65rem] font-bold leading-none text-primary-foreground shadow-[0_0_0_2px_hsl(var(--card))]">
             {totalItemCount}
           </span>
         )}

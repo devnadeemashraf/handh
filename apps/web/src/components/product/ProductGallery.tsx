@@ -1,77 +1,51 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 import type { PublicProductImage } from '@hh/domain';
 
 export function ProductGallery({ images, title }: { images: PublicProductImage[]; title: string }) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
   const activeImage = images[selectedIndex] ?? images[0];
 
   if (!activeImage) {
     return (
-      <div
-        style={{
-          width: '100%',
-          aspectRatio: '3 / 4',
-          backgroundColor: '#f4f1ea',
-          borderRadius: 'var(--radius-md)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--color-text-muted)'
-        }}
-      >
+      <div className="flex aspect-[3/4] w-full items-center justify-center rounded-lg bg-secondary/40 border border-border text-sm text-muted-foreground">
         No Image Available
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div className="flex flex-col gap-4">
       {/* Primary Display */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          aspectRatio: '3 / 4',
-          borderRadius: 'var(--radius-md)',
-          overflow: 'hidden',
-          backgroundColor: '#f4f1ea',
-          boxShadow: 'var(--shadow-subtle)'
-        }}
-      >
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-lg bg-secondary/40 border border-border shadow-sm">
         <Image
           src={activeImage.url}
           alt={activeImage.altText || title}
           fill
           priority
           sizes="(max-width: 768px) 100vw, 50vw"
-          style={{ objectFit: 'cover' }}
+          className="object-cover"
         />
       </div>
 
       {/* Thumbnails */}
       {images.length > 1 && (
-        <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
           {images.map((img, idx) => (
             <button
               key={img.id}
+              type="button"
               onClick={() => setSelectedIndex(idx)}
-              style={{
-                position: 'relative',
-                width: '72px',
-                height: '96px',
-                flexShrink: 0,
-                borderRadius: 'var(--radius-sm)',
-                overflow: 'hidden',
-                border: '2px solid',
-                borderColor: selectedIndex === idx ? 'var(--color-primary)' : 'transparent',
-                padding: 0,
-                backgroundColor: '#f4f1ea',
-                cursor: 'pointer'
-              }}
+              className={cn(
+                'relative h-24 w-18 shrink-0 overflow-hidden rounded-md border-2 bg-secondary/40 transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                selectedIndex === idx
+                  ? 'border-primary shadow-sm'
+                  : 'border-transparent opacity-70 hover:opacity-100'
+              )}
               aria-label={`View image ${idx + 1}`}
             >
               <Image
@@ -79,7 +53,7 @@ export function ProductGallery({ images, title }: { images: PublicProductImage[]
                 alt={img.altText || `${title} thumbnail ${idx + 1}`}
                 fill
                 sizes="72px"
-                style={{ objectFit: 'cover' }}
+                className="object-cover"
               />
             </button>
           ))}

@@ -11,8 +11,7 @@ import { ProductPurchaseCard } from '@/components/product/ProductPurchaseCard';
 
 import type { Metadata } from 'next';
 
-import { createDbClient } from '@hh/db';
-import { findProductBySlug, findStoreBySlug, getCategoryTree } from '@hh/db';
+import { createDbClient, findProductBySlug, findStoreBySlug, getCategoryTree } from '@hh/db';
 import { resolveStorefrontConfig } from '@hh/domain';
 
 interface ProductPageProps {
@@ -108,71 +107,48 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <main className="royale-container" style={{ paddingTop: '32px' }}>
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
         {/* Breadcrumb Navigation */}
         <nav
-          style={{
-            fontSize: '0.8rem',
-            color: 'var(--color-text-muted)',
-            marginBottom: '32px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
+          className="mb-8 flex items-center gap-2 text-xs text-muted-foreground"
           aria-label="Breadcrumb"
         >
-          <Link href="/">Catalog</Link>
+          <Link href="/" className="transition-colors hover:text-foreground">
+            Catalog
+          </Link>
           <span>/</span>
           {product.category && (
             <>
-              <Link href={`/?category=${product.category.slug}#catalog`}>
+              <Link
+                href={`/?category=${product.category.slug}#catalog`}
+                className="transition-colors hover:text-foreground"
+              >
                 {product.category.name}
               </Link>
               <span>/</span>
             </>
           )}
-          <span style={{ color: 'var(--color-text)', fontWeight: 500 }}>{product.title}</span>
+          <span className="font-medium text-foreground">{product.title}</span>
         </nav>
 
-        {/* 2-Column Grid: Left Gallery, Right Details */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '48px',
-            alignItems: 'start'
-          }}
-        >
+        {/* 2-Column Responsive Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
           <div>
             <ProductGallery images={product.images} title={product.title} />
           </div>
 
-          <div>
+          <div className="lg:sticky lg:top-24">
             {product.category && (
-              <span className="royale-eyebrow" style={{ display: 'block', marginBottom: '8px' }}>
+              <span className="mb-2 block text-xs uppercase tracking-[0.25em] font-semibold text-accent">
                 {product.category.name}
               </span>
             )}
 
-            <h1
-              className="royale-heading"
-              style={{
-                fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
-                lineHeight: 1.2,
-                margin: '0 0 16px 0'
-              }}
-            >
+            <h1 className="mb-4 font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-primary leading-tight">
               {product.title}
             </h1>
 
-            <div
-              style={{
-                color: 'var(--color-text)',
-                fontSize: '0.95rem',
-                lineHeight: 1.7,
-                marginBottom: '32px'
-              }}
-            >
+            <div className="mb-8 text-sm sm:text-base leading-relaxed text-muted-foreground">
               {product.description}
             </div>
 

@@ -1,11 +1,11 @@
 'use client';
 
 import { Heart } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import * as React from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
 
-import { useAuth } from '../../context/AuthContext';
-
-interface WishlistButtonProps {
+export interface WishlistButtonProps {
   productId: string;
   variantId?: string | undefined;
   variant?: 'icon' | 'pill' | 'button';
@@ -23,15 +23,15 @@ export function WishlistButton({
   onToggle
 }: WishlistButtonProps) {
   const { user, openAuthModal } = useAuth();
-  const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
-  const [isBusy, setIsBusy] = useState(false);
+  const [isWishlisted, setIsWishlisted] = React.useState(initialWishlisted);
+  const [isBusy, setIsBusy] = React.useState(false);
 
   // Sync with initialWishlisted if prop changes
-  useEffect(() => {
+  React.useEffect(() => {
     setIsWishlisted(initialWishlisted);
   }, [initialWishlisted]);
 
-  const handleToggle = useCallback(
+  const handleToggle = React.useCallback(
     async (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
@@ -81,29 +81,20 @@ export function WishlistButton({
         type="button"
         onClick={handleToggle}
         disabled={isBusy}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          padding: '14px 20px',
-          borderRadius: 'var(--radius-sm, 4px)',
-          border: '1px solid var(--color-border, #E4DCCF)',
-          backgroundColor: isWishlisted ? 'rgba(197, 168, 128, 0.12)' : 'transparent',
-          color: isWishlisted ? 'var(--color-primary, #0A2E24)' : 'var(--color-text, #171A19)',
-          fontSize: '0.9rem',
-          fontWeight: 500,
-          cursor: isBusy ? 'not-allowed' : 'pointer',
-          transition: 'all 0.2s ease',
-          width: '100%'
-        }}
+        className={cn(
+          'inline-flex w-full items-center justify-center gap-2 rounded-md border border-border px-5 py-3.5 text-sm font-medium transition-colors select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+          isWishlisted
+            ? 'bg-accent/15 text-primary border-accent/40'
+            : 'bg-transparent text-foreground hover:bg-secondary/60'
+        )}
         aria-label={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
       >
         <Heart
           size={size}
-          color={isWishlisted ? '#C5A880' : 'currentColor'}
-          fill={isWishlisted ? '#C5A880' : 'none'}
-          style={{ transition: 'all 0.2s ease' }}
+          className={cn(
+            'transition-colors',
+            isWishlisted ? 'fill-accent text-accent' : 'text-current'
+          )}
         />
         <span>{isWishlisted ? 'Saved in Wishlist' : 'Save to Wishlist'}</span>
       </button>
@@ -116,28 +107,20 @@ export function WishlistButton({
         type="button"
         onClick={handleToggle}
         disabled={isBusy}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '8px 14px',
-          borderRadius: '9999px',
-          border: '1px solid var(--color-border, #E4DCCF)',
-          backgroundColor: isWishlisted ? 'rgba(197, 168, 128, 0.15)' : '#ffffff',
-          color: isWishlisted
-            ? 'var(--color-primary, #0A2E24)'
-            : 'var(--color-text-muted, #71717A)',
-          fontSize: '0.8rem',
-          fontWeight: 500,
-          cursor: isBusy ? 'not-allowed' : 'pointer',
-          transition: 'all 0.2s ease'
-        }}
+        className={cn(
+          'inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-xs font-medium transition-colors select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+          isWishlisted
+            ? 'bg-accent/15 text-primary border-accent/40'
+            : 'bg-card text-muted-foreground hover:bg-secondary hover:text-foreground'
+        )}
         aria-label={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
       >
         <Heart
           size={size}
-          color={isWishlisted ? '#C5A880' : 'currentColor'}
-          fill={isWishlisted ? '#C5A880' : 'none'}
+          className={cn(
+            'transition-colors',
+            isWishlisted ? 'fill-accent text-accent' : 'text-current'
+          )}
         />
         <span>{isWishlisted ? 'Saved' : 'Wishlist'}</span>
       </button>
@@ -150,30 +133,19 @@ export function WishlistButton({
       type="button"
       onClick={handleToggle}
       disabled={isBusy}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '36px',
-        height: '36px',
-        borderRadius: '50%',
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-        backdropFilter: 'blur(4px)',
-        border: '1px solid rgba(0, 0, 0, 0.06)',
-        color: isWishlisted ? '#C5A880' : '#171A19',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-        cursor: isBusy ? 'not-allowed' : 'pointer',
-        transition: 'all 0.2s ease',
-        padding: 0
-      }}
+      className={cn(
+        'inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/5 bg-white/90 backdrop-blur-sm shadow-sm transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+        isWishlisted ? 'text-accent' : 'text-foreground hover:text-accent'
+      )}
       aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
       title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
     >
       <Heart
         size={size}
-        color={isWishlisted ? '#C5A880' : '#171A19'}
-        fill={isWishlisted ? '#C5A880' : 'none'}
-        style={{ transition: 'all 0.2s ease' }}
+        className={cn(
+          'transition-colors',
+          isWishlisted ? 'fill-accent text-accent' : 'text-current'
+        )}
       />
     </button>
   );

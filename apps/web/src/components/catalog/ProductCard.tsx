@@ -1,7 +1,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 
-import { Money, type PublicProductListItem } from '@hh/domain';
+import { Money } from '@hh/domain';
+
+import type { PublicProductListItem } from '@hh/domain';
 
 import { WishlistButton } from '../product/WishlistButton';
 
@@ -9,143 +13,75 @@ export function ProductCard({ product }: { product: PublicProductListItem }) {
   const formattedPrice = Money.fromMinor(product.startingPriceMinor, 'INR').format('en-IN');
 
   return (
-    <article
-      className="royale-card"
-      style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}
-    >
+    <Card className="group relative flex flex-col overflow-hidden border-border bg-card transition-all duration-300 hover:shadow-md">
       {/* Wishlist Button floating top-right */}
-      <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 3 }}>
+      <div className="absolute top-3 right-3 z-10">
         <WishlistButton productId={product.id} size={18} />
       </div>
 
-      <Link href={`/products/${product.slug}`} style={{ display: 'block', position: 'relative' }}>
-        {/* 3:4 Luxury Aspect Ratio Image Wrapper */}
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            aspectRatio: '3 / 4',
-            backgroundColor: '#f4f1ea',
-            overflow: 'hidden'
-          }}
-        >
+      <Link href={`/products/${product.slug}`} className="block relative">
+        {/* 3:4 Luxury Aspect Ratio Image Container */}
+        <div className="relative aspect-[3/4] w-full overflow-hidden bg-secondary/40">
           {product.primaryImageUrl ? (
             <Image
               src={product.primaryImageUrl}
               alt={product.title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              style={{
-                objectFit: 'cover',
-                transition: 'transform 0.4s ease'
-              }}
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--color-text-muted)',
-                fontSize: '0.85rem'
-              }}
-            >
+            <div className="flex h-full w-full items-center justify-center text-xs font-serif tracking-widest uppercase text-muted-foreground">
               H&amp;H Signature
             </div>
           )}
 
-          {/* Availability Badge */}
-          <div style={{ position: 'absolute', top: '12px', left: '12px' }}>
+          {/* Stock Badge */}
+          <div className="absolute top-3 left-3">
             {product.isAvailable ? (
-              <span className="royale-badge royale-badge-gold">In Stock</span>
+              <Badge
+                variant="gold"
+                className="text-[0.65rem] font-semibold tracking-wider uppercase"
+              >
+                In Stock
+              </Badge>
             ) : (
-              <span
-                className="royale-badge"
-                style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', color: '#ffffff' }}
+              <Badge
+                variant="secondary"
+                className="bg-foreground/80 text-background text-[0.65rem] font-semibold tracking-wider uppercase"
               >
                 Sold Out
-              </span>
+              </Badge>
             )}
           </div>
         </div>
       </Link>
 
       {/* Content */}
-      <div
-        style={{
-          padding: '20px',
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}
-      >
+      <CardContent className="flex flex-1 flex-col justify-between p-4 sm:p-5">
         <div>
           {product.categoryName && (
-            <span
-              style={{
-                display: 'block',
-                fontSize: '0.7rem',
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                color: 'var(--color-text-muted)',
-                marginBottom: '4px'
-              }}
-            >
+            <span className="mb-1 block text-[0.65rem] uppercase tracking-[0.18em] font-semibold text-accent">
               {product.categoryName}
             </span>
           )}
 
-          <h3
-            style={{
-              margin: '0 0 8px 0',
-              fontSize: '1.1rem',
-              fontWeight: 500,
-              color: 'var(--color-text)'
-            }}
-          >
-            <Link href={`/products/${product.slug}`} style={{ color: 'inherit' }}>
-              {product.title}
-            </Link>
+          <h3 className="line-clamp-2 font-medium text-sm sm:text-base text-foreground group-hover:text-primary transition-colors">
+            <Link href={`/products/${product.slug}`}>{product.title}</Link>
           </h3>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: '16px',
-            paddingTop: '12px',
-            borderTop: '1px solid var(--color-border)'
-          }}
-        >
-          <span
-            style={{
-              fontSize: '1.05rem',
-              fontWeight: 600,
-              color: 'var(--color-primary)'
-            }}
-          >
-            {formattedPrice}
-          </span>
+        <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+          <span className="text-base font-semibold text-primary">{formattedPrice}</span>
 
           <Link
             href={`/products/${product.slug}`}
-            style={{
-              fontSize: '0.8rem',
-              fontWeight: 500,
-              letterSpacing: '0.05em',
-              color: 'var(--color-accent)',
-              textTransform: 'uppercase'
-            }}
+            className="text-xs uppercase tracking-wider font-semibold text-accent hover:text-primary transition-colors"
           >
-            View Details →
+            View Details &rarr;
           </Link>
         </div>
-      </div>
-    </article>
+      </CardContent>
+    </Card>
   );
 }

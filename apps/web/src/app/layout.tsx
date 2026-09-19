@@ -1,4 +1,6 @@
 import { CartDrawer } from '@/components/cart/CartDrawer';
+import { MobileNav } from '@/components/layout/MobileNav';
+import { PwaRegister } from '@/components/layout/PwaRegister';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 
@@ -15,6 +17,11 @@ export const metadata: Metadata = {
   },
   description: 'Refined modest wear accessories and essentials crafted with precision and purpose.',
   metadataBase: new URL(process.env['APP_URL'] ?? 'http://localhost:3000'),
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: '/icons/icon-192.png',
+    apple: '/icons/icon-192.png'
+  },
   openGraph: {
     title: 'H&H — Curated Modest Essentials & Jewelry',
     description:
@@ -42,20 +49,23 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0a2e24',
+  themeColor: '#0A2E24',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5
+  maximumScale: 5,
+  viewportFit: 'cover'
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className="h-full">
+      <body className="min-h-full flex flex-col pb-16 md:pb-0">
         <AuthProvider>
           <CartProvider>
             {children}
             <CartDrawer />
+            <MobileNav />
+            <PwaRegister />
           </CartProvider>
         </AuthProvider>
       </body>

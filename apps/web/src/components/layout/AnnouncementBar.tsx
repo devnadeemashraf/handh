@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 import type { StorefrontAnnouncement } from '@hh/domain';
 
@@ -7,44 +9,37 @@ export function AnnouncementBar({ announcement }: { announcement: StorefrontAnno
     return null;
   }
 
+  const variantClasses = {
+    default: 'bg-primary text-primary-foreground',
+    emerald: 'bg-primary text-primary-foreground',
+    gold: 'bg-accent text-accent-foreground font-medium',
+    subtle: 'bg-secondary text-secondary-foreground'
+  }[announcement.variant ?? 'default'];
+
   const content = (
-    <div
-      style={{
-        backgroundColor: 'var(--color-primary)',
-        color: '#ffffff',
-        fontSize: '0.8rem',
-        letterSpacing: '0.04em',
-        padding: '8px 16px',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '10px'
-      }}
+    <aside
+      className={cn(
+        'flex items-center justify-center gap-2.5 px-4 py-2 text-center text-xs tracking-wide transition-colors',
+        variantClasses
+      )}
+      role="region"
+      aria-label="Announcement"
     >
       {announcement.badge && (
-        <span
-          style={{
-            backgroundColor: 'var(--color-accent)',
-            color: '#000000',
-            fontSize: '0.65rem',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-            padding: '2px 8px',
-            borderRadius: '9999px'
-          }}
+        <Badge
+          variant={announcement.badgeVariant ?? 'gold'}
+          className="text-[0.65rem] uppercase font-bold tracking-widest px-2 py-0.5"
         >
           {announcement.badge}
-        </span>
+        </Badge>
       )}
-      <span>{announcement.text}</span>
-    </div>
+      <span className="font-medium">{announcement.text}</span>
+    </aside>
   );
 
   if (announcement.link) {
     return (
-      <Link href={announcement.link} style={{ display: 'block' }}>
+      <Link href={announcement.link} className="block transition-opacity hover:opacity-90">
         {content}
       </Link>
     );

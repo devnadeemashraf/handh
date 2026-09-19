@@ -4,9 +4,11 @@ import { AlertCircle, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { type CartItemDetail, Money } from '@hh/domain';
+import { Money } from '@hh/domain';
 
-interface CartItemRowProps {
+import type { CartItemDetail } from '@hh/domain';
+
+export interface CartItemRowProps {
   item: CartItemDetail;
   onUpdateQuantity: (quantity: number) => void;
   onRemove: () => void;
@@ -27,207 +29,95 @@ export function CartItemRow({
   const isUnavailable = item.statusNotice === 'unavailable';
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: '16px',
-        padding: '16px 0',
-        borderBottom: '1px solid var(--color-border)',
-        alignItems: 'flex-start'
-      }}
-    >
+    <div className="flex gap-4 py-4 border-b border-border items-start">
       {/* Thumbnail */}
-      <div
-        style={{
-          position: 'relative',
-          width: '72px',
-          height: '72px',
-          flexShrink: 0,
-          borderRadius: 'var(--radius-sm)',
-          overflow: 'hidden',
-          backgroundColor: '#F5EFE6',
-          border: '1px solid var(--color-border)'
-        }}
-      >
+      <div className="relative h-18 w-18 shrink-0 overflow-hidden rounded-md border border-border bg-secondary/40">
         {item.primaryImageUrl ? (
           <Image
             src={item.primaryImageUrl}
             alt={item.productTitle}
             fill
             sizes="72px"
-            style={{ objectFit: 'cover' }}
+            className="object-cover"
           />
         ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--color-accent-gold)',
-              fontSize: '11px',
-              fontWeight: 500,
-              textAlign: 'center',
-              padding: '4px'
-            }}
-          >
-            H&H
+          <div className="flex h-full w-full items-center justify-center p-1 text-center font-serif text-[11px] font-medium text-accent">
+            H&amp;H
           </div>
         )}
       </div>
 
       {/* Item Details */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
           <div>
             {item.productSlug ? (
               <Link
                 href={`/products/${item.productSlug}`}
-                style={{
-                  fontSize: '0.95rem',
-                  fontWeight: 600,
-                  color: 'var(--color-primary-emerald)',
-                  textDecoration: 'none',
-                  display: 'block',
-                  lineHeight: 1.3
-                }}
+                className="block text-sm font-semibold text-primary hover:text-accent transition-colors leading-snug line-clamp-1"
               >
                 {item.productTitle}
               </Link>
             ) : (
-              <span
-                style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-text-primary)' }}
-              >
+              <span className="text-sm font-semibold text-foreground line-clamp-1">
                 {item.productTitle}
               </span>
             )}
             {item.variantTitle &&
               item.variantTitle !== 'Default' &&
               item.variantTitle !== 'Default Variant' && (
-                <div
-                  style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '2px' }}
-                >
-                  {item.variantTitle}
-                </div>
+                <div className="mt-0.5 text-xs text-muted-foreground">{item.variantTitle}</div>
               )}
           </div>
 
-          <span
-            style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-text-primary)' }}
-          >
+          <span className="text-sm font-semibold text-foreground shrink-0">
             {formattedLineTotal}
           </span>
         </div>
 
         {/* Unit price display if qty > 1 */}
         {item.effectiveQuantity > 1 && (
-          <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-            {formattedUnitPrice} each
-          </div>
+          <div className="mt-0.5 text-xs text-muted-foreground">{formattedUnitPrice} each</div>
         )}
 
         {/* Warning / Error Notices */}
         {isOutOfStock && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.75rem',
-              color: '#DC2626',
-              marginTop: '6px',
-              fontWeight: 500
-            }}
-          >
-            <AlertCircle size={14} />
-            Out of stock. Please remove to checkout.
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-destructive">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            <span>Out of stock. Please remove to checkout.</span>
           </div>
         )}
 
         {isQuantityReduced && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.75rem',
-              color: '#D97706',
-              marginTop: '6px',
-              fontWeight: 500
-            }}
-          >
-            <AlertCircle size={14} />
-            Only {item.availableQuantity} left in stock (adjusted from {item.requestedQuantity}).
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-amber-600">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            <span>
+              Only {item.availableQuantity} left in stock (adjusted from {item.requestedQuantity}).
+            </span>
           </div>
         )}
 
         {isUnavailable && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.75rem',
-              color: '#DC2626',
-              marginTop: '6px',
-              fontWeight: 500
-            }}
-          >
-            <AlertCircle size={14} />
-            Product is no longer available.
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-destructive">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            <span>Product is no longer available.</span>
           </div>
         )}
 
         {/* Stepper & Remove controls */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: '12px'
-          }}
-        >
-          {/* Touch-Friendly Stepper (Mobile First: min 44x44px tap targets) */}
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-sm)',
-              backgroundColor: 'var(--color-surface)',
-              overflow: 'hidden'
-            }}
-          >
+        <div className="mt-3 flex items-center justify-between">
+          {/* Touch-Friendly Stepper (Mobile First: min 40x40px tap targets) */}
+          <div className="inline-flex items-center rounded-md border border-border bg-card">
             <button
               type="button"
               onClick={() => onUpdateQuantity(item.requestedQuantity - 1)}
               disabled={disabled || item.requestedQuantity <= 1}
               aria-label="Decrease quantity"
-              style={{
-                width: '40px',
-                height: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: 'none',
-                backgroundColor: 'transparent',
-                cursor: item.requestedQuantity <= 1 ? 'not-allowed' : 'pointer',
-                color:
-                  item.requestedQuantity <= 1 ? 'var(--color-border)' : 'var(--color-text-primary)'
-              }}
+              className="flex h-9 w-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
             >
-              <Minus size={14} />
+              <Minus className="h-3.5 w-3.5" />
             </button>
-            <span
-              style={{
-                minWidth: '32px',
-                textAlign: 'center',
-                fontSize: '0.9rem',
-                fontWeight: 600,
-                color: 'var(--color-text-primary)'
-              }}
-            >
+            <span className="min-w-8 text-center text-xs font-semibold text-foreground">
               {item.requestedQuantity}
             </span>
             <button
@@ -235,25 +125,9 @@ export function CartItemRow({
               onClick={() => onUpdateQuantity(item.requestedQuantity + 1)}
               disabled={disabled || item.requestedQuantity >= Math.min(10, item.availableQuantity)}
               aria-label="Increase quantity"
-              style={{
-                width: '40px',
-                height: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: 'none',
-                backgroundColor: 'transparent',
-                cursor:
-                  item.requestedQuantity >= Math.min(10, item.availableQuantity)
-                    ? 'not-allowed'
-                    : 'pointer',
-                color:
-                  item.requestedQuantity >= Math.min(10, item.availableQuantity)
-                    ? 'var(--color-border)'
-                    : 'var(--color-text-primary)'
-              }}
+              className="flex h-9 w-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
             >
-              <Plus size={14} />
+              <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
 
@@ -263,22 +137,9 @@ export function CartItemRow({
             onClick={onRemove}
             disabled={disabled}
             aria-label="Remove item"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '8px',
-              fontSize: '0.8rem',
-              color: 'var(--color-text-muted)',
-              border: 'none',
-              backgroundColor: 'transparent',
-              cursor: 'pointer',
-              minHeight: '44px',
-              minWidth: '44px',
-              justifyContent: 'center'
-            }}
+            className="flex h-10 w-10 items-center justify-center text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40"
           >
-            <Trash2 size={16} />
+            <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>

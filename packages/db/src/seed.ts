@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 
-import { defaultInvoiceTemplate } from '@hh/domain';
+import { DEFAULT_STOREFRONT_CONFIG, defaultInvoiceTemplate } from '@hh/domain';
 
 import { createDbClient } from './index';
 import { createProductWithVariants } from './repositories';
@@ -37,18 +37,9 @@ async function seed(): Promise<void> {
     enableCoupons: true,
     invoice: defaultInvoiceTemplate,
     storefront: {
-      theme: {
-        background: '#FDFBF7',
-        surface: '#FFFFFF',
-        border: '#EBE7DF',
-        primaryEmerald: '#0A2E24',
-        primaryEmeraldHover: '#07221A',
-        accentGold: '#C5A880',
-        accentGoldLight: '#F5EFE6',
-        textPrimary: '#171A19',
-        textSecondary: '#5C6460'
-      },
+      ...DEFAULT_STOREFRONT_CONFIG,
       hero: {
+        ...DEFAULT_STOREFRONT_CONFIG.hero,
         eyebrow: 'H&H Signature Collection',
         title: 'Crafted for Grace & Modesty',
         subtitle:
@@ -58,27 +49,11 @@ async function seed(): Promise<void> {
         badgeText: 'Handcrafted Heritage • Limited Edition'
       },
       announcement: {
+        ...DEFAULT_STOREFRONT_CONFIG.announcement,
         enabled: true,
         text: 'Handcrafted in limited batches • Express courier dispatch across India via India Post & DTDC',
         badge: 'Signature Drop'
-      },
-      reassurances: [
-        {
-          icon: 'sparkles' as const,
-          title: 'Artisanal Craftsmanship',
-          description: 'Meticulously shaped in limited quantities for unmatched grace.'
-        },
-        {
-          icon: 'truck' as const,
-          title: 'Direct Courier Dispatch',
-          description: 'Carefully packaged and shipped with verifiable tracking.'
-        },
-        {
-          icon: 'shield' as const,
-          title: 'Secure Online Payments',
-          description: 'End-to-end encrypted checkout powered by Razorpay.'
-        }
-      ]
+      }
     }
   };
 

@@ -7,8 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { ThemeInjector } from '@/components/layout/ThemeInjector';
 
-import { createDbClient } from '@hh/db';
-import { findStoreBySlug, getCategoryTree, listPublishedProducts } from '@hh/db';
+import { createDbClient, findStoreBySlug, getCategoryTree, listPublishedProducts } from '@hh/db';
 import { resolveStorefrontConfig } from '@hh/domain';
 
 interface HomePageProps {
@@ -30,10 +29,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   if (!store) {
     return (
-      <main style={{ padding: '64px 24px', textAlign: 'center', fontFamily: 'sans-serif' }}>
-        <h2>Storefront Initializing</h2>
-        <p>
-          Please run the database seed script (<code>pnpm db:seed</code>) to initialize the store.
+      <main className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
+        <h2 className="text-xl font-bold text-primary">Storefront Initializing</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Please run the database seed script (
+          <code className="bg-secondary px-1.5 py-0.5 rounded">pnpm db:seed</code>) to initialize
+          the store.
         </p>
       </main>
     );
@@ -62,13 +63,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <HeroSection hero={storefrontConfig.hero} />
 
       {/* Main Catalog Showcase */}
-      <main className="royale-container" id="catalog" style={{ paddingTop: '56px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto' }}>
-          <span className="royale-eyebrow">Artisanal Curation</span>
-          <h2 className="royale-heading" style={{ fontSize: '2rem', margin: '8px 0 12px' }}>
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14" id="catalog">
+        <div className="mx-auto max-w-xl text-center">
+          <span className="text-xs uppercase tracking-[0.25em] font-semibold text-accent">
+            Artisanal Curation
+          </span>
+          <h2 className="mt-2 font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-primary">
             The Collection
           </h2>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.95rem', margin: 0 }}>
+          <p className="mt-2 text-sm text-muted-foreground">
             Individually inspected and crafted for modest sophistication.
           </p>
         </div>
@@ -78,30 +81,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
         {/* Responsive Product Grid */}
         {products.length > 0 ? (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-              gap: '32px',
-              marginTop: '32px'
-            }}
-          >
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '64px 24px',
-              backgroundColor: 'var(--color-surface)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-border)',
-              marginTop: '32px'
-            }}
-          >
-            <p style={{ color: 'var(--color-text-muted)', margin: 0 }}>
+          <div className="mt-8 rounded-lg border border-border bg-card p-12 text-center">
+            <p className="text-sm text-muted-foreground">
               No pieces are currently cataloged in this collection.
             </p>
           </div>

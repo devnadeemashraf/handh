@@ -1,1145 +1,181 @@
 'use client';
 
-import {
-  AlertTriangle,
-  ArrowLeft,
-  Check,
-  CheckCircle2,
-  Clock,
-  Copy,
-  CreditCard,
-  Loader2,
-  MapPin,
-  ShieldCheck,
-  ShoppingBag,
-  User as UserIcon
-} from 'lucide-react';
+import { AlertTriangle, ShoppingBag, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import Script from 'next/script';
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { AddressForm } from '@/components/checkout/AddressForm';
+import { CheckoutHeader } from '@/components/checkout/CheckoutHeader';
+import { OrderReviewCard } from '@/components/checkout/OrderReviewCard';
+import { OrderSuccessView } from '@/components/checkout/OrderSuccessView';
+import { SavedAddressSelector } from '@/components/checkout/SavedAddressSelector';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 
-import {
-  type CheckoutOrderResult,
-  generateUUID,
-  Money,
-  type ServiceControlConfig,
-  ShippingAddressSchema,
-  type UserAddress
-} from '@hh/domain';
-
-import { AddressForm, type AddressFormValues } from '../../components/checkout/AddressForm';
-import { OrderReviewCard } from '../../components/checkout/OrderReviewCard';
-import { useAuth } from '../../context/AuthContext';
-import { useCart } from '../../context/CartContext';
-
-interface RazorpayResponse {
-  razorpay_payment_id: string;
-  razorpay_order_id: string;
-  razorpay_signature: string;
-}
-
-declare global {
-  interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => {
-      open: () => void;
-      on: (event: string, handler: (response: unknown) => void) => void;
-    };
-  }
-}
+import { useCheckoutFlow } from './useCheckoutFlow';
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const { user, openAuthModal } = useAuth();
   const { cartSummary, isLoading: isCartLoading, clearCart, refreshCart } = useCart();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [orderPlaced, setOrderPlaced] = useState<CheckoutOrderResult | null>(null);
-  const [copiedOrderNumber, setCopiedOrderNumber] = useState(false);
-  const [reservationRemainingSecs, setReservationRemainingSecs] = useState<number>(15 * 60);
-  const [serviceControl, setServiceControl] = useState<ServiceControlConfig | null>(null);
 
-  // Saved addresses state for authenticated users
-  const [savedAddresses, setSavedAddresses] = useState<UserAddress[]>([]);
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-  const [isManualAddress, setIsManualAddress] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/service-status')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.serviceControl) {
-          setServiceControl(data.serviceControl);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  // Fetch and auto-select saved address when authenticated
-  useEffect(() => {
-    if (!user) {
-      setSavedAddresses([]);
-      setSelectedAddressId(null);
-      return;
-    }
-
-    fetch('/api/user/addresses')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.addresses) && data.addresses.length > 0) {
-          setSavedAddresses(data.addresses);
-          const defaultAddr =
-            data.addresses.find((a: UserAddress) => a.isDefault) || data.addresses[0];
-          if (defaultAddr && !isManualAddress) {
-            setSelectedAddressId(defaultAddr.id);
-            setValues((prev) => ({
-              ...prev,
-              fullName: defaultAddr.recipientName,
-              phone: defaultAddr.phone,
-              line1: defaultAddr.line1,
-              line2: defaultAddr.line2 || '',
-              city: defaultAddr.city,
-              state: defaultAddr.state,
-              postalCode: defaultAddr.postalCode,
-              country: 'IN',
-              email: prev.email || user.email || ''
-            }));
-          }
-        } else {
-          // Pre-fill profile info if available
-          setValues((prev) => ({
-            ...prev,
-            fullName: prev.fullName || user.name || '',
-            phone: prev.phone || user.phone || '',
-            email: prev.email || user.email || ''
-          }));
-        }
-      })
-      .catch(() => {});
-  }, [user]);
-
-  const handleSelectSavedAddress = (addr: UserAddress) => {
-    setSelectedAddressId(addr.id);
-    setIsManualAddress(false);
-    setValues((prev) => ({
-      ...prev,
-      fullName: addr.recipientName,
-      phone: addr.phone,
-      line1: addr.line1,
-      line2: addr.line2 || '',
-      city: addr.city,
-      state: addr.state,
-      postalCode: addr.postalCode,
-      country: 'IN'
-    }));
-    setErrors({});
-  };
-
-  const handleSwitchToManualAddress = () => {
-    setIsManualAddress(true);
-    setSelectedAddressId(null);
-    setValues((prev) => ({
-      ...prev,
-      fullName: user?.name || '',
-      phone: user?.phone || '',
-      email: prev.email || user?.email || '',
-      line1: '',
-      line2: '',
-      city: '',
-      state: '',
-      postalCode: '',
-      country: 'IN'
-    }));
-  };
-
-  const isServicePaused =
-    serviceControl !== null &&
-    (!serviceControl.checkoutEnabled ||
-      !serviceControl.paymentsEnabled ||
-      serviceControl.operatingStatus === 'maintenance');
-
-  // Client-side idempotency key generation (persists per session until success)
-  const [idempotencyKey, setIdempotencyKey] = useState<string>('');
-
-  useEffect(() => {
-    if (!idempotencyKey && typeof window !== 'undefined') {
-      setIdempotencyKey(generateUUID());
-    }
-  }, [idempotencyKey]);
-
-  // Form values state
-  const [values, setValues] = useState<AddressFormValues>({
-    fullName: '',
-    phone: '',
-    email: '',
-    line1: '',
-    line2: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'IN',
-    customerNotes: ''
+  const {
+    values,
+    errors,
+    handleFieldChange,
+    savedAddresses,
+    selectedAddressId,
+    isManualAddress,
+    handleSelectSavedAddress,
+    handleSwitchToManualAddress,
+    isSubmitting,
+    isProcessingPayment,
+    submitError,
+    orderPlaced,
+    reservationRemainingSecs,
+    isServicePaused,
+    serviceControl,
+    handleSubmit,
+    launchPaymentGateway
+  } = useCheckoutFlow({
+    user,
+    cartSummary,
+    clearCart,
+    refreshCart,
+    openAuthModal
   });
-
-  const [errors, setErrors] = useState<Partial<Record<keyof AddressFormValues, string>>>({});
-
-  // Countdown timer for 15-minute reservation once order is created
-  useEffect(() => {
-    if (!orderPlaced) return;
-
-    const expiryTime = new Date(orderPlaced.expiresAt).getTime();
-    const updateCountdown = () => {
-      const now = Date.now();
-      const diffSecs = Math.max(0, Math.floor((expiryTime - now) / 1000));
-      setReservationRemainingSecs(diffSecs);
-    };
-
-    updateCountdown();
-    const timer = setInterval(updateCountdown, 1000);
-    return () => clearInterval(timer);
-  }, [orderPlaced]);
-
-  const handleFieldChange = (field: keyof AddressFormValues, val: string) => {
-    setValues((prev) => ({ ...prev, [field]: val }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-    if (submitError) {
-      setSubmitError(null);
-    }
-  };
-
-  const handleCopyOrderNumber = (num: string) => {
-    navigator.clipboard.writeText(num);
-    setCopiedOrderNumber(true);
-    setTimeout(() => setCopiedOrderNumber(false), 2000);
-  };
-
-  // Verify payment on server
-  const verifyPayment = async (params: {
-    orderId: string;
-    razorpayOrderId: string;
-    razorpayPaymentId: string;
-    razorpaySignature: string;
-    orderNumber: string;
-  }) => {
-    setIsProcessingPayment(true);
-    setSubmitError(null);
-
-    try {
-      const res = await fetch('/api/checkout/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: params.orderId,
-          razorpayOrderId: params.razorpayOrderId,
-          razorpayPaymentId: params.razorpayPaymentId,
-          razorpaySignature: params.razorpaySignature
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setSubmitError(data.error || 'Payment confirmation failed. Please contact support.');
-        setIsProcessingPayment(false);
-        return;
-      }
-
-      // Route directly to the receipt page
-      router.push(`/checkout/success?orderNumber=${params.orderNumber}`);
-    } catch (err) {
-      console.error('Payment verification error:', err);
-      setSubmitError('A network error occurred while confirming payment.');
-      setIsProcessingPayment(false);
-    }
-  };
-
-  // Launch Razorpay gateway modal
-  const launchPaymentGateway = async (createdOrder: CheckoutOrderResult) => {
-    if (serviceControl && !serviceControl.paymentsEnabled) {
-      setSubmitError(
-        serviceControl.maintenanceNotice ||
-          'Payment processing is temporarily paused for system maintenance. Your order reservation is safe—please check back shortly.'
-      );
-      return;
-    }
-
-    setIsProcessingPayment(true);
-    setSubmitError(null);
-
-    try {
-      const initRes = await fetch('/api/checkout/payment-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: createdOrder.orderId })
-      });
-
-      const initData = await initRes.json();
-      if (!initRes.ok || !initData.success) {
-        setSubmitError(initData.error || 'Failed to initialize payment gateway.');
-        setIsProcessingPayment(false);
-        return;
-      }
-
-      // Check if Razorpay Checkout SDK is available
-      if (typeof window !== 'undefined' && window.Razorpay) {
-        const options = {
-          key: initData.keyId,
-          amount: initData.amountMinor,
-          currency: initData.currency,
-          name: 'H&H',
-          description: `Order ${initData.orderNumber}`,
-          order_id: initData.razorpayOrderId,
-          prefill: {
-            name: values.fullName,
-            email: values.email,
-            contact: values.phone
-          },
-          theme: {
-            color: '#0A2E24'
-          },
-          handler: async function (response: RazorpayResponse) {
-            await verifyPayment({
-              orderId: createdOrder.orderId,
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-              orderNumber: createdOrder.orderNumber
-            });
-          },
-          modal: {
-            ondismiss: function () {
-              setIsProcessingPayment(false);
-            }
-          }
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      } else {
-        // Fallback for offline/mock development mode
-        await verifyPayment({
-          orderId: createdOrder.orderId,
-          razorpayOrderId: initData.razorpayOrderId,
-          razorpayPaymentId: `mock_pay_${Date.now()}`,
-          razorpaySignature: 'mock_payment_signature',
-          orderNumber: createdOrder.orderNumber
-        });
-      }
-    } catch (err) {
-      console.error('Payment launch error:', err);
-      setSubmitError('Unable to launch payment gateway. Please try again.');
-      setIsProcessingPayment(false);
-    }
-  };
-
-  const handleSubmit = async (appliedCouponCode?: string) => {
-    setSubmitError(null);
-
-    if (isServicePaused) {
-      setSubmitError(
-        serviceControl?.maintenanceNotice ||
-          'Checkout and payment processing is temporarily undergoing maintenance. Please keep items in your bag and check back shortly!'
-      );
-      return;
-    }
-
-    // 1. Validate Shipping Address
-    const addressValidation = ShippingAddressSchema.safeParse({
-      fullName: values.fullName,
-      phone: values.phone,
-      email: values.email,
-      line1: values.line1,
-      line2: values.line2 || undefined,
-      city: values.city,
-      state: values.state,
-      postalCode: values.postalCode,
-      country: 'IN'
-    });
-
-    if (!addressValidation.success) {
-      const fieldErrors: Partial<Record<keyof AddressFormValues, string>> = {};
-      for (const issue of addressValidation.error.issues) {
-        const fieldName = issue.path[0] as keyof AddressFormValues;
-        if (!fieldErrors[fieldName]) {
-          fieldErrors[fieldName] = issue.message;
-        }
-      }
-      setErrors(fieldErrors);
-      setSubmitError('Please complete all required shipping fields marked below.');
-      return;
-    }
-
-    if (!cartSummary || cartSummary.items.length === 0) {
-      setSubmitError('Your cart is empty. Please add items before checking out.');
-      return;
-    }
-
-    if (!cartSummary.isValidForCheckout) {
-      setSubmitError('Some items in your cart are no longer available in the requested quantity.');
-      return;
-    }
-
-    // 2. Account Required to Place Order (User Platform Rule)
-    if (!user) {
-      openAuthModal({
-        reason: 'An account is required to place and track your handcrafted order.',
-        initialPhone: values.phone,
-        onSuccess: () => {
-          handleSubmit(appliedCouponCode);
-        }
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const payload = {
-        items: cartSummary.items.map((i) => ({
-          variantId: i.variantId,
-          quantity: i.effectiveQuantity
-        })),
-        shippingAddress: addressValidation.data,
-        customerNotes: values.customerNotes ? values.customerNotes.trim() : undefined,
-        couponCode: appliedCouponCode || undefined,
-        idempotencyKey: idempotencyKey || generateUUID()
-      };
-
-      const res = await fetch('/api/checkout/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        if (res.status === 401) {
-          openAuthModal({
-            reason: 'Please verify your mobile number to complete your order reservation.',
-            initialPhone: values.phone,
-            onSuccess: () => {
-              handleSubmit(appliedCouponCode);
-            }
-          });
-          setIsSubmitting(false);
-          return;
-        }
-
-        if (res.status === 409) {
-          setSubmitError(
-            data.error || 'Inventory was reserved by another shopper. Refreshing cart...'
-          );
-          await refreshCart();
-        } else {
-          setSubmitError(
-            data.error || 'An unexpected error occurred while placing your order. Please try again.'
-          );
-        }
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Order created & stock locked!
-      const createdOrder = data.order as CheckoutOrderResult;
-      setOrderPlaced(createdOrder);
-      clearCart();
-      setIsSubmitting(false);
-
-      // Immediately launch payment gateway
-      await launchPaymentGateway(createdOrder);
-    } catch (err) {
-      console.error('Checkout submission network error:', err);
-      setSubmitError('A network error occurred. Please verify your connection and try again.');
-      setIsSubmitting(false);
-    }
-  };
 
   // 1. Order Placed Screen (Awaiting Payment or Retry)
   if (orderPlaced) {
-    const minutes = Math.floor(reservationRemainingSecs / 60);
-    const seconds = reservationRemainingSecs % 60;
-    const formattedTimer = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <>
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-        <main className="royale-container" style={{ flex: 1, padding: '56px 16px 96px' }}>
-          <div
-            style={{
-              maxWidth: '640px',
-              margin: '0 auto',
-              backgroundColor: 'var(--color-surface)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-border)',
-              padding: '40px 28px',
-              textAlign: 'center'
-            }}
-          >
-            {/* Header Icon */}
-            <div
-              style={{
-                width: '72px',
-                height: '72px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(10, 46, 36, 0.08)',
-                color: 'var(--color-primary-emerald)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '20px'
-              }}
-            >
-              <CheckCircle2 size={40} />
-            </div>
-
-            <span className="royale-eyebrow" style={{ display: 'block', marginBottom: '8px' }}>
-              Order Reserved
-            </span>
-
-            <h1 className="royale-heading" style={{ fontSize: '1.85rem', margin: '0 0 12px' }}>
-              Artisanal Reservation Confirmed
-            </h1>
-
-            <p
-              style={{
-                fontSize: '0.95rem',
-                color: 'var(--color-text-muted)',
-                lineHeight: 1.6,
-                marginBottom: '24px'
-              }}
-            >
-              Thank you, <strong>{values.fullName}</strong>. Your pieces are held in inventory.
-              Please complete your payment below to confirm dispatch.
-            </p>
-
-            {/* Error message if payment failed */}
-            {submitError && (
-              <div
-                style={{
-                  backgroundColor: '#FEF2F2',
-                  border: '1px solid #FECACA',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '12px 16px',
-                  marginBottom: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  color: '#B91C1C',
-                  fontSize: '0.85rem',
-                  textAlign: 'left'
-                }}
-              >
-                <AlertTriangle size={18} style={{ flexShrink: 0 }} />
-                <span>{submitError}</span>
-              </div>
-            )}
-
-            {/* Order Reference Badge */}
-            <div
-              style={{
-                backgroundColor: 'var(--color-bg)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '24px'
-              }}
-            >
-              <div style={{ textAlign: 'left' }}>
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    color: 'var(--color-text-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}
-                >
-                  Order Reference
-                </span>
-                <div
-                  style={{
-                    fontSize: '1.25rem',
-                    fontWeight: 700,
-                    color: 'var(--color-primary-emerald)',
-                    letterSpacing: '0.05em',
-                    marginTop: '2px'
-                  }}
-                >
-                  {orderPlaced.orderNumber}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handleCopyOrderNumber(orderPlaced.orderNumber)}
-                aria-label="Copy order reference"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 12px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-surface)',
-                  fontSize: '0.8rem',
-                  color: 'var(--color-text)',
-                  cursor: 'pointer'
-                }}
-              >
-                {copiedOrderNumber ? (
-                  <>
-                    <Check size={14} color="#059669" />
-                    <span>Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={14} />
-                    <span>Copy</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* 15-Minute Reservation Lock Box */}
-            <div
-              style={{
-                backgroundColor: reservationRemainingSecs > 0 ? '#FFFBEB' : '#FEF2F2',
-                border: `1px solid ${reservationRemainingSecs > 0 ? '#FDE68A' : '#FECACA'}`,
-                borderRadius: 'var(--radius-sm)',
-                padding: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                textAlign: 'left',
-                marginBottom: '28px'
-              }}
-            >
-              <Clock
-                size={24}
-                color={reservationRemainingSecs > 0 ? '#D97706' : '#DC2626'}
-                style={{ flexShrink: 0 }}
-              />
-              <div>
-                <div
-                  style={{
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    color: reservationRemainingSecs > 0 ? '#92400E' : '#991B1B'
-                  }}
-                >
-                  {reservationRemainingSecs > 0
-                    ? `Inventory Held for ${formattedTimer}`
-                    : 'Reservation Window Expired'}
-                </div>
-                <div
-                  style={{
-                    fontSize: '0.78rem',
-                    color: reservationRemainingSecs > 0 ? '#B45309' : '#B91C1C',
-                    marginTop: '2px'
-                  }}
-                >
-                  {reservationRemainingSecs > 0
-                    ? 'Your items are reserved in stock while payment is pending.'
-                    : 'The reservation window has timed out. Please refresh to place a new order.'}
-                </div>
-              </div>
-            </div>
-
-            {/* Financial Details Table */}
-            <div
-              style={{
-                borderTop: '1px solid var(--color-border)',
-                borderBottom: '1px solid var(--color-border)',
-                padding: '16px 0',
-                marginBottom: '28px',
-                fontSize: '0.9rem',
-                textAlign: 'left'
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '8px',
-                  color: 'var(--color-text-muted)'
-                }}
-              >
-                <span>Subtotal</span>
-                <span>{Money.fromMinor(orderPlaced.subtotalMinor, 'INR').format()}</span>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '8px',
-                  color: 'var(--color-text-muted)'
-                }}
-              >
-                <span>Standard Delivery</span>
-                <span>
-                  {orderPlaced.shippingMinor === 0
-                    ? 'FREE'
-                    : Money.fromMinor(orderPlaced.shippingMinor, 'INR').format()}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontWeight: 700,
-                  fontSize: '1.05rem',
-                  color: 'var(--color-text-primary)',
-                  paddingTop: '8px',
-                  borderTop: '1px solid var(--color-border)'
-                }}
-              >
-                <span>Total Amount Due</span>
-                <span style={{ color: 'var(--color-primary-emerald)' }}>
-                  {Money.fromMinor(orderPlaced.totalMinor, 'INR').format()}
-                </span>
-              </div>
-            </div>
-
-            {/* Payment Trigger CTA */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <button
-                type="button"
-                onClick={() => launchPaymentGateway(orderPlaced)}
-                disabled={
-                  isProcessingPayment ||
-                  reservationRemainingSecs <= 0 ||
-                  (serviceControl !== null && !serviceControl.paymentsEnabled)
-                }
-                className="royale-button-primary"
-                style={{
-                  width: '100%',
-                  padding: '16px',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                {isProcessingPayment ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>Connecting with Razorpay...</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCard size={18} />
-                    <span>Pay {Money.fromMinor(orderPlaced.totalMinor, 'INR').format()} Now</span>
-                  </>
-                )}
-              </button>
-
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  fontSize: '0.75rem',
-                  color: 'var(--color-text-muted)'
-                }}
-              >
-                <ShieldCheck size={14} color="var(--color-primary-emerald)" />
-                <span>UPI, Credit/Debit Cards, NetBanking, and Wallets accepted</span>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
+        <OrderSuccessView
+          orderPlaced={orderPlaced}
+          reservationRemainingSecs={reservationRemainingSecs}
+          isProcessingPayment={isProcessingPayment}
+          onLaunchGateway={launchPaymentGateway}
+        />
+      </>
     );
   }
 
-  // 2. Empty Cart Guard
+  // 2. Empty Bag Guard
   if (!isCartLoading && (!cartSummary || cartSummary.items.length === 0)) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <main className="royale-container" style={{ flex: 1, padding: '56px 16px 96px' }}>
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '72px 24px',
-              backgroundColor: 'var(--color-surface)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-border)',
-              maxWidth: '520px',
-              margin: '0 auto'
-            }}
-          >
-            <div
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--color-bg)',
-                border: '1px solid var(--color-border)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '16px',
-                color: 'var(--color-accent-gold)'
-              }}
-            >
-              <ShoppingBag size={28} />
-            </div>
-            <h2
-              style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: '1.4rem',
-                color: 'var(--color-primary-emerald)',
-                marginBottom: '8px'
-              }}
-            >
-              Your Bag is Empty
-            </h2>
-            <p
-              style={{
-                fontSize: '0.9rem',
-                color: 'var(--color-text-muted)',
-                marginBottom: '24px',
-                lineHeight: 1.5
-              }}
-            >
-              You need at least one artisanal piece in your bag to initiate checkout.
-            </p>
-            <Link
-              href="/"
-              className="royale-button-primary"
-              style={{ padding: '12px 28px', textDecoration: 'none' }}
-            >
-              Browse Catalog
-            </Link>
-          </div>
+      <div className="flex min-h-screen flex-col bg-background">
+        <CheckoutHeader />
+        <main className="mx-auto flex-1 max-w-lg px-4 py-24 text-center">
+          <Card className="border-border bg-card p-8">
+            <CardContent className="p-0">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-secondary text-accent">
+                <ShoppingBag className="h-8 w-8" />
+              </div>
+              <h2 className="font-serif text-2xl font-semibold text-primary mb-2">
+                Your Bag is Empty
+              </h2>
+              <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                Add an artisanal piece from our collection to begin checkout.
+              </p>
+              <Button asChild size="lg" className="w-full">
+                <Link href="/">Explore Collection</Link>
+              </Button>
+            </CardContent>
+          </Card>
         </main>
       </div>
     );
   }
 
-  // 3. Active Checkout Form Screen
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen flex flex-col bg-background">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-      <main className="royale-container" style={{ flex: 1, padding: '40px 16px 96px' }}>
-        {/* Navigation Breadcrumb */}
-        <div style={{ marginBottom: '24px' }}>
-          <Link
-            href="/cart"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.875rem',
-              color: 'var(--color-primary-emerald)',
-              textDecoration: 'none',
-              fontWeight: 500
-            }}
-          >
-            <ArrowLeft size={16} />
-            <span>Return to Collection Bag</span>
-          </Link>
-        </div>
+      <CheckoutHeader />
 
-        <div style={{ marginBottom: '32px' }}>
-          <span className="royale-eyebrow">Direct Dispatch</span>
-          <h1 className="royale-heading" style={{ fontSize: '2rem', margin: '4px 0 0' }}>
-            Checkout & Shipping
-          </h1>
-        </div>
+      <main className="mx-auto flex-1 max-w-7xl px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Error Alert Banner */}
+        {submitError && (
+          <div className="mb-6 flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+            <div className="leading-relaxed">{submitError}</div>
+          </div>
+        )}
 
-        {/* Service Control Reassurance Banner */}
-        {isServicePaused && (
-          <div
-            style={{
-              backgroundColor: '#FFFBEB',
-              border: '1px solid #FDE68A',
-              borderRadius: 'var(--radius-sm)',
-              padding: '16px 20px',
-              marginBottom: '24px',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '12px',
-              color: '#92400E'
-            }}
-          >
-            <AlertTriangle
-              size={20}
-              style={{ flexShrink: 0, marginTop: '2px', color: '#D97706' }}
-            />
-            <div>
-              <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '4px' }}>
-                Checkout Temporarily Paused
+        {/* Maintenance Banner */}
+        {isServicePaused && serviceControl && (
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <div className="font-semibold mb-1">{serviceControl.headline}</div>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              {serviceControl.maintenanceNotice}
+            </p>
+          </div>
+        )}
+
+        {/* Guest Authentication Prompt Banner */}
+        {!user && (
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg border border-accent/40 bg-secondary/30 p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <UserIcon className="h-5 w-5" />
               </div>
-              <div style={{ fontSize: '0.875rem', lineHeight: 1.5 }}>
-                {serviceControl?.maintenanceNotice ||
-                  'We are currently upgrading our payment & checkout systems. Feel free to browse and keep treasures in your cart—checkout will resume shortly!'}
+              <div>
+                <p className="font-semibold text-sm text-primary">
+                  Have an account or need to create one?
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  An account is required to place and track your handcrafted order.
+                </p>
               </div>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                openAuthModal({
+                  reason: 'Sign in or enter your mobile number to complete checkout.',
+                  initialPhone: values.phone
+                })
+              }
+              className="shrink-0 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold text-xs"
+            >
+              Sign In / Register
+            </Button>
           </div>
         )}
 
-        {/* Global Error Banner */}
-        {submitError && (
-          <div
-            style={{
-              backgroundColor: '#FEF2F2',
-              border: '1px solid #FECACA',
-              borderRadius: 'var(--radius-sm)',
-              padding: '14px 16px',
-              marginBottom: '24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              color: '#B91C1C',
-              fontSize: '0.9rem'
-            }}
-          >
-            <AlertTriangle size={18} style={{ flexShrink: 0 }} />
-            <span>{submitError}</span>
-          </div>
-        )}
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '40px',
-            alignItems: 'flex-start'
-          }}
-        >
-          {/* Left: Address & Customer Details */}
-          <div>
-            {!user && (
-              <div
-                style={{
-                  backgroundColor: '#F5EFE6',
-                  border: '1px solid #E4DCCF',
-                  borderRadius: 'var(--radius-md, 8px)',
-                  padding: '16px 20px',
-                  marginBottom: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '12px'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      backgroundColor: '#0A2E24',
-                      color: '#C5A880',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}
-                  >
-                    <UserIcon size={18} />
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0A2E24' }}>
-                      Checkout as H&amp;H Patron
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: '#5C6460', marginTop: '2px' }}>
-                      Sign in with your mobile number to use saved addresses and track orders
-                      seamlessly.
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    openAuthModal({
-                      reason: 'Sign in to access your saved addresses.',
-                      initialPhone: values.phone
-                    })
-                  }
-                  style={{
-                    padding: '8px 18px',
-                    borderRadius: '6px',
-                    border: '1px solid #0A2E24',
-                    backgroundColor: 'transparent',
-                    color: '#0A2E24',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Sign In / Register
-                </button>
-              </div>
-            )}
-
+        {/* 2-Column Responsive Checkout Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          {/* Left Column: Shipping & Details */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* Saved Address Selector for Logged-In Users */}
             {user && savedAddresses.length > 0 && (
-              <div
-                style={{
-                  backgroundColor: 'var(--color-surface)',
-                  borderRadius: 'var(--radius-md, 8px)',
-                  border: '1px solid var(--color-border)',
-                  padding: '20px',
-                  marginBottom: '20px'
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '14px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <MapPin size={18} color="var(--color-primary-emerald)" />
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: '1rem',
-                        fontWeight: 600,
-                        color: 'var(--color-primary-emerald)'
-                      }}
-                    >
-                      Deliver to Saved Address
-                    </h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={
-                      isManualAddress
-                        ? () => {
-                            const defaultAddr =
-                              savedAddresses.find((a) => a.isDefault) || savedAddresses[0];
-                            if (defaultAddr) handleSelectSavedAddress(defaultAddr);
-                          }
-                        : handleSwitchToManualAddress
-                    }
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--color-primary-emerald)',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      textDecoration: 'underline',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {isManualAddress ? '← Choose Saved Address' : '+ New Address'}
-                  </button>
-                </div>
-
-                {!isManualAddress && (
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                      gap: '12px'
-                    }}
-                  >
-                    {savedAddresses.map((addr) => {
-                      const isSelected = selectedAddressId === addr.id;
-                      return (
-                        <div
-                          key={addr.id}
-                          onClick={() => handleSelectSavedAddress(addr)}
-                          style={{
-                            padding: '14px',
-                            borderRadius: '8px',
-                            border: '2px solid',
-                            borderColor: isSelected
-                              ? 'var(--color-primary-emerald)'
-                              : 'var(--color-border)',
-                            backgroundColor: isSelected ? 'rgba(10, 46, 36, 0.04)' : '#FFFFFF',
-                            cursor: 'pointer',
-                            position: 'relative'
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              marginBottom: '6px'
-                            }}
-                          >
-                            <span
-                              style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0A2E24' }}
-                            >
-                              {addr.label}
-                            </span>
-                            {addr.isDefault && (
-                              <span
-                                style={{
-                                  fontSize: '0.65rem',
-                                  padding: '2px 6px',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#F5EFE6',
-                                  color: '#C5A880',
-                                  fontWeight: 600,
-                                  textTransform: 'uppercase'
-                                }}
-                              >
-                                Default
-                              </span>
-                            )}
-                          </div>
-                          <div style={{ fontSize: '0.85rem', fontWeight: 500, color: '#171A19' }}>
-                            {addr.recipientName}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: '0.8rem',
-                              color: '#5C6460',
-                              marginTop: '2px',
-                              lineHeight: 1.4
-                            }}
-                          >
-                            {addr.line1}
-                            {addr.line2 ? `, ${addr.line2}` : ''}, {addr.city}, {addr.state} -{' '}
-                            {addr.postalCode}
-                          </div>
-                          <div
-                            style={{
-                              fontSize: '0.78rem',
-                              color: '#8BAAA0',
-                              marginTop: '4px'
-                            }}
-                          >
-                            {addr.phone}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              <SavedAddressSelector
+                addresses={savedAddresses}
+                selectedAddressId={selectedAddressId}
+                isManualAddress={isManualAddress}
+                onSelectAddress={handleSelectSavedAddress}
+                onSwitchToManual={handleSwitchToManualAddress}
+              />
             )}
 
-            <AddressForm
-              values={values}
-              errors={errors}
-              onChange={handleFieldChange}
-              disabled={isSubmitting || isProcessingPayment || isServicePaused}
-            />
+            {/* Address Input Form */}
+            {(!user || savedAddresses.length === 0 || isManualAddress) && (
+              <AddressForm
+                values={values}
+                errors={errors}
+                onChange={handleFieldChange}
+                disabled={isSubmitting}
+              />
+            )}
           </div>
 
-          {/* Right: Review & Financial Summary Card */}
-          <div>
+          {/* Right Column: Order Summary & Review */}
+          <div className="lg:col-span-5">
             {cartSummary && (
               <OrderReviewCard
                 cartSummary={cartSummary}
-                isSubmitting={isSubmitting || isProcessingPayment}
+                isSubmitting={isSubmitting}
                 onSubmit={handleSubmit}
                 disabled={isServicePaused}
               />

@@ -3,8 +3,10 @@
 import { Heart, LogOut, MapPin, Package, Shield, User as UserIcon, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react';
+import * as React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
 
 export function AccountNav() {
   const pathname = usePathname();
@@ -19,99 +21,70 @@ export function AccountNav() {
   ];
 
   return (
-    <nav
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '4px',
-        backgroundColor: '#FFFFFF',
-        border: '1px solid #EBE7DF',
-        borderRadius: '12px',
-        padding: '12px',
-        boxShadow: '0 4px 12px rgba(10, 46, 36, 0.03)'
-      }}
-    >
-      <div
-        style={{ padding: '8px 12px 14px', borderBottom: '1px solid #F0ECE4', marginBottom: '6px' }}
-      >
-        <p style={{ margin: 0, fontWeight: 700, fontSize: '0.95rem', color: '#0A2E24' }}>
-          {user?.name || 'H&H Patron'}
-        </p>
-        <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#5C6460' }}>{user?.phone}</p>
-      </div>
+    <Card className="border-border bg-card shadow-sm">
+      <CardContent className="p-3">
+        {/* User Ribbon */}
+        <div className="mb-2 border-b border-border px-3 py-3">
+          <p className="font-bold text-sm text-primary leading-tight">
+            {user?.name || 'H&H Patron'}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{user?.phone}</p>
+        </div>
 
-      {links.map((link) => {
-        const Icon = link.icon;
-        const isActive = pathname === link.href;
+        {/* Links */}
+        <div className="space-y-1">
+          {links.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname === link.href;
 
-        return (
-          <Link
-            key={link.href}
-            href={link.href}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '12px 14px',
-              borderRadius: '8px',
-              fontSize: '0.88rem',
-              fontWeight: isActive ? 600 : 500,
-              color: isActive ? '#0A2E24' : '#5C6460',
-              backgroundColor: isActive ? '#F5EFE6' : 'transparent',
-              textDecoration: 'none',
-              transition: 'all 0.15s ease'
-            }}
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-secondary text-primary font-semibold shadow-xs'
+                    : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
+                )}
+              >
+                <Icon
+                  className={cn(
+                    'h-4 w-4 shrink-0',
+                    isActive ? 'text-primary' : 'text-muted-foreground'
+                  )}
+                />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Admin Portal Link */}
+        {(user?.role === 'admin' || user?.role === 'super_admin') && (
+          <div className="mt-2 pt-2 border-t border-border">
+            <Link
+              href="/admin"
+              className="flex items-center gap-3 rounded-md bg-primary px-3 py-2.5 text-sm font-semibold text-accent hover:bg-primary/90 transition-colors shadow-xs"
+            >
+              <Shield className="h-4 w-4 shrink-0 text-accent" />
+              <span>Admin Portal</span>
+            </Link>
+          </div>
+        )}
+
+        {/* Sign Out Action */}
+        <div className="mt-2 border-t border-border pt-2">
+          <button
+            type="button"
+            onClick={logout}
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors text-left"
           >
-            <Icon size={18} color={isActive ? '#0A2E24' : '#8C928F'} />
-            <span>{link.label}</span>
-          </Link>
-        );
-      })}
-
-      {(user?.role === 'admin' || user?.role === 'super_admin') && (
-        <Link
-          href="/admin"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '12px 14px',
-            borderRadius: '8px',
-            fontSize: '0.88rem',
-            fontWeight: 600,
-            color: '#C5A880',
-            backgroundColor: '#0A2E24',
-            textDecoration: 'none',
-            marginTop: '8px'
-          }}
-        >
-          <Shield size={18} color="#C5A880" />
-          <span>Admin Portal</span>
-        </Link>
-      )}
-
-      <div style={{ borderTop: '1px solid #F0ECE4', marginTop: '8px', paddingTop: '6px' }}>
-        <button
-          onClick={logout}
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            padding: '10px 14px',
-            borderRadius: '8px',
-            fontSize: '0.85rem',
-            color: '#991B1B',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            textAlign: 'left'
-          }}
-        >
-          <LogOut size={16} />
-          <span>Sign Out</span>
-        </button>
-      </div>
-    </nav>
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -85,6 +85,8 @@ export default function BrandCustomizerDashboard({ initialConfig }: BrandCustomi
           enabled: announcementEnabled,
           text: announcementText.trim(),
           badge: announcementBadge.trim(),
+          variant: 'default',
+          badgeVariant: 'gold',
           ...(announcementLink.trim() ? { link: announcementLink.trim() } : {})
         },
         hero: {
@@ -92,7 +94,10 @@ export default function BrandCustomizerDashboard({ initialConfig }: BrandCustomi
           title: heroTitle.trim(),
           subtitle: heroSubtitle.trim(),
           ctaText: heroCtaText.trim(),
-          ctaLink: heroCtaLink.trim()
+          ctaLink: heroCtaLink.trim(),
+          variant: 'luxury',
+          ctaVariant: 'default',
+          alignment: 'center'
         },
         reassurances
       };

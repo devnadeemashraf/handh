@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { hexToHsl, resolveStorefrontConfig, storefrontConfigSchema } from './storefront-config';
 import {
   createCategorySchema,
   createProductSchema,
@@ -97,6 +98,44 @@ describe('Catalog Domain Validation', () => {
         name: 'Accessories'
       };
       expect(createCategorySchema.safeParse(category).success).toBe(true);
+    });
+  });
+
+  describe('storefrontConfigSchema & hexToHsl', () => {
+    it('converts hex colors accurately to HSL space', () => {
+      expect(hexToHsl('#0A2E24')).toBe('163 64% 11%');
+      expect(hexToHsl('#FDFBF7')).toBe('40 60% 98%');
+      expect(hexToHsl('#FFFFFF')).toBe('0 0% 100%');
+      expect(hexToHsl('#000000')).toBe('0 0% 0%');
+    });
+
+    it('resolves safe defaults for storefront config', () => {
+      const config = resolveStorefrontConfig({});
+      expect(config.hero.variant).toBe('luxury');
+      expect(config.hero.ctaVariant).toBe('default');
+      expect(config.hero.alignment).toBe('center');
+      expect(config.announcement.variant).toBe('default');
+      expect(config.announcement.badgeVariant).toBe('gold');
+      expect(config.reassurances[0]?.cardStyle).toBe('default');
+    });
+
+    it('parses custom hero and announcement variants cleanly', () => {
+      const parsed = storefrontConfigSchema.parse({
+        hero: {
+          variant: 'split',
+          ctaVariant: 'gold',
+          alignment: 'left'
+        },
+        announcement: {
+          variant: 'emerald',
+          badgeVariant: 'secondary'
+        }
+      });
+      expect(parsed.hero.variant).toBe('split');
+      expect(parsed.hero.ctaVariant).toBe('gold');
+      expect(parsed.hero.alignment).toBe('left');
+      expect(parsed.announcement.variant).toBe('emerald');
+      expect(parsed.announcement.badgeVariant).toBe('secondary');
     });
   });
 });

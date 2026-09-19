@@ -13,36 +13,13 @@ export function Header({
   categories: CategoryTreeItem[];
 }) {
   return (
-    <header
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        backgroundColor: 'rgba(253, 251, 247, 0.92)',
-        backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid var(--color-border)'
-      }}
-    >
-      <div
-        className="royale-container"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '72px'
-        }}
-      >
-        {/* Navigation Categories */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
+      <div className="mx-auto flex h-16 sm:h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Navigation Categories (Desktop) */}
+        <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
           <Link
             href="/"
-            style={{
-              fontSize: '0.85rem',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'var(--color-text)',
-              fontWeight: 500
-            }}
+            className="text-xs uppercase font-medium tracking-widest text-foreground transition-colors hover:text-accent"
           >
             All Collections
           </Link>
@@ -50,13 +27,7 @@ export function Header({
             <Link
               key={cat.id}
               href={`/?category=${cat.slug}`}
-              style={{
-                fontSize: '0.85rem',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: 'var(--color-text-muted)',
-                fontWeight: 500
-              }}
+              className="text-xs uppercase font-medium tracking-widest text-muted-foreground transition-colors hover:text-foreground"
             >
               {cat.name}
             </Link>
@@ -64,36 +35,19 @@ export function Header({
         </nav>
 
         {/* Central Brand Identity */}
-        <div style={{ textAlign: 'center' }}>
-          <Link href="/" style={{ display: 'inline-block' }}>
-            <span
-              style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: '1.75rem',
-                fontWeight: 600,
-                letterSpacing: '0.1em',
-                color: 'var(--color-primary)'
-              }}
-            >
+        <div className="text-center">
+          <Link href="/" className="inline-flex flex-col items-center group">
+            <span className="font-serif text-2xl sm:text-3xl font-semibold tracking-wider text-primary group-hover:opacity-95 transition-opacity">
               {storeName}
             </span>
-            <span
-              style={{
-                display: 'block',
-                fontSize: '0.6rem',
-                letterSpacing: '0.3em',
-                textTransform: 'uppercase',
-                color: 'var(--color-accent)',
-                marginTop: '-4px'
-              }}
-            >
+            <span className="-mt-1 text-[0.6rem] uppercase tracking-[0.25em] text-accent font-medium">
               Curated Essentials
             </span>
           </Link>
         </div>
 
-        {/* Right Actions: Bag / Cart / User Account */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Right Actions: User Account + Bag */}
+        <div className="flex items-center gap-2 sm:gap-4">
           <HeaderUserButton />
           <HeaderCartButton />
         </div>
