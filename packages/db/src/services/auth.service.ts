@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 
 import { OTP_CONFIG, SESSION_CONFIG } from '@hh/domain';
+
 import type { UserRole } from '@hh/domain';
 
 export function generateOTP(): string {

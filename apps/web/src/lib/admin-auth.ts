@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 
 import { verifyAdminSessionToken } from '@hh/db';
 
+import { getUserSession } from './auth';
+
 export const ADMIN_COOKIE_NAME = 'hh_admin_session';
 
 export function getAdminSecrets() {
@@ -21,10 +23,21 @@ export async function getAdminSession(): Promise<boolean> {
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
-    if (!sessionCookie) return false;
+    if (sessionCookie) {
+      const { sessionSecret } = getAdminSecrets();
+      if (verifyAdminSessionToken(sessionCookie, sessionSecret)) return true;
+    }
 
-    const { sessionSecret } = getAdminSecrets();
-    return verifyAdminSessionToken(sessionCookie, sessionSecret);
+    // Also recognize authenticated users who hold admin or super_admin role
+    const userSession = await getUserSession();
+    if (
+      userSession &&
+      (userSession.user.role === 'admin' || userSession.user.role === 'super_admin')
+    ) {
+      return true;
+    }
+
+    return false;
   } catch {
     return false;
   }

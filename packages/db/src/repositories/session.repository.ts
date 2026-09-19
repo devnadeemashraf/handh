@@ -61,6 +61,13 @@ export async function revokeSession(db: DatabaseClient, sessionId: string): Prom
   await db.delete(userSessions).where(eq(userSessions.id, sessionId));
 }
 
+export async function revokeSessionByTokenHash(
+  db: DatabaseClient,
+  tokenHash: string
+): Promise<void> {
+  await db.delete(userSessions).where(eq(userSessions.tokenHash, tokenHash));
+}
+
 export async function revokeAllUserSessions(db: DatabaseClient, userId: string): Promise<void> {
   await db.delete(userSessions).where(eq(userSessions.userId, userId));
 }

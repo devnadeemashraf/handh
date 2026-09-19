@@ -12,7 +12,9 @@ export const config = {
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
-  const sessionCookie = request.cookies.get('hh_admin_session')?.value;
+  const adminCookie = request.cookies.get('hh_admin_session')?.value;
+  const userCookie = request.cookies.get('hh_session')?.value;
+  const hasSession = Boolean(adminCookie || userCookie);
   const accessKey = process.env['ADMIN_ACCESS_KEY'] ?? 'hh_dev_access_key';
 
   // 1. Gateway Entry Gate: /admin/login
@@ -20,7 +22,7 @@ export function middleware(request: NextRequest) {
     const keyParam = searchParams.get('key');
 
     // If already authenticated with a session cookie, allow through
-    if (sessionCookie) {
+    if (hasSession) {
       return NextResponse.next();
     }
 
@@ -34,7 +36,7 @@ export function middleware(request: NextRequest) {
   }
 
   // 2. All Protected Admin Routes (/admin, /admin/orders, etc.)
-  if (!sessionCookie) {
+  if (!hasSession) {
     // Return fake 404 Not Found
     return NextResponse.rewrite(new URL('/_not-found', request.url));
   }
