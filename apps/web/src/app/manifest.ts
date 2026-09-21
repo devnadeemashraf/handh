@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'H&H — Haute & Heritage',
+    name: 'H&H',
     short_name: 'H&H',
     description: 'Curated luxury essentials and refined modest accessories.',
     start_url: '/',

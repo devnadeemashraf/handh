@@ -231,7 +231,7 @@ export function renderOrderConfirmationEmail(data: OrderConfirmationEmailData): 
     }
   `;
 
-  const text = `H&H Haute & Heritage — Order Confirmed: #${data.orderNumber}
+  const text = `H&H — Order Confirmed: #${data.orderNumber}
 
 Thank you for your order, ${data.customerName}!
 
@@ -293,7 +293,7 @@ export function renderOrderDispatchedEmail(data: OrderDispatchedEmailData): Emai
     }
   `;
 
-  const text = `H&H Haute & Heritage — Order Dispatched: #${data.orderNumber}
+  const text = `H&H — Order Dispatched: #${data.orderNumber}
 
 Dear ${data.customerName},
 
@@ -341,7 +341,7 @@ export function renderOrderDeliveredEmail(data: OrderDeliveredEmailData): EmailR
     }
   `;
 
-  const text = `H&H Haute & Heritage — Order Delivered: #${data.orderNumber}
+  const text = `H&H — Order Delivered: #${data.orderNumber}
 
 Dear ${data.customerName},
 
@@ -436,7 +436,7 @@ export function formatOrderConfirmationWhatsApp(
   const text = `*H&H Luxury Concierge* ✨
 
 Dear ${data.customerName},
-Thank you for choosing H&H Haute & Heritage.
+Thank you for choosing H&H.
 
 Your order *#${data.orderNumber}* for *${formattedTotal}* (${data.itemCount} item${data.itemCount === 1 ? '' : 's'}) has been confirmed! Our atelier is preparing your pieces.
 

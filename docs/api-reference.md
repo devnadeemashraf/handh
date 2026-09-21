@@ -1,4 +1,4 @@
-# H&H Haute & Heritage — Backend API Reference
+# H&H — Backend API Reference
 
 > Complete technical documentation of all backend REST endpoints, authentication protocols, validation schemas, and webhook contracts for integrating with the H&H platform.
 
