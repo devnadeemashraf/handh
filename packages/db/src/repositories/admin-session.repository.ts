@@ -2,11 +2,7 @@ import { and, asc, eq, gt, lt } from 'drizzle-orm';
 
 import type { AdminUser } from '@hh/domain';
 
-import {
-  type AdminSessionRecord,
-  adminSessions,
-  adminUsers
-} from '../schema/admin';
+import { type AdminSessionRecord, adminSessions, adminUsers } from '../schema/admin';
 import { toDomainAdminUser } from './admin-user.repository';
 
 import type { DatabaseClient } from '../index';

@@ -45,6 +45,20 @@ export const serverEnvSchema = z
       .min(8, 'ADMIN_PASSWORD must be at least 8 characters long')
       .default('hh_admin_secret_pass_2026'),
 
+    // Initial Admin Auto-Provisioning
+    INITIAL_ADMIN_EMAIL: z.string().email().default('admin@handh.in'),
+    INITIAL_ADMIN_PASSWORD: z.string().min(8).default('hh_admin_master_password_2026'),
+    INITIAL_ADMIN_ROLE: z.enum(['admin', 'super_admin']).default('super_admin'),
+
+    // Enterprise SSO & Corporate Domain Gating
+    ADMIN_ALLOWED_DOMAINS: z.string().default('handh.in'),
+    ADMIN_ALLOWED_EMAILS: z.string().default(''),
+    GOOGLE_CLIENT_ID: z.string().optional(),
+    GOOGLE_CLIENT_SECRET: z.string().optional(),
+    ZOHO_CLIENT_ID: z.string().optional(),
+    ZOHO_CLIENT_SECRET: z.string().optional(),
+    ZOHO_ACCOUNTS_DOMAIN: z.string().default('accounts.zoho.in'),
+
     // Storage (S3 / Cloudflare R2 / Local Floci)
     S3_ENDPOINT: z.string().url().optional(),
     S3_REGION: z.string().default('us-east-1'),
