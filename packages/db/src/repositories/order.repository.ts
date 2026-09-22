@@ -7,6 +7,7 @@ import {
   type CheckoutSubmissionInput,
   ConflictError,
   type Coupon,
+  type CurrencyCode,
   generateOrderNumber,
   type InvoiceData,
   type InvoiceTemplateConfig,
@@ -40,6 +41,58 @@ export interface CreateOrderParams extends CheckoutSubmissionInput {
 }
 
 /**
+ * Detects whether a database error was triggered by a unique constraint violation
+ * on the order idempotency key constraint (unq_orders_store_idempotency).
+ */
+export function isIdempotencyConflict(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const err = error as Record<string, unknown>;
+  const code =
+    err['code'] ??
+    (err['cause'] as Record<string, unknown> | undefined)?.['code'] ??
+    (err['originalError'] as Record<string, unknown> | undefined)?.['code'];
+  const constraint =
+    err['constraint_name'] ??
+    (err['cause'] as Record<string, unknown> | undefined)?.['constraint_name'] ??
+    err['constraint'] ??
+    (err['cause'] as Record<string, unknown> | undefined)?.['constraint'];
+  const message = String(err['message'] ?? '');
+  const detail = String(
+    err['detail'] ?? (err['cause'] as Record<string, unknown> | undefined)?.['detail'] ?? ''
+  );
+
+  if (code === '23505') {
+    if (constraint === 'unq_orders_store_idempotency') return true;
+    if (
+      detail.includes('idempotency_key') ||
+      message.includes('unq_orders_store_idempotency') ||
+      detail.includes('unq_orders_store_idempotency')
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Retrieves an order by store ID and client idempotency key.
+ */
+export async function findOrderByStoreAndIdempotencyKey(
+  db: DatabaseClient,
+  storeId: string,
+  idempotencyKey: string
+): Promise<Order | null> {
+  const result = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.storeId, storeId), eq(orders.idempotencyKey, idempotencyKey)))
+    .limit(1);
+
+  return result[0] ?? null;
+}
+
+/**
  * Atomically validates inventory with row-locking, creates inventory reservations,
  * and records a pending order with historical line item snapshots.
  */
@@ -53,231 +106,267 @@ export async function createPendingCheckoutOrder(
     throw new ValidationError('Checkout cannot be processed with an empty cart.');
   }
 
-  // Idempotency check: Look for existing order with this idempotency key
-  const idempotencyTag = `[idempotency:${idempotencyKey}]`;
-  const existingOrder = await db
-    .select({
-      id: orders.id,
-      orderNumber: orders.orderNumber,
-      currency: orders.currency,
-      subtotalMinor: orders.subtotalMinor,
-      shippingMinor: orders.shippingMinor,
-      totalMinor: orders.totalMinor,
-      createdAt: orders.createdAt
-    })
-    .from(orders)
-    .where(and(eq(orders.storeId, storeId), sql`${orders.notes} LIKE ${`%${idempotencyTag}%`}`))
-    .limit(1);
+  // 1. Fast-path Idempotency Check: Look for existing order with this idempotency key
+  if (idempotencyKey) {
+    const existingOrder = await db
+      .select({
+        id: orders.id,
+        orderNumber: orders.orderNumber,
+        currency: orders.currency,
+        subtotalMinor: orders.subtotalMinor,
+        shippingMinor: orders.shippingMinor,
+        totalMinor: orders.totalMinor,
+        createdAt: orders.createdAt
+      })
+      .from(orders)
+      .where(and(eq(orders.storeId, storeId), eq(orders.idempotencyKey, idempotencyKey)))
+      .limit(1);
 
-  if (existingOrder[0]) {
-    const existing = existingOrder[0];
-    return {
-      orderId: existing.id,
-      orderNumber: existing.orderNumber,
-      currency: 'INR',
-      subtotalMinor: existing.subtotalMinor,
-      shippingMinor: existing.shippingMinor,
-      totalMinor: existing.totalMinor,
-      expiresAt: new Date(new Date(existing.createdAt).getTime() + 15 * 60 * 1000).toISOString()
-    };
+    if (existingOrder[0]) {
+      const existing = existingOrder[0];
+      return {
+        orderId: existing.id,
+        orderNumber: existing.orderNumber,
+        currency: (existing.currency as CurrencyCode) || 'INR',
+        subtotalMinor: existing.subtotalMinor,
+        shippingMinor: existing.shippingMinor,
+        totalMinor: existing.totalMinor,
+        expiresAt: new Date(new Date(existing.createdAt).getTime() + 15 * 60 * 1000).toISOString()
+      };
+    }
   }
 
-  return await db.transaction(async (tx) => {
-    const variantIds = items.map((i) => i.variantId);
+  try {
+    return await db.transaction(async (tx) => {
+      const variantIds = items.map((i) => i.variantId);
 
-    // 1. Lock and fetch inventory & variant rows concurrently using FOR UPDATE
-    const variantRows = await tx
-      .select({
-        variantId: productVariants.id,
-        sku: productVariants.sku,
-        variantTitle: productVariants.title,
-        priceMinor: productVariants.priceMinor,
-        isVariantActive: productVariants.isActive,
-        productId: products.id,
-        productTitle: products.title,
-        productStatus: products.status,
-        inventoryId: inventoryLevels.id,
-        onHand: inventoryLevels.onHand,
-        reserved: inventoryLevels.reserved
-      })
-      .from(productVariants)
-      .innerJoin(products, eq(productVariants.productId, products.id))
-      .innerJoin(inventoryLevels, eq(productVariants.id, inventoryLevels.variantId))
-      .where(
-        and(
-          inArray(productVariants.id, variantIds),
-          eq(products.storeId, storeId),
-          eq(products.status, 'published'),
-          eq(productVariants.isActive, true)
+      // 1. Lock and fetch inventory & variant rows concurrently using FOR UPDATE
+      const variantRows = await tx
+        .select({
+          variantId: productVariants.id,
+          sku: productVariants.sku,
+          variantTitle: productVariants.title,
+          priceMinor: productVariants.priceMinor,
+          isVariantActive: productVariants.isActive,
+          productId: products.id,
+          productTitle: products.title,
+          productStatus: products.status,
+          inventoryId: inventoryLevels.id,
+          onHand: inventoryLevels.onHand,
+          reserved: inventoryLevels.reserved
+        })
+        .from(productVariants)
+        .innerJoin(products, eq(productVariants.productId, products.id))
+        .innerJoin(inventoryLevels, eq(productVariants.id, inventoryLevels.variantId))
+        .where(
+          and(
+            inArray(productVariants.id, variantIds),
+            eq(products.storeId, storeId),
+            eq(products.status, 'published'),
+            eq(productVariants.isActive, true)
+          )
         )
-      )
-      .for('update', { of: inventoryLevels });
+        .for('update', { of: inventoryLevels });
 
-    const variantMap = new Map<string, (typeof variantRows)[number]>();
-    for (const row of variantRows) {
-      variantMap.set(row.variantId, row);
-    }
-
-    // Verify all requested variants exist, are active, and have sufficient inventory
-    let subtotalMinor = 0;
-
-    for (const item of items) {
-      const variant = variantMap.get(item.variantId);
-      if (!variant) {
-        throw new NotFoundError('ProductVariant', item.variantId, {
-          reason: 'Product piece is no longer available or was unpublished'
-        });
+      const variantMap = new Map<string, (typeof variantRows)[number]>();
+      for (const row of variantRows) {
+        variantMap.set(row.variantId, row);
       }
 
-      const available = Math.max(0, variant.onHand - variant.reserved);
-      if (available < item.quantity) {
-        throw new ConflictError(
-          `Insufficient stock for "${variant.productTitle} (${variant.variantTitle})". Requested: ${item.quantity}, Available: ${available}`,
-          {
-            variantId: item.variantId,
-            requested: item.quantity,
-            available
+      // Verify all requested variants exist, are active, and have sufficient inventory
+      let subtotalMinor = 0;
+
+      for (const item of items) {
+        const variant = variantMap.get(item.variantId);
+        if (!variant) {
+          throw new NotFoundError('ProductVariant', item.variantId, {
+            reason: 'Product piece is no longer available or was unpublished'
+          });
+        }
+
+        const available = Math.max(0, variant.onHand - variant.reserved);
+        if (available < item.quantity) {
+          throw new ConflictError(
+            `Insufficient stock for "${variant.productTitle} (${variant.variantTitle})". Requested: ${item.quantity}, Available: ${available}`,
+            {
+              variantId: item.variantId,
+              requested: item.quantity,
+              available
+            }
+          );
+        }
+
+        subtotalMinor += variant.priceMinor * item.quantity;
+      }
+
+      // 2. Authoritative Financial Calculations & Optional Coupon Verification
+      let appliedCouponCode: string | null = null;
+      let discountMinor = 0;
+
+      if (params.couponCode) {
+        const normalizedCode = params.couponCode.trim().toUpperCase();
+        const couponRows = await tx
+          .select()
+          .from(coupons)
+          .where(and(eq(coupons.storeId, storeId), eq(coupons.code, normalizedCode)))
+          .limit(1);
+
+        const couponRecord = couponRows[0];
+        if (couponRecord) {
+          const domainCoupon: Coupon = {
+            id: couponRecord.id,
+            code: couponRecord.code,
+            discountType: couponRecord.discountType as 'percentage' | 'fixed',
+            value: couponRecord.value,
+            minOrderValueMinor: couponRecord.minOrderValueMinor,
+            maxDiscountMinor: couponRecord.maxDiscountMinor,
+            usageLimit: couponRecord.usageLimit,
+            timesUsed: couponRecord.timesUsed,
+            startsAt: couponRecord.startsAt ? couponRecord.startsAt.toISOString() : null,
+            expiresAt: couponRecord.expiresAt ? couponRecord.expiresAt.toISOString() : null,
+            isActive: couponRecord.isActive,
+            createdAt: couponRecord.createdAt.toISOString()
+          };
+
+          const validation = validateCoupon(domainCoupon, { subtotalMinor });
+          if (validation.valid) {
+            discountMinor = validation.discountMinor;
+            appliedCouponCode = domainCoupon.code;
+            await tx
+              .update(coupons)
+              .set({
+                timesUsed: sql`${coupons.timesUsed} + 1`,
+                updatedAt: new Date()
+              })
+              .where(eq(coupons.id, domainCoupon.id));
           }
-        );
-      }
-
-      subtotalMinor += variant.priceMinor * item.quantity;
-    }
-
-    // 2. Authoritative Financial Calculations & Optional Coupon Verification
-    let appliedCouponCode: string | null = null;
-    let discountMinor = 0;
-
-    if (params.couponCode) {
-      const normalizedCode = params.couponCode.trim().toUpperCase();
-      const couponRows = await tx
-        .select()
-        .from(coupons)
-        .where(and(eq(coupons.storeId, storeId), eq(coupons.code, normalizedCode)))
-        .limit(1);
-
-      const couponRecord = couponRows[0];
-      if (couponRecord) {
-        const domainCoupon: Coupon = {
-          id: couponRecord.id,
-          code: couponRecord.code,
-          discountType: couponRecord.discountType as 'percentage' | 'fixed',
-          value: couponRecord.value,
-          minOrderValueMinor: couponRecord.minOrderValueMinor,
-          maxDiscountMinor: couponRecord.maxDiscountMinor,
-          usageLimit: couponRecord.usageLimit,
-          timesUsed: couponRecord.timesUsed,
-          startsAt: couponRecord.startsAt ? couponRecord.startsAt.toISOString() : null,
-          expiresAt: couponRecord.expiresAt ? couponRecord.expiresAt.toISOString() : null,
-          isActive: couponRecord.isActive,
-          createdAt: couponRecord.createdAt.toISOString()
-        };
-
-        const validation = validateCoupon(domainCoupon, { subtotalMinor });
-        if (validation.valid) {
-          discountMinor = validation.discountMinor;
-          appliedCouponCode = domainCoupon.code;
-          await tx
-            .update(coupons)
-            .set({
-              timesUsed: sql`${coupons.timesUsed} + 1`,
-              updatedAt: new Date()
-            })
-            .where(eq(coupons.id, domainCoupon.id));
         }
       }
-    }
 
-    const financials = calculateCheckoutFinancials(subtotalMinor, 'INR', { discountMinor });
+      const financials = calculateCheckoutFinancials(subtotalMinor, 'INR', { discountMinor });
 
-    // 3. Generate Order ID & Order Number
-    const orderNumber = generateOrderNumber();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minute reservation TTL
+      // 3. Generate Order ID & Order Number
+      const orderNumber = generateOrderNumber();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minute reservation TTL
 
-    // 4. Create Order Record
-    const notesContent = customerNotes ? `${idempotencyTag} ${customerNotes}` : idempotencyTag;
+      // 4. Create Order Record
+      const shippingAddressPayload = {
+        line1: shippingAddress.line1,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        postalCode: shippingAddress.postalCode,
+        country: shippingAddress.country,
+        ...(shippingAddress.line2 ? { line2: shippingAddress.line2 } : {})
+      };
 
-    const shippingAddressPayload = {
-      line1: shippingAddress.line1,
-      city: shippingAddress.city,
-      state: shippingAddress.state,
-      postalCode: shippingAddress.postalCode,
-      country: shippingAddress.country,
-      ...(shippingAddress.line2 ? { line2: shippingAddress.line2 } : {})
-    };
+      const [createdOrder] = await tx
+        .insert(orders)
+        .values({
+          orderNumber,
+          storeId,
+          userId: params.userId ?? null,
+          idempotencyKey: idempotencyKey ?? null,
+          status: 'pending_payment',
+          paymentStatus: 'unpaid',
+          fulfillmentStatus: 'unfulfilled',
+          customerEmail: shippingAddress.email,
+          customerPhone: shippingAddress.phone,
+          customerName: shippingAddress.fullName,
+          shippingAddress: shippingAddressPayload,
+          currency: 'INR',
+          subtotalMinor: financials.subtotalMinor,
+          shippingMinor: financials.shippingMinor,
+          discountMinor: financials.discountMinor,
+          totalMinor: financials.totalMinor,
+          couponCode: appliedCouponCode,
+          attribution: params.attribution ?? null,
+          notes: customerNotes ? customerNotes.trim() : null
+        })
+        .returning();
 
-    const [createdOrder] = await tx
-      .insert(orders)
-      .values({
-        orderNumber,
-        storeId,
-        userId: params.userId ?? null,
-        status: 'pending_payment',
-        paymentStatus: 'unpaid',
-        fulfillmentStatus: 'unfulfilled',
-        customerEmail: shippingAddress.email,
-        customerPhone: shippingAddress.phone,
-        customerName: shippingAddress.fullName,
-        shippingAddress: shippingAddressPayload,
+      const orderId = createdOrder!.id;
+
+      // 5. Create Order Items & Inventory Reservations
+      for (const item of items) {
+        const variant = variantMap.get(item.variantId)!;
+        const lineTotalMinor = variant.priceMinor * item.quantity;
+
+        // Create snapshot line item
+        await tx.insert(orderItems).values({
+          orderId,
+          variantId: variant.variantId,
+          skuSnapshot: variant.sku,
+          productNameSnapshot: variant.productTitle,
+          variantNameSnapshot: variant.variantTitle,
+          unitPriceMinor: variant.priceMinor,
+          quantity: item.quantity,
+          totalPriceMinor: lineTotalMinor
+        });
+
+        // Create inventory reservation record
+        await tx.insert(inventoryReservations).values({
+          orderId,
+          variantId: variant.variantId,
+          quantity: item.quantity,
+          status: 'active',
+          expiresAt
+        });
+
+        // Increment reserved units atomically
+        await tx
+          .update(inventoryLevels)
+          .set({
+            reserved: sql`${inventoryLevels.reserved} + ${item.quantity}`,
+            updatedAt: new Date()
+          })
+          .where(eq(inventoryLevels.variantId, variant.variantId));
+      }
+
+      return {
+        orderId,
+        orderNumber: createdOrder!.orderNumber,
         currency: 'INR',
         subtotalMinor: financials.subtotalMinor,
         shippingMinor: financials.shippingMinor,
-        discountMinor: financials.discountMinor,
         totalMinor: financials.totalMinor,
-        couponCode: appliedCouponCode,
-        attribution: params.attribution ?? null,
-        notes: notesContent
-      })
-      .returning();
-
-    const orderId = createdOrder!.id;
-
-    // 5. Create Order Items & Inventory Reservations
-    for (const item of items) {
-      const variant = variantMap.get(item.variantId)!;
-      const lineTotalMinor = variant.priceMinor * item.quantity;
-
-      // Create snapshot line item
-      await tx.insert(orderItems).values({
-        orderId,
-        variantId: variant.variantId,
-        skuSnapshot: variant.sku,
-        productNameSnapshot: variant.productTitle,
-        variantNameSnapshot: variant.variantTitle,
-        unitPriceMinor: variant.priceMinor,
-        quantity: item.quantity,
-        totalPriceMinor: lineTotalMinor
-      });
-
-      // Create inventory reservation record
-      await tx.insert(inventoryReservations).values({
-        orderId,
-        variantId: variant.variantId,
-        quantity: item.quantity,
-        status: 'active',
-        expiresAt
-      });
-
-      // Increment reserved units atomically
-      await tx
-        .update(inventoryLevels)
-        .set({
-          reserved: sql`${inventoryLevels.reserved} + ${item.quantity}`,
-          updatedAt: new Date()
+        expiresAt: expiresAt.toISOString()
+      };
+    });
+  } catch (error) {
+    // If a concurrent request with the same idempotency key committed while this transaction was running,
+    // PostgreSQL raises unique constraint violation (23505) on unq_orders_store_idempotency.
+    // Fetch and return the committed order instead of failing.
+    if (idempotencyKey && isIdempotencyConflict(error)) {
+      const existingOrder = await db
+        .select({
+          id: orders.id,
+          orderNumber: orders.orderNumber,
+          currency: orders.currency,
+          subtotalMinor: orders.subtotalMinor,
+          shippingMinor: orders.shippingMinor,
+          totalMinor: orders.totalMinor,
+          createdAt: orders.createdAt
         })
-        .where(eq(inventoryLevels.variantId, variant.variantId));
+        .from(orders)
+        .where(and(eq(orders.storeId, storeId), eq(orders.idempotencyKey, idempotencyKey)))
+        .limit(1);
+
+      if (existingOrder[0]) {
+        const existing = existingOrder[0];
+        return {
+          orderId: existing.id,
+          orderNumber: existing.orderNumber,
+          currency: (existing.currency as CurrencyCode) || 'INR',
+          subtotalMinor: existing.subtotalMinor,
+          shippingMinor: existing.shippingMinor,
+          totalMinor: existing.totalMinor,
+          expiresAt: new Date(new Date(existing.createdAt).getTime() + 15 * 60 * 1000).toISOString()
+        };
+      }
     }
 
-    return {
-      orderId,
-      orderNumber: createdOrder!.orderNumber,
-      currency: 'INR',
-      subtotalMinor: financials.subtotalMinor,
-      shippingMinor: financials.shippingMinor,
-      totalMinor: financials.totalMinor,
-      expiresAt: expiresAt.toISOString()
-    };
-  });
+    throw error;
+  }
 }
 
 /**

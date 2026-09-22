@@ -57,6 +57,13 @@
       "when": 1790067301243,
       "tag": "0007_stiff_maestro",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790070289644,
+      "tag": "0008_mixed_the_professor",
+      "breakpoints": true
     }
   ]
 }

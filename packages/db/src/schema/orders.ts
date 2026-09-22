@@ -8,6 +8,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
   varchar
 } from 'drizzle-orm/pg-core';
@@ -37,6 +38,7 @@ export const orders = pgTable(
       .notNull()
       .references(() => stores.id, { onDelete: 'restrict' }),
     userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+    idempotencyKey: varchar('idempotency_key', { length: 128 }),
     status: varchar('status', { length: 32 })
       .$type<OrderStatus>()
       .notNull()
@@ -69,6 +71,7 @@ export const orders = pgTable(
     check('chk_orders_shipping_minor', sql`${table.shippingMinor} >= 0`),
     check('chk_orders_discount_minor', sql`${table.discountMinor} >= 0`),
     check('chk_orders_total_minor', sql`${table.totalMinor} >= 0`),
+    unique('unq_orders_store_idempotency').on(table.storeId, table.idempotencyKey),
     index('idx_orders_customer_email').on(table.customerEmail),
     index('idx_orders_user_id').on(table.userId),
     index('idx_orders_status').on(table.status),

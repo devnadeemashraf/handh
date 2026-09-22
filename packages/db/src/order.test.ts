@@ -1,4 +1,5 @@
-import { eq } from 'drizzle-orm';
+import { randomUUID } from 'crypto';
+import { and, eq } from 'drizzle-orm';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { ConflictError, NotFoundError, ValidationError } from '@hh/domain';
@@ -10,9 +11,11 @@ import {
   createProductWithVariants,
   createStore,
   findOrderById,
-  findOrderByOrderNumber
+  findOrderByOrderNumber,
+  findOrderByStoreAndIdempotencyKey,
+  isIdempotencyConflict
 } from './repositories';
-import { inventoryLevels } from './schema';
+import { inventoryLevels, orders } from './schema';
 
 describe('Order Repository Integration', () => {
   const databaseUrl =
@@ -94,7 +97,7 @@ describe('Order Repository Integration', () => {
   });
 
   it('atomically creates order, line items, and reserves inventory', async () => {
-    const idempotencyKey = '11111111-2222-3333-4444-555555555555';
+    const idempotencyKey = randomUUID();
 
     const orderResult = await createPendingCheckoutOrder(db, {
       storeId,
@@ -154,7 +157,7 @@ describe('Order Repository Integration', () => {
   });
 
   it('guarantees idempotency on duplicate checkout submissions', async () => {
-    const idempotencyKey = '99999999-8888-7777-6666-555555555555';
+    const idempotencyKey = randomUUID();
 
     // First submission
     const firstAttempt = await createPendingCheckoutOrder(db, {
@@ -206,6 +209,88 @@ describe('Order Repository Integration', () => {
       .from(inventoryLevels)
       .where(eq(inventoryLevels.variantId, variantAId));
     expect(invAfter?.reserved).toBe(3); // Still 3, NOT 4!
+
+    // Verify database row contains dedicated idempotency_key column without notes pollution
+    const [persistedOrder] = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.id, firstAttempt.orderId));
+    expect(persistedOrder?.idempotencyKey).toBe(idempotencyKey);
+    expect(persistedOrder?.notes).toBeNull();
+  });
+
+  it('handles concurrent identical checkout submissions atomically without duplicate orders or stock corruption', async () => {
+    const concurrentKey = randomUUID();
+
+    const [res1, res2] = await Promise.all([
+      createPendingCheckoutOrder(db, {
+        storeId,
+        items: [{ variantId: variantAId, quantity: 1 }],
+        shippingAddress: {
+          fullName: 'Farhan Zaidi',
+          phone: '9876543210',
+          email: 'farhan@example.com',
+          line1: 'B-101 Royal Palms',
+          city: 'Mumbai',
+          state: 'Maharashtra',
+          postalCode: '400001',
+          country: 'IN'
+        },
+        idempotencyKey: concurrentKey
+      }),
+      createPendingCheckoutOrder(db, {
+        storeId,
+        items: [{ variantId: variantAId, quantity: 1 }],
+        shippingAddress: {
+          fullName: 'Farhan Zaidi',
+          phone: '9876543210',
+          email: 'farhan@example.com',
+          line1: 'B-101 Royal Palms',
+          city: 'Mumbai',
+          state: 'Maharashtra',
+          postalCode: '400001',
+          country: 'IN'
+        },
+        idempotencyKey: concurrentKey
+      })
+    ]);
+
+    expect(res1.orderId).toBe(res2.orderId);
+    expect(res1.orderNumber).toBe(res2.orderNumber);
+
+    // Verify only 1 order exists with this idempotency key in the database for this store
+    const matchingOrders = await db
+      .select()
+      .from(orders)
+      .where(and(eq(orders.storeId, storeId), eq(orders.idempotencyKey, concurrentKey)));
+    expect(matchingOrders.length).toBe(1);
+
+    // Verify direct lookup helper
+    const foundOrder = await findOrderByStoreAndIdempotencyKey(db, storeId, concurrentKey);
+    expect(foundOrder?.id).toBe(res1.orderId);
+  });
+
+  it('correctly identifies idempotency conflicts using isIdempotencyConflict helper', () => {
+    expect(isIdempotencyConflict(null)).toBe(false);
+    expect(isIdempotencyConflict({})).toBe(false);
+    expect(
+      isIdempotencyConflict({
+        code: '23505',
+        constraint_name: 'unq_orders_store_idempotency'
+      })
+    ).toBe(true);
+    expect(
+      isIdempotencyConflict({
+        code: '23505',
+        detail: 'Key (store_id, idempotency_key)=(...) already exists.'
+      })
+    ).toBe(true);
+    expect(
+      isIdempotencyConflict({
+        code: '23505',
+        constraint_name: 'users_email_unique'
+      })
+    ).toBe(false);
   });
 
   it('rejects order and prevents overselling when requested stock exceeds available units', async () => {

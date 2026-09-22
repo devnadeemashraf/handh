@@ -19,6 +19,7 @@ const mockOrder: Order & { shippingAddress: ShippingAddress } = {
   orderNumber: 'HH-2026-00123',
   storeId: 'store-1',
   userId: null,
+  idempotencyKey: null,
   status: 'paid',
   paymentStatus: 'captured',
   fulfillmentStatus: 'unfulfilled',

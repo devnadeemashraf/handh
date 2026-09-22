@@ -60,6 +60,7 @@ describe('Database Schema Definitions & Inferred Types', () => {
 
     it('defines orders and order items with decoupled state machine columns', () => {
       expect(orders.orderNumber).toBeDefined();
+      expect(orders.idempotencyKey).toBeDefined();
       expect(orders.status).toBeDefined();
       expect(orders.paymentStatus).toBeDefined();
       expect(orders.fulfillmentStatus).toBeDefined();

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { createDbClient, createPendingCheckoutOrder, findStoreBySlug } from '@hh/db';
+import { createPendingCheckoutOrder, findStoreBySlug, getSharedDbClient } from '@hh/db';
 import {
   CheckoutSubmissionSchema,
   ConflictError,
@@ -11,6 +11,7 @@ import {
 } from '@hh/domain';
 
 import { getCurrentUser } from '../../../../lib/auth';
+import { getClientIp } from '../../../../lib/client-ip';
 import { checkoutSubmitRateLimiter } from '../../../../lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
@@ -19,15 +20,12 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function POST(request: Request) {
   try {
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-      request.headers.get('x-real-ip') ??
-      '127.0.0.1';
+    const ip = getClientIp(request);
 
     const rl = await checkoutSubmitRateLimiter.limit(ip);
     if (!rl.success) {

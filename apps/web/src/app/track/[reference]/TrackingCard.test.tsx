@@ -18,6 +18,7 @@ const mockOrder: Order = {
   orderNumber: 'HH-2026-00999',
   storeId: 'store-1',
   userId: null,
+  idempotencyKey: null,
   status: 'processing',
   paymentStatus: 'captured',
   fulfillmentStatus: 'shipped',
