@@ -11,18 +11,21 @@ export interface OrderSuccessViewProps {
   reservationRemainingSecs: number;
   isProcessingPayment: boolean;
   onLaunchGateway: (order: CheckoutOrderResult) => void;
+  onCancelReservation?: () => void;
 }
 
 export function OrderSuccessView({
   orderPlaced,
   reservationRemainingSecs,
   isProcessingPayment,
-  onLaunchGateway
+  onLaunchGateway,
+  onCancelReservation
 }: OrderSuccessViewProps) {
   const [copied, setCopied] = React.useState(false);
 
-  const minutes = Math.floor(reservationRemainingSecs / 60);
-  const seconds = reservationRemainingSecs % 60;
+  const isExpired = reservationRemainingSecs <= 0;
+  const minutes = Math.floor(Math.max(0, reservationRemainingSecs) / 60);
+  const seconds = Math.max(0, reservationRemainingSecs) % 60;
   const formattedTimer = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
   const handleCopy = () => {
@@ -42,16 +45,17 @@ export function OrderSuccessView({
             </div>
 
             <span className="mb-2 block text-xs uppercase tracking-[0.25em] font-semibold text-accent">
-              Order Reserved
+              {isExpired ? 'Reservation Expired' : 'Order Reserved'}
             </span>
 
             <h1 className="mb-3 font-serif text-2xl sm:text-3xl font-semibold text-primary">
-              Awaiting Payment Confirmation
+              {isExpired ? 'Hold Window Expired' : 'Awaiting Payment Confirmation'}
             </h1>
 
             <p className="mx-auto mb-6 max-w-md text-sm text-muted-foreground leading-relaxed">
-              Your handcrafted pieces have been reserved exclusively for you. Please complete
-              payment to lock in your order and initiate courier packing.
+              {isExpired
+                ? 'Your 15-minute inventory hold has elapsed. Your items remain saved in your bag so you can resume or review checkout.'
+                : 'Your handcrafted pieces have been reserved exclusively for you. Please complete payment to lock in your order and initiate courier packing.'}
             </p>
 
             {/* Order Reference Badge */}
@@ -77,39 +81,82 @@ export function OrderSuccessView({
             </div>
 
             {/* Reservation Timer Banner */}
-            <div className="mb-8 rounded-lg border border-primary/20 bg-primary/5 p-4 text-xs text-primary">
-              <div className="flex items-center justify-center gap-2 font-bold mb-1">
-                <Clock className="h-4 w-4 text-accent" />
-                <span>Time Remaining to Complete Payment: {formattedTimer}</span>
+            {!isExpired ? (
+              <div className="mb-8 rounded-lg border border-primary/20 bg-primary/5 p-4 text-xs text-primary">
+                <div className="flex items-center justify-center gap-2 font-bold mb-1">
+                  <Clock className="h-4 w-4 text-accent" />
+                  <span>Time Remaining to Complete Payment: {formattedTimer}</span>
+                </div>
+                <p className="text-muted-foreground leading-relaxed">
+                  If payment is not completed before the reservation expires, inventory is
+                  automatically returned to the public collection.
+                </p>
               </div>
-              <p className="text-muted-foreground leading-relaxed">
-                If payment is not completed before the reservation expires, inventory is
-                automatically returned to the public collection.
-              </p>
-            </div>
+            ) : (
+              <div className="mb-8 rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-xs text-destructive">
+                <div className="flex items-center justify-center gap-2 font-bold mb-1">
+                  <Clock className="h-4 w-4 text-destructive" />
+                  <span>Hold window expired</span>
+                </div>
+                <p className="text-muted-foreground leading-relaxed">
+                  The temporary hold on this stock has ended, but your cart items are preserved.
+                </p>
+              </div>
+            )}
 
             {/* Payment Trigger CTA */}
             <div className="space-y-3">
-              <Button
-                onClick={() => onLaunchGateway(orderPlaced)}
-                disabled={isProcessingPayment}
-                size="lg"
-                className="w-full text-base font-semibold shadow-md"
-              >
-                {isProcessingPayment ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    <span>Processing Payment Gateway...</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    <span>Open Payment Window</span>
-                  </>
-                )}
-              </Button>
+              {!isExpired ? (
+                <>
+                  <Button
+                    onClick={() => onLaunchGateway(orderPlaced)}
+                    disabled={isProcessingPayment}
+                    size="lg"
+                    className="w-full text-base font-semibold shadow-md"
+                  >
+                    {isProcessingPayment ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <span>Processing Payment Gateway...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        <span>Open Payment Window</span>
+                      </>
+                    )}
+                  </Button>
 
-              <Button asChild variant="outline" size="lg" className="w-full">
+                  {onCancelReservation && (
+                    <Button
+                      onClick={onCancelReservation}
+                      variant="outline"
+                      size="lg"
+                      className="w-full"
+                    >
+                      Modify Bag / Return to Checkout
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <>
+                  {onCancelReservation ? (
+                    <Button
+                      onClick={onCancelReservation}
+                      size="lg"
+                      className="w-full text-base font-semibold shadow-md"
+                    >
+                      Return to Checkout Form
+                    </Button>
+                  ) : (
+                    <Button asChild size="lg" className="w-full text-base font-semibold shadow-md">
+                      <Link href="/cart">Return to Bag</Link>
+                    </Button>
+                  )}
+                </>
+              )}
+
+              <Button asChild variant="ghost" size="sm" className="w-full text-muted-foreground">
                 <Link href="/">Return to Storefront</Link>
               </Button>
             </div>

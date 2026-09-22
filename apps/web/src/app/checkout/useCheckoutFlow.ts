@@ -34,6 +34,8 @@ declare global {
   }
 }
 
+export const PENDING_ORDER_STORAGE_KEY = 'hh_pending_checkout';
+
 export function useCheckoutFlow({
   user,
   cartSummary,
@@ -45,11 +47,7 @@ export function useCheckoutFlow({
   cartSummary: CartSummary | null;
   clearCart: () => void;
   refreshCart: () => Promise<void>;
-  openAuthModal: (options: {
-    reason: string;
-    initialPhone?: string;
-    onSuccess?: () => void;
-  }) => void;
+  openAuthModal: (opts: { reason?: string; initialPhone?: string; onSuccess?: () => void }) => void;
 }) {
   const router = useRouter();
 
@@ -59,6 +57,31 @@ export function useCheckoutFlow({
   const [orderPlaced, setOrderPlaced] = React.useState<CheckoutOrderResult | null>(null);
   const [reservationRemainingSecs, setReservationRemainingSecs] = React.useState<number>(15 * 60);
   const [serviceControl, setServiceControl] = React.useState<ServiceControlConfig | null>(null);
+
+  // Restore pending order on client mount if reservation is still active (E-COM-044)
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = sessionStorage.getItem(PENDING_ORDER_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as CheckoutOrderResult;
+        if (parsed && parsed.expiresAt) {
+          const remaining = Math.max(
+            0,
+            Math.floor((new Date(parsed.expiresAt).getTime() - Date.now()) / 1000)
+          );
+          if (remaining > 0) {
+            setOrderPlaced(parsed);
+            setReservationRemainingSecs(remaining);
+          } else {
+            sessionStorage.removeItem(PENDING_ORDER_STORAGE_KEY);
+          }
+        }
+      }
+    } catch {
+      // ignore parsing errors
+    }
+  }, []);
 
   // Saved addresses state for authenticated users
   const [savedAddresses, setSavedAddresses] = React.useState<UserAddress[]>([]);
@@ -250,6 +273,16 @@ export function useCheckoutFlow({
         setSubmitError(data.error || 'Payment confirmation failed. Please contact support.');
         setIsProcessingPayment(false);
         return;
+      }
+
+      // Payment verified on server! Clear client cart and pending checkout storage (E-COM-044)
+      clearCart();
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.removeItem(PENDING_ORDER_STORAGE_KEY);
+        } catch {
+          // ignore storage errors
+        }
       }
 
       // Track order completion and clear attribution window
@@ -478,7 +511,14 @@ export function useCheckoutFlow({
       // Order created & stock locked!
       const createdOrder = data.order as CheckoutOrderResult;
       setOrderPlaced(createdOrder);
-      clearCart();
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.setItem(PENDING_ORDER_STORAGE_KEY, JSON.stringify(createdOrder));
+        } catch {
+          // ignore storage quota errors
+        }
+      }
+      // Note: Client cart is retained until verified payment capture (E-COM-044)
       setIsSubmitting(false);
 
       // Immediately launch payment gateway
@@ -487,6 +527,17 @@ export function useCheckoutFlow({
       console.error('Checkout submission network error:', err);
       setSubmitError('A network error occurred. Please verify your connection and try again.');
       setIsSubmitting(false);
+    }
+  };
+
+  const clearPendingOrder = () => {
+    setOrderPlaced(null);
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.removeItem(PENDING_ORDER_STORAGE_KEY);
+      } catch {
+        // ignore storage errors
+      }
     }
   };
 
@@ -507,6 +558,7 @@ export function useCheckoutFlow({
     serviceControl,
     isServicePaused,
     handleSubmit,
-    launchPaymentGateway
+    launchPaymentGateway,
+    clearPendingOrder
   };
 }

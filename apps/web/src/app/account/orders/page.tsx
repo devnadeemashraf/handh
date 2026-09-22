@@ -1,7 +1,7 @@
 'use client';
-
-import { ShoppingBag, Truck } from 'lucide-react';
+import { CreditCard, Loader2, ShoppingBag, Truck } from 'lucide-react';
 import Link from 'next/link';
+import Script from 'next/script';
 import React, { useEffect, useState } from 'react';
 
 import { Money } from '@hh/domain';
@@ -14,6 +14,8 @@ export default function AccountOrdersPage() {
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/user/orders')
@@ -49,6 +51,105 @@ export default function AccountOrdersPage() {
     }
   };
 
+  const handlePayNow = async (order: OrderWithItems) => {
+    setPayingOrderId(order.id);
+    setPaymentError(null);
+
+    try {
+      const res = await fetch('/api/checkout/payment-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setPaymentError(data.error || 'Failed to initialize payment gateway.');
+        setPayingOrderId(null);
+        return;
+      }
+
+      if (typeof window !== 'undefined' && window.Razorpay) {
+        const options = {
+          key: data.keyId,
+          amount: data.amountMinor,
+          currency: data.currency,
+          name: 'H&H',
+          description: `Order ${data.orderNumber}`,
+          order_id: data.razorpayOrderId,
+          prefill: {
+            name: data.customerName || '',
+            email: data.customerEmail || '',
+            contact: data.customerPhone || ''
+          },
+          theme: { color: '#0A2E24' },
+          handler: async function (response: {
+            razorpay_order_id: string;
+            razorpay_payment_id: string;
+            razorpay_signature: string;
+          }) {
+            try {
+              const verifyRes = await fetch('/api/checkout/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  orderId: order.id,
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature
+                })
+              });
+
+              const verifyData = await verifyRes.json();
+              if (verifyRes.ok && verifyData.success) {
+                window.location.href = `/checkout/success?orderNumber=${order.orderNumber}`;
+              } else {
+                setPaymentError(verifyData.error || 'Payment verification failed.');
+                setPayingOrderId(null);
+              }
+            } catch {
+              setPaymentError('Network error while verifying payment.');
+              setPayingOrderId(null);
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              setPayingOrderId(null);
+            }
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      } else {
+        if (process.env['NODE_ENV'] !== 'production') {
+          const verifyRes = await fetch('/api/checkout/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderId: order.id,
+              razorpayOrderId: data.razorpayOrderId,
+              razorpayPaymentId: `mock_pay_${Date.now()}`,
+              razorpaySignature: 'mock_payment_signature'
+            })
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyRes.ok && verifyData.success) {
+            window.location.href = `/checkout/success?orderNumber=${order.orderNumber}`;
+            return;
+          }
+        }
+        setPaymentError(
+          'Payment gateway could not be loaded. Please disable ad-blockers and try again.'
+        );
+        setPayingOrderId(null);
+      }
+    } catch {
+      setPaymentError('A network error occurred while launching payment.');
+      setPayingOrderId(null);
+    }
+  };
+
   return (
     <div
       style={{
@@ -59,6 +160,7 @@ export default function AccountOrdersPage() {
         boxShadow: '0 4px 12px rgba(10, 46, 36, 0.03)'
       }}
     >
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <div
         style={{ borderBottom: '1px solid #F0ECE4', paddingBottom: '16px', marginBottom: '24px' }}
       >
@@ -221,26 +323,75 @@ export default function AccountOrdersPage() {
                       {badge.text}
                     </span>
 
-                    <Link
-                      href={`/track/${ord.orderNumber}`}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        padding: '6px 12px',
-                        backgroundColor: '#0A2E24',
-                        color: '#FDFBF7',
-                        borderRadius: '6px',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        textDecoration: 'none'
-                      }}
-                    >
-                      <Truck size={13} />
-                      <span>Track Shipment</span>
-                    </Link>
+                    {ord.status === 'pending_payment' ? (
+                      <button
+                        type="button"
+                        onClick={() => handlePayNow(ord)}
+                        disabled={payingOrderId === ord.id}
+                        aria-label={`Pay Now for Order ${ord.orderNumber}`}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 14px',
+                          backgroundColor: '#0A2E24',
+                          color: '#FDFBF7',
+                          borderRadius: '6px',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          border: 'none',
+                          cursor: payingOrderId === ord.id ? 'not-allowed' : 'pointer',
+                          opacity: payingOrderId === ord.id ? 0.7 : 1
+                        }}
+                      >
+                        {payingOrderId === ord.id ? (
+                          <>
+                            <Loader2 size={13} className="animate-spin" />
+                            <span>Opening Gateway...</span>
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard size={13} />
+                            <span>Pay Now</span>
+                          </>
+                        )}
+                      </button>
+                    ) : ord.status !== 'cancelled' ? (
+                      <Link
+                        href={`/track/${ord.orderNumber}`}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '6px 12px',
+                          backgroundColor: '#0A2E24',
+                          color: '#FDFBF7',
+                          borderRadius: '6px',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          textDecoration: 'none'
+                        }}
+                      >
+                        <Truck size={13} />
+                        <span>Track Shipment</span>
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
+
+                {paymentError && payingOrderId === ord.id && (
+                  <div
+                    style={{
+                      padding: '10px 18px',
+                      backgroundColor: '#FEF2F2',
+                      borderBottom: '1px solid #FECACA',
+                      color: '#991B1B',
+                      fontSize: '0.8rem'
+                    }}
+                  >
+                    {paymentError}
+                  </div>
+                )}
 
                 {/* Items */}
                 <div

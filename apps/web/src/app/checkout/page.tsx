@@ -37,7 +37,8 @@ export default function CheckoutPage() {
     isServicePaused,
     serviceControl,
     handleSubmit,
-    launchPaymentGateway
+    launchPaymentGateway,
+    clearPendingOrder
   } = useCheckoutFlow({
     user,
     cartSummary,
@@ -56,6 +57,7 @@ export default function CheckoutPage() {
           reservationRemainingSecs={reservationRemainingSecs}
           isProcessingPayment={isProcessingPayment}
           onLaunchGateway={launchPaymentGateway}
+          onCancelReservation={clearPendingOrder}
         />
       </>
     );
