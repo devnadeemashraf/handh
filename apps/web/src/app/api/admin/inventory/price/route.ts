@@ -1,21 +1,16 @@
 import { NextResponse } from 'next/server';
-import { getAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, getSharedDb } from '@/lib/admin-auth';
+import { getClientIp } from '@/lib/client-ip';
 
-import { createDbClient, updateVariantPrice } from '@hh/db';
+import { recordAdminAuditLog, updateVariantPrice } from '@hh/db';
 import { UpdateVariantPriceSchema } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-function getDatabase() {
-  const databaseUrl =
-    process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
-}
-
 export async function PATCH(request: Request) {
-  const isAuthed = await getAdminSession();
-  if (!isAuthed) {
+  const sessionContext = await getAdminSession();
+  if (!sessionContext) {
     return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
   }
 
@@ -34,8 +29,22 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const db = getDatabase();
+    const db = getSharedDb();
     await updateVariantPrice(db, parseResult.data);
+
+    // Record immutable audit log (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: sessionContext.admin.id,
+      adminEmail: sessionContext.admin.email,
+      action: 'inventory:price_updated',
+      entityType: 'product_variant',
+      entityId: parseResult.data.variantId,
+      details: {
+        priceMinor: parseResult.data.priceMinor
+      },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
+    });
 
     return NextResponse.json({
       success: true,

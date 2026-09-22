@@ -1,26 +1,21 @@
 import { NextResponse } from 'next/server';
-import { getAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, getSharedDb } from '@/lib/admin-auth';
+import { getClientIp } from '@/lib/client-ip';
 
-import { createCoupon, createDbClient, listCoupons } from '@hh/db';
+import { createCoupon, listCoupons, recordAdminAuditLog } from '@hh/db';
 import { CreateCouponSchema } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-function getDatabase() {
-  const databaseUrl =
-    process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
-}
-
 export async function GET() {
-  const isAuthed = await getAdminSession();
-  if (!isAuthed) {
+  const sessionContext = await getAdminSession();
+  if (!sessionContext) {
     return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
   }
 
   try {
-    const db = getDatabase();
+    const db = getSharedDb();
     const coupons = await listCoupons(db, 'hh');
 
     return NextResponse.json({ success: true, coupons });
@@ -31,8 +26,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const isAuthed = await getAdminSession();
-  if (!isAuthed) {
+  const sessionContext = await getAdminSession();
+  if (!sessionContext) {
     return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
   }
 
@@ -51,8 +46,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const db = getDatabase();
+    const db = getSharedDb();
     const coupon = await createCoupon(db, 'hh', parseResult.data);
+
+    // Record immutable audit log (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: sessionContext.admin.id,
+      adminEmail: sessionContext.admin.email,
+      action: 'coupon:created',
+      entityType: 'coupon',
+      entityId: coupon.id,
+      details: {
+        code: coupon.code,
+        discountType: coupon.discountType,
+        value: coupon.value
+      },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
+    });
 
     return NextResponse.json({
       success: true,

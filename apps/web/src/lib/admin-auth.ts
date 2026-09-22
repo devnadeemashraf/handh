@@ -1,10 +1,28 @@
 import { cookies } from 'next/headers';
 
-import { verifyAdminSessionToken } from '@hh/db';
+import {
+  type AdminSessionRecord,
+  findAdminSessionByTokenHash,
+  getSharedDbClient,
+  hashAdminSessionToken
+} from '@hh/db';
 
-import { getUserSession } from './auth';
+import type { AdminRole, AdminUser } from '@hh/domain';
+
+import { adminLoginRateLimiter } from './rate-limit';
 
 export const ADMIN_COOKIE_NAME = 'hh_admin_session';
+
+export interface AdminSessionContext {
+  admin: AdminUser;
+  session: AdminSessionRecord;
+}
+
+export function getSharedDb() {
+  const databaseUrl =
+    process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
+  return getSharedDbClient(databaseUrl);
+}
 
 export function getAdminSecrets() {
   const sessionSecret =
@@ -18,75 +36,52 @@ export function getAdminSecrets() {
 
 /**
  * Validates the admin session cookie from Server Components or Route Handlers.
+ * Queries admin_sessions joined with admin_users.
+ * Customer sessions (hh_session) can NEVER satisfy this check (E-COM-015).
  */
-export async function getAdminSession(): Promise<boolean> {
+export async function getAdminSession(): Promise<AdminSessionContext | null> {
   try {
     const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
-    if (sessionCookie) {
-      const { sessionSecret } = getAdminSecrets();
-      if (verifyAdminSessionToken(sessionCookie, sessionSecret)) return true;
-    }
+    const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
+    if (!token) return null;
 
-    // Also recognize authenticated users who hold admin or super_admin role
-    const userSession = await getUserSession();
-    if (
-      userSession &&
-      (userSession.user.role === 'admin' || userSession.user.role === 'super_admin')
-    ) {
-      return true;
-    }
+    const tokenHash = hashAdminSessionToken(token);
+    const db = getSharedDb();
+    const result = await findAdminSessionByTokenHash(db, tokenHash);
+    if (!result) return null;
 
-    return false;
+    return result;
   } catch {
-    return false;
+    return null;
   }
 }
 
 /**
- * Memory-based sliding-window rate limiter for admin authentication attempts.
- * Max 5 failed attempts per 15 minutes per IP.
+ * Asserts admin authentication and optional role-level authorization.
  */
-interface RateLimitRecord {
-  failures: number;
-  lockedUntil: number;
+export async function requireAdmin(requiredRole?: AdminRole): Promise<AdminSessionContext> {
+  const sessionContext = await getAdminSession();
+  if (!sessionContext) {
+    throw new Error('Unauthorized: Admin authentication required.');
+  }
+
+  if (requiredRole === 'super_admin' && sessionContext.admin.role !== 'super_admin') {
+    throw new Error('Forbidden: Super Administrator privileges required.');
+  }
+
+  return sessionContext;
 }
 
-const rateLimitStore = new Map<string, RateLimitRecord>();
-
-export function checkAdminRateLimit(ip: string): { allowed: boolean; retryAfterSeconds?: number } {
-  const now = Date.now();
-  const record = rateLimitStore.get(ip);
-
-  if (!record) return { allowed: true };
-
-  if (record.lockedUntil > now) {
-    const retryAfterSeconds = Math.ceil((record.lockedUntil - now) / 1000);
+/**
+ * Redis sliding-window rate limit checker for admin login attempts (E-COM-017).
+ */
+export async function checkAdminLoginRateLimit(
+  ip: string
+): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
+  const result = await adminLoginRateLimiter.limit(ip);
+  if (!result.success) {
+    const retryAfterSeconds = Math.max(1, result.reset - Math.floor(Date.now() / 1000));
     return { allowed: false, retryAfterSeconds };
   }
-
-  // Lock expired
-  if (record.lockedUntil > 0 && record.lockedUntil <= now) {
-    rateLimitStore.delete(ip);
-    return { allowed: true };
-  }
-
   return { allowed: true };
-}
-
-export function recordAdminAuthFailure(ip: string): void {
-  const now = Date.now();
-  const record = rateLimitStore.get(ip) ?? { failures: 0, lockedUntil: 0 };
-  record.failures += 1;
-
-  if (record.failures >= 5) {
-    // Lock out for 15 minutes
-    record.lockedUntil = now + 15 * 60 * 1000;
-  }
-
-  rateLimitStore.set(ip, record);
-}
-
-export function resetAdminAuthFailures(ip: string): void {
-  rateLimitStore.delete(ip);
 }

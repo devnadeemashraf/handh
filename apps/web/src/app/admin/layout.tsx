@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getAdminSecrets, getAdminSession } from '@/lib/admin-auth';
+import { getAdminSession } from '@/lib/admin-auth';
 
 import type { ReactNode } from 'react';
 
@@ -9,19 +9,18 @@ import AdminHeader from './AdminHeader';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const isAuthed = await getAdminSession();
+  const session = await getAdminSession();
   const headerList = await headers();
   const pathname = headerList.get('x-admin-pathname') ?? '';
 
-  // 1. If on login page, wrap in background/foreground container
+  // 1. If on login page, wrap in clean auth background container
   if (pathname === '/admin/login') {
     return <div className="min-h-screen bg-background text-foreground">{children}</div>;
   }
 
-  // 2. If not authenticated, redirect to login page with access key
-  if (!isAuthed) {
-    const { accessKey } = getAdminSecrets();
-    redirect(`/admin/login?key=${encodeURIComponent(accessKey)}`);
+  // 2. If not authenticated with a valid admin session, redirect cleanly to login
+  if (!session) {
+    redirect('/admin/login');
   }
 
   // 3. Fully authenticated admin portal layout

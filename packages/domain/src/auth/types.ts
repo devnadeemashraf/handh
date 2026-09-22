@@ -7,6 +7,9 @@ import type { CurrencyCode } from '../money';
 export const USER_ROLES = ['customer', 'admin', 'super_admin'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
+export const ADMIN_ROLES = ['admin', 'super_admin'] as const;
+export type AdminRole = (typeof ADMIN_ROLES)[number];
+
 export const ALL_PERMISSIONS = [
   // Customer permissions
   'catalog:browse',
@@ -82,6 +85,51 @@ export interface User {
   lastLoginAt?: string | null | undefined;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AdminUser {
+  id: string;
+  storeId: string;
+  email: string;
+  name: string;
+  role: AdminRole;
+  isActive: boolean;
+  failedLoginAttempts: number;
+  lockedUntil?: string | null | undefined;
+  lastLoginAt?: string | null | undefined;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSession {
+  id: string;
+  adminId: string;
+  ipAddress?: string | null | undefined;
+  userAgent?: string | null | undefined;
+  expiresAt: string;
+  createdAt: string;
+}
+
+export interface AdminAuditLogEntry {
+  id: string;
+  adminId?: string | null | undefined;
+  adminEmail: string;
+  action: string;
+  entityType: string;
+  entityId?: string | null | undefined;
+  details: Record<string, unknown>;
+  ipAddress?: string | null | undefined;
+  userAgent?: string | null | undefined;
+  createdAt: string;
+}
+
+export interface OAuthUserProfile {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl?: string | null | undefined;
+  emailVerified: boolean;
+  hostedDomain?: string | null | undefined;
 }
 
 export interface UserAddress {
@@ -211,3 +259,9 @@ export const UpdateProfileSchema = z.object({
   whatsappOptIn: z.boolean().optional()
 });
 export type UpdateProfileInput = z.infer<typeof UpdateProfileSchema>;
+
+export const AdminLoginSchema = z.object({
+  email: z.string().trim().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters')
+});
+export type AdminLoginInput = z.infer<typeof AdminLoginSchema>;

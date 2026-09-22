@@ -1,21 +1,16 @@
 import { NextResponse } from 'next/server';
-import { getAdminSession } from '@/lib/admin-auth';
+import { getAdminSession, getSharedDb } from '@/lib/admin-auth';
+import { getClientIp } from '@/lib/client-ip';
 
-import { adjustStock, createDbClient } from '@hh/db';
+import { adjustStock, recordAdminAuditLog } from '@hh/db';
 import { StockAdjustmentSchema } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-function getDatabase() {
-  const databaseUrl =
-    process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
-}
-
 export async function POST(request: Request) {
-  const isAuthed = await getAdminSession();
-  if (!isAuthed) {
+  const sessionContext = await getAdminSession();
+  if (!sessionContext) {
     return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
   }
 
@@ -34,8 +29,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const db = getDatabase();
+    const db = getSharedDb();
     const result = await adjustStock(db, parseResult.data);
+
+    // Record immutable audit log (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: sessionContext.admin.id,
+      adminEmail: sessionContext.admin.email,
+      action: 'inventory:stock_adjusted',
+      entityType: 'inventory_level',
+      entityId: parseResult.data.variantId,
+      details: { delta: parseResult.data.delta, reason: parseResult.data.reason },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
+    });
 
     return NextResponse.json({
       success: true,

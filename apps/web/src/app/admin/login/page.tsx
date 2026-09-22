@@ -6,14 +6,14 @@ import AdminLoginForm from './AdminLoginForm';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminLoginPage(props: { searchParams: Promise<{ key?: string }> }) {
-  const isAuthed = await getAdminSession();
-  if (isAuthed) {
+export default async function AdminLoginPage(props: { searchParams: Promise<{ error?: string }> }) {
+  const session = await getAdminSession();
+  if (session) {
     redirect('/admin/orders');
   }
 
   const searchParams = await props.searchParams;
-  const entryKey = searchParams.key ?? '';
+  const initialError = searchParams.error ?? null;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -26,12 +26,12 @@ export default async function AdminLoginPage(props: { searchParams: Promise<{ ke
             Workshop Operations
           </CardTitle>
           <CardDescription className="text-xs text-muted-foreground mt-1">
-            Authorized personnel portal
+            Enterprise Management &amp; Fulfillment Portal
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <AdminLoginForm initialKey={entryKey} />
+          <AdminLoginForm initialError={initialError} />
         </CardContent>
       </Card>
     </div>

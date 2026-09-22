@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 
-import { createDbClient, findSessionByTokenHash, hashSessionToken } from '@hh/db';
+import { findSessionByTokenHash, getSharedDbClient, hashSessionToken } from '@hh/db';
 import { hasPermission } from '@hh/domain';
 
 import type { UserSessionRecord } from '@hh/db';
@@ -11,7 +11,7 @@ export const USER_SESSION_COOKIE = 'hh_session';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function getUserSession(): Promise<{ user: User; session: UserSessionRecord } | null> {

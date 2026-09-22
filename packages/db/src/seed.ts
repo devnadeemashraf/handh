@@ -5,6 +5,7 @@ import { DEFAULT_STOREFRONT_CONFIG, defaultInvoiceTemplate, flattenTaxonomyTree 
 import { createDbClient } from './index';
 import { createProductWithVariants } from './repositories';
 import {
+  adminUsers,
   categories,
   coupons,
   familyMembers,
@@ -20,6 +21,7 @@ import {
   users,
   wishlistItems
 } from './schema';
+import { hashPassword } from './services/admin-auth.service';
 
 async function seed(): Promise<void> {
   const databaseUrl =
@@ -872,6 +874,20 @@ async function seed(): Promise<void> {
   }
 
   // 7. Seed Initial Super Admin & Sample Customer
+  const adminPasswordHash = await hashPassword('hh_admin_master_password_2026');
+  await db
+    .insert(adminUsers)
+    .values({
+      storeId: store.id,
+      email: 'admin@handh.in',
+      name: 'H&H Super Admin',
+      passwordHash: adminPasswordHash,
+      role: 'super_admin',
+      isActive: true,
+      failedLoginAttempts: 0
+    })
+    .onConflictDoNothing();
+
   await db
     .insert(users)
     .values({

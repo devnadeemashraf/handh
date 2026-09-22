@@ -1,30 +1,23 @@
 import { NextResponse } from 'next/server';
 
-import { createDbClient, updateUserRole } from '@hh/db';
+import { recordAdminAuditLog, updateUserRole } from '@hh/db';
 import { USER_ROLES, type UserRole } from '@hh/domain';
 
-import { getAdminSession } from '../../../../../../lib/admin-auth';
-import { getUserSession } from '../../../../../../lib/auth';
+import { getAdminSession, getSharedDb } from '../../../../../../lib/admin-auth';
+import { getClientIp } from '../../../../../../lib/client-ip';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-function getDatabase() {
-  const databaseUrl =
-    process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
-}
-
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
-    const isAuthed = await getAdminSession();
-    if (!isAuthed) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const sessionContext = await getAdminSession();
+    if (!sessionContext) {
+      return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
     }
 
-    // Role modification is strictly restricted to super_admin
-    const userSession = await getUserSession();
-    if (userSession && userSession.user.role !== 'super_admin') {
+    // Role modification is strictly restricted to super_admin (fail-closed check - E-COM-074)
+    if (sessionContext.admin.role !== 'super_admin') {
       return NextResponse.json(
         { success: false, error: 'Only super administrators can modify user roles.' },
         { status: 403 }
@@ -32,6 +25,15 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
     }
 
     const { id: targetUserId } = await props.params;
+
+    // Block self-role modification to prevent privilege escalation or accidental lockout
+    if (sessionContext.admin.id === targetUserId) {
+      return NextResponse.json(
+        { success: false, error: 'Self-modification of administrative roles is forbidden.' },
+        { status: 400 }
+      );
+    }
+
     const json = await request.json();
     const role = json.role as UserRole;
 
@@ -42,8 +44,20 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       );
     }
 
-    const db = getDatabase();
+    const db = getSharedDb();
     const updated = await updateUserRole(db, targetUserId, role);
+
+    // Record 100% auditable record (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: sessionContext.admin.id,
+      adminEmail: sessionContext.admin.email,
+      action: 'user:role_updated',
+      entityType: 'user',
+      entityId: targetUserId,
+      details: { newRole: role },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
+    });
 
     return NextResponse.json({ success: true, user: updated });
   } catch (err: unknown) {

@@ -1,24 +1,19 @@
 import { NextResponse } from 'next/server';
 
-import { createDbClient, transitionOrderStatus } from '@hh/db';
+import { recordAdminAuditLog, transitionOrderStatus } from '@hh/db';
 
 import type { OrderStatus } from '@hh/domain';
 
-import { getAdminSession } from '../../../../../../lib/admin-auth';
+import { getAdminSession, getSharedDb } from '../../../../../../lib/admin-auth';
+import { getClientIp } from '../../../../../../lib/client-ip';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-function getDatabase() {
-  const databaseUrl =
-    process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
-}
-
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const isAuthed = await getAdminSession();
-  if (!isAuthed) {
+  const sessionContext = await getAdminSession();
+  if (!sessionContext) {
     return NextResponse.json({ success: false, error: 'Unauthorized.' }, { status: 401 });
   }
 
@@ -33,8 +28,20 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
       );
     }
 
-    const db = getDatabase();
+    const db = getSharedDb();
     const updatedOrder = await transitionOrderStatus(db, params.id, status as OrderStatus);
+
+    // Audit logging for state transitions (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: sessionContext.admin.id,
+      adminEmail: sessionContext.admin.email,
+      action: 'order:status_updated',
+      entityType: 'order',
+      entityId: params.id,
+      details: { newStatus: status },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
+    });
 
     return NextResponse.json({ success: true, order: updatedOrder });
   } catch (err: unknown) {

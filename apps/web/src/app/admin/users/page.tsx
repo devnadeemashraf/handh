@@ -1,30 +1,23 @@
 import { redirect } from 'next/navigation';
 
-import { createDbClient, listUsers } from '@hh/db';
+import { listUsers } from '@hh/db';
 
-import { getAdminSession } from '../../../lib/admin-auth';
-import { getUserSession } from '../../../lib/auth';
+import { getAdminSession, getSharedDb } from '../../../lib/admin-auth';
 import UsersDashboard from './UsersDashboard';
 
 export const dynamic = 'force-dynamic';
 
-function getDatabase() {
-  const databaseUrl =
-    process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
-}
-
 export default async function AdminUsersPage() {
-  const isAuthed = await getAdminSession();
-  if (!isAuthed) {
+  const sessionContext = await getAdminSession();
+  if (!sessionContext) {
     redirect('/admin/login');
   }
 
-  const db = getDatabase();
-  const [users, session] = await Promise.all([listUsers(db, 'hh'), getUserSession()]);
+  const db = getSharedDb();
+  const users = await listUsers(db, 'hh');
 
-  const currentUserRole = session?.user.role ?? 'admin';
-  const currentUserId = session?.user.id;
+  const currentUserRole = sessionContext.admin.role;
+  const currentUserId = sessionContext.admin.id;
 
   return (
     <UsersDashboard
