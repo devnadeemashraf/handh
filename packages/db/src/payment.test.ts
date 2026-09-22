@@ -1,5 +1,8 @@
+import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import { beforeAll, describe, expect, it } from 'vitest';
+
+import { ValidationError } from '@hh/domain';
 
 import { createDbClient } from './index';
 import {
@@ -238,5 +241,152 @@ describe('Payment Repository Integration', () => {
     expect(result2.processed).toBe(true);
     expect(result2.duplicate).toBe(true);
     expect(processCounter).toBe(1); // Handler was NOT executed a second time!
+  });
+
+  it('rejects payment capture when captured amount does not match order total (E-COM-053)', async () => {
+    const orderResult = await createPendingCheckoutOrder(db, {
+      storeId,
+      items: [{ variantId, quantity: 1 }],
+      shippingAddress: {
+        fullName: 'Zainab Ahmed',
+        phone: '9876543210',
+        email: 'zainab@example.com',
+        line1: '14 Jubilee Hills',
+        city: 'Hyderabad',
+        state: 'Telangana',
+        postalCode: '500033',
+        country: 'IN'
+      },
+      idempotencyKey: randomUUID()
+    });
+
+    const providerOrderId = `order_tamper_amt_${Date.now()}`;
+    await createPaymentAttempt(db, {
+      orderId: orderResult.orderId,
+      providerOrderId,
+      amountMinor: orderResult.totalMinor,
+      currency: 'INR'
+    });
+
+    // Attacker captured ₹1 (100 minor) instead of full order total (₹1299.00 / 129900 minor)
+    await expect(
+      confirmPaymentAndCaptureOrder(db, {
+        orderId: orderResult.orderId,
+        providerOrderId,
+        providerPaymentId: `pay_tamper_${Date.now()}`,
+        providerSignature: 'valid_mock_signature',
+        amountMinor: 100 // Tampered amount
+      })
+    ).rejects.toThrow(ValidationError);
+
+    // Verify order was NOT marked as paid
+    const [orderRecord] = await db.select().from(orders).where(eq(orders.id, orderResult.orderId));
+    expect(orderRecord?.status).toBe('pending_payment');
+    expect(orderRecord?.paymentStatus).toBe('unpaid');
+
+    // Verify payment attempt was marked failed with AMOUNT_MISMATCH
+    const attempt = await findPaymentAttemptByProviderOrderId(db, providerOrderId);
+    expect(attempt?.status).toBe('failed');
+    expect(attempt?.errorCode).toBe('AMOUNT_MISMATCH');
+  });
+
+  it('rejects payment capture when captured currency does not match order currency (E-COM-053)', async () => {
+    const orderResult = await createPendingCheckoutOrder(db, {
+      storeId,
+      items: [{ variantId, quantity: 1 }],
+      shippingAddress: {
+        fullName: 'Kareem Khan',
+        phone: '9876543210',
+        email: 'kareem@example.com',
+        line1: '99 Bandra Kurla Complex',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        postalCode: '400051',
+        country: 'IN'
+      },
+      idempotencyKey: randomUUID()
+    });
+
+    const providerOrderId = `order_tamper_curr_${Date.now()}`;
+    await createPaymentAttempt(db, {
+      orderId: orderResult.orderId,
+      providerOrderId,
+      amountMinor: orderResult.totalMinor,
+      currency: 'INR'
+    });
+
+    // Attacker attempted capture in USD instead of INR
+    await expect(
+      confirmPaymentAndCaptureOrder(db, {
+        orderId: orderResult.orderId,
+        providerOrderId,
+        providerPaymentId: `pay_tamper_${Date.now()}`,
+        providerSignature: 'valid_mock_signature',
+        amountMinor: orderResult.totalMinor,
+        currency: 'USD'
+      })
+    ).rejects.toThrow(ValidationError);
+
+    // Verify order remains pending_payment
+    const [orderRecord] = await db.select().from(orders).where(eq(orders.id, orderResult.orderId));
+    expect(orderRecord?.status).toBe('pending_payment');
+
+    // Verify attempt marked failed with CURRENCY_MISMATCH
+    const attempt = await findPaymentAttemptByProviderOrderId(db, providerOrderId);
+    expect(attempt?.status).toBe('failed');
+    expect(attempt?.errorCode).toBe('CURRENCY_MISMATCH');
+  });
+
+  it('prevents out-of-order payment failure from downgrading an already captured attempt (E-COM-057)', async () => {
+    const orderResult = await createPendingCheckoutOrder(db, {
+      storeId,
+      items: [{ variantId, quantity: 1 }],
+      shippingAddress: {
+        fullName: 'Rehana Begum',
+        phone: '9876543210',
+        email: 'rehana@example.com',
+        line1: '77 Alkapuri',
+        city: 'Hyderabad',
+        state: 'Telangana',
+        postalCode: '500089',
+        country: 'IN'
+      },
+      idempotencyKey: randomUUID()
+    });
+
+    const providerOrderId = `order_race_${Date.now()}`;
+    await createPaymentAttempt(db, {
+      orderId: orderResult.orderId,
+      providerOrderId,
+      amountMinor: orderResult.totalMinor,
+      currency: 'INR'
+    });
+
+    // 1. Payment successfully captured
+    await confirmPaymentAndCaptureOrder(db, {
+      orderId: orderResult.orderId,
+      providerOrderId,
+      providerPaymentId: `pay_race_${Date.now()}`,
+      providerSignature: 'valid_mock_sig',
+      amountMinor: orderResult.totalMinor,
+      currency: 'INR'
+    });
+
+    const capturedAttempt = await findPaymentAttemptByProviderOrderId(db, providerOrderId);
+    expect(capturedAttempt?.status).toBe('captured');
+
+    // 2. Delayed payment.failed webhook arrives out-of-order
+    await recordPaymentFailure(db, {
+      providerOrderId,
+      errorCode: 'GATEWAY_ERROR',
+      errorDescription: 'Delayed failure callback'
+    });
+
+    // Verify status is STILL captured and was not corrupted by the delayed failure
+    const attemptAfterDelayedFailure = await findPaymentAttemptByProviderOrderId(
+      db,
+      providerOrderId
+    );
+    expect(attemptAfterDelayedFailure?.status).toBe('captured');
   });
 });

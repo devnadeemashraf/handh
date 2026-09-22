@@ -12,7 +12,9 @@ export const PaymentVerificationSchema = z.object({
   orderId: z.string().uuid('Valid order ID is required'),
   razorpayOrderId: z.string().min(1, 'Razorpay order ID is required'),
   razorpayPaymentId: z.string().min(1, 'Razorpay payment ID is required'),
-  razorpaySignature: z.string().min(1, 'Razorpay signature is required')
+  razorpaySignature: z.string().min(1, 'Razorpay signature is required'),
+  amountMinor: z.number().int().nonnegative().optional(),
+  currency: z.string().min(3).max(3).optional()
 });
 
 export type PaymentVerificationInput = z.infer<typeof PaymentVerificationSchema>;

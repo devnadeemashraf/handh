@@ -26,6 +26,11 @@ export async function createGatewayOrder(
     keySecret.includes('placeholder') ||
     keyId.startsWith('rzp_test_placeholder');
 
+  const isProduction = process.env['NODE_ENV'] === 'production';
+  if (isProduction && isMockCredentials) {
+    throw new Error('Razorpay production keys are missing or set to placeholder values.');
+  }
+
   if (isMockCredentials) {
     const mockId = `order_mock_${Math.random().toString(36).substring(2, 12).toUpperCase()}`;
     return {
@@ -50,7 +55,8 @@ export async function createGatewayOrder(
       currency,
       receipt,
       notes: notes ?? {}
-    })
+    }),
+    signal: AbortSignal.timeout(8000)
   });
 
   if (!response.ok) {
@@ -88,6 +94,8 @@ export function generateRazorpayPaymentSignature(
   return createHmac('sha256', secret).update(payload).digest('hex');
 }
 
+const HEX_64_REGEX = /^[a-f0-9]{64}$/i;
+
 /**
  * Verifies the authenticity of a Razorpay payment response using constant-time comparison
  * to prevent timing side-channel attacks.
@@ -102,13 +110,18 @@ export function verifyRazorpayPaymentSignature(
     return false;
   }
 
+  const trimmedSig = signature.trim();
+  if (!HEX_64_REGEX.test(trimmedSig)) {
+    return false;
+  }
+
   const expectedSignature = generateRazorpayPaymentSignature(
     razorpayOrderId,
     razorpayPaymentId,
     secret
   );
 
-  const sigBuffer = Buffer.from(signature, 'utf8');
+  const sigBuffer = Buffer.from(trimmedSig, 'utf8');
   const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
 
   if (sigBuffer.length !== expectedBuffer.length) {
@@ -137,9 +150,14 @@ export function verifyRazorpayWebhookSignature(
     return false;
   }
 
+  const trimmedSig = signature.trim();
+  if (!HEX_64_REGEX.test(trimmedSig)) {
+    return false;
+  }
+
   const expectedSignature = generateRazorpayWebhookSignature(rawBody, secret);
 
-  const sigBuffer = Buffer.from(signature, 'utf8');
+  const sigBuffer = Buffer.from(trimmedSig, 'utf8');
   const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
 
   if (sigBuffer.length !== expectedBuffer.length) {

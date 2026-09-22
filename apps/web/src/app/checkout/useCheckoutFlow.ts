@@ -335,14 +335,21 @@ export function useCheckoutFlow({
         const rzp = new window.Razorpay(options);
         rzp.open();
       } else {
-        // Fallback for offline/mock development mode
-        await verifyPayment({
-          orderId: createdOrder.orderId,
-          razorpayOrderId: initData.razorpayOrderId,
-          razorpayPaymentId: `mock_pay_${Date.now()}`,
-          razorpaySignature: 'mock_payment_signature',
-          orderNumber: createdOrder.orderNumber
-        });
+        // Fallback for offline/mock development mode (strictly barred in production)
+        if (process.env.NODE_ENV !== 'production') {
+          await verifyPayment({
+            orderId: createdOrder.orderId,
+            razorpayOrderId: initData.razorpayOrderId,
+            razorpayPaymentId: `mock_pay_${Date.now()}`,
+            razorpaySignature: 'mock_payment_signature',
+            orderNumber: createdOrder.orderNumber
+          });
+        } else {
+          setSubmitError(
+            'Payment gateway could not be loaded. Please disable ad-blockers, refresh the page, and try again.'
+          );
+          setIsProcessingPayment(false);
+        }
       }
     } catch (err) {
       console.error('Payment launch error:', err);

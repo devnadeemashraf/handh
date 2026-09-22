@@ -1,11 +1,12 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, ne, sql } from 'drizzle-orm';
 
 import {
   assertCanTransitionOrder,
   assertCanTransitionPayment,
   type CurrencyCode,
   NotFoundError,
-  PaymentAlreadyProcessedError
+  PaymentAlreadyProcessedError,
+  ValidationError
 } from '@hh/domain';
 
 import {
@@ -36,6 +37,8 @@ export interface ConfirmPaymentParams {
   providerOrderId: string;
   providerPaymentId: string;
   providerSignature: string;
+  amountMinor?: number | undefined;
+  currency?: string | undefined;
 }
 
 export interface RecordPaymentFailureParams {
@@ -84,7 +87,7 @@ export async function createPaymentAttempt(
  * Finds a payment attempt by the payment provider's order ID (e.g. Razorpay order_id).
  */
 export async function findPaymentAttemptByProviderOrderId(
-  db: DatabaseClient,
+  db: DatabaseClient | DbTransaction,
   providerOrderId: string
 ): Promise<PaymentAttempt | null> {
   const attempts = await db
@@ -100,7 +103,7 @@ export async function findPaymentAttemptByProviderOrderId(
  * Finds all payment attempts for a given internal order ID.
  */
 export async function findPaymentAttemptsByOrderId(
-  db: DatabaseClient,
+  db: DatabaseClient | DbTransaction,
   orderId: string
 ): Promise<PaymentAttempt[]> {
   return await db
@@ -113,28 +116,52 @@ export async function findPaymentAttemptsByOrderId(
 /**
  * Confirms payment verification atomically:
  * 1. Checks order and asserts valid state transitions.
- * 2. Marks order as 'paid' with paymentStatus 'captured'.
- * 3. Marks payment attempt as 'captured' with signature and payment ID.
- * 4. Consumes active inventory reservations and decrements stock (reserved & on_hand).
+ * 2. Validates amount and currency integrity against the authoritative order (E-COM-053).
+ * 3. Marks order as 'paid' with paymentStatus 'captured'.
+ * 4. Marks payment attempt as 'captured' with signature and payment ID.
+ * 5. Consumes active inventory reservations and decrements stock (reserved & on_hand).
  */
 export async function confirmPaymentAndCaptureOrder(
-  db: DatabaseClient,
+  db: DatabaseClient | DbTransaction,
   params: ConfirmPaymentParams
 ): Promise<{ order: Order; paymentAttempt: PaymentAttempt }> {
   const { orderId, providerOrderId, providerPaymentId, providerSignature } = params;
 
-  return await db.transaction(async (tx) => {
-    // 1. Lock and retrieve order
-    const orderRows = await tx.select().from(orders).where(eq(orders.id, orderId)).for('update');
+  try {
+    return await db.transaction(async (tx) => {
+      // 1. Lock and retrieve order
+      const orderRows = await tx.select().from(orders).where(eq(orders.id, orderId)).for('update');
 
-    const order = orderRows[0];
-    if (!order) {
-      throw new NotFoundError('Order', orderId);
-    }
+      const order = orderRows[0];
+      if (!order) {
+        throw new NotFoundError('Order', orderId);
+      }
 
-    // If order is already paid, handle idempotently
-    if (order.status === 'paid' && order.paymentStatus === 'captured') {
-      const existingAttempt = await tx
+      // If order is already paid, handle idempotently
+      if (order.status === 'paid' && order.paymentStatus === 'captured') {
+        const existingAttempt = await tx
+          .select()
+          .from(paymentAttempts)
+          .where(
+            and(
+              eq(paymentAttempts.orderId, orderId),
+              eq(paymentAttempts.providerOrderId, providerOrderId)
+            )
+          )
+          .limit(1);
+
+        if (existingAttempt[0]?.status === 'captured') {
+          return { order, paymentAttempt: existingAttempt[0] };
+        }
+        throw new PaymentAlreadyProcessedError(providerOrderId);
+      }
+
+      // Verify state transitions
+      assertCanTransitionOrder(order.status, 'paid');
+      assertCanTransitionPayment(order.paymentStatus, 'captured');
+
+      // 2. Lock and retrieve the payment attempt
+      const attemptRows = await tx
         .select()
         .from(paymentAttempts)
         .where(
@@ -143,147 +170,206 @@ export async function confirmPaymentAndCaptureOrder(
             eq(paymentAttempts.providerOrderId, providerOrderId)
           )
         )
-        .limit(1);
+        .for('update');
 
-      if (existingAttempt[0]?.status === 'captured') {
-        return { order, paymentAttempt: existingAttempt[0] };
+      const attempt = attemptRows[0];
+      if (!attempt) {
+        throw new NotFoundError('PaymentAttempt', providerOrderId);
       }
-      throw new PaymentAlreadyProcessedError(providerOrderId);
-    }
 
-    // Verify state transitions
-    assertCanTransitionOrder(order.status, 'paid');
-    assertCanTransitionPayment(order.paymentStatus, 'captured');
+      // 3. Financial Integrity Validation (E-COM-053)
+      // Check initiated attempt amount against authoritative order total
+      if (attempt.amountMinor !== order.totalMinor) {
+        await tx
+          .update(paymentAttempts)
+          .set({
+            status: 'failed',
+            errorCode: 'AMOUNT_MISMATCH',
+            errorDescription: `Initiated attempt amount ${attempt.amountMinor} does not match order total ${order.totalMinor}`,
+            updatedAt: new Date()
+          })
+          .where(eq(paymentAttempts.id, attempt.id));
 
-    // 2. Lock and retrieve the payment attempt
-    const attemptRows = await tx
-      .select()
-      .from(paymentAttempts)
-      .where(
-        and(
-          eq(paymentAttempts.orderId, orderId),
-          eq(paymentAttempts.providerOrderId, providerOrderId)
+        throw new ValidationError(
+          `Payment attempt amount mismatch: expected ₹${(order.totalMinor / 100).toFixed(2)}, but attempt was ₹${(attempt.amountMinor / 100).toFixed(2)}.`,
+          'AMOUNT_MISMATCH'
+        );
+      }
+
+      if (attempt.currency.toUpperCase() !== order.currency.toUpperCase()) {
+        await tx
+          .update(paymentAttempts)
+          .set({
+            status: 'failed',
+            errorCode: 'CURRENCY_MISMATCH',
+            errorDescription: `Initiated attempt currency ${attempt.currency} does not match order currency ${order.currency}`,
+            updatedAt: new Date()
+          })
+          .where(eq(paymentAttempts.id, attempt.id));
+
+        throw new ValidationError(
+          `Payment currency mismatch: expected ${order.currency}, but attempt was ${attempt.currency}.`,
+          'CURRENCY_MISMATCH'
+        );
+      }
+
+      // Check explicitly captured amount if provided by webhook or verification payload
+      if (params.amountMinor !== undefined && params.amountMinor !== order.totalMinor) {
+        await tx
+          .update(paymentAttempts)
+          .set({
+            status: 'failed',
+            errorCode: 'AMOUNT_MISMATCH',
+            errorDescription: `Captured amount ${params.amountMinor} does not match order total ${order.totalMinor}`,
+            updatedAt: new Date()
+          })
+          .where(eq(paymentAttempts.id, attempt.id));
+
+        throw new ValidationError(
+          `Captured payment amount mismatch: expected ₹${(order.totalMinor / 100).toFixed(2)}, but received ₹${(params.amountMinor / 100).toFixed(2)}.`,
+          'AMOUNT_MISMATCH'
+        );
+      }
+
+      if (
+        params.currency !== undefined &&
+        params.currency.toUpperCase() !== order.currency.toUpperCase()
+      ) {
+        await tx
+          .update(paymentAttempts)
+          .set({
+            status: 'failed',
+            errorCode: 'CURRENCY_MISMATCH',
+            errorDescription: `Captured currency ${params.currency} does not match order currency ${order.currency}`,
+            updatedAt: new Date()
+          })
+          .where(eq(paymentAttempts.id, attempt.id));
+
+        throw new ValidationError(
+          `Captured payment currency mismatch: expected ${order.currency}, but received ${params.currency}.`,
+          'CURRENCY_MISMATCH'
+        );
+      }
+
+      const now = new Date();
+
+      // 4. Update the Order to 'paid' and 'captured'
+      const [updatedOrder] = await tx
+        .update(orders)
+        .set({
+          status: 'paid',
+          paymentStatus: 'captured',
+          updatedAt: now
+        })
+        .where(eq(orders.id, orderId))
+        .returning();
+
+      // 5. Update the Payment Attempt to 'captured'
+      const [updatedAttempt] = await tx
+        .update(paymentAttempts)
+        .set({
+          status: 'captured',
+          providerPaymentId,
+          providerSignature,
+          updatedAt: now
+        })
+        .where(eq(paymentAttempts.id, attempt.id))
+        .returning();
+
+      // 6. Consume active inventory reservations and decrement on_hand + reserved
+      const activeReservations = await tx
+        .select()
+        .from(inventoryReservations)
+        .where(
+          and(
+            eq(inventoryReservations.orderId, orderId),
+            eq(inventoryReservations.status, 'active')
+          )
         )
-      )
-      .for('update');
+        .for('update');
 
-    const attempt = attemptRows[0];
-    if (!attempt) {
-      throw new NotFoundError('PaymentAttempt', providerOrderId);
-    }
+      for (const res of activeReservations) {
+        // Mark reservation as consumed
+        await tx
+          .update(inventoryReservations)
+          .set({
+            status: 'consumed',
+            updatedAt: now
+          })
+          .where(eq(inventoryReservations.id, res.id));
 
-    const now = new Date();
+        // Decrement both reserved and on_hand stock
+        await tx
+          .update(inventoryLevels)
+          .set({
+            reserved: sql`${inventoryLevels.reserved} - ${res.quantity}`,
+            onHand: sql`${inventoryLevels.onHand} - ${res.quantity}`,
+            updatedAt: now
+          })
+          .where(eq(inventoryLevels.variantId, res.variantId));
+      }
 
-    // 3. Update the Order to 'paid' and 'captured'
-    const [updatedOrder] = await tx
-      .update(orders)
-      .set({
-        status: 'paid',
-        paymentStatus: 'captured',
-        updatedAt: now
-      })
-      .where(eq(orders.id, orderId))
-      .returning();
+      // 7. Record outbox event for transactional customer & admin notification
+      const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, order.id));
 
-    // 4. Update the Payment Attempt to 'captured'
-    const [updatedAttempt] = await tx
-      .update(paymentAttempts)
-      .set({
-        status: 'captured',
-        providerPaymentId,
-        providerSignature,
-        updatedAt: now
-      })
-      .where(eq(paymentAttempts.id, attempt.id))
-      .returning();
+      const itemsSnapshot = items.map((it) => ({
+        title: it.productNameSnapshot,
+        variantTitle: it.variantNameSnapshot,
+        quantity: it.quantity,
+        unitPriceMinor: it.unitPriceMinor,
+        subtotalMinor: it.totalPriceMinor
+      }));
 
-    // 5. Consume active inventory reservations and decrement on_hand + reserved
-    const activeReservations = await tx
-      .select()
-      .from(inventoryReservations)
-      .where(
-        and(eq(inventoryReservations.orderId, orderId), eq(inventoryReservations.status, 'active'))
-      )
-      .for('update');
+      await tx.insert(outboxEvents).values({
+        eventName: 'order.paid',
+        aggregateType: 'order',
+        aggregateId: order.id,
+        payload: {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          customerEmail: order.customerEmail,
+          customerPhone: order.customerPhone,
+          customerName: order.customerName,
+          totalMinor: order.totalMinor,
+          currency: order.currency,
+          items: itemsSnapshot,
+          providerPaymentId,
+          paidAt: now.toISOString()
+        },
+        status: 'pending'
+      });
 
-    for (const res of activeReservations) {
-      // Mark reservation as consumed
-      await tx
-        .update(inventoryReservations)
-        .set({
-          status: 'consumed',
-          updatedAt: now
-        })
-        .where(eq(inventoryReservations.id, res.id));
-
-      // Decrement both reserved and on_hand stock
-      await tx
-        .update(inventoryLevels)
-        .set({
-          reserved: sql`${inventoryLevels.reserved} - ${res.quantity}`,
-          onHand: sql`${inventoryLevels.onHand} - ${res.quantity}`,
-          updatedAt: now
-        })
-        .where(eq(inventoryLevels.variantId, res.variantId));
-    }
-
-    // 6. Record outbox event for transactional customer & admin notification
-    const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, order.id));
-
-    const itemsSnapshot = items.map((it) => ({
-      title: it.productNameSnapshot,
-      variantTitle: it.variantNameSnapshot,
-      quantity: it.quantity,
-      unitPriceMinor: it.unitPriceMinor,
-      subtotalMinor: it.totalPriceMinor
-    }));
-
-    const shippingAddressSnapshot = {
-      recipientName: order.customerName,
-      line1: order.shippingAddress.line1,
-      line2: order.shippingAddress.line2 ?? null,
-      city: order.shippingAddress.city,
-      state: order.shippingAddress.state,
-      postalCode: order.shippingAddress.postalCode,
-      country: order.shippingAddress.country,
-      phone: order.customerPhone
-    };
-
-    await tx.insert(outboxEvents).values({
-      eventName: 'order.paid',
-      aggregateType: 'order',
-      aggregateId: order.id,
-      payload: {
-        orderId: order.id,
-        storeId: order.storeId,
-        orderNumber: order.orderNumber,
-        customerName: order.customerName,
-        customerEmail: order.customerEmail,
-        customerPhone: order.customerPhone,
-        totalMinor: order.totalMinor,
-        currency: order.currency,
-        itemsSnapshot,
-        shippingAddressSnapshot,
-        userId: order.userId,
-        paymentProvider: attempt.provider,
-        paidAt: now.toISOString()
-      },
-      status: 'pending',
-      scheduledAt: now
+      return {
+        order: updatedOrder!,
+        paymentAttempt: updatedAttempt!
+      };
     });
-
-    return {
-      order: updatedOrder!,
-      paymentAttempt: updatedAttempt!
-    };
-  });
+  } catch (err) {
+    if (
+      err instanceof ValidationError &&
+      (err.details === 'AMOUNT_MISMATCH' || err.details === 'CURRENCY_MISMATCH')
+    ) {
+      const errorCode = String(err.details);
+      await db
+        .update(paymentAttempts)
+        .set({
+          status: 'failed',
+          errorCode,
+          errorDescription: err.message,
+          updatedAt: new Date()
+        })
+        .where(eq(paymentAttempts.providerOrderId, providerOrderId));
+    }
+    throw err;
+  }
 }
 
 /**
  * Records payment failure on a payment attempt.
+ * Protected against out-of-order webhooks downgrading already-captured payments (E-COM-057).
  */
 export async function recordPaymentFailure(
-  db: DatabaseClient,
+  db: DatabaseClient | DbTransaction,
   params: RecordPaymentFailureParams
 ): Promise<PaymentAttempt | null> {
   const { providerOrderId, errorCode, errorDescription } = params;
@@ -303,7 +389,12 @@ export async function recordPaymentFailure(
   const [updated] = await db
     .update(paymentAttempts)
     .set(updateFields)
-    .where(eq(paymentAttempts.providerOrderId, providerOrderId))
+    .where(
+      and(
+        eq(paymentAttempts.providerOrderId, providerOrderId),
+        ne(paymentAttempts.status, 'captured')
+      )
+    )
     .returning();
 
   return updated ?? null;

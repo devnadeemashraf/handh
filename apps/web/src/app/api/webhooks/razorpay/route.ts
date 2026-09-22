@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 import {
   confirmPaymentAndCaptureOrder,
-  createDbClient,
   findPaymentAttemptByProviderOrderId,
+  getSharedDbClient,
   recordAndProcessWebhookEvent,
   recordPaymentFailure,
   verifyRazorpayWebhookSignature
@@ -16,7 +16,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function POST(request: Request) {
@@ -28,11 +28,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing webhook signature header' }, { status: 400 });
     }
 
-    const webhookSecret = process.env['RAZORPAY_WEBHOOK_SECRET'] ?? 'placeholder_webhook_secret';
+    const isProduction = process.env.NODE_ENV === 'production';
+    const enableDevMocks =
+      !isProduction &&
+      (process.env['ENABLE_DEV_MOCKS'] === 'true' || process.env.NODE_ENV === 'test');
 
-    const isMock =
-      webhookSecret.includes('placeholder') &&
-      (signature.startsWith('mock_') || rawBody.includes('mock'));
+    const webhookSecret = process.env['RAZORPAY_WEBHOOK_SECRET'] ?? '';
+    if (isProduction && (!webhookSecret || webhookSecret.includes('placeholder'))) {
+      console.error(
+        'CRITICAL: RAZORPAY_WEBHOOK_SECRET is missing or using placeholder in production!'
+      );
+      return NextResponse.json({ error: 'Webhook gateway configuration error.' }, { status: 500 });
+    }
+
+    const isMock = enableDevMocks && (signature.startsWith('mock_') || rawBody.includes('mock'));
 
     const isSignatureValid =
       isMock || verifyRazorpayWebhookSignature(rawBody, signature, webhookSecret);
@@ -54,27 +63,36 @@ export async function POST(request: Request) {
     const event = parseResult.data;
     const db = getDatabase();
 
-    // Unique event identifier for idempotency
-    const eventId = `${event.account_id}_${event.created_at}_${event.event}`;
+    // Event ID priority: Native Razorpay header -> payment/order entity ID -> fallback composite (E-COM-052)
+    const headerEventId = request.headers.get('x-razorpay-event-id');
+    const paymentEntityId = event.payload.payment?.entity?.id;
+    const orderEntityId = event.payload.order?.entity?.id;
+    const eventId =
+      headerEventId ||
+      (paymentEntityId ? `${paymentEntityId}_${event.event}` : null) ||
+      (orderEntityId ? `${orderEntityId}_${event.event}` : null) ||
+      `${event.account_id}_${event.created_at}_${event.event}`;
 
     const webhookResult = await recordAndProcessWebhookEvent(db, {
       provider: 'razorpay',
       eventId,
       eventType: event.event,
       payload: json as Record<string, unknown>,
-      processFn: async () => {
+      processFn: async (tx) => {
         if (event.event === 'payment.captured' || event.event === 'order.paid') {
           const paymentEntity = event.payload.payment?.entity;
           const providerOrderId = paymentEntity?.order_id ?? event.payload.order?.entity.id;
 
           if (providerOrderId && paymentEntity) {
-            const attempt = await findPaymentAttemptByProviderOrderId(db, providerOrderId);
+            const attempt = await findPaymentAttemptByProviderOrderId(tx, providerOrderId);
             if (attempt && attempt.status !== 'captured') {
-              await confirmPaymentAndCaptureOrder(db, {
+              await confirmPaymentAndCaptureOrder(tx, {
                 orderId: attempt.orderId,
                 providerOrderId,
                 providerPaymentId: paymentEntity.id,
-                providerSignature: signature
+                providerSignature: signature,
+                amountMinor: paymentEntity.amount,
+                currency: paymentEntity.currency
               });
             }
           }
@@ -83,7 +101,7 @@ export async function POST(request: Request) {
           const providerOrderId = paymentEntity?.order_id;
 
           if (providerOrderId && paymentEntity) {
-            await recordPaymentFailure(db, {
+            await recordPaymentFailure(tx, {
               providerOrderId,
               errorCode: paymentEntity.error_code ?? 'PAYMENT_FAILED',
               errorDescription: paymentEntity.error_description ?? 'Payment failed'

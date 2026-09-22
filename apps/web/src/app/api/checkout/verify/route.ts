@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import {
   confirmPaymentAndCaptureOrder,
-  createDbClient,
+  getSharedDbClient,
   recordPaymentFailure,
   verifyRazorpayPaymentSignature
 } from '@hh/db';
@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function POST(request: Request) {
@@ -36,9 +36,22 @@ export async function POST(request: Request) {
     const { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature } = parseResult.data;
     const db = getDatabase();
 
-    const keySecret = process.env['RAZORPAY_KEY_SECRET'] ?? 'placeholder_secret_never_use_in_prod';
+    const isProduction = process.env.NODE_ENV === 'production';
+    const enableDevMocks =
+      !isProduction &&
+      (process.env['ENABLE_DEV_MOCKS'] === 'true' || process.env.NODE_ENV === 'test');
+
+    const keySecret = process.env['RAZORPAY_KEY_SECRET'] ?? '';
+    if (isProduction && (!keySecret || keySecret.includes('placeholder'))) {
+      console.error('CRITICAL: RAZORPAY_KEY_SECRET is missing or using placeholder in production!');
+      return NextResponse.json(
+        { success: false, error: 'Payment gateway configuration error.' },
+        { status: 500 }
+      );
+    }
+
     const isMock =
-      keySecret.includes('placeholder') &&
+      enableDevMocks &&
       (razorpaySignature.startsWith('mock_') || razorpayOrderId.startsWith('order_mock_'));
 
     const isSignatureValid =
@@ -66,12 +79,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // Capture payment and mark order paid atomically
+    // Capture payment and mark order paid atomically with amount and currency checks (E-COM-053)
     const result = await confirmPaymentAndCaptureOrder(db, {
       orderId,
       providerOrderId: razorpayOrderId,
       providerPaymentId: razorpayPaymentId,
-      providerSignature: razorpaySignature
+      providerSignature: razorpaySignature,
+      amountMinor: parseResult.data.amountMinor,
+      currency: parseResult.data.currency
     });
 
     return NextResponse.json({
