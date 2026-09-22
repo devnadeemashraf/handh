@@ -1,0 +1,2 @@
+ALTER TABLE "inventory_reservations" ADD CONSTRAINT "inventory_reservations_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "idx_inventory_reservations_order_status" ON "inventory_reservations" USING btree ("order_id","status");

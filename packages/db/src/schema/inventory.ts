@@ -3,6 +3,7 @@ import { check, index, integer, pgTable, timestamp, uuid, varchar } from 'drizzl
 
 import type { InventoryAuditReason, ReservationStatus } from '@hh/domain';
 
+import { orders } from './orders';
 import { productVariants } from './products';
 export type { InventoryAuditReason, ReservationStatus };
 
@@ -30,7 +31,9 @@ export const inventoryReservations = pgTable(
   'inventory_reservations',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    orderId: uuid('order_id').notNull(),
+    orderId: uuid('order_id')
+      .notNull()
+      .references(() => orders.id, { onDelete: 'cascade' }),
     variantId: uuid('variant_id')
       .notNull()
       .references(() => productVariants.id, { onDelete: 'restrict' }),
@@ -45,7 +48,8 @@ export const inventoryReservations = pgTable(
   },
   (table) => [
     check('chk_reservation_quantity_positive', sql`${table.quantity} > 0`),
-    index('idx_inventory_reservations_cleanup').on(table.status, table.expiresAt)
+    index('idx_inventory_reservations_cleanup').on(table.status, table.expiresAt),
+    index('idx_inventory_reservations_order_status').on(table.orderId, table.status)
   ]
 );
 
@@ -77,6 +81,10 @@ export const inventoryReservationsRelations = relations(inventoryReservations, (
   variant: one(productVariants, {
     fields: [inventoryReservations.variantId],
     references: [productVariants.id]
+  }),
+  order: one(orders, {
+    fields: [inventoryReservations.orderId],
+    references: [orders.id]
   })
 }));
 

@@ -1,12 +1,13 @@
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, lte, sql } from 'drizzle-orm';
 
-import type {
-  AdminInventoryItem,
-  AdminInventorySummary,
-  InventoryAuditLogItem,
-  StockAdjustmentInput,
-  UpdateProductStatusInput,
-  UpdateVariantPriceInput
+import {
+  type AdminInventoryItem,
+  type AdminInventorySummary,
+  assertCanTransitionReservation,
+  type InventoryAuditLogItem,
+  type StockAdjustmentInput,
+  type UpdateProductStatusInput,
+  type UpdateVariantPriceInput
 } from '@hh/domain';
 
 import {
@@ -14,6 +15,9 @@ import {
   inventoryAuditLogs,
   type InventoryLevel,
   inventoryLevels,
+  inventoryReservations,
+  orders,
+  outboxEvents,
   productImages,
   products,
   type ProductStatus,
@@ -272,5 +276,141 @@ export async function listInventoryAuditLogs(
       item.note = r.note;
     }
     return item;
+  });
+}
+
+export interface SweepExpiredReservationsResult {
+  releasedReservationsCount: number;
+  affectedVariantsCount: number;
+  cancelledOrdersCount: number;
+  orderIds: string[];
+}
+
+/**
+ * Atomically releases all active inventory reservations that have passed their expiresAt timestamp (E-COM-043, E-COM-117).
+ * 1. Finds and locks all active reservations where expiresAt <= now.
+ * 2. Validates reservation transition using assertCanTransitionReservation('active', 'released') (E-COM-051).
+ * 3. Updates reservation status to 'released'.
+ * 4. Decrements inventory_levels.reserved for affected variants using GREATEST(0, reserved - quantity).
+ * 5. Transitions stale pending_payment orders associated with expired reservations to 'cancelled'.
+ * 6. Emits order.cancelled outbox event for administrative and system visibility.
+ */
+export async function sweepExpiredReservations(
+  db: DatabaseClient,
+  asOf: Date = new Date()
+): Promise<SweepExpiredReservationsResult> {
+  return await db.transaction(async (tx) => {
+    // 1. Lock and find all expired active reservations
+    const expiredReservations = await tx
+      .select()
+      .from(inventoryReservations)
+      .where(
+        and(eq(inventoryReservations.status, 'active'), lte(inventoryReservations.expiresAt, asOf))
+      )
+      .for('update');
+
+    if (expiredReservations.length === 0) {
+      return {
+        releasedReservationsCount: 0,
+        affectedVariantsCount: 0,
+        cancelledOrdersCount: 0,
+        orderIds: []
+      };
+    }
+
+    const now = new Date();
+    const variantDeltas = new Map<string, number>();
+    const affectedOrderIds = new Set<string>();
+
+    for (const res of expiredReservations) {
+      // Validate domain state transition (E-COM-051)
+      assertCanTransitionReservation(res.status, 'released');
+
+      // Update reservation status to 'released'
+      await tx
+        .update(inventoryReservations)
+        .set({
+          status: 'released',
+          updatedAt: now
+        })
+        .where(eq(inventoryReservations.id, res.id));
+
+      const currentDelta = variantDeltas.get(res.variantId) ?? 0;
+      variantDeltas.set(res.variantId, currentDelta + res.quantity);
+      affectedOrderIds.add(res.orderId);
+    }
+
+    // 2. Decrement reserved stock on inventory levels
+    for (const [variantId, deltaQuantity] of variantDeltas.entries()) {
+      await tx
+        .update(inventoryLevels)
+        .set({
+          reserved: sql`GREATEST(0, ${inventoryLevels.reserved} - ${deltaQuantity})`,
+          updatedAt: now
+        })
+        .where(eq(inventoryLevels.variantId, variantId));
+    }
+
+    // 3. For any pending_payment orders whose reservations expired, transition to cancelled
+    let cancelledOrdersCount = 0;
+    const cancelledOrderIds: string[] = [];
+
+    for (const orderId of affectedOrderIds) {
+      // Check if order still has any active reservations
+      const remainingActive = await tx
+        .select()
+        .from(inventoryReservations)
+        .where(
+          and(
+            eq(inventoryReservations.orderId, orderId),
+            eq(inventoryReservations.status, 'active')
+          )
+        )
+        .limit(1);
+
+      if (remainingActive.length === 0) {
+        // All reservations for this order are released; cancel if pending
+        const [updatedOrder] = await tx
+          .update(orders)
+          .set({
+            status: 'cancelled',
+            updatedAt: now
+          })
+          .where(
+            and(
+              eq(orders.id, orderId),
+              eq(orders.status, 'pending_payment'),
+              eq(orders.paymentStatus, 'unpaid')
+            )
+          )
+          .returning();
+
+        if (updatedOrder) {
+          cancelledOrdersCount++;
+          cancelledOrderIds.push(updatedOrder.id);
+
+          // Record outbox event for cancelled order
+          await tx.insert(outboxEvents).values({
+            eventName: 'order.cancelled',
+            aggregateType: 'order',
+            aggregateId: updatedOrder.id,
+            payload: {
+              orderId: updatedOrder.id,
+              orderNumber: updatedOrder.orderNumber,
+              reason: 'reservation_expired',
+              cancelledAt: now.toISOString()
+            },
+            status: 'pending'
+          });
+        }
+      }
+    }
+
+    return {
+      releasedReservationsCount: expiredReservations.length,
+      affectedVariantsCount: variantDeltas.size,
+      cancelledOrdersCount,
+      orderIds: cancelledOrderIds
+    };
   });
 }

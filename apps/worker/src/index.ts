@@ -5,6 +5,7 @@ import { startOutboxPoller } from './poller/outbox-poller';
 import { createNotificationQueues, createRedisConnection } from './queues';
 import { EmailService } from './services/email.service';
 import { WhatsAppService } from './services/whatsapp.service';
+import { startInventorySweeper } from './sweeper/inventory-sweeper';
 import { createEmailWorker } from './workers/email.worker';
 import { createWhatsAppWorker } from './workers/whatsapp.worker';
 
@@ -44,10 +45,13 @@ async function main(): Promise<void> {
     appUrl: env.APP_URL
   });
 
+  // 7. Start Inventory Hold Sweeper (E-COM-043, E-COM-117)
+  const stopSweeper = startInventorySweeper(db, 60000);
+
   console.log(
     JSON.stringify({
       level: 'info',
-      message: 'H&H background worker initialized successfully. Poller & workers active.'
+      message: 'H&H background worker initialized successfully. Poller, sweeper & workers active.'
     })
   );
 
@@ -64,6 +68,7 @@ async function main(): Promise<void> {
     );
 
     stopPoller();
+    stopSweeper();
 
     await Promise.allSettled([
       emailWorker.close(),

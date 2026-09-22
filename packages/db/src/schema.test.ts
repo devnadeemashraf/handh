@@ -56,6 +56,7 @@ describe('Database Schema Definitions & Inferred Types', () => {
       expect(inventoryLevels.onHand).toBeDefined();
       expect(inventoryLevels.reserved).toBeDefined();
       expect(inventoryReservations.expiresAt).toBeDefined();
+      expect(inventoryReservations.orderId).toBeDefined();
     });
 
     it('defines orders and order items with decoupled state machine columns', () => {
