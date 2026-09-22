@@ -9,11 +9,12 @@ import {
 } from './types';
 
 describe('Checkout Domain Validation', () => {
-  it('validates 10-digit Indian mobile numbers', () => {
-    expect(IndianPhoneSchema.parse('9876543210')).toBe('9876543210');
-    expect(IndianPhoneSchema.parse('8123456789')).toBe('8123456789');
-    expect(IndianPhoneSchema.parse('7000000000')).toBe('7000000000');
-    expect(IndianPhoneSchema.parse('6234567890')).toBe('6234567890');
+  it('validates 10-digit Indian mobile numbers and normalizes to canonical +91 format', () => {
+    expect(IndianPhoneSchema.parse('9876543210')).toBe('+919876543210');
+    expect(IndianPhoneSchema.parse('8123456789')).toBe('+918123456789');
+    expect(IndianPhoneSchema.parse('7000000000')).toBe('+917000000000');
+    expect(IndianPhoneSchema.parse('6234567890')).toBe('+916234567890');
+    expect(IndianPhoneSchema.parse('+919876543210')).toBe('+919876543210');
 
     // Invalid phones
     expect(() => IndianPhoneSchema.parse('1234567890')).toThrow();
@@ -32,8 +33,8 @@ describe('Checkout Domain Validation', () => {
     expect(() => IndianPostalCodeSchema.parse('11000A')).toThrow();
   });
 
-  it('validates complete Indian shipping address', () => {
-    const validAddress = {
+  it('validates complete Indian shipping address with both raw 10-digit and +91 phone numbers', () => {
+    const rawPhoneAddress = {
       fullName: 'Fatima Khan',
       phone: '9876543210',
       email: 'fatima@example.com',
@@ -45,7 +46,20 @@ describe('Checkout Domain Validation', () => {
       country: 'IN' as const
     };
 
-    expect(ShippingAddressSchema.parse(validAddress)).toEqual(validAddress);
+    expect(ShippingAddressSchema.parse(rawPhoneAddress)).toEqual({
+      ...rawPhoneAddress,
+      phone: '+919876543210'
+    });
+
+    const prefilledPhoneAddress = {
+      ...rawPhoneAddress,
+      phone: '+919876543210'
+    };
+
+    expect(ShippingAddressSchema.parse(prefilledPhoneAddress)).toEqual({
+      ...prefilledPhoneAddress,
+      phone: '+919876543210'
+    });
   });
 
   it('validates full checkout submission payload', () => {

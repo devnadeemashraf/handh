@@ -1,13 +1,23 @@
 import { z } from 'zod';
 
 import { CartItemInputSchema } from '../cart/types';
+import {
+  extractIndianPhoneDigits,
+  formatIndianPhoneDisplay,
+  IndianPhoneSchema,
+  isValidIndianPhone,
+  normalizeIndianPhone
+} from '../phone';
 
 import type { CurrencyCode } from '../money';
 
-export const IndianPhoneSchema = z
-  .string()
-  .trim()
-  .regex(/^[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number');
+export {
+  extractIndianPhoneDigits,
+  formatIndianPhoneDisplay,
+  IndianPhoneSchema,
+  isValidIndianPhone,
+  normalizeIndianPhone
+};
 
 export const IndianPostalCodeSchema = z
   .string()

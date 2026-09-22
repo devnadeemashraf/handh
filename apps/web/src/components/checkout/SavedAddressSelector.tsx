@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
+import { formatIndianPhoneDisplay } from '@hh/domain';
+
 import type { UserAddress } from '@hh/domain';
 
 export interface SavedAddressSelectorProps {
@@ -84,7 +86,9 @@ export function SavedAddressSelector({
                   {addr.postalCode}
                 </p>
 
-                <p className="text-xs font-medium text-foreground mt-2">Phone: +91 {addr.phone}</p>
+                <p className="text-xs font-medium text-foreground mt-2">
+                  Phone: {formatIndianPhoneDisplay(addr.phone)}
+                </p>
 
                 {isSelected && (
                   <div className="absolute bottom-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">

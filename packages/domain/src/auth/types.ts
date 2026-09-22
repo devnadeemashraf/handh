@@ -50,25 +50,23 @@ export const SESSION_CONFIG = {
   tokenBytes: 32
 } as const;
 
-export function normalizeIndianPhone(input: string): string {
-  const cleaned = input.trim();
-  const digits = cleaned.replace(/\D/g, '');
-  if (digits.length === 10 && /^[6-9]/.test(digits)) {
-    return `+91${digits}`;
-  }
-  if (digits.length === 12 && digits.startsWith('91') && /^91[6-9]/.test(digits)) {
-    return `+${digits}`;
-  }
-  return cleaned;
-}
+import {
+  AuthPhoneSchema,
+  extractIndianPhoneDigits,
+  formatIndianPhoneDisplay,
+  IndianPhoneSchema,
+  isValidIndianPhone,
+  normalizeIndianPhone
+} from '../phone';
 
-export const AuthPhoneSchema = z
-  .string()
-  .trim()
-  .transform(normalizeIndianPhone)
-  .refine((val) => /^\+91[6-9]\d{9}$/.test(val), {
-    message: 'Please enter a valid 10-digit Indian mobile number (+91)'
-  });
+export {
+  AuthPhoneSchema,
+  extractIndianPhoneDigits,
+  formatIndianPhoneDisplay,
+  IndianPhoneSchema,
+  isValidIndianPhone,
+  normalizeIndianPhone
+};
 
 export interface User {
   id: string;

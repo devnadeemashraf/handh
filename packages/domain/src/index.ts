@@ -34,6 +34,7 @@ export type {
   RazorpayWebhookEvent
 } from './payment';
 export * from './payment';
+export * from './phone';
 export * from './result';
 export * from './service-control';
 export * from './shipping';

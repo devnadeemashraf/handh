@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-import { INDIAN_STATES } from '@hh/domain';
+import { extractIndianPhoneDigits, INDIAN_STATES } from '@hh/domain';
 
 import type { ShippingAddressInput } from '@hh/domain';
 
@@ -87,12 +87,26 @@ export function AddressForm({ values, errors, onChange, disabled = false }: Addr
                   type="tel"
                   inputMode="tel"
                   autoComplete="tel"
-                  maxLength={10}
+                  maxLength={16}
                   placeholder="10-digit mobile"
-                  value={values.phone}
+                  value={
+                    extractIndianPhoneDigits(values.phone) || values.phone.replace(/^\+91/, '')
+                  }
                   onChange={(e) => {
-                    const cleaned = e.target.value.replace(/\D/g, '').slice(0, 10);
-                    handleFieldChange('phone', cleaned);
+                    const raw = e.target.value;
+                    const extracted = extractIndianPhoneDigits(raw);
+                    if (extracted) {
+                      handleFieldChange('phone', extracted);
+                    } else {
+                      const digitsOnly = raw.replace(/\D/g, '');
+                      if (digitsOnly.startsWith('91') && digitsOnly.length > 10) {
+                        handleFieldChange('phone', digitsOnly.slice(2, 12));
+                      } else if (digitsOnly.startsWith('0') && digitsOnly.length > 10) {
+                        handleFieldChange('phone', digitsOnly.slice(1, 11));
+                      } else {
+                        handleFieldChange('phone', digitsOnly.slice(0, 10));
+                      }
+                    }
                   }}
                   disabled={disabled}
                   className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:border-transparent px-3 py-2 text-sm"
