@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { createDbClient, listUsers } from '@hh/db';
+import { getSharedDbClient, listUsers } from '@hh/db';
 
 import { getAdminSession } from '../../../../lib/admin-auth';
 
@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function GET() {

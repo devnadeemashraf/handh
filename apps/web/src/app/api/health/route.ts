@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRedisClient } from '@/lib/redis';
 
-import { createDbClient, sql } from '@hh/db';
+import { getSharedDbClient, sql } from '@hh/db';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function GET() {

@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { createDbClient, createUser } from '@hh/db';
+import { createUser, getSharedDbClient } from '@hh/db';
 
 import type { User } from '@hh/domain';
 
@@ -25,7 +25,7 @@ describe('User Platform API Routes', () => {
   beforeAll(async () => {
     const databaseUrl =
       process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-    const db = createDbClient(databaseUrl);
+    const db = getSharedDbClient(databaseUrl);
     const testPhone = `+9198${Date.now().toString().slice(-8)}`;
     testUser = await createUser(db, 'hh', {
       phone: testPhone,

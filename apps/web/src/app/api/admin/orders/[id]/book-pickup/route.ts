@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { createDbClient, createOrderFulfillment, findOrderById } from '@hh/db';
+import { createOrderFulfillment, findOrderById, getSharedDbClient } from '@hh/db';
 import { BookPickupInputSchema } from '@hh/domain';
 
 import type { ShippingAddress } from '@hh/db';
@@ -14,7 +14,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {

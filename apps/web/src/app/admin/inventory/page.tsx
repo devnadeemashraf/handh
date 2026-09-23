@@ -1,4 +1,4 @@
-import { createDbClient, listAdminInventory, listInventoryAuditLogs } from '@hh/db';
+import { getSharedDbClient, listAdminInventory, listInventoryAuditLogs } from '@hh/db';
 
 import InventoryManager from './InventoryManager';
 
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export default async function AdminInventoryPage() {

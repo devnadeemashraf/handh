@@ -1,5 +1,5 @@
 import { validateServerEnv } from '@hh/config';
-import { createDbClient } from '@hh/db';
+import { getSharedDbClient } from '@hh/db';
 
 import { startOutboxPoller } from './poller/outbox-poller';
 import { createNotificationQueues, createRedisConnection } from './queues';
@@ -23,7 +23,7 @@ async function main(): Promise<void> {
   );
 
   // 1. Initialize DB client
-  const db = createDbClient(env.DATABASE_URL);
+  const db = getSharedDbClient(env.DATABASE_URL);
 
   // 2. Initialize Redis connection
   const redisConnection = createRedisConnection(env.REDIS_URL);

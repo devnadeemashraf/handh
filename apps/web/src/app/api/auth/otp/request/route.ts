@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { countRecentOTPs, createDbClient, createOTP, generateOTP } from '@hh/db';
+import { countRecentOTPs, createOTP, generateOTP, getSharedDbClient } from '@hh/db';
 import { RequestOTPSchema } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function POST(request: Request) {

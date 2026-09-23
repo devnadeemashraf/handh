@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { createDbClient, deleteFamilyMember, updateFamilyMember } from '@hh/db';
+import { deleteFamilyMember, getSharedDbClient, updateFamilyMember } from '@hh/db';
 import { UpdateFamilyMemberSchema } from '@hh/domain';
 
 import { requireUser } from '../../../../../lib/auth';
@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function PATCH(request: Request, props: { params: Promise<{ id: string }> }) {

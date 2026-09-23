@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/admin-auth';
 
-import { createDbClient, getStoreServiceControl, updateStoreServiceControl } from '@hh/db';
+import { getSharedDbClient, getStoreServiceControl, updateStoreServiceControl } from '@hh/db';
 import { ServiceControlConfigSchema } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function GET() {

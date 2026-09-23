@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { createDbClient, getOrderInvoiceData } from '@hh/db';
+import { getOrderInvoiceData, getSharedDbClient } from '@hh/db';
 
 import InvoiceViewer from './InvoiceViewer';
 
@@ -13,7 +13,7 @@ interface InvoicePageProps {
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export default async function AdminOrderInvoicePage({ params }: InvoicePageProps) {

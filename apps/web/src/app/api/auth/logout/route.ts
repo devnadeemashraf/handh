@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { createDbClient, hashSessionToken, revokeSessionByTokenHash } from '@hh/db';
+import { getSharedDbClient, hashSessionToken, revokeSessionByTokenHash } from '@hh/db';
 
 import { USER_SESSION_COOKIE } from '../../../../lib/auth';
 
@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function POST(request: NextRequest) {

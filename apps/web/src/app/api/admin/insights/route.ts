@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/admin-auth';
 
-import { createDbClient, getExecutiveInsights } from '@hh/db';
+import { getExecutiveInsights, getSharedDbClient } from '@hh/db';
 
 import type { InsightTimeframe } from '@hh/domain';
 
@@ -11,7 +11,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 const VALID_TIMEFRAMES: Set<string> = new Set(['today', 'week', 'month', 'all']);

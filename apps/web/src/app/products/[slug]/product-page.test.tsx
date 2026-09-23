@@ -63,7 +63,7 @@ const { mockProduct } = vi.hoisted(() => ({
 }));
 
 vi.mock('@hh/db', () => ({
-  createDbClient: vi.fn(() => ({})),
+  getSharedDbClient: vi.fn(() => ({})),
   findStoreBySlug: vi.fn().mockResolvedValue({
     id: 'store-1',
     name: 'H&H',

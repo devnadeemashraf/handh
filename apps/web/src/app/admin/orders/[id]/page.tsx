@@ -5,9 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import {
-  createDbClient,
   findFulfillmentsForOrder,
   findOrderById,
+  getSharedDbClient,
   type ShippingAddress
 } from '@hh/db';
 
@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export default async function AdminOrderDetailPage(props: { params: Promise<{ id: string }> }) {

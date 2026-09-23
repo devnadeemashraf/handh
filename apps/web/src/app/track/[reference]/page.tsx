@@ -1,6 +1,6 @@
 import { MessageCircle, PackageX } from 'lucide-react';
 
-import { createDbClient, findFulfillmentByReference } from '@hh/db';
+import { findFulfillmentByReference, getSharedDbClient } from '@hh/db';
 
 import TrackingCard from './TrackingCard';
 
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export default async function TrackingPage(props: { params: Promise<{ reference: string }> }) {

@@ -7,7 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { ThemeInjector } from '@/components/layout/ThemeInjector';
 
-import { createDbClient, findStoreBySlug, getCategoryTree, listPublishedProducts } from '@hh/db';
+import { findStoreBySlug, getCategoryTree, getSharedDbClient, listPublishedProducts } from '@hh/db';
 import { resolveStorefrontConfig } from '@hh/domain';
 
 interface HomePageProps {
@@ -17,7 +17,7 @@ interface HomePageProps {
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {

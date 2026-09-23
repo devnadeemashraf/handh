@@ -1,7 +1,7 @@
 import { Clock, IndianRupee, ShoppingBag, Truck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
-import { createDbClient, getAdminOrderMetrics, listAdminOrders } from '@hh/db';
+import { getAdminOrderMetrics, getSharedDbClient, listAdminOrders } from '@hh/db';
 
 import OrdersTable from './OrdersTable';
 
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export default async function AdminOrdersPage() {

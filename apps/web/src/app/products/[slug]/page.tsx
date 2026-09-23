@@ -12,7 +12,7 @@ import { ProductPurchaseCard } from '@/components/product/ProductPurchaseCard';
 
 import type { Metadata } from 'next';
 
-import { createDbClient, findProductBySlug, findStoreBySlug, getCategoryTree } from '@hh/db';
+import { findProductBySlug, findStoreBySlug, getCategoryTree, getSharedDbClient } from '@hh/db';
 import { resolveStorefrontConfig } from '@hh/domain';
 
 interface ProductPageProps {
@@ -22,7 +22,7 @@ interface ProductPageProps {
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
