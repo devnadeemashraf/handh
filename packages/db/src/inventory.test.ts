@@ -15,7 +15,13 @@ import {
   updateProductStatus,
   updateVariantPrice
 } from './repositories';
-import { inventoryLevels, inventoryReservations, orders, outboxEvents } from './schema';
+import {
+  inventoryLevels,
+  inventoryReservations,
+  orders,
+  outboxEvents,
+  productVariants
+} from './schema';
 
 describe('Inventory Repository Integration', () => {
   const databaseUrl =
@@ -333,6 +339,21 @@ describe('Inventory Repository Integration', () => {
         .update(inventoryLevels)
         .set({ reserved: 0 })
         .where(eq(inventoryLevels.variantId, variantId));
+    });
+
+    it('enforces statutory audit immutability by blocking variant deletion when audit history exists (E-COM-100)', async () => {
+      // variantId already has audit log entries created during earlier stock adjustments
+      const auditLogsBefore = await listInventoryAuditLogs(db, variantId);
+      expect(auditLogsBefore.length).toBeGreaterThan(0);
+
+      // Attempting to delete the product variant row directly MUST fail due to ON DELETE RESTRICT foreign key
+      await expect(
+        db.delete(productVariants).where(eq(productVariants.id, variantId))
+      ).rejects.toThrow(/foreign key|violates foreign key constraint|restrict/i);
+
+      // Verify audit logs remain 100% intact and uncorrupted
+      const auditLogsAfter = await listInventoryAuditLogs(db, variantId);
+      expect(auditLogsAfter.length).toBe(auditLogsBefore.length);
     });
   });
 });

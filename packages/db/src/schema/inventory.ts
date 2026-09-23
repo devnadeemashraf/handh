@@ -59,7 +59,7 @@ export const inventoryAuditLogs = pgTable(
     id: uuid('id').defaultRandom().primaryKey(),
     variantId: uuid('variant_id')
       .notNull()
-      .references(() => productVariants.id, { onDelete: 'cascade' }),
+      .references(() => productVariants.id, { onDelete: 'restrict' }),
     previousOnHand: integer('previous_on_hand').notNull(),
     newOnHand: integer('new_on_hand').notNull(),
     delta: integer('delta').notNull(),
