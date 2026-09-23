@@ -92,15 +92,33 @@ export const CheckoutSubmissionSchema = z.object({
 
 export type CheckoutSubmissionInput = z.infer<typeof CheckoutSubmissionSchema>;
 
+export interface GstBreakdown {
+  ratePercent: number;
+  taxableAmountMinor: number;
+  totalTaxMinor: number;
+  cgstMinor: number;
+  sgstMinor: number;
+  igstMinor: number;
+  isInterState: boolean;
+  originState: string;
+  destinationState?: string | undefined;
+}
+
 export interface CheckoutFinancialBreakdown {
   subtotalMinor: number;
   shippingMinor: number;
   discountMinor: number;
   totalMinor: number;
+  taxMinor: number;
+  cgstMinor: number;
+  sgstMinor: number;
+  igstMinor: number;
+  taxableAmountMinor: number;
   currency: CurrencyCode;
   isFreeDelivery: boolean;
   freeDeliveryThresholdMinor: number;
   remainingForFreeDeliveryMinor: number;
+  gst?: GstBreakdown | undefined;
 }
 
 export interface CheckoutOrderResult {

@@ -13,6 +13,7 @@ export type {
   CheckoutFinancialBreakdown,
   CheckoutOrderResult,
   CheckoutSubmissionInput,
+  GstBreakdown,
   IndianState,
   ShippingAddressInput
 } from './checkout';

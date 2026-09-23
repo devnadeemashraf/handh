@@ -4,16 +4,28 @@ import type { CheckoutFinancialBreakdown } from './types';
 
 export const DEFAULT_SHIPPING_FEE_MINOR = 9900; // ₹99.00
 export const DEFAULT_FREE_SHIPPING_THRESHOLD_MINOR = 99900; // ₹999.00
+export const DEFAULT_MERCHANT_STATE = 'Telangana';
+export const DEFAULT_GST_RATE_PERCENT = 18;
 
 export interface CalculateFinancialsOptions {
-  standardShippingFeeMinor?: number;
-  freeShippingThresholdMinor?: number;
-  discountMinor?: number;
+  standardShippingFeeMinor?: number | undefined;
+  freeShippingThresholdMinor?: number | undefined;
+  discountMinor?: number | undefined;
+  destinationState?: string | undefined;
+  merchantState?: string | undefined;
+  gstRatePercent?: number | undefined;
 }
 
 /**
  * Calculates authoritative checkout financials using the Money value object.
  * Enforces zero floating-point arithmetic.
+ *
+ * Statutory Indian GST:
+ * Retail consumer prices in India are statutory MRP (inclusive of all taxes).
+ * Taxable base and statutory GST are derived backwards from the gross billable total.
+ * - Intra-state (Destination = Telangana): 50% CGST + 50% SGST, 0% IGST.
+ * - Inter-state (Destination ≠ Telangana or unspecified): 100% IGST, 0% CGST, 0% SGST.
+ * Integer floor/difference guarantee cgst + sgst === totalTax with zero rounding loss.
  */
 export function calculateCheckoutFinancials(
   subtotalMinor: number,
@@ -36,16 +48,53 @@ export function calculateCheckoutFinancials(
     : Math.max(0, thresholdMinor - subtotal.amountMinor);
 
   const total = subtotal.add(shipping).subtract(discount);
+  const totalMinor = Math.max(0, total.amountMinor);
+
+  // Statutory GST Derivation (MRP Tax-Inclusive Engine)
+  const gstRatePercent = options.gstRatePercent ?? DEFAULT_GST_RATE_PERCENT;
+  const originState = (options.merchantState ?? DEFAULT_MERCHANT_STATE).trim();
+  const destinationState = options.destinationState?.trim();
+
+  const taxableAmountMinor =
+    totalMinor > 0 ? Math.round(totalMinor / (1 + gstRatePercent / 100)) : 0;
+  const taxMinor = totalMinor - taxableAmountMinor;
+
+  const isIntraState = Boolean(
+    destinationState && originState.toLowerCase() === destinationState.toLowerCase()
+  );
+  const isInterState = !isIntraState;
+
+  const cgstMinor = isIntraState ? Math.floor(taxMinor / 2) : 0;
+  const sgstMinor = isIntraState ? taxMinor - cgstMinor : 0;
+  const igstMinor = isInterState ? taxMinor : 0;
+
+  const gst = {
+    ratePercent: gstRatePercent,
+    taxableAmountMinor,
+    totalTaxMinor: taxMinor,
+    cgstMinor,
+    sgstMinor,
+    igstMinor,
+    isInterState,
+    originState,
+    ...(destinationState ? { destinationState } : {})
+  };
 
   return {
     subtotalMinor: subtotal.amountMinor,
     shippingMinor: shipping.amountMinor,
     discountMinor: discount.amountMinor,
-    totalMinor: Math.max(0, total.amountMinor),
+    totalMinor,
+    taxMinor,
+    cgstMinor,
+    sgstMinor,
+    igstMinor,
+    taxableAmountMinor,
     currency,
     isFreeDelivery,
     freeDeliveryThresholdMinor: thresholdMinor,
-    remainingForFreeDeliveryMinor
+    remainingForFreeDeliveryMinor,
+    gst
   };
 }
 

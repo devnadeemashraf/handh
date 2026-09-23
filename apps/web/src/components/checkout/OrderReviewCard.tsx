@@ -16,13 +16,15 @@ export interface OrderReviewCardProps {
   isSubmitting: boolean;
   onSubmit: (couponCode?: string) => void;
   disabled?: boolean;
+  destinationState?: string | undefined;
 }
 
 export function OrderReviewCard({
   cartSummary,
   isSubmitting,
   onSubmit,
-  disabled = false
+  disabled = false,
+  destinationState
 }: OrderReviewCardProps) {
   const [couponInput, setCouponInput] = React.useState('');
   const [appliedCoupon, setAppliedCoupon] = React.useState<{
@@ -74,7 +76,8 @@ export function OrderReviewCard({
   };
 
   const financials = calculateCheckoutFinancials(cartSummary.subtotalMinor, 'INR', {
-    discountMinor: appliedCoupon?.discountMinor ?? 0
+    discountMinor: appliedCoupon?.discountMinor ?? 0,
+    destinationState
   });
 
   const subtotalFormatted = Money.fromMinor(financials.subtotalMinor, 'INR').format();
@@ -226,6 +229,40 @@ export function OrderReviewCard({
               {shippingFormatted}
             </span>
           </div>
+
+          {/* Statutory GST Tax Itemization (Consumer Protection Rules & CGST Act §31) */}
+          {financials.taxMinor > 0 && (
+            <div
+              data-testid="gst-breakdown"
+              className="rounded-md bg-muted/40 p-2.5 border border-border/60 text-xs space-y-1 text-muted-foreground my-2"
+            >
+              <div className="flex justify-between font-medium text-foreground">
+                <span>{`Statutory GST Included (${financials.gst?.ratePercent ?? 18}%)`}</span>
+                <span>{Money.fromMinor(financials.taxMinor, 'INR').format()}</span>
+              </div>
+              <div className="flex justify-between text-[11px] pl-2 border-l-2 border-primary/20">
+                <span>Taxable Amount</span>
+                <span>{Money.fromMinor(financials.taxableAmountMinor, 'INR').format()}</span>
+              </div>
+              {financials.gst?.isInterState ? (
+                <div className="flex justify-between text-[11px] pl-2 border-l-2 border-primary/20">
+                  <span>{`IGST (${financials.gst.ratePercent}%) · Inter-state`}</span>
+                  <span>{Money.fromMinor(financials.igstMinor, 'INR').format()}</span>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between text-[11px] pl-2 border-l-2 border-primary/20">
+                    <span>{`CGST (${financials.gst ? financials.gst.ratePercent / 2 : 9}%)`}</span>
+                    <span>{Money.fromMinor(financials.cgstMinor, 'INR').format()}</span>
+                  </div>
+                  <div className="flex justify-between text-[11px] pl-2 border-l-2 border-primary/20">
+                    <span>{`SGST (${financials.gst ? financials.gst.ratePercent / 2 : 9}%)`}</span>
+                    <span>{Money.fromMinor(financials.sgstMinor, 'INR').format()}</span>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           <div className="border-t border-border pt-3 flex items-baseline justify-between">
             <div>

@@ -243,7 +243,10 @@ export async function createPendingCheckoutOrder(
         }
       }
 
-      const financials = calculateCheckoutFinancials(subtotalMinor, 'INR', { discountMinor });
+      const financials = calculateCheckoutFinancials(subtotalMinor, 'INR', {
+        discountMinor,
+        destinationState: shippingAddress.state
+      });
 
       // 3. Generate Order ID & Order Number
       const orderNumber = generateOrderNumber();
@@ -278,6 +281,11 @@ export async function createPendingCheckoutOrder(
           shippingMinor: financials.shippingMinor,
           discountMinor: financials.discountMinor,
           totalMinor: financials.totalMinor,
+          taxMinor: financials.taxMinor,
+          cgstMinor: financials.cgstMinor,
+          sgstMinor: financials.sgstMinor,
+          igstMinor: financials.igstMinor,
+          taxableAmountMinor: financials.taxableAmountMinor,
           couponCode: appliedCouponCode,
           attribution: params.attribution ?? null,
           notes: customerNotes ? customerNotes.trim() : null
@@ -627,6 +635,11 @@ export async function getOrderInvoiceData(
     deliveryFeeMinor: Number(orderWithItems.shippingMinor),
     discountMinor: Number(orderWithItems.discountMinor),
     totalAmountMinor: Number(orderWithItems.totalMinor),
+    taxMinor: Number(orderWithItems.taxMinor ?? 0),
+    cgstMinor: Number(orderWithItems.cgstMinor ?? 0),
+    sgstMinor: Number(orderWithItems.sgstMinor ?? 0),
+    igstMinor: Number(orderWithItems.igstMinor ?? 0),
+    taxableAmountMinor: Number(orderWithItems.taxableAmountMinor ?? 0),
     template
   };
 

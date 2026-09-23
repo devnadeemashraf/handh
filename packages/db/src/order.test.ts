@@ -13,6 +13,7 @@ import {
   findOrderById,
   findOrderByOrderNumber,
   findOrderByStoreAndIdempotencyKey,
+  getOrderInvoiceData,
   isIdempotencyConflict
 } from './repositories';
 import { inventoryLevels, orders } from './schema';
@@ -26,6 +27,7 @@ describe('Order Repository Integration', () => {
   let storeId: string;
   let variantAId: string;
   let variantBId: string;
+  let variantTaxId: string;
 
   beforeAll(async () => {
     // 1. Create a dedicated test store
@@ -50,6 +52,7 @@ describe('Order Repository Integration', () => {
     // 3. Create product with initial inventory:
     // Variant A: 5 on_hand, 0 reserved (5 available)
     // Variant B: 2 on_hand, 0 reserved (2 available)
+    // Variant Tax: 50 on_hand, 0 reserved (50 available for tax tests)
     const product = await createProductWithVariants(db, {
       storeId,
       categoryId: category.id,
@@ -77,6 +80,16 @@ describe('Order Repository Integration', () => {
           sortOrder: 1,
           isActive: true,
           initialQuantity: 2
+        },
+        {
+          sku: `SKUTAX-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          title: 'Tax Test Accent',
+          priceMinor: 59900, // ₹599.00
+          currency: 'INR',
+          weightGrams: 10,
+          sortOrder: 2,
+          isActive: true,
+          initialQuantity: 50
         }
       ],
       images: [
@@ -91,9 +104,11 @@ describe('Order Repository Integration', () => {
 
     const vA = product.variants.find((v) => v.title === 'Silver Accent')!;
     const vB = product.variants.find((v) => v.title === 'Gold Accent')!;
+    const vTax = product.variants.find((v) => v.title === 'Tax Test Accent')!;
 
     variantAId = vA.id;
     variantBId = vB.id;
+    variantTaxId = vTax.id;
   });
 
   it('atomically creates order, line items, and reserves inventory', async () => {
@@ -385,5 +400,77 @@ describe('Order Repository Integration', () => {
         idempotencyKey: '66666666-6666-6666-6666-666666666666'
       })
     ).rejects.toThrow(NotFoundError);
+  });
+
+  it('persists intra-state CGST + SGST tax breakdown for Telangana shipping address', async () => {
+    const idempotencyKey = randomUUID();
+    const orderResult = await createPendingCheckoutOrder(db, {
+      storeId,
+      items: [{ variantId: variantTaxId, quantity: 1 }], // 59900
+      shippingAddress: {
+        fullName: 'Zainab Fatima',
+        phone: '9876543219',
+        email: 'zainab@example.com',
+        line1: 'Banjara Hills Road No 10',
+        city: 'Hyderabad',
+        state: 'Telangana',
+        postalCode: '500034',
+        country: 'IN'
+      },
+      idempotencyKey
+    });
+
+    // Subtotal 59900 + shipping 9900 = 69800
+    // Taxable base = round(69800 / 1.18) = 59153
+    // Tax = 69800 - 59153 = 10647
+    // CGST = floor(10647 / 2) = 5323, SGST = 10647 - 5323 = 5324
+    const [persisted] = await db.select().from(orders).where(eq(orders.id, orderResult.orderId));
+
+    expect(persisted).toBeDefined();
+    expect(persisted?.totalMinor).toBe(69800);
+    expect(persisted?.taxableAmountMinor).toBe(59153);
+    expect(persisted?.taxMinor).toBe(10647);
+    expect(persisted?.cgstMinor).toBe(5323);
+    expect(persisted?.sgstMinor).toBe(5324);
+    expect(persisted?.igstMinor).toBe(0);
+    expect((persisted?.cgstMinor ?? 0) + (persisted?.sgstMinor ?? 0)).toBe(persisted?.taxMinor);
+
+    // Verify invoice data exposes the persisted GST values
+    const invoice = await getOrderInvoiceData(db, orderResult.orderId);
+    expect(invoice).not.toBeNull();
+    expect(invoice?.taxableAmountMinor).toBe(59153);
+    expect(invoice?.taxMinor).toBe(10647);
+    expect(invoice?.cgstMinor).toBe(5323);
+    expect(invoice?.sgstMinor).toBe(5324);
+    expect(invoice?.igstMinor).toBe(0);
+  });
+
+  it('persists inter-state IGST tax breakdown when shipping destination is outside Telangana', async () => {
+    const idempotencyKey = randomUUID();
+    const orderResult = await createPendingCheckoutOrder(db, {
+      storeId,
+      items: [{ variantId: variantTaxId, quantity: 1 }], // 59900
+      shippingAddress: {
+        fullName: 'Kavita Menon',
+        phone: '9876543220',
+        email: 'kavita@example.com',
+        line1: 'Marine Drive',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        postalCode: '400020',
+        country: 'IN'
+      },
+      idempotencyKey
+    });
+
+    const [persisted] = await db.select().from(orders).where(eq(orders.id, orderResult.orderId));
+
+    expect(persisted).toBeDefined();
+    expect(persisted?.totalMinor).toBe(69800);
+    expect(persisted?.taxableAmountMinor).toBe(59153);
+    expect(persisted?.taxMinor).toBe(10647);
+    expect(persisted?.cgstMinor).toBe(0);
+    expect(persisted?.sgstMinor).toBe(0);
+    expect(persisted?.igstMinor).toBe(10647);
   });
 });

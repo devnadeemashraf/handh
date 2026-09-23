@@ -34,6 +34,11 @@ const mockOrder: Order & { shippingAddress: ShippingAddress } = {
   shippingMinor: 0,
   discountMinor: 0,
   totalMinor: 850000,
+  taxMinor: 129661,
+  cgstMinor: 64830,
+  sgstMinor: 64831,
+  igstMinor: 0,
+  taxableAmountMinor: 720339,
   currency: 'INR',
   createdAt: new Date('2026-09-18T10:00:00Z'),
   updatedAt: new Date('2026-09-18T10:00:00Z')

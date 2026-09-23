@@ -155,4 +155,97 @@ describe('Checkout Financial Calculations', () => {
     const orderNumber = generateOrderNumber();
     expect(orderNumber).toMatch(/^HH-\d{4}-[A-Z0-9]{5}$/);
   });
+
+  describe('Statutory Indian GST Calculations', () => {
+    it('calculates intra-state split (CGST + SGST) for Telangana destination', () => {
+      // Order of ₹1,180 total (free shipping)
+      const breakdown = calculateCheckoutFinancials(118000, 'INR', {
+        destinationState: 'Telangana'
+      });
+
+      expect(breakdown.totalMinor).toBe(118000);
+      // At 18% GST, taxable base = 118000 / 1.18 = 100000
+      expect(breakdown.taxableAmountMinor).toBe(100000);
+      expect(breakdown.taxMinor).toBe(18000);
+      // Intra-state split: 9% CGST (9000), 9% SGST (9000), 0 IGST
+      expect(breakdown.cgstMinor).toBe(9000);
+      expect(breakdown.sgstMinor).toBe(9000);
+      expect(breakdown.igstMinor).toBe(0);
+      expect(breakdown.cgstMinor + breakdown.sgstMinor).toBe(breakdown.taxMinor);
+      expect(breakdown.taxableAmountMinor + breakdown.taxMinor).toBe(breakdown.totalMinor);
+
+      expect(breakdown.gst).toBeDefined();
+      expect(breakdown.gst?.isInterState).toBe(false);
+      expect(breakdown.gst?.ratePercent).toBe(18);
+      expect(breakdown.gst?.originState).toBe('Telangana');
+      expect(breakdown.gst?.destinationState).toBe('Telangana');
+    });
+
+    it('handles case-insensitive and whitespace-tolerant state matching for Telangana', () => {
+      const breakdown = calculateCheckoutFinancials(118000, 'INR', {
+        destinationState: '  tElAnGaNa  '
+      });
+
+      expect(breakdown.cgstMinor).toBe(9000);
+      expect(breakdown.sgstMinor).toBe(9000);
+      expect(breakdown.igstMinor).toBe(0);
+      expect(breakdown.gst?.isInterState).toBe(false);
+    });
+
+    it('calculates inter-state IGST when destination is outside Telangana', () => {
+      // Destination: Karnataka
+      const breakdown = calculateCheckoutFinancials(118000, 'INR', {
+        destinationState: 'Karnataka'
+      });
+
+      expect(breakdown.totalMinor).toBe(118000);
+      expect(breakdown.taxableAmountMinor).toBe(100000);
+      expect(breakdown.taxMinor).toBe(18000);
+      // Inter-state: CGST = 0, SGST = 0, IGST = 18000 (18%)
+      expect(breakdown.cgstMinor).toBe(0);
+      expect(breakdown.sgstMinor).toBe(0);
+      expect(breakdown.igstMinor).toBe(18000);
+      expect(breakdown.gst?.isInterState).toBe(true);
+      expect(breakdown.gst?.destinationState).toBe('Karnataka');
+    });
+
+    it('defaults to inter-state IGST when destination state is not provided', () => {
+      const breakdown = calculateCheckoutFinancials(118000, 'INR');
+
+      expect(breakdown.taxMinor).toBe(18000);
+      expect(breakdown.cgstMinor).toBe(0);
+      expect(breakdown.sgstMinor).toBe(0);
+      expect(breakdown.igstMinor).toBe(18000);
+      expect(breakdown.gst?.isInterState).toBe(true);
+    });
+
+    it('guarantees zero penny leakage with odd tax values via integer division', () => {
+      // Total ₹599.00 -> taxable: round(59900 / 1.18) = 50763. Tax = 9137 (odd number)
+      const breakdown = calculateCheckoutFinancials(59900, 'INR', {
+        destinationState: 'Telangana',
+        freeShippingThresholdMinor: 0 // Free shipping
+      });
+
+      expect(breakdown.taxMinor).toBe(9137);
+      // cgst = floor(9137 / 2) = 4568, sgst = 9137 - 4568 = 4569
+      expect(breakdown.cgstMinor).toBe(4568);
+      expect(breakdown.sgstMinor).toBe(4569);
+      expect(breakdown.cgstMinor + breakdown.sgstMinor).toBe(breakdown.taxMinor);
+      expect(breakdown.taxableAmountMinor + breakdown.taxMinor).toBe(breakdown.totalMinor);
+    });
+
+    it('handles zero total orders with zero tax', () => {
+      const breakdown = calculateCheckoutFinancials(0, 'INR', {
+        destinationState: 'Telangana',
+        standardShippingFeeMinor: 0
+      });
+
+      expect(breakdown.totalMinor).toBe(0);
+      expect(breakdown.taxableAmountMinor).toBe(0);
+      expect(breakdown.taxMinor).toBe(0);
+      expect(breakdown.cgstMinor).toBe(0);
+      expect(breakdown.sgstMinor).toBe(0);
+      expect(breakdown.igstMinor).toBe(0);
+    });
+  });
 });

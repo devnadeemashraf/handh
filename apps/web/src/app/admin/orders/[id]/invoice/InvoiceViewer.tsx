@@ -230,6 +230,42 @@ export default function InvoiceViewer({ initialInvoiceData, orderId }: InvoiceVi
               </div>
             )}
 
+            {/* Statutory GST Tax Itemization */}
+            {(template.showGstBreakdown || (invoiceData.taxMinor ?? 0) > 0) &&
+              (invoiceData.taxMinor ?? 0) > 0 && (
+                <div
+                  data-testid="invoice-gst-breakdown"
+                  className="py-2 border-t border-dashed border-zinc-300 my-1 space-y-1 text-zinc-600 text-xs"
+                >
+                  <div className="flex justify-between text-zinc-500">
+                    <span>Taxable Base Value</span>
+                    <span>{formatPrice(invoiceData.taxableAmountMinor ?? 0)}</span>
+                  </div>
+                  {(invoiceData.cgstMinor ?? 0) > 0 && (
+                    <div className="flex justify-between text-zinc-500">
+                      <span>CGST (9%)</span>
+                      <span>{formatPrice(invoiceData.cgstMinor ?? 0)}</span>
+                    </div>
+                  )}
+                  {(invoiceData.sgstMinor ?? 0) > 0 && (
+                    <div className="flex justify-between text-zinc-500">
+                      <span>SGST (9%)</span>
+                      <span>{formatPrice(invoiceData.sgstMinor ?? 0)}</span>
+                    </div>
+                  )}
+                  {(invoiceData.igstMinor ?? 0) > 0 && (
+                    <div className="flex justify-between text-zinc-500">
+                      <span>IGST (18%)</span>
+                      <span>{formatPrice(invoiceData.igstMinor ?? 0)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-medium text-zinc-700">
+                    <span>Total GST Included</span>
+                    <span>{formatPrice(invoiceData.taxMinor ?? 0)}</span>
+                  </div>
+                </div>
+              )}
+
             <div className="flex justify-between py-2.5 border-t-2 border-zinc-900 mt-1.5 text-base font-extrabold text-[#0A2E24]">
               <span>Grand Total</span>
               <span>{formatPrice(invoiceData.totalAmountMinor)}</span>

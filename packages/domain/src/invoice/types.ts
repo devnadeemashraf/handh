@@ -54,5 +54,10 @@ export interface InvoiceData {
   deliveryFeeMinor: number;
   discountMinor: number;
   totalAmountMinor: number;
+  taxMinor?: number | undefined;
+  cgstMinor?: number | undefined;
+  sgstMinor?: number | undefined;
+  igstMinor?: number | undefined;
+  taxableAmountMinor?: number | undefined;
   template: InvoiceTemplateConfig;
 }

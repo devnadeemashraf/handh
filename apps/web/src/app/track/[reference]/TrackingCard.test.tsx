@@ -33,6 +33,11 @@ const mockOrder: Order = {
   shippingMinor: 0,
   discountMinor: 0,
   totalMinor: 1500000,
+  taxMinor: 228814,
+  cgstMinor: 114407,
+  sgstMinor: 114407,
+  igstMinor: 0,
+  taxableAmountMinor: 1271186,
   currency: 'INR',
   createdAt: new Date('2026-09-17T09:00:00Z'),
   updatedAt: new Date('2026-09-17T09:00:00Z')

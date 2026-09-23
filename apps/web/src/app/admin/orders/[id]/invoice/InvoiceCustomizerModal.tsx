@@ -259,6 +259,28 @@ export default function InvoiceCustomizerModal({
             />
           </div>
 
+          {/* Statutory Tax Itemization Toggle */}
+          <div className="flex items-center justify-between rounded-md border border-border p-3 bg-muted/20">
+            <div className="space-y-0.5">
+              <Label
+                htmlFor="showGstBreakdown"
+                className="text-xs font-semibold text-accent cursor-pointer"
+              >
+                Display Statutory GST Breakdown
+              </Label>
+              <div className="text-[11px] text-muted-foreground">
+                Itemizes taxable value, CGST, SGST, and IGST on customer tax invoices.
+              </div>
+            </div>
+            <input
+              id="showGstBreakdown"
+              type="checkbox"
+              checked={template.showGstBreakdown}
+              onChange={(e) => setTemplate({ ...template, showGstBreakdown: e.target.checked })}
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+            />
+          </div>
+
           <DialogFooter className="gap-2 sm:gap-0 pt-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel

@@ -180,6 +180,7 @@ export default function CheckoutPage() {
                 isSubmitting={isSubmitting}
                 onSubmit={handleSubmit}
                 disabled={isServicePaused}
+                destinationState={values.state}
               />
             )}
           </div>

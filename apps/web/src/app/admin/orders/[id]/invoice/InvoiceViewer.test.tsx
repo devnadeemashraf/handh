@@ -48,6 +48,11 @@ const mockInvoiceData: InvoiceData = {
   deliveryFeeMinor: 0,
   discountMinor: 10000,
   totalAmountMinor: 159700,
+  taxMinor: 24361,
+  taxableAmountMinor: 135339,
+  cgstMinor: 12180,
+  sgstMinor: 12181,
+  igstMinor: 0,
   courierName: 'DTDC Express',
   trackingNumber: 'DTDC998877',
   template: {
@@ -104,6 +109,16 @@ describe('InvoiceViewer Component', () => {
     // Financial breakdown
     expect(screen.getByText('Grand Total')).toBeInTheDocument();
     expect(screen.getByText('Discount Applied')).toBeInTheDocument();
+  });
+
+  it('renders statutory GST tax breakdown when available', () => {
+    render(<InvoiceViewer initialInvoiceData={mockInvoiceData} orderId="order-123" />);
+
+    expect(screen.getByTestId('invoice-gst-breakdown')).toBeInTheDocument();
+    expect(screen.getByText('Taxable Base Value')).toBeInTheDocument();
+    expect(screen.getByText('CGST (9%)')).toBeInTheDocument();
+    expect(screen.getByText('SGST (9%)')).toBeInTheDocument();
+    expect(screen.getByText('Total GST Included')).toBeInTheDocument();
   });
 
   it('triggers window.print when print button is clicked', () => {
