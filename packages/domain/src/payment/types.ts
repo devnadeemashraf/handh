@@ -3,7 +3,8 @@ import { z } from 'zod';
 import type { CurrencyCode } from '../money';
 
 export const PaymentOrderRequestSchema = z.object({
-  orderId: z.string().uuid('Valid order ID is required')
+  orderId: z.string().uuid('Valid order ID is required'),
+  token: z.string().optional()
 });
 
 export type PaymentOrderRequestInput = z.infer<typeof PaymentOrderRequestSchema>;

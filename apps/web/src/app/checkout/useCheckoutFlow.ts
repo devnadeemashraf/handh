@@ -296,8 +296,10 @@ export function useCheckoutFlow({
       });
       clearStoredAttribution();
 
-      // Route directly to the receipt page
-      router.push(`/checkout/success?orderNumber=${params.orderNumber}`);
+      // Route directly to the receipt page with signed receipt token (E-COM-143)
+      const token = data.receiptToken || orderPlaced?.receiptToken;
+      const tokenQuery = token ? `&token=${encodeURIComponent(token)}` : '';
+      router.push(`/checkout/success?orderNumber=${params.orderNumber}${tokenQuery}`);
     } catch (err) {
       console.error('Payment verification error:', err);
       setSubmitError('A network error occurred while confirming payment.');
@@ -321,8 +323,14 @@ export function useCheckoutFlow({
     try {
       const initRes = await fetch('/api/checkout/payment-order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: createdOrder.orderId })
+        headers: {
+          'Content-Type': 'application/json',
+          ...(createdOrder.receiptToken ? { 'X-Order-Token': createdOrder.receiptToken } : {})
+        },
+        body: JSON.stringify({
+          orderId: createdOrder.orderId,
+          token: createdOrder.receiptToken
+        })
       });
 
       const initData = await initRes.json();

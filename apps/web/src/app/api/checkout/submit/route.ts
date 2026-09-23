@@ -13,6 +13,7 @@ import {
 import { getCurrentUser } from '../../../../lib/auth';
 import { getClientIp } from '../../../../lib/client-ip';
 import { checkoutSubmitRateLimiter } from '../../../../lib/rate-limit';
+import { generateOrderReceiptToken } from '../../../../lib/receipt-token';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -105,10 +106,15 @@ export async function POST(request: Request) {
       ...parseResult.data
     });
 
+    const receiptToken = generateOrderReceiptToken(orderResult.orderId, orderResult.orderNumber);
+
     return NextResponse.json(
       {
         success: true,
-        order: orderResult
+        order: {
+          ...orderResult,
+          receiptToken
+        }
       },
       { status: 201 }
     );

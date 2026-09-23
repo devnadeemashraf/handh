@@ -44,6 +44,7 @@ export const serverEnvSchema = z
       .string()
       .min(8, 'ADMIN_PASSWORD must be at least 8 characters long')
       .default('hh_admin_secret_pass_2026'),
+    ORDER_RECEIPT_SECRET: z.string().min(16).optional(),
 
     // Initial Admin Auto-Provisioning
     INITIAL_ADMIN_EMAIL: z.string().email().default('admin@handh.in'),

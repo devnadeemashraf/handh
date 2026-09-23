@@ -78,9 +78,9 @@ export default function AccountOrdersPage() {
           description: `Order ${data.orderNumber}`,
           order_id: data.razorpayOrderId,
           prefill: {
-            name: data.customerName || '',
-            email: data.customerEmail || '',
-            contact: data.customerPhone || ''
+            name: order.customerName || '',
+            email: order.customerEmail || '',
+            contact: order.customerPhone || ''
           },
           theme: { color: '#0A2E24' },
           handler: async function (response: {
@@ -102,7 +102,10 @@ export default function AccountOrdersPage() {
 
               const verifyData = await verifyRes.json();
               if (verifyRes.ok && verifyData.success) {
-                window.location.href = `/checkout/success?orderNumber=${order.orderNumber}`;
+                const tokenQuery = verifyData.receiptToken
+                  ? `&token=${encodeURIComponent(verifyData.receiptToken)}`
+                  : '';
+                window.location.href = `/checkout/success?orderNumber=${order.orderNumber}${tokenQuery}`;
               } else {
                 setPaymentError(verifyData.error || 'Payment verification failed.');
                 setPayingOrderId(null);
@@ -135,7 +138,10 @@ export default function AccountOrdersPage() {
           });
           const verifyData = await verifyRes.json();
           if (verifyRes.ok && verifyData.success) {
-            window.location.href = `/checkout/success?orderNumber=${order.orderNumber}`;
+            const tokenQuery = verifyData.receiptToken
+              ? `&token=${encodeURIComponent(verifyData.receiptToken)}`
+              : '';
+            window.location.href = `/checkout/success?orderNumber=${order.orderNumber}${tokenQuery}`;
             return;
           }
         }

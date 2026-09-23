@@ -3,24 +3,29 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import React from 'react';
 
-import { createDbClient, findOrderByOrderNumber } from '@hh/db';
-import { Money } from '@hh/domain';
+import { findOrderByOrderNumber, getSharedDbClient } from '@hh/db';
+import { formatIndianPhoneDisplay, Money } from '@hh/domain';
+
+import { getAdminSession } from '../../../lib/admin-auth';
+import { getCurrentUser } from '../../../lib/auth';
+import { verifyOrderReceiptToken } from '../../../lib/receipt-token';
 
 interface SuccessPageProps {
-  searchParams: Promise<{ orderNumber?: string }>;
+  searchParams: Promise<{ orderNumber?: string; token?: string }>;
 }
 
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export default async function CheckoutSuccessPage({ searchParams }: SuccessPageProps) {
-  const { orderNumber } = await searchParams;
+  const { orderNumber, token } = await searchParams;
 
   if (!orderNumber) {
     notFound();
+    return null;
   }
 
   const db = getDatabase();
@@ -28,6 +33,21 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
 
   if (!order) {
     notFound();
+    return null;
+  }
+
+  // Authorization & PII Protection Check (E-COM-143)
+  const currentUser = await getCurrentUser();
+  const isOwner = Boolean(currentUser && order.userId && currentUser.id === order.userId);
+  const adminSession = !isOwner ? await getAdminSession() : null;
+  const isAdmin = Boolean(adminSession);
+  const isTokenValid = Boolean(
+    token && verifyOrderReceiptToken(token, order.id, order.orderNumber)
+  );
+
+  if (!isOwner && !isAdmin && !isTokenValid) {
+    notFound();
+    return null;
   }
 
   const isPaid = order.status === 'paid' || order.paymentStatus === 'captured';
@@ -245,7 +265,7 @@ export default async function CheckoutSuccessPage({ searchParams }: SuccessPageP
                 {order.shippingAddress.city}, {order.shippingAddress.state} -{' '}
                 {order.shippingAddress.postalCode}
               </div>
-              <div>Contact: +91 {order.customerPhone}</div>
+              <div>Contact: {formatIndianPhoneDisplay(order.customerPhone)}</div>
             </div>
           </div>
 

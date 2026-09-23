@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
 
 import {
-  createDbClient,
   createGatewayOrder,
   createPaymentAttempt,
   findOrderById,
-  findStoreBySlug
+  findPaymentAttemptsByOrderId,
+  findStoreBySlug,
+  getSharedDbClient
 } from '@hh/db';
 import { PaymentOrderRequestSchema, resolveServiceControl } from '@hh/domain';
+
+import { getAdminSession } from '../../../../lib/admin-auth';
+import { getCurrentUser } from '../../../../lib/auth';
+import { verifyOrderReceiptToken } from '../../../../lib/receipt-token';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -15,7 +20,7 @@ export const runtime = 'nodejs';
 function getDatabase() {
   const databaseUrl =
     process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return createDbClient(databaseUrl);
+  return getSharedDbClient(databaseUrl);
 }
 
 export async function POST(request: Request) {
@@ -34,7 +39,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const { orderId } = parseResult.data;
+    const { orderId, token: bodyToken } = parseResult.data;
+    const headerToken = request.headers.get('x-order-token');
+    const token = bodyToken || headerToken;
+
     const db = getDatabase();
 
     const order = await findOrderById(db, orderId);
@@ -42,6 +50,26 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: 'Order could not be found.' },
         { status: 404 }
+      );
+    }
+
+    // Authorization & Ownership Verification (E-COM-045)
+    const currentUser = await getCurrentUser();
+    const isOwner = Boolean(currentUser && order.userId && currentUser.id === order.userId);
+    const adminSession = !isOwner ? await getAdminSession() : null;
+    const isAdmin = Boolean(adminSession);
+    const isTokenValid = Boolean(
+      token && verifyOrderReceiptToken(token, order.id, order.orderNumber)
+    );
+
+    if (!isOwner && !isAdmin && !isTokenValid) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'FORBIDDEN',
+          error: 'You are not authorized to initialize payment for this order.'
+        },
+        { status: 403 }
       );
     }
 
@@ -79,38 +107,49 @@ export async function POST(request: Request) {
     const keyId = process.env['RAZORPAY_KEY_ID'] ?? 'rzp_test_placeholder_key_id';
     const keySecret = process.env['RAZORPAY_KEY_SECRET'] ?? 'placeholder_secret_never_use_in_prod';
 
-    // 1. Create order on Razorpay (or mock in test/placeholder environment)
-    const gatewayOrder = await createGatewayOrder({
-      keyId,
-      keySecret,
-      amountMinor: order.totalMinor,
-      currency: 'INR',
-      receipt: order.orderNumber,
-      notes: {
+    // Reuse existing initiated payment attempt if present to prevent redundant orders (E-COM-045)
+    const existingAttempts = await findPaymentAttemptsByOrderId(db, order.id);
+    const reusableAttempt = existingAttempts.find(
+      (a) =>
+        a.provider === 'razorpay' && a.status === 'initiated' && a.amountMinor === order.totalMinor
+    );
+
+    let gatewayOrderId: string;
+    if (reusableAttempt) {
+      gatewayOrderId = reusableAttempt.providerOrderId;
+    } else {
+      // 1. Create order on Razorpay (or mock in test/placeholder environment)
+      const gatewayOrder = await createGatewayOrder({
+        keyId,
+        keySecret,
+        amountMinor: order.totalMinor,
+        currency: 'INR',
+        receipt: order.orderNumber,
+        notes: {
+          orderId: order.id,
+          orderNumber: order.orderNumber
+        }
+      });
+      gatewayOrderId = gatewayOrder.id;
+
+      // 2. Record payment attempt
+      await createPaymentAttempt(db, {
         orderId: order.id,
-        orderNumber: order.orderNumber
-      }
-    });
+        provider: 'razorpay',
+        providerOrderId: gatewayOrderId,
+        amountMinor: order.totalMinor,
+        currency: 'INR'
+      });
+    }
 
-    // 2. Record payment attempt
-    await createPaymentAttempt(db, {
-      orderId: order.id,
-      provider: 'razorpay',
-      providerOrderId: gatewayOrder.id,
-      amountMinor: order.totalMinor,
-      currency: 'INR'
-    });
-
+    // 3. Return sanitized response omitting customer PII (E-COM-045)
     return NextResponse.json({
       success: true,
-      razorpayOrderId: gatewayOrder.id,
+      razorpayOrderId: gatewayOrderId,
       amountMinor: order.totalMinor,
       currency: 'INR',
       keyId,
-      orderNumber: order.orderNumber,
-      customerName: order.customerName,
-      customerEmail: order.customerEmail,
-      customerPhone: order.customerPhone
+      orderNumber: order.orderNumber
     });
   } catch (error) {
     console.error('Payment order initialization error:', error);

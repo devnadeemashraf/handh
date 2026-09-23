@@ -8,6 +8,8 @@ import {
 } from '@hh/db';
 import { DomainError, PaymentVerificationSchema } from '@hh/domain';
 
+import { generateOrderReceiptToken } from '../../../../lib/receipt-token';
+
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
@@ -89,10 +91,13 @@ export async function POST(request: Request) {
       currency: parseResult.data.currency
     });
 
+    const receiptToken = generateOrderReceiptToken(result.order.id, result.order.orderNumber);
+
     return NextResponse.json({
       success: true,
       orderNumber: result.order.orderNumber,
-      orderId: result.order.id
+      orderId: result.order.id,
+      receiptToken
     });
   } catch (error) {
     if (error instanceof DomainError) {

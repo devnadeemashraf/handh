@@ -111,4 +111,5 @@ export interface CheckoutOrderResult {
   shippingMinor: number;
   totalMinor: number;
   expiresAt: string;
+  receiptToken?: string;
 }
