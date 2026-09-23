@@ -6,6 +6,7 @@ import { createNotificationQueues, createRedisConnection } from './queues';
 import { EmailService } from './services/email.service';
 import { WhatsAppService } from './services/whatsapp.service';
 import { startInventorySweeper } from './sweeper/inventory-sweeper';
+import { startRetentionSweeper } from './sweeper/retention-sweeper';
 import { createEmailWorker } from './workers/email.worker';
 import { createWhatsAppWorker } from './workers/whatsapp.worker';
 
@@ -48,10 +49,14 @@ async function main(): Promise<void> {
   // 7. Start Inventory Hold Sweeper (E-COM-043, E-COM-117)
   const stopSweeper = startInventorySweeper(db, 60000);
 
+  // 8. Start Statutory DPDP Retention Sweeper (E-COM-166) - Runs hourly
+  const stopRetentionSweeper = startRetentionSweeper(db, 3600000);
+
   console.log(
     JSON.stringify({
       level: 'info',
-      message: 'H&H background worker initialized successfully. Poller, sweeper & workers active.'
+      message:
+        'H&H background worker initialized successfully. Poller, inventory sweeper, retention sweeper & workers active.'
     })
   );
 
@@ -69,6 +74,7 @@ async function main(): Promise<void> {
 
     stopPoller();
     stopSweeper();
+    stopRetentionSweeper();
 
     await Promise.allSettled([
       emailWorker.close(),

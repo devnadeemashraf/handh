@@ -27,7 +27,8 @@ const SUPER_ADMIN_PERMISSIONS: readonly Permission[] = [
   'brand:manage',
   'service_control:manage',
   'users:manage_roles',
-  'invoice:manage_templates'
+  'invoice:manage_templates',
+  'compliance:manage'
 ] as const;
 
 export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {

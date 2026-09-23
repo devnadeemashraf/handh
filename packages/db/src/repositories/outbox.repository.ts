@@ -1,4 +1,4 @@
-import { and, asc, eq, lte } from 'drizzle-orm';
+import { and, asc, eq, inArray, lt, lte } from 'drizzle-orm';
 
 import { type NewOutboxEvent, type OutboxEvent, outboxEvents } from '../schema/outbox';
 
@@ -153,4 +153,33 @@ export async function cleanPendingOutboxEvents(db: DatabaseClient): Promise<numb
     .returning();
 
   return updated.length;
+}
+
+/**
+ * Anonymizes payloads of completed/failed outbox notification events older than the specified retention window (default: 30 days).
+ * Fulfills DPDP Act 2023 §8(7) data minimization & customer notification PII retention mandates.
+ */
+export async function purgeProcessedOutboxPayloads(
+  db: DatabaseClient,
+  retentionWindowDays: number = 30
+): Promise<number> {
+  const threshold = new Date(Date.now() - retentionWindowDays * 24 * 60 * 60 * 1000);
+  const anonymized = await db
+    .update(outboxEvents)
+    .set({
+      payload: {
+        redacted: true,
+        reason: 'DPDP_RETENTION_EXPIRY',
+        anonymizedAt: new Date().toISOString()
+      }
+    })
+    .where(
+      and(
+        inArray(outboxEvents.status, ['published', 'failed']),
+        lt(outboxEvents.createdAt, threshold)
+      )
+    )
+    .returning({ id: outboxEvents.id });
+
+  return anonymized.length;
 }

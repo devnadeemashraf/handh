@@ -33,12 +33,15 @@ export const users = pgTable(
     whatsappOptIn: boolean('whatsapp_opt_in').notNull().default(false),
     lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    anonymizedAt: timestamp('anonymized_at', { withTimezone: true })
   },
   (table) => [
     unique('unq_users_store_phone').on(table.storeId, table.phone),
     index('idx_users_email').on(table.email),
-    index('idx_users_role').on(table.role)
+    index('idx_users_role').on(table.role),
+    index('idx_users_deleted_at').on(table.deletedAt)
   ]
 );
 

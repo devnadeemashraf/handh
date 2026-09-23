@@ -88,3 +88,20 @@ export async function countRecentOTPs(
 
   return rows[0]?.total ?? 0;
 }
+
+/**
+ * Purges expired OTP records older than the specified retention window (default: 24 hours).
+ * Fulfills DPDP Act 2023 §8(7) data minimization & ephemeral telemetry retention mandates.
+ */
+export async function purgeExpiredOtps(
+  db: DatabaseClient,
+  retentionWindowHours: number = 24
+): Promise<number> {
+  const threshold = new Date(Date.now() - retentionWindowHours * 60 * 60 * 1000);
+  const deleted = await db
+    .delete(otpCodes)
+    .where(lt(otpCodes.expiresAt, threshold))
+    .returning({ id: otpCodes.id });
+
+  return deleted.length;
+}

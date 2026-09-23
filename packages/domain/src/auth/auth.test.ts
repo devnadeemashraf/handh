@@ -53,6 +53,7 @@ describe('Auth Domain Logic', () => {
       expect(hasPermission('admin', 'service_control:manage')).toBe(false);
       expect(hasPermission('admin', 'users:manage_roles')).toBe(false);
       expect(hasPermission('admin', 'invoice:manage_templates')).toBe(false);
+      expect(hasPermission('admin', 'compliance:manage')).toBe(false);
     });
 
     it('grants super_admin all permissions without exception', () => {
@@ -62,6 +63,7 @@ describe('Auth Domain Logic', () => {
       expect(hasPermission('super_admin', 'service_control:manage')).toBe(true);
       expect(hasPermission('super_admin', 'users:manage_roles')).toBe(true);
       expect(hasPermission('super_admin', 'invoice:manage_templates')).toBe(true);
+      expect(hasPermission('super_admin', 'compliance:manage')).toBe(true);
     });
   });
 

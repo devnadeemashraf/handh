@@ -34,7 +34,8 @@ export const ALL_PERMISSIONS = [
   'brand:manage',
   'service_control:manage',
   'users:manage_roles',
-  'invoice:manage_templates'
+  'invoice:manage_templates',
+  'compliance:manage'
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -85,6 +86,82 @@ export interface User {
   lastLoginAt?: string | null | undefined;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null | undefined;
+  anonymizedAt?: string | null | undefined;
+}
+
+export interface UserAnonymizationResult {
+  userId: string;
+  anonymizedAt: string;
+  redactedRecords: {
+    addressesCount: number;
+    familyMembersCount: number;
+    wishlistItemsCount: number;
+    sessionsRevokedCount: number;
+    ordersAnonymizedCount: number;
+  };
+}
+
+export interface UserDataExport {
+  exportVersion: string;
+  exportedAt: string;
+  dataFiduciary: {
+    name: string;
+    cin?: string | undefined;
+    registeredAddress?: string | undefined;
+    grievanceEmail?: string | undefined;
+  };
+  notice: string;
+  user: {
+    id: string;
+    phone: string;
+    email: string | null;
+    name: string | null;
+    whatsappOptIn: boolean;
+    createdAt: string;
+  };
+  addresses: Array<{
+    id: string;
+    label: string;
+    recipientName: string;
+    phone: string;
+    line1: string;
+    line2: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+    isDefault: boolean;
+    createdAt: string;
+  }>;
+  familyMembers: Array<{
+    id: string;
+    name: string;
+    relationship: string | null;
+    preferences: Record<string, unknown>;
+  }>;
+  wishlist: Array<{
+    id: string;
+    productId: string;
+    variantId: string | null;
+    addedAt: string;
+  }>;
+  orders: Array<{
+    id: string;
+    orderNumber: string;
+    status: string;
+    paymentStatus: string;
+    fulfillmentStatus: string;
+    totalAmountMinor: number;
+    currency: string;
+    createdAt: string;
+  }>;
+}
+
+export interface RetentionPurgeResult {
+  purgedOtpsCount: number;
+  anonymizedOutboxEventsCount: number;
+  executedAt: string;
 }
 
 export interface AdminUser {
