@@ -7,6 +7,7 @@ export * from './category.repository';
 export * from './coupon.repository';
 export * from './family.repository';
 export * from './fulfillment.repository';
+export * from './grievance.repository';
 export * from './insights.repository';
 export * from './inventory.repository';
 export * from './order.repository';

@@ -17,6 +17,7 @@ export type {
   ShippingAddressInput
 } from './checkout';
 export * from './checkout';
+export * from './compliance';
 export * from './coupon';
 export * from './errors';
 export * from './fulfillment';

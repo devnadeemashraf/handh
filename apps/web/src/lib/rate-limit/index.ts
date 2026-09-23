@@ -147,3 +147,9 @@ export const checkoutSubmitRateLimiter = new RedisRateLimiter({
   windowSeconds: 60, // 1 minute
   maxRequests: 10 // 10 requests per minute
 });
+
+export const grievanceSubmitRateLimiter = new RedisRateLimiter({
+  prefix: 'rl:grievance:',
+  windowSeconds: 15 * 60, // 15 minutes
+  maxRequests: 5 // 5 grievance filings per 15 minutes per IP
+});

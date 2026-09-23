@@ -20,6 +20,7 @@ async function clean(): Promise<void> {
         payment_attempts,
         webhook_events,
         outbox_events,
+        grievance_tickets,
         orders,
         coupons,
         wishlist_items,

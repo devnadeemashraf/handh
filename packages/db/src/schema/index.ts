@@ -2,6 +2,7 @@ export * from './admin';
 export * from './categories';
 export * from './coupons';
 export * from './fulfillments';
+export * from './grievance';
 export * from './inventory';
 export * from './orders';
 export * from './outbox';

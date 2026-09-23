@@ -82,7 +82,23 @@ export const serverEnvSchema = z
     R2_ACCESS_KEY_ID: z.string().optional(),
     R2_SECRET_ACCESS_KEY: z.string().optional(),
     R2_BUCKET_NAME: z.string().optional(),
-    R2_PUBLIC_URL: z.string().url().optional()
+    R2_PUBLIC_URL: z.string().url().optional(),
+
+    // Statutory Grievance Redressal & Corporate Identity (E-COM-065, E-COM-161)
+    GRIEVANCE_OFFICER_NAME: z.string().default('Mohammed Irfan'),
+    GRIEVANCE_OFFICER_DESIGNATION: z
+      .string()
+      .default('Head of Customer Experience & Grievance Officer'),
+    GRIEVANCE_OFFICER_EMAIL: z.string().email().default('grievance@handh.in'),
+    GRIEVANCE_OFFICER_PHONE: z.string().default('+91 40 2355 7890'),
+    COMPANY_LEGAL_NAME: z.string().default('H&H Luxury Modest Wear Private Limited'),
+    COMPANY_REGISTERED_ADDRESS: z
+      .string()
+      .default('Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India'),
+    COMPANY_CIN: z.string().default('U18101TG2024PTC189234'),
+    COMPANY_GSTIN: z.string().default('36AAACH1234F1Z5'),
+    COMPANY_SUPPORT_EMAIL: z.string().email().default('support@handh.in'),
+    COMPANY_SUPPORT_PHONE: z.string().default('+91 40 2355 7890')
   })
   .superRefine((data, ctx) => {
     // In staging and production, strictly disallow placeholder or dummy secrets
