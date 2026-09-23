@@ -72,7 +72,12 @@ export function ProductCard({ product }: { product: PublicProductListItem }) {
         </div>
 
         <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-          <span className="text-base font-semibold text-primary">{formattedPrice}</span>
+          <div className="flex flex-col">
+            <span className="text-base font-semibold text-primary">{formattedPrice}</span>
+            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
+              MRP (incl. taxes)
+            </span>
+          </div>
 
           <Link
             href={`/products/${product.slug}`}

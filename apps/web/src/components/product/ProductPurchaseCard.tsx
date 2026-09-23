@@ -53,16 +53,21 @@ export function ProductPurchaseCard({
   return (
     <Card className="border-border bg-card shadow-sm">
       <CardContent className="p-6 sm:p-8">
-        {/* Price Header */}
-        <div className="mb-4 flex items-baseline gap-3">
-          <span className="font-serif text-3xl sm:text-4xl font-semibold text-primary">
-            {priceFormatted}
-          </span>
-          {selectedVariant.compareAtPriceMinor && (
-            <span className="text-base text-muted-foreground line-through">
-              {Money.fromMinor(selectedVariant.compareAtPriceMinor, 'INR').format('en-IN')}
+        {/* Price Header with Statutory Legal Metrology MRP Notice */}
+        <div className="mb-4">
+          <div className="flex items-baseline gap-3">
+            <span className="font-serif text-3xl sm:text-4xl font-semibold text-primary">
+              {priceFormatted}
             </span>
-          )}
+            {selectedVariant.compareAtPriceMinor && (
+              <span className="text-base text-muted-foreground line-through">
+                MRP {Money.fromMinor(selectedVariant.compareAtPriceMinor, 'INR').format('en-IN')}
+              </span>
+            )}
+          </div>
+          <span className="mt-1 block text-xs font-medium text-muted-foreground">
+            MRP (Inclusive of all taxes)
+          </span>
         </div>
 
         {/* Stock Status Urgency */}

@@ -33,6 +33,47 @@ export interface PublicProductListItem {
   isAvailable: boolean;
 }
 
+export interface ManufacturerDetails {
+  name: string;
+  address: string;
+  email?: string | undefined;
+  phone?: string | undefined;
+}
+
+export interface LegalMetrologyDeclarations {
+  countryOfOrigin: string;
+  netQuantity: string;
+  commodityName: string;
+  manufacturer: ManufacturerDetails;
+  packer?: ManufacturerDetails | undefined;
+  consumerCare: {
+    email: string;
+    phone: string;
+    address: string;
+  };
+}
+
+export const DEFAULT_LEGAL_METROLOGY: LegalMetrologyDeclarations = {
+  countryOfOrigin: 'India',
+  netQuantity: '1 N',
+  commodityName: 'Handcrafted Modest Wear Accessory',
+  manufacturer: {
+    name: 'H&H Luxury Modest Wear Private Limited',
+    address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India',
+    email: 'support@handh.in',
+    phone: '+91 40 2355 7890'
+  },
+  packer: {
+    name: 'H&H Luxury Modest Wear Private Limited',
+    address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India'
+  },
+  consumerCare: {
+    email: 'support@handh.in',
+    phone: '+91 40 2355 7890',
+    address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India'
+  }
+};
+
 export interface PublicProductDetail {
   id: string;
   slug: string;
@@ -44,6 +85,18 @@ export interface PublicProductDetail {
   customizationConfig?: ProductCustomizationRule | null;
   specifications?: Record<string, string | number | boolean>;
   tags?: string[];
+  countryOfOrigin: string;
+  netQuantity: string;
+  commodityName?: string | undefined;
+  manufacturerDetails: ManufacturerDetails;
+  packerDetails?: ManufacturerDetails | undefined;
+  consumerCareDetails?:
+    | {
+        email: string;
+        phone: string;
+        address: string;
+      }
+    | undefined;
   category: {
     id: string;
     slug: string;

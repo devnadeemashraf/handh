@@ -39,6 +39,13 @@ export const products = pgTable(
     tags: jsonb('tags')
       .$type<string[]>()
       .$defaultFn(() => []),
+    countryOfOrigin: varchar('country_of_origin', { length: 64 }).notNull().default('India'),
+    netQuantity: varchar('net_quantity', { length: 32 }).notNull().default('1 N'),
+    commodityName: varchar('commodity_name', { length: 128 }),
+    manufacturerName: varchar('manufacturer_name', { length: 255 }),
+    manufacturerAddress: text('manufacturer_address'),
+    packerName: varchar('packer_name', { length: 255 }),
+    packerAddress: text('packer_address'),
     seoTitle: varchar('seo_title', { length: 255 }),
     seoDescription: text('seo_description'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

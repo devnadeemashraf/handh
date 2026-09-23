@@ -79,6 +79,30 @@ describe('Catalog Domain Validation', () => {
       };
       expect(createProductSchema.safeParse(floatPrice).success).toBe(false);
     });
+
+    it('validates Legal Metrology statutory defaults and custom overrides', () => {
+      const parsedDefault = createProductSchema.parse(validProductInput);
+      expect(parsedDefault.countryOfOrigin).toBe('India');
+      expect(parsedDefault.netQuantity).toBe('1 N');
+
+      const customInput = {
+        ...validProductInput,
+        countryOfOrigin: 'India',
+        netQuantity: '2 N (Set of 2)',
+        commodityName: 'Handcrafted Nose Pin',
+        manufacturerName: 'H&H Luxury Modest Wear Private Limited',
+        manufacturerAddress: 'Hyderabad, Telangana 500034',
+        packerName: 'H&H Logistics Hub',
+        packerAddress: 'Hyderabad, Telangana 500034'
+      };
+
+      const parsedCustom = createProductSchema.parse(customInput);
+      expect(parsedCustom.countryOfOrigin).toBe('India');
+      expect(parsedCustom.netQuantity).toBe('2 N (Set of 2)');
+      expect(parsedCustom.commodityName).toBe('Handcrafted Nose Pin');
+      expect(parsedCustom.manufacturerName).toBe('H&H Luxury Modest Wear Private Limited');
+      expect(parsedCustom.packerName).toBe('H&H Logistics Hub');
+    });
   });
 
   describe('createStoreSchema and createCategorySchema', () => {

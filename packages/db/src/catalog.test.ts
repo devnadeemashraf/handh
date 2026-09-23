@@ -125,5 +125,12 @@ describe('Catalog Domain Integration', () => {
     expect(detail?.variants[0]?.sku).toBe(sku);
     expect(detail?.variants[0]?.availableQuantity).toBe(5);
     expect(detail?.variants[0]?.isAvailable).toBe(true);
+
+    // Verify statutory Legal Metrology declarations
+    expect(detail?.countryOfOrigin).toBe('India');
+    expect(detail?.netQuantity).toBe('1 N');
+    expect(detail?.commodityName).toBe('Test Gold Nose Piece');
+    expect(detail?.manufacturerDetails.name).toBe('H&H Luxury Modest Wear Private Limited');
+    expect(detail?.consumerCareDetails?.email).toBe('support@handh.in');
   });
 });

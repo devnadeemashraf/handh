@@ -1,11 +1,12 @@
 import { and, asc, eq, min } from 'drizzle-orm';
 
-import type {
-  CreateProductInput,
-  ProductCustomizationRule,
-  PublicProductDetail,
-  PublicProductListItem,
-  PublicVariantItem
+import {
+  type CreateProductInput,
+  DEFAULT_LEGAL_METROLOGY,
+  type ProductCustomizationRule,
+  type PublicProductDetail,
+  type PublicProductListItem,
+  type PublicVariantItem
 } from '@hh/domain';
 
 import {
@@ -120,6 +121,13 @@ export async function findProductBySlug(
       tags: products.tags,
       seoTitle: products.seoTitle,
       seoDescription: products.seoDescription,
+      countryOfOrigin: products.countryOfOrigin,
+      netQuantity: products.netQuantity,
+      commodityName: products.commodityName,
+      manufacturerName: products.manufacturerName,
+      manufacturerAddress: products.manufacturerAddress,
+      packerName: products.packerName,
+      packerAddress: products.packerAddress,
       categoryId: categories.id,
       categorySlug: categories.slug,
       categoryName: categories.name
@@ -189,6 +197,34 @@ export async function findProductBySlug(
     customizationConfig: (product.customizationConfig as ProductCustomizationRule | null) ?? null,
     specifications: (product.specifications as Record<string, string | number | boolean>) ?? {},
     tags: (product.tags as string[]) ?? [],
+    countryOfOrigin:
+      product.countryOfOrigin ??
+      (product.specifications?.['country_of_origin'] as string) ??
+      DEFAULT_LEGAL_METROLOGY.countryOfOrigin,
+    netQuantity:
+      product.netQuantity ??
+      (product.specifications?.['net_quantity'] as string) ??
+      DEFAULT_LEGAL_METROLOGY.netQuantity,
+    commodityName:
+      product.commodityName ??
+      (product.specifications?.['commodity_name'] as string) ??
+      product.title ??
+      DEFAULT_LEGAL_METROLOGY.commodityName,
+    manufacturerDetails: product.manufacturerName
+      ? {
+          name: product.manufacturerName,
+          address: product.manufacturerAddress ?? DEFAULT_LEGAL_METROLOGY.manufacturer.address,
+          email: DEFAULT_LEGAL_METROLOGY.manufacturer.email,
+          phone: DEFAULT_LEGAL_METROLOGY.manufacturer.phone
+        }
+      : DEFAULT_LEGAL_METROLOGY.manufacturer,
+    packerDetails: product.packerName
+      ? {
+          name: product.packerName,
+          address: product.packerAddress ?? DEFAULT_LEGAL_METROLOGY.packer?.address ?? ''
+        }
+      : DEFAULT_LEGAL_METROLOGY.packer,
+    consumerCareDetails: DEFAULT_LEGAL_METROLOGY.consumerCare,
     category: product.categoryId
       ? {
           id: product.categoryId,
@@ -224,6 +260,13 @@ export async function createProductWithVariants(
         customizationConfig: input.customizationConfig ?? null,
         specifications: input.specifications ?? {},
         tags: input.tags ?? [],
+        countryOfOrigin: input.countryOfOrigin ?? 'India',
+        netQuantity: input.netQuantity ?? '1 N',
+        commodityName: input.commodityName ?? null,
+        manufacturerName: input.manufacturerName ?? null,
+        manufacturerAddress: input.manufacturerAddress ?? null,
+        packerName: input.packerName ?? null,
+        packerAddress: input.packerAddress ?? null,
         seoTitle: input.seoTitle,
         seoDescription: input.seoDescription
       })

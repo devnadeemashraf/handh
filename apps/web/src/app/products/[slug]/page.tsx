@@ -5,6 +5,7 @@ import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { ThemeInjector } from '@/components/layout/ThemeInjector';
+import { LegalMetrologySection } from '@/components/product/LegalMetrologySection';
 import { ProductAccordion } from '@/components/product/ProductAccordion';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductPurchaseCard } from '@/components/product/ProductPurchaseCard';
@@ -161,6 +162,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
             {/* Craftsmanship, Shipping & Care Accordion */}
             <ProductAccordion />
+
+            {/* Statutory Legal Metrology Declarations */}
+            <LegalMetrologySection product={product} selectedVariant={primaryVariant} />
           </div>
         </div>
 

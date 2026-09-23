@@ -110,6 +110,13 @@ export const createProductSchema = z.object({
     .optional()
     .default({}),
   tags: z.array(z.string()).optional().default([]),
+  countryOfOrigin: z.string().max(64).optional().default('India'),
+  netQuantity: z.string().max(32).optional().default('1 N'),
+  commodityName: z.string().max(128).optional(),
+  manufacturerName: z.string().max(255).optional(),
+  manufacturerAddress: z.string().optional(),
+  packerName: z.string().max(255).optional(),
+  packerAddress: z.string().optional(),
   seoTitle: z.string().max(255).optional(),
   seoDescription: z.string().max(500).optional(),
   variants: z.array(createVariantInputSchema).min(1, 'Product must have at least one variant'),
