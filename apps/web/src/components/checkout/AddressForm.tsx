@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-import { extractIndianPhoneDigits, INDIAN_STATES } from '@hh/domain';
+import { extractIndianPhoneDigits, INDIAN_STATES, isPostalCodeServiceable } from '@hh/domain';
 
 import type { ShippingAddressInput } from '@hh/domain';
 
@@ -216,12 +216,19 @@ export function AddressForm({ values, errors, onChange, disabled = false }: Addr
                 }}
                 disabled={disabled}
                 className={cn(
-                  errors.postalCode && 'border-destructive focus-visible:ring-destructive'
+                  (errors.postalCode ||
+                    (values.postalCode.length === 6 &&
+                      !isPostalCodeServiceable(values.postalCode))) &&
+                    'border-destructive focus-visible:ring-destructive'
                 )}
               />
-              {errors.postalCode && (
+              {errors.postalCode ? (
                 <span className="mt-1 block text-xs text-destructive">{errors.postalCode}</span>
-              )}
+              ) : values.postalCode.length === 6 && !isPostalCodeServiceable(values.postalCode) ? (
+                <span className="mt-1 block text-xs text-destructive">
+                  Delivery is currently not available to PIN {values.postalCode}.
+                </span>
+              ) : null}
             </div>
 
             {/* City */}

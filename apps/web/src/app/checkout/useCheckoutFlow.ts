@@ -502,6 +502,17 @@ export function useCheckoutFlow({
           return;
         }
 
+        if (res.status === 422 || data.code === 'UNSERVICEABLE_PINCODE') {
+          const message = data.error || 'Delivery is currently not available to this PIN code.';
+          setSubmitError(message);
+          setErrors((prev) => ({
+            ...prev,
+            postalCode: message
+          }));
+          setIsSubmitting(false);
+          return;
+        }
+
         if (res.status === 409) {
           setSubmitError(
             data.error || 'Inventory was reserved by another shopper. Refreshing cart...'

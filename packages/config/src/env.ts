@@ -46,6 +46,15 @@ export const serverEnvSchema = z
       .default('hh_admin_secret_pass_2026'),
     ORDER_RECEIPT_SECRET: z.string().min(16).optional(),
 
+    // Shipping & Courier Webhooks (E-COM-062)
+    SHIPROCKET_EMAIL: z.string().optional(),
+    SHIPROCKET_PASSWORD: z.string().optional(),
+    SHIPROCKET_API_KEY: z.string().optional(),
+    SHIPROCKET_WEBHOOK_SECRET: z.string().optional(),
+    TRACKINGMORE_API_KEY: z.string().optional(),
+    TRACKINGMORE_WEBHOOK_SECRET: z.string().optional(),
+    MANUAL_WEBHOOK_SECRET: z.string().optional(),
+
     // Initial Admin Auto-Provisioning
     INITIAL_ADMIN_EMAIL: z.string().email().default('admin@handh.in'),
     INITIAL_ADMIN_PASSWORD: z.string().min(8).default('hh_admin_master_password_2026'),

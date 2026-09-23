@@ -28,6 +28,51 @@ describe('Shipping Provider Adapters', () => {
       expect(speedPostRes.trackingUrl).toContain('indiapost.gov.in');
     });
 
+    it('fails closed when webhookSecret is missing or empty (E-COM-062)', () => {
+      const unconfiguredAdapter = new ManualShippingAdapter({});
+      expect(
+        unconfiguredAdapter.verifyWebhookSignature('{}', {
+          'x-manual-webhook-secret': 'any_attempt'
+        })
+      ).toBe(false);
+
+      const emptySecretAdapter = new ManualShippingAdapter({ webhookSecret: '' });
+      expect(
+        emptySecretAdapter.verifyWebhookSignature('{}', {
+          'x-manual-webhook-secret': ''
+        })
+      ).toBe(false);
+    });
+
+    it('checks serviceability for valid and unserviceable Indian PIN codes (E-COM-063)', async () => {
+      // Serviceable Hyderabad local address
+      const localRes = await adapter.checkServiceability({ postalCode: '500034' });
+      expect(localRes.isServiceable).toBe(true);
+      expect(localRes.state).toBe('Telangana');
+      expect(localRes.estimatedDaysMin).toBe(1);
+      expect(localRes.estimatedDaysMax).toBe(2);
+
+      // Serviceable Bangalore address
+      const blrRes = await adapter.checkServiceability({ postalCode: '560001' });
+      expect(blrRes.isServiceable).toBe(true);
+      expect(blrRes.state).toBe('Karnataka');
+
+      // Invalid format PIN codes
+      const invalidRes1 = await adapter.checkServiceability({ postalCode: '12345' });
+      expect(invalidRes1.isServiceable).toBe(false);
+      const invalidRes2 = await adapter.checkServiceability({ postalCode: '012345' });
+      expect(invalidRes2.isServiceable).toBe(false);
+
+      // Blocked / unserviceable PIN codes (E-COM-063 audit case)
+      const remoteRes = await adapter.checkServiceability({ postalCode: '790001' });
+      expect(remoteRes.isServiceable).toBe(false);
+      expect(remoteRes.message).toContain('Delivery is currently not available to PIN 790001');
+
+      // Military APS (Zone 9)
+      const apsRes = await adapter.checkServiceability({ postalCode: '900001' });
+      expect(apsRes.isServiceable).toBe(false);
+    });
+
     it('verifies webhook signature using header', () => {
       expect(
         adapter.verifyWebhookSignature('{}', { 'x-manual-webhook-secret': 'test_manual_secret' })
@@ -56,6 +101,31 @@ describe('Shipping Provider Adapters', () => {
   describe('ShiprocketAdapter', () => {
     const adapter = new ShiprocketAdapter({
       webhookSecret: 'sr_secret_key'
+    });
+
+    it('fails closed when webhookSecret is missing or empty (E-COM-062)', () => {
+      const unconfigured = new ShiprocketAdapter({});
+      expect(
+        unconfigured.verifyWebhookSignature('{}', { 'x-shiprocket-signature': 'sr_secret_key' })
+      ).toBe(false);
+
+      const emptySecret = new ShiprocketAdapter({ webhookSecret: '   ' });
+      expect(
+        emptySecret.verifyWebhookSignature('{}', { 'x-shiprocket-signature': 'sr_secret_key' })
+      ).toBe(false);
+    });
+
+    it('checks serviceability for valid and unserviceable Indian PIN codes (E-COM-063)', async () => {
+      const serviceable = await adapter.checkServiceability({ postalCode: '110001' });
+      expect(serviceable.isServiceable).toBe(true);
+      expect(serviceable.state).toBe('Delhi');
+
+      const unserviceable = await adapter.checkServiceability({ postalCode: '790001' });
+      expect(unserviceable.isServiceable).toBe(false);
+      expect(unserviceable.message).toContain('Delivery is currently not available to PIN 790001');
+
+      const dummyCode = await adapter.checkServiceability({ postalCode: '999999' });
+      expect(dummyCode.isServiceable).toBe(false);
     });
 
     it('simulates doorstep pickup booking in dev mode', async () => {
@@ -132,6 +202,19 @@ describe('Shipping Provider Adapters', () => {
       webhookSecret: 'tm_webhook_secret'
     });
 
+    it('fails closed when webhookSecret is missing or empty (E-COM-062)', () => {
+      const unconfigured = new TrackingMoreAdapter({});
+      expect(
+        unconfigured.verifyWebhookSignature('{}', { 'trackingmore-signature': 'tm_webhook_secret' })
+      ).toBe(false);
+    });
+
+    it('checks serviceability for valid Indian PIN codes', async () => {
+      const res = await adapter.checkServiceability({ postalCode: '400001' });
+      expect(res.isServiceable).toBe(true);
+      expect(res.state).toBe('Maharashtra');
+    });
+
     it('registers counter AWB for universal tracking', async () => {
       const result = await adapter.registerCounterAwb({
         awb: 'EM998877665IN',
@@ -196,6 +279,20 @@ describe('Shipping Provider Adapters', () => {
       expect(registry.has('manual')).toBe(true);
       expect(registry.has('shiprocket')).toBe(true);
       expect(registry.has('trackingmore')).toBe(true);
+    });
+
+    it('delegates checkServiceability to appropriate provider', async () => {
+      const registry = ShippingAdapterRegistry.createDefault({
+        manualSecret: 'manual_sec',
+        shiprocket: { webhookSecret: 'sr_sec' }
+      });
+
+      const res = await registry.checkServiceability({ postalCode: '500034' });
+      expect(res.isServiceable).toBe(true);
+      expect(res.postalCode).toBe('500034');
+
+      const blockedRes = await registry.checkServiceability({ postalCode: '790001' });
+      expect(blockedRes.isServiceable).toBe(false);
     });
   });
 });

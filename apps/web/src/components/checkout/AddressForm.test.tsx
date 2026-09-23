@@ -85,4 +85,19 @@ describe('AddressForm Component', () => {
       screen.getByText('Please enter a valid 10-digit Indian mobile number')
     ).toBeInTheDocument();
   });
+
+  it('displays inline unserviceable notice when unserviceable PIN code is entered (E-COM-063)', () => {
+    const onChange = vi.fn();
+    render(
+      <AddressForm
+        values={{ ...defaultValues, postalCode: '790001' }}
+        errors={{}}
+        onChange={onChange}
+      />
+    );
+
+    expect(
+      screen.getByText('Delivery is currently not available to PIN 790001.')
+    ).toBeInTheDocument();
+  });
 });

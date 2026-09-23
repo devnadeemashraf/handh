@@ -1,9 +1,19 @@
+import { verifySecretTimingSafe } from '../crypto';
+import {
+  estimateTransitDays,
+  getPostalCodeRegion,
+  isPostalCodeServiceable,
+  validateIndianPostalCode
+} from '../pincode';
+
 import type { ShippingProviderAdapter } from '../adapter';
 import type {
   NormalizedTrackingEvent,
   NormalizedTrackingStatus,
   RegisterCounterAwbRequest,
-  RegisterCounterAwbResult
+  RegisterCounterAwbResult,
+  ServiceabilityRequest,
+  ServiceabilityResult
 } from '../types';
 
 export interface TrackingMoreAdapterConfig {
@@ -43,9 +53,48 @@ export class TrackingMoreAdapter implements ShippingProviderAdapter {
     };
   }
 
+  async checkServiceability(request: ServiceabilityRequest): Promise<ServiceabilityResult> {
+    const validation = validateIndianPostalCode(request.postalCode);
+    if (!validation.valid || !validation.normalized) {
+      return {
+        isServiceable: false,
+        postalCode: request.postalCode,
+        providerId: this.providerId,
+        message: validation.error ?? 'Invalid Indian PIN code format'
+      };
+    }
+
+    const postalCode = validation.normalized;
+    const serviceable = isPostalCodeServiceable(postalCode);
+
+    if (!serviceable) {
+      return {
+        isServiceable: false,
+        postalCode,
+        providerId: this.providerId,
+        message: `Delivery is currently not available to PIN ${postalCode}.`
+      };
+    }
+
+    const region = getPostalCodeRegion(postalCode);
+    const transit = estimateTransitDays(postalCode);
+
+    return {
+      isServiceable: true,
+      postalCode,
+      providerId: this.providerId,
+      state: region?.state,
+      estimatedDaysMin: transit.minDays,
+      estimatedDaysMax: transit.maxDays,
+      codAvailable: true,
+      message: 'Universal postal tracking network available.'
+    };
+  }
+
   verifyWebhookSignature(_rawBody: string, headers: Record<string, string>): boolean {
-    if (!this.config.webhookSecret) {
-      return true;
+    if (!this.config.webhookSecret || this.config.webhookSecret.trim() === '') {
+      // Fail closed when no secret is configured (E-COM-062)
+      return false;
     }
 
     const providedSignature =
@@ -53,7 +102,7 @@ export class TrackingMoreAdapter implements ShippingProviderAdapter {
       headers['x-trackingmore-signature'] ||
       headers['authorization']?.replace(/^Bearer\s+/i, '');
 
-    return providedSignature === this.config.webhookSecret;
+    return verifySecretTimingSafe(providedSignature, this.config.webhookSecret);
   }
 
   parseWebhookPayload(rawBody: string): NormalizedTrackingEvent {

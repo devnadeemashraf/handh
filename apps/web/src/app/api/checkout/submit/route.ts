@@ -14,6 +14,7 @@ import { getCurrentUser } from '../../../../lib/auth';
 import { getClientIp } from '../../../../lib/client-ip';
 import { checkoutSubmitRateLimiter } from '../../../../lib/rate-limit';
 import { generateOrderReceiptToken } from '../../../../lib/receipt-token';
+import { getShippingRegistry } from '../../../../lib/shipping';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
   try {
     const ip = getClientIp(request);
 
-    const rl = await checkoutSubmitRateLimiter.limit(ip);
+    const rl = (await checkoutSubmitRateLimiter.limit(ip)) ?? { success: true, reset: 0 };
     if (!rl.success) {
       return NextResponse.json(
         {
@@ -85,6 +86,26 @@ export async function POST(request: Request) {
           error: serviceControl.maintenanceNotice
         },
         { status: 503 }
+      );
+    }
+
+    // Courier Postal Code Serviceability Gate (E-COM-063)
+    const shippingPincode = parseResult.data.shippingAddress.postalCode;
+    const shippingRegistry = getShippingRegistry();
+    const serviceability = await shippingRegistry.checkServiceability({
+      postalCode: shippingPincode
+    });
+
+    if (!serviceability.isServiceable) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'UNSERVICEABLE_PINCODE',
+          error:
+            serviceability.message ||
+            `Delivery is currently not available to PIN code ${shippingPincode}. Please select a different delivery address.`
+        },
+        { status: 422 }
       );
     }
 

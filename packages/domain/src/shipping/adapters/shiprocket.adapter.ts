@@ -1,9 +1,19 @@
+import { verifySecretTimingSafe } from '../crypto';
+import {
+  estimateTransitDays,
+  getPostalCodeRegion,
+  isPostalCodeServiceable,
+  validateIndianPostalCode
+} from '../pincode';
+
 import type { ShippingProviderAdapter } from '../adapter';
 import type {
   BookPickupRequest,
   BookPickupResult,
   NormalizedTrackingEvent,
-  NormalizedTrackingStatus
+  NormalizedTrackingStatus,
+  ServiceabilityRequest,
+  ServiceabilityResult
 } from '../types';
 
 export interface ShiprocketAdapterConfig {
@@ -50,9 +60,49 @@ export class ShiprocketAdapter implements ShippingProviderAdapter {
     };
   }
 
+  async checkServiceability(request: ServiceabilityRequest): Promise<ServiceabilityResult> {
+    const validation = validateIndianPostalCode(request.postalCode);
+    if (!validation.valid || !validation.normalized) {
+      return {
+        isServiceable: false,
+        postalCode: request.postalCode,
+        providerId: this.providerId,
+        message: validation.error ?? 'Invalid Indian PIN code format'
+      };
+    }
+
+    const postalCode = validation.normalized;
+    const serviceable = isPostalCodeServiceable(postalCode);
+
+    if (!serviceable) {
+      return {
+        isServiceable: false,
+        postalCode,
+        providerId: this.providerId,
+        message: `Delivery is currently not available to PIN ${postalCode}.`
+      };
+    }
+
+    const region = getPostalCodeRegion(postalCode);
+    const transit = estimateTransitDays(postalCode);
+
+    return {
+      isServiceable: true,
+      postalCode,
+      providerId: this.providerId,
+      city: region?.state ? `${region.state} Region` : undefined,
+      state: region?.state,
+      estimatedDaysMin: transit.minDays,
+      estimatedDaysMax: transit.maxDays,
+      codAvailable: true,
+      message: 'Courier delivery available via Shiprocket network.'
+    };
+  }
+
   verifyWebhookSignature(_rawBody: string, headers: Record<string, string>): boolean {
-    if (!this.config.webhookSecret) {
-      return true;
+    if (!this.config.webhookSecret || this.config.webhookSecret.trim() === '') {
+      // Fail closed when no secret is configured (E-COM-062)
+      return false;
     }
 
     const providedSecret =
@@ -60,7 +110,7 @@ export class ShiprocketAdapter implements ShippingProviderAdapter {
       headers['x-api-key'] ||
       headers['authorization']?.replace(/^Bearer\s+/i, '');
 
-    return providedSecret === this.config.webhookSecret;
+    return verifySecretTimingSafe(providedSecret, this.config.webhookSecret);
   }
 
   parseWebhookPayload(rawBody: string): NormalizedTrackingEvent {

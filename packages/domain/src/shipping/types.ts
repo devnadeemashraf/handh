@@ -89,3 +89,26 @@ export const BookPickupInputSchema = z.object({
 });
 
 export type BookPickupInput = z.infer<typeof BookPickupInputSchema>;
+
+export const ServiceabilityRequestSchema = z.object({
+  postalCode: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'Please enter a valid 6-digit Indian PIN code'),
+  cod: z.boolean().optional(),
+  weightGrams: z.number().int().positive().optional()
+});
+
+export type ServiceabilityRequest = z.infer<typeof ServiceabilityRequestSchema>;
+
+export interface ServiceabilityResult {
+  isServiceable: boolean;
+  postalCode: string;
+  providerId: string;
+  city?: string | undefined;
+  state?: string | undefined;
+  estimatedDaysMin?: number | undefined;
+  estimatedDaysMax?: number | undefined;
+  codAvailable?: boolean | undefined;
+  message?: string | undefined;
+}

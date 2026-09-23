@@ -4,6 +4,8 @@ import type {
   NormalizedTrackingEvent,
   RegisterCounterAwbRequest,
   RegisterCounterAwbResult,
+  ServiceabilityRequest,
+  ServiceabilityResult,
   ShippingProviderId
 } from './types';
 
@@ -27,6 +29,11 @@ export interface ShippingProviderAdapter {
    * Mode 2: Registers a walk-in / counter AWB (e.g. India Post slip) for automated webhook triggers
    */
   registerCounterAwb?(request: RegisterCounterAwbRequest): Promise<RegisterCounterAwbResult>;
+
+  /**
+   * Pre-purchase courier serviceability verification (E-COM-063).
+   */
+  checkServiceability(request: ServiceabilityRequest): Promise<ServiceabilityResult>;
 
   /**
    * Cryptographically verifies inbound webhook authenticity (HMAC / Secret Token)

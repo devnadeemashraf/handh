@@ -286,4 +286,61 @@ describe('useCheckoutFlow Hook (E-COM-044)', () => {
     expect(hookResult!.current.orderPlaced).toBeNull();
     expect(sessionStorage.getItem(PENDING_ORDER_STORAGE_KEY)).toBeNull();
   });
+
+  it('sets submitError and errors.postalCode when submission returns UNSERVICEABLE_PINCODE (E-COM-063)', async () => {
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/api/checkout/submit')) {
+        return Promise.resolve({
+          ok: false,
+          status: 422,
+          json: () =>
+            Promise.resolve({
+              success: false,
+              code: 'UNSERVICEABLE_PINCODE',
+              error: 'Delivery is currently not available to PIN 790001.'
+            })
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ success: true, addresses: [] })
+      });
+    });
+
+    let hookResult: { current: ReturnType<typeof useCheckoutFlow> } | undefined;
+    await act(async () => {
+      const { result } = renderHook(() =>
+        useCheckoutFlow({
+          user: mockUser,
+          cartSummary: mockCartSummary,
+          clearCart: mockClearCart,
+          refreshCart: mockRefreshCart,
+          openAuthModal: mockOpenAuthModal
+        })
+      );
+      hookResult = result;
+    });
+
+    await act(async () => {
+      hookResult!.current.handleFieldChange('fullName', 'Fatima Begum');
+      hookResult!.current.handleFieldChange('phone', '9876543210');
+      hookResult!.current.handleFieldChange('email', 'fatima@example.com');
+      hookResult!.current.handleFieldChange('line1', 'Jubilee Hills Road 36');
+      hookResult!.current.handleFieldChange('city', 'Hyderabad');
+      hookResult!.current.handleFieldChange('state', 'Telangana');
+      hookResult!.current.handleFieldChange('postalCode', '790001');
+    });
+
+    await act(async () => {
+      await hookResult!.current.handleSubmit();
+    });
+
+    expect(hookResult!.current.submitError).toBe(
+      'Delivery is currently not available to PIN 790001.'
+    );
+    expect(hookResult!.current.errors.postalCode).toBe(
+      'Delivery is currently not available to PIN 790001.'
+    );
+    expect(hookResult!.current.orderPlaced).toBeNull();
+  });
 });

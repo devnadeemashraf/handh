@@ -49,6 +49,35 @@ export class ShippingAdapterRegistry {
     return this.adapters.has(providerId);
   }
 
+  /**
+   * Evaluates postal code serviceability across configured providers (E-COM-063).
+   * Prefers the specified provider, then Shiprocket, then Manual fallback.
+   */
+  async checkServiceability(
+    request: import('./types').ServiceabilityRequest,
+    preferredProviderId?: string
+  ): Promise<import('./types').ServiceabilityResult> {
+    const provider = preferredProviderId
+      ? this.get(preferredProviderId)
+      : (this.get('shiprocket') ?? this.get('manual'));
+
+    if (provider) {
+      return provider.checkServiceability(request);
+    }
+
+    const fallback = this.list()[0];
+    if (fallback) {
+      return fallback.checkServiceability(request);
+    }
+
+    return {
+      isServiceable: false,
+      postalCode: request.postalCode,
+      providerId: 'none',
+      message: 'No shipping providers available to verify serviceability.'
+    };
+  }
+
   static createDefault(config: DefaultRegistryConfig = {}): ShippingAdapterRegistry {
     const registry = new ShippingAdapterRegistry();
 
