@@ -2,6 +2,7 @@
 
 import { Clock, Loader2, ShieldCheck, Sparkles, Tag, Truck, X } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -284,12 +285,49 @@ export function OrderReviewCard({
           </span>
         </div>
 
+        {/* Affirmative Pre-Purchase Contract Formation Notice (Consumer Protection Rules & Indian Contract Act) */}
+        <div
+          id="contract-formation-notice"
+          data-testid="contract-formation-notice"
+          className="mb-4 text-xs text-muted-foreground leading-relaxed text-center px-1"
+        >
+          By placing this order, you confirm and agree to H&amp;H&apos;s{' '}
+          <Link
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary font-medium underline underline-offset-2 hover:text-primary/80 transition-colors"
+          >
+            Terms of Sale
+          </Link>
+          ,{' '}
+          <Link
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary font-medium underline underline-offset-2 hover:text-primary/80 transition-colors"
+          >
+            Privacy Policy
+          </Link>
+          , and{' '}
+          <Link
+            href="/refunds"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary font-medium underline underline-offset-2 hover:text-primary/80 transition-colors"
+          >
+            Refund Policy
+          </Link>
+          .
+        </div>
+
         {/* Primary Submit Button */}
         <Button
           type="button"
           onClick={() => onSubmit(appliedCoupon?.code)}
           disabled={disabled || isSubmitting || !cartSummary.isValidForCheckout}
           size="lg"
+          aria-describedby="contract-formation-notice"
           className="w-full text-base font-semibold shadow-md min-h-12"
         >
           {isSubmitting ? (

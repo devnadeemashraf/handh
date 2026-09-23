@@ -171,4 +171,35 @@ describe('OrderReviewCard Component', () => {
 
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
+
+  it('renders affirmative pre-purchase contract formation notice with legal policy links above submit button', () => {
+    const onSubmit = vi.fn();
+    render(
+      <OrderReviewCard cartSummary={mockCartSummary} isSubmitting={false} onSubmit={onSubmit} />
+    );
+
+    const notice = screen.getByTestId('contract-formation-notice');
+    expect(notice).toBeInTheDocument();
+    expect(notice).toHaveTextContent(
+      "By placing this order, you confirm and agree to H&H's Terms of Sale, Privacy Policy, and Refund Policy."
+    );
+
+    const termsLink = screen.getByRole('link', { name: /Terms of Sale/i });
+    expect(termsLink).toHaveAttribute('href', '/terms');
+    expect(termsLink).toHaveAttribute('target', '_blank');
+    expect(termsLink).toHaveAttribute('rel', 'noopener noreferrer');
+
+    const privacyLink = screen.getByRole('link', { name: /Privacy Policy/i });
+    expect(privacyLink).toHaveAttribute('href', '/privacy');
+    expect(privacyLink).toHaveAttribute('target', '_blank');
+    expect(privacyLink).toHaveAttribute('rel', 'noopener noreferrer');
+
+    const refundLink = screen.getByRole('link', { name: /Refund Policy/i });
+    expect(refundLink).toHaveAttribute('href', '/refunds');
+    expect(refundLink).toHaveAttribute('target', '_blank');
+    expect(refundLink).toHaveAttribute('rel', 'noopener noreferrer');
+
+    const proceedBtn = screen.getByRole('button', { name: /Place Order & Proceed to Pay/i });
+    expect(proceedBtn).toHaveAttribute('aria-describedby', 'contract-formation-notice');
+  });
 });
