@@ -88,6 +88,18 @@ describe('Admin Book Doorstep Pickup API Route (POST /api/admin/orders/[id]/book
     });
 
     vi.spyOn(dbModule, 'getSharedDbClient').mockReturnValue(mockDb);
+    const auditSpy = vi.spyOn(dbModule, 'recordAdminAuditLog').mockResolvedValue({
+      id: 'audit-1',
+      adminId: 'admin-123',
+      adminEmail: 'admin@brand.com',
+      action: 'order:pickup_booked',
+      entityType: 'order',
+      entityId: 'ord-123',
+      details: {},
+      ipAddress: '127.0.0.1',
+      userAgent: 'test-agent',
+      createdAt: new Date()
+    });
     // @ts-expect-error Mock order return
     vi.spyOn(dbModule, 'findOrderById').mockResolvedValue(mockOrder);
 
@@ -132,6 +144,15 @@ describe('Admin Book Doorstep Pickup API Route (POST /api/admin/orders/[id]/book
 
     const data = await res.json();
     expect(data.success).toBe(true);
+    expect(auditSpy).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        adminId: 'admin-123',
+        action: 'order:pickup_booked',
+        entityType: 'order',
+        entityId: 'ord-123'
+      })
+    );
 
     // Verify bookDoorstepPickup received origin from environment variables
     expect(bookDoorstepPickupMock).toHaveBeenCalledWith(
@@ -177,6 +198,18 @@ describe('Admin Book Doorstep Pickup API Route (POST /api/admin/orders/[id]/book
     });
 
     vi.spyOn(dbModule, 'getSharedDbClient').mockReturnValue(mockDb);
+    const auditSpy = vi.spyOn(dbModule, 'recordAdminAuditLog').mockResolvedValue({
+      id: 'audit-2',
+      adminId: 'admin-123',
+      adminEmail: 'admin@brand.com',
+      action: 'order:pickup_booked',
+      entityType: 'order',
+      entityId: 'ord-123',
+      details: {},
+      ipAddress: '127.0.0.1',
+      userAgent: 'test-agent',
+      createdAt: new Date()
+    });
     // @ts-expect-error Mock order return
     vi.spyOn(dbModule, 'findOrderById').mockResolvedValue(mockOrder);
 
@@ -228,6 +261,16 @@ describe('Admin Book Doorstep Pickup API Route (POST /api/admin/orders/[id]/book
       params: Promise.resolve({ id: 'ord-123' })
     });
     expect(res.status).toBe(200);
+
+    expect(auditSpy).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        adminId: 'admin-123',
+        action: 'order:pickup_booked',
+        entityType: 'order',
+        entityId: 'ord-123'
+      })
+    );
 
     // Verify bookDoorstepPickup received custom origin from request body
     expect(bookDoorstepPickupMock).toHaveBeenCalledWith(

@@ -4,6 +4,7 @@ import {
   BarChart3,
   Boxes,
   ExternalLink,
+  History,
   LogOut,
   Menu,
   Package,
@@ -63,7 +64,8 @@ export default function AdminHeader() {
       group: 'Governance',
       items: [
         { href: '/admin/service-control', label: 'Services', icon: Sliders },
-        { href: '/admin/users', label: 'Users', icon: Users }
+        { href: '/admin/users', label: 'Users', icon: Users },
+        { href: '/admin/audit-logs', label: 'Audit Logs', icon: History }
       ]
     }
   ];

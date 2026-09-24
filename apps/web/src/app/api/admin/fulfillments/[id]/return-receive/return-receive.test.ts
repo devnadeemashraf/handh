@@ -58,6 +58,18 @@ describe('Admin Fulfillment Return Intake API Route (POST /api/admin/fulfillment
     });
 
     vi.spyOn(dbModule, 'getSharedDbClient').mockReturnValue(mockDb);
+    const auditSpy = vi.spyOn(dbModule, 'recordAdminAuditLog').mockResolvedValue({
+      id: 'audit-1',
+      adminId: 'admin-123',
+      adminEmail: 'admin@brand.com',
+      action: 'fulfillment:return_received',
+      entityType: 'fulfillment',
+      entityId: 'fulf-1',
+      details: {},
+      ipAddress: '127.0.0.1',
+      userAgent: 'test-agent',
+      createdAt: new Date()
+    });
 
     const receiveSpy = vi.spyOn(dbModule, 'receiveFulfillmentReturn').mockResolvedValue({
       success: true,
@@ -88,6 +100,21 @@ describe('Admin Fulfillment Return Intake API Route (POST /api/admin/fulfillment
     expect(res.status).toBe(200);
 
     const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(receiveSpy).toHaveBeenCalledWith(mockDb, {
+      fulfillmentId: 'fulf-1',
+      note: 'Customer returned package - verified seal intact',
+      restock: true
+    });
+    expect(auditSpy).toHaveBeenCalledWith(
+      mockDb,
+      expect.objectContaining({
+        adminId: 'admin-123',
+        action: 'fulfillment:return_received',
+        entityType: 'fulfillment',
+        entityId: 'fulf-1'
+      })
+    );
     expect(data.success).toBe(true);
     expect(data.result.restockedItems.length).toBe(1);
     expect(receiveSpy).toHaveBeenCalledWith(mockDb, {

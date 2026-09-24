@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/admin-auth';
+import { getClientIp } from '@/lib/client-ip';
 
-import { getSharedDbClient, updateCoupon } from '@hh/db';
+import { getSharedDbClient, recordAdminAuditLog, updateCoupon } from '@hh/db';
 import { UpdateCouponSchema } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
@@ -38,6 +39,20 @@ export async function PATCH(request: Request, props: { params: Promise<{ id: str
 
     const db = getDatabase();
     const updated = await updateCoupon(db, 'hh', id, parseResult.data);
+
+    // Record immutable admin audit log (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: isAuthed.admin.id,
+      adminEmail: isAuthed.admin.email,
+      action: 'coupon:updated',
+      entityType: 'coupon',
+      entityId: id,
+      details: {
+        changes: parseResult.data
+      },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
+    });
 
     return NextResponse.json({
       success: true,

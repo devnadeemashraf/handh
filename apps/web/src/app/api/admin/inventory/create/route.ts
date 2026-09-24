@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/admin-auth';
+import { getClientIp } from '@/lib/client-ip';
 
-import { createProductWithVariants, findStoreBySlug, getSharedDbClient } from '@hh/db';
+import {
+  createProductWithVariants,
+  findStoreBySlug,
+  getSharedDbClient,
+  recordAdminAuditLog
+} from '@hh/db';
 import { createProductSchema } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
@@ -65,6 +71,22 @@ export async function POST(request: Request) {
     }
 
     const result = await createProductWithVariants(db, parseResult.data);
+
+    // Record immutable admin audit log (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: isAuthed.admin.id,
+      adminEmail: isAuthed.admin.email,
+      action: 'inventory:product_created',
+      entityType: 'product',
+      entityId: result.product.id,
+      details: {
+        title: result.product.title,
+        slug: result.product.slug,
+        variantsCount: result.variants.length
+      },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
+    });
 
     return NextResponse.json({
       success: true,

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createDbClient } from './index';
 import {
+  countAdminAuditLogs,
   createAdminSession,
   createAdminUser,
   findAdminSessionByTokenHash,
@@ -144,7 +145,14 @@ describe('Admin Repositories & Enterprise Auth Integration', () => {
       action: 'user:role_updated'
     });
 
+    const totalCount = await countAdminAuditLogs(db, {
+      adminId,
+      entityType: 'user',
+      action: 'user:role_updated'
+    });
+
     expect(logs.length).toBeGreaterThanOrEqual(1);
+    expect(totalCount).toBeGreaterThanOrEqual(1);
     const entry = logs[0]!;
     expect(entry.adminEmail).toBe(testEmail.toLowerCase());
     expect(entry.action).toBe('user:role_updated');

@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
 
-import { createOrderFulfillment, findOrderById, getSharedDbClient } from '@hh/db';
+import {
+  createOrderFulfillment,
+  findOrderById,
+  getSharedDbClient,
+  recordAdminAuditLog
+} from '@hh/db';
 import { BookPickupInputSchema } from '@hh/domain';
 
 import type { ShippingAddress } from '@hh/db';
 
 import { getAdminSession } from '../../../../../../lib/admin-auth';
+import { getClientIp } from '../../../../../../lib/client-ip';
 import { getShippingRegistry } from '../../../../../../lib/shipping';
 
 export const dynamic = 'force-dynamic';
@@ -120,6 +126,24 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       labelUrl: pickupResult.labelUrl,
       pickupToken: pickupResult.pickupToken,
       notes: notes ?? `Booked via ${adapter.name}`
+    });
+
+    // Record immutable admin audit log (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: isAuthed.admin.id,
+      adminEmail: isAuthed.admin.email,
+      action: 'order:pickup_booked',
+      entityType: 'order',
+      entityId: id,
+      details: {
+        fulfillmentId: fulfillmentResult.fulfillment.id,
+        awb: pickupResult.awb,
+        shippingProviderId: providerId,
+        pickupToken: pickupResult.pickupToken ?? null,
+        originCity: origin.city
+      },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
     });
 
     return NextResponse.json({

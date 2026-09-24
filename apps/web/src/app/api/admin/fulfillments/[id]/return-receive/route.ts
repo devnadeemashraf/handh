@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 
-import { getSharedDbClient, receiveFulfillmentReturn } from '@hh/db';
+import { getSharedDbClient, receiveFulfillmentReturn, recordAdminAuditLog } from '@hh/db';
 import { ReturnReceiveSchema } from '@hh/domain';
 
 import { getAdminSession } from '../../../../../../lib/admin-auth';
+import { getClientIp } from '../../../../../../lib/client-ip';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -36,6 +37,22 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       fulfillmentId: id,
       note: parsed.data.note,
       restock: parsed.data.restock
+    });
+
+    // Record immutable admin audit log (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: isAuthed.admin.id,
+      adminEmail: isAuthed.admin.email,
+      action: 'fulfillment:return_received',
+      entityType: 'fulfillment',
+      entityId: id,
+      details: {
+        note: parsed.data.note ?? null,
+        restock: parsed.data.restock,
+        restockedItems: result.restockedItems
+      },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
     });
 
     return NextResponse.json({

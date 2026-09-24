@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, count, desc, eq } from 'drizzle-orm';
 
 import type { AdminAuditLogEntry } from '@hh/domain';
 
@@ -8,7 +8,7 @@ import {
   type NewAdminAuditLogRecord
 } from '../schema/admin';
 
-import type { DatabaseClient } from '../index';
+import type { DatabaseClient, DbTransaction } from '../index';
 
 export function toDomainAdminAuditLog(record: AdminAuditLogRecord): AdminAuditLogEntry {
   return {
@@ -26,7 +26,7 @@ export function toDomainAdminAuditLog(record: AdminAuditLogRecord): AdminAuditLo
 }
 
 export async function recordAdminAuditLog(
-  db: DatabaseClient,
+  db: DatabaseClient | DbTransaction,
   entry: Omit<NewAdminAuditLogRecord, 'id' | 'createdAt'>
 ): Promise<AdminAuditLogRecord> {
   const [created] = await db
@@ -45,7 +45,7 @@ export async function recordAdminAuditLog(
 }
 
 export async function listAdminAuditLogs(
-  db: DatabaseClient,
+  db: DatabaseClient | DbTransaction,
   options: {
     adminId?: string | undefined;
     entityType?: string | undefined;
@@ -71,4 +71,25 @@ export async function listAdminAuditLogs(
   const rows = conditions.length > 0 ? await query.where(and(...conditions)) : await query;
 
   return rows.map(toDomainAdminAuditLog);
+}
+
+export async function countAdminAuditLogs(
+  db: DatabaseClient | DbTransaction,
+  options: {
+    adminId?: string | undefined;
+    entityType?: string | undefined;
+    action?: string | undefined;
+  } = {}
+): Promise<number> {
+  const { adminId, entityType, action } = options;
+
+  const conditions = [];
+  if (adminId) conditions.push(eq(adminAuditLogs.adminId, adminId));
+  if (entityType) conditions.push(eq(adminAuditLogs.entityType, entityType));
+  if (action) conditions.push(eq(adminAuditLogs.action, action));
+
+  const query = db.select({ total: count() }).from(adminAuditLogs);
+  const rows = conditions.length > 0 ? await query.where(and(...conditions)) : await query;
+
+  return Number(rows[0]?.total ?? 0);
 }

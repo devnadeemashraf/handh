@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 
-import { createOrderFulfillment, getSharedDbClient } from '@hh/db';
+import { createOrderFulfillment, getSharedDbClient, recordAdminAuditLog } from '@hh/db';
 import { CreateFulfillmentRequestSchema } from '@hh/domain';
 
 import { getAdminSession } from '../../../../../../lib/admin-auth';
+import { getClientIp } from '../../../../../../lib/client-ip';
 import { getShippingRegistry } from '../../../../../../lib/shipping';
 
 export const dynamic = 'force-dynamic';
@@ -68,6 +69,24 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       trackingNumber,
       shippingProviderId,
       notes
+    });
+
+    // Record immutable admin audit log (E-COM-073)
+    await recordAdminAuditLog(db, {
+      adminId: isAuthed.admin.id,
+      adminEmail: isAuthed.admin.email,
+      action: 'order:fulfillment_created',
+      entityType: 'order',
+      entityId: params.id,
+      details: {
+        fulfillmentId: result.fulfillment.id,
+        trackingNumber,
+        courierProvider,
+        shippingProviderId,
+        notes: notes ?? null
+      },
+      ipAddress: getClientIp(request),
+      userAgent: request.headers.get('user-agent') ?? null
     });
 
     return NextResponse.json({

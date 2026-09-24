@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { getUserPermissions, hasPermission } from './permissions';
-import { AuthPhoneSchema, FamilyPreferencesSchema, normalizeIndianPhone } from './types';
+import {
+  AdminAuditLogFilterSchema,
+  AuthPhoneSchema,
+  FamilyPreferencesSchema,
+  normalizeIndianPhone
+} from './types';
 
 describe('Auth Domain Logic', () => {
   describe('Phone Normalization and Validation', () => {
@@ -54,6 +59,7 @@ describe('Auth Domain Logic', () => {
       expect(hasPermission('admin', 'users:manage_roles')).toBe(false);
       expect(hasPermission('admin', 'invoice:manage_templates')).toBe(false);
       expect(hasPermission('admin', 'compliance:manage')).toBe(false);
+      expect(hasPermission('admin', 'audit_logs:view')).toBe(false);
     });
 
     it('grants super_admin all permissions without exception', () => {
@@ -64,6 +70,43 @@ describe('Auth Domain Logic', () => {
       expect(hasPermission('super_admin', 'users:manage_roles')).toBe(true);
       expect(hasPermission('super_admin', 'invoice:manage_templates')).toBe(true);
       expect(hasPermission('super_admin', 'compliance:manage')).toBe(true);
+      expect(hasPermission('super_admin', 'audit_logs:view')).toBe(true);
+    });
+  });
+
+  describe('Admin Audit Log Filter Schema Validation', () => {
+    it('validates default filter values', () => {
+      const result = AdminAuditLogFilterSchema.safeParse({});
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.limit).toBe(50);
+        expect(result.data.offset).toBe(0);
+      }
+    });
+
+    it('coerces string numbers and validates optional query parameters', () => {
+      const result = AdminAuditLogFilterSchema.safeParse({
+        limit: '25',
+        offset: '10',
+        action: 'order:status_updated',
+        entityType: 'order',
+        adminId: 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d'
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.limit).toBe(25);
+        expect(result.data.offset).toBe(10);
+        expect(result.data.action).toBe('order:status_updated');
+        expect(result.data.entityType).toBe('order');
+      }
+    });
+
+    it('rejects invalid limit or non-uuid adminId', () => {
+      const invalidLimit = AdminAuditLogFilterSchema.safeParse({ limit: 0 });
+      expect(invalidLimit.success).toBe(false);
+
+      const invalidUuid = AdminAuditLogFilterSchema.safeParse({ adminId: 'not-a-uuid' });
+      expect(invalidUuid.success).toBe(false);
     });
   });
 

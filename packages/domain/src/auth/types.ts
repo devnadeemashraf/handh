@@ -35,7 +35,8 @@ export const ALL_PERMISSIONS = [
   'service_control:manage',
   'users:manage_roles',
   'invoice:manage_templates',
-  'compliance:manage'
+  'compliance:manage',
+  'audit_logs:view'
 ] as const;
 
 export type Permission = (typeof ALL_PERMISSIONS)[number];
@@ -199,6 +200,16 @@ export interface AdminAuditLogEntry {
   userAgent?: string | null | undefined;
   createdAt: string;
 }
+
+export const AdminAuditLogFilterSchema = z.object({
+  adminId: z.string().uuid().optional(),
+  entityType: z.string().max(64).optional(),
+  action: z.string().max(64).optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+  offset: z.coerce.number().int().min(0).default(0)
+});
+
+export type AdminAuditLogFilter = z.infer<typeof AdminAuditLogFilterSchema>;
 
 export interface OAuthUserProfile {
   id: string;
