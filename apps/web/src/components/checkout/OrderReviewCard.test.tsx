@@ -232,4 +232,110 @@ describe('OrderReviewCard Component', () => {
     fireEvent.click(checkbox);
     expect(onWhatsappOptInChange).toHaveBeenCalledWith(false);
   });
+
+  it('disables submit button and shows loading text when isSubmitting is true', () => {
+    const onSubmit = vi.fn();
+    render(
+      <OrderReviewCard cartSummary={mockCartSummary} isSubmitting={true} onSubmit={onSubmit} />
+    );
+
+    const submitBtn = screen.getByRole('button', {
+      name: /Securing Stock & Placing Order.../i
+    });
+    expect(submitBtn).toBeDisabled();
+  });
+
+  it('disables submit button when disabled prop is true (e.g. store service paused)', () => {
+    const onSubmit = vi.fn();
+    render(
+      <OrderReviewCard
+        cartSummary={mockCartSummary}
+        isSubmitting={false}
+        onSubmit={onSubmit}
+        disabled={true}
+      />
+    );
+
+    const submitBtn = screen.getByRole('button', {
+      name: /Place Order & Proceed to Pay/i
+    });
+    expect(submitBtn).toBeDisabled();
+  });
+
+  it('disables submit button when cart is invalid for checkout', () => {
+    const onSubmit = vi.fn();
+    const invalidCart: CartSummary = {
+      ...mockCartSummary,
+      isValidForCheckout: false
+    };
+
+    render(<OrderReviewCard cartSummary={invalidCart} isSubmitting={false} onSubmit={onSubmit} />);
+
+    const submitBtn = screen.getByRole('button', {
+      name: /Place Order & Proceed to Pay/i
+    });
+    expect(submitBtn).toBeDisabled();
+  });
+
+  it('displays coupon validation error when API returns invalid reason', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({
+        valid: false,
+        reason: 'Coupon FESTIVE50 has expired or exceeded maximum redemptions.'
+      })
+    });
+    global.fetch = fetchMock;
+
+    const onSubmit = vi.fn();
+    render(
+      <OrderReviewCard cartSummary={mockCartSummary} isSubmitting={false} onSubmit={onSubmit} />
+    );
+
+    const couponInput = screen.getByPlaceholderText(/PROMO CODE/i);
+    fireEvent.change(couponInput, { target: { value: 'FESTIVE50' } });
+
+    const applyBtn = screen.getByRole('button', { name: /Apply/i });
+    fireEvent.click(applyBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Coupon FESTIVE50 has expired or exceeded maximum redemptions.')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('allows removing an applied coupon and resets financial totals', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        valid: true,
+        discountMinor: 20000,
+        coupon: { code: 'SAVE200' }
+      })
+    });
+    global.fetch = fetchMock;
+
+    const onSubmit = vi.fn();
+    render(
+      <OrderReviewCard cartSummary={mockCartSummary} isSubmitting={false} onSubmit={onSubmit} />
+    );
+
+    // Apply coupon
+    const couponInput = screen.getByPlaceholderText(/PROMO CODE/i);
+    fireEvent.change(couponInput, { target: { value: 'SAVE200' } });
+    fireEvent.click(screen.getByRole('button', { name: /Apply/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('SAVE200 applied')).toBeInTheDocument();
+      expect(screen.getByText(/Coupon Discount \(SAVE200\)/i)).toBeInTheDocument();
+    });
+
+    // Remove coupon
+    const removeBtn = screen.getByRole('button', { name: /Remove/i });
+    fireEvent.click(removeBtn);
+
+    expect(screen.queryByText('SAVE200 applied')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Coupon Discount \(SAVE200\)/i)).not.toBeInTheDocument();
+  });
 });

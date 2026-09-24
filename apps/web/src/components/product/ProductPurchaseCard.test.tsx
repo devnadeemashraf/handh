@@ -91,5 +91,70 @@ describe('ProductPurchaseCard Component', () => {
     fireEvent.click(addToBagButton);
 
     expect(mockAddItem).toHaveBeenCalledWith('var-1', 1);
+    expect(screen.getByText('Added to Bag')).toBeInTheDocument();
+  });
+
+  it('increments and decrements quantity within bounds and disables buttons at limits', () => {
+    // mockVariants[0] has availableQuantity: 4 (maxAllowed = 4)
+    render(<ProductPurchaseCard variants={mockVariants} productId="prod-1" />);
+
+    const decBtn = screen.getByRole('button', { name: /Decrease quantity/i });
+    const incBtn = screen.getByRole('button', { name: /Increase quantity/i });
+
+    // Initially at 1: decrease button should be disabled
+    expect(decBtn).toBeDisabled();
+    expect(incBtn).toBeEnabled();
+
+    // Increment to 2
+    fireEvent.click(incBtn);
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(decBtn).toBeEnabled();
+
+    // Increment to 3
+    fireEvent.click(incBtn);
+    expect(screen.getByText('3')).toBeInTheDocument();
+
+    // Increment to 4 (max allowed)
+    fireEvent.click(incBtn);
+    expect(screen.getByText('4')).toBeInTheDocument();
+    expect(incBtn).toBeDisabled();
+
+    // Decrement back to 3
+    fireEvent.click(decBtn);
+    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(incBtn).toBeEnabled();
+
+    // Add to bag with quantity 3
+    const addToBagButton = screen.getByRole('button', { name: /Add to Shopping Bag/i });
+    fireEvent.click(addToBagButton);
+    expect(mockAddItem).toHaveBeenCalledWith('var-1', 3);
+  });
+
+  it('resets quantity to 1 when user switches between variants', () => {
+    render(<ProductPurchaseCard variants={mockVariants} productId="prod-1" />);
+
+    const incBtn = screen.getByRole('button', { name: /Increase quantity/i });
+    fireEvent.click(incBtn);
+    expect(screen.getByText('2')).toBeInTheDocument();
+
+    // Switch to another variant and back
+    const goldVariantButton = screen.getByRole('button', { name: 'Royale Gold' });
+    fireEvent.click(goldVariantButton);
+
+    const emeraldVariantButton = screen.getByRole('button', { name: 'Emerald Green' });
+    fireEvent.click(emeraldVariantButton);
+
+    // Quantity should be reset to 1
+    expect(screen.getByText('1')).toBeInTheDocument();
+  });
+
+  it('respects initialVariantId prop when specified', () => {
+    render(
+      <ProductPurchaseCard variants={mockVariants} productId="prod-1" initialVariantId="var-2" />
+    );
+
+    // Initial variant is var-2 which is sold out
+    expect(screen.getByText('₹1,499.00')).toBeInTheDocument();
+    expect(screen.getByText(/Currently Sold Out/i)).toBeInTheDocument();
   });
 });

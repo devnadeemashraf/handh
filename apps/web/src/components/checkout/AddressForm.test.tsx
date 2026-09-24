@@ -100,4 +100,92 @@ describe('AddressForm Component', () => {
       screen.getByText('Delivery is currently not available to PIN 790001.')
     ).toBeInTheDocument();
   });
+
+  it('restricts PIN code input to 6 numeric digits and strips non-digits', () => {
+    const onChange = vi.fn();
+    render(
+      <AddressForm values={{ ...defaultValues, postalCode: '' }} errors={{}} onChange={onChange} />
+    );
+
+    const pinInput = screen.getByLabelText(/PIN Code/i);
+    fireEvent.change(pinInput, { target: { value: '500-034-ABC' } });
+
+    expect(onChange).toHaveBeenCalledWith('postalCode', '500034');
+  });
+
+  it('dispatches onChange for all address input fields', () => {
+    const onChange = vi.fn();
+    render(<AddressForm values={defaultValues} errors={{}} onChange={onChange} />);
+
+    // Full name
+    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Fatima Khan' } });
+    expect(onChange).toHaveBeenCalledWith('fullName', 'Fatima Khan');
+
+    // Email
+    fireEvent.change(screen.getByLabelText(/Email Address/i), {
+      target: { value: 'fatima@example.com' }
+    });
+    expect(onChange).toHaveBeenCalledWith('email', 'fatima@example.com');
+
+    // Line 1
+    fireEvent.change(screen.getByLabelText(/Flat \/ House No\./i), {
+      target: { value: 'Flat 502, Pearl Towers' }
+    });
+    expect(onChange).toHaveBeenCalledWith('line1', 'Flat 502, Pearl Towers');
+
+    // Line 2
+    fireEvent.change(screen.getByLabelText(/Landmark \/ Area/i), {
+      target: { value: 'Near Jubilee Hills Checkpost' }
+    });
+    expect(onChange).toHaveBeenCalledWith('line2', 'Near Jubilee Hills Checkpost');
+
+    // City
+    fireEvent.change(screen.getByLabelText(/City/i), { target: { value: 'Secunderabad' } });
+    expect(onChange).toHaveBeenCalledWith('city', 'Secunderabad');
+
+    // State select
+    fireEvent.change(screen.getByLabelText(/State \/ UT/i), { target: { value: 'Karnataka' } });
+    expect(onChange).toHaveBeenCalledWith('state', 'Karnataka');
+
+    // Customer notes
+    fireEvent.change(screen.getByLabelText(/Special Instructions/i), {
+      target: { value: 'Handle with care' }
+    });
+    expect(onChange).toHaveBeenCalledWith('customerNotes', 'Handle with care');
+  });
+
+  it('disables all inputs and select dropdown when disabled is true', () => {
+    const onChange = vi.fn();
+    render(<AddressForm values={defaultValues} errors={{}} onChange={onChange} disabled={true} />);
+
+    expect(screen.getByLabelText(/Full Name/i)).toBeDisabled();
+    expect(screen.getByLabelText(/Mobile Number/i)).toBeDisabled();
+    expect(screen.getByLabelText(/Email Address/i)).toBeDisabled();
+    expect(screen.getByLabelText(/Flat \/ House No\./i)).toBeDisabled();
+    expect(screen.getByLabelText(/PIN Code/i)).toBeDisabled();
+    expect(screen.getByLabelText(/City/i)).toBeDisabled();
+    expect(screen.getByLabelText(/State \/ UT/i)).toBeDisabled();
+    expect(screen.getByLabelText(/Special Instructions/i)).toBeDisabled();
+  });
+
+  it('renders multiple field error messages simultaneously', () => {
+    const onChange = vi.fn();
+    render(
+      <AddressForm
+        values={defaultValues}
+        errors={{
+          fullName: 'Full name is required',
+          line1: 'Street address is required',
+          city: 'City is required',
+          state: 'State is required'
+        }}
+        onChange={onChange}
+      />
+    );
+
+    expect(screen.getByText('Full name is required')).toBeInTheDocument();
+    expect(screen.getByText('Street address is required')).toBeInTheDocument();
+    expect(screen.getByText('City is required')).toBeInTheDocument();
+    expect(screen.getByText('State is required')).toBeInTheDocument();
+  });
 });
