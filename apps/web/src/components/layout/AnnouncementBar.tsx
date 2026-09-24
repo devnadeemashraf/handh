@@ -38,7 +38,17 @@ export function AnnouncementBar({ announcement }: { announcement: StorefrontAnno
   );
 
   if (announcement.link) {
-    return (
+    const isExternal = announcement.link.startsWith('http');
+    return isExternal ? (
+      <a
+        href={announcement.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block transition-opacity hover:opacity-90"
+      >
+        {content}
+      </a>
+    ) : (
       <Link href={announcement.link} className="block transition-opacity hover:opacity-90">
         {content}
       </Link>

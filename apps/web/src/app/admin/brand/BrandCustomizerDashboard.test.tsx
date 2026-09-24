@@ -103,4 +103,38 @@ describe('BrandCustomizerDashboard Component', () => {
       expect(screen.getByText('Database transaction timeout.')).toBeInTheDocument();
     });
   });
+
+  it('renders a Live Storefront Preview link pointing to draft preview route', () => {
+    render(<BrandCustomizerDashboard initialConfig={DEFAULT_STOREFRONT_CONFIG} />);
+
+    const previewLink = screen.getByRole('link', { name: /live storefront preview/i });
+    expect(previewLink).toBeInTheDocument();
+    expect(previewLink).toHaveAttribute('href', '/api/draft/preview?path=/');
+    expect(previewLink).toHaveAttribute('target', '_blank');
+  });
+
+  it('allows setting announcement link and includes it in payload', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true })
+    });
+    global.fetch = fetchMock;
+
+    render(<BrandCustomizerDashboard initialConfig={DEFAULT_STOREFRONT_CONFIG} />);
+
+    const linkInput = screen.getByLabelText(/ribbon target link/i);
+    fireEvent.change(linkInput, { target: { value: '#catalog' } });
+
+    const submitBtn = screen.getByRole('button', { name: /save & publish storefront/i });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/admin/settings/brand',
+        expect.objectContaining({
+          body: expect.stringContaining('"link":"#catalog"')
+        })
+      );
+    });
+  });
 });

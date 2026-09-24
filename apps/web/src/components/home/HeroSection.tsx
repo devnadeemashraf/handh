@@ -58,10 +58,22 @@ export function HeroSection({ hero }: { hero: StorefrontHero }) {
             size="lg"
             className="group rounded-full shadow-sm"
           >
-            <Link href={hero.ctaLink} className="inline-flex items-center gap-2 font-medium">
-              <span>{hero.ctaText}</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
+            {hero.ctaLink.startsWith('http') ? (
+              <a
+                href={hero.ctaLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 font-medium"
+              >
+                <span>{hero.ctaText}</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </a>
+            ) : (
+              <Link href={hero.ctaLink} className="inline-flex items-center gap-2 font-medium">
+                <span>{hero.ctaText}</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+            )}
           </Button>
         </div>
       </div>

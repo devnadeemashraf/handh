@@ -45,7 +45,7 @@ export async function PATCH(request: Request) {
 
   try {
     const json = await request.json();
-    const parseResult = storefrontConfigSchema.partial().safeParse(json);
+    const parseResult = storefrontConfigSchema.deepPartial().safeParse(json);
 
     if (!parseResult.success) {
       return NextResponse.json(
@@ -55,7 +55,11 @@ export async function PATCH(request: Request) {
     }
 
     const db = getDatabase();
-    const updated = await updateStorefrontConfig(db, 'hh', parseResult.data);
+    const updated = await updateStorefrontConfig(
+      db,
+      'hh',
+      parseResult.data as Record<string, unknown>
+    );
 
     // Record immutable admin audit log (E-COM-073)
     await recordAdminAuditLog(db, {

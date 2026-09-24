@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ReassuranceSection } from '@/components/home/ReassuranceSection';
 import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
+import { DraftPreviewBanner } from '@/components/layout/DraftPreviewBanner';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { ThemeInjector } from '@/components/layout/ThemeInjector';
@@ -13,8 +14,10 @@ import {
   getCachedCatalog,
   getCachedCategories,
   getCachedProduct,
-  getCachedStore
+  getCachedStore,
+  getFreshStore
 } from '@/lib/catalog-cache';
+import { isDraftModeEnabled } from '@/lib/draft';
 
 import type { Metadata } from 'next';
 
@@ -80,7 +83,9 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
-  const store = await getCachedStore('hh');
+  const isDraft = await isDraftModeEnabled();
+
+  const store = isDraft ? await getFreshStore('hh') : await getCachedStore('hh');
   if (!store) notFound();
 
   const [product, categories] = await Promise.all([
@@ -115,6 +120,9 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   return (
     <>
+      {/* Live Preview Mode Indicator Banner */}
+      {isDraft && <DraftPreviewBanner exitPath={`/products/${slug}`} />}
+
       <ThemeInjector theme={storefrontConfig.theme} />
       <AnnouncementBar announcement={storefrontConfig.announcement} />
       <Header storeName={store.name} categories={categories} />

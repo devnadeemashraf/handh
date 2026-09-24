@@ -34,7 +34,7 @@ export default function BrandCustomizerDashboard({ initialConfig }: BrandCustomi
   );
   const [announcementText, setAnnouncementText] = useState(initialConfig.announcement.text);
   const [announcementBadge, setAnnouncementBadge] = useState(initialConfig.announcement.badge);
-  const [announcementLink, _setAnnouncementLink] = useState(initialConfig.announcement.link ?? '');
+  const [announcementLink, setAnnouncementLink] = useState(initialConfig.announcement.link ?? '');
 
   // Hero Section State
   const [heroEyebrow, setHeroEyebrow] = useState(initialConfig.hero.eyebrow);
@@ -221,6 +221,25 @@ export default function BrandCustomizerDashboard({ initialConfig }: BrandCustomi
                   placeholder="Announcement text..."
                 />
               </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="announcementLink"
+                className="block text-xs font-medium text-foreground mb-1.5"
+              >
+                Ribbon Target Link (Optional)
+              </label>
+              <Input
+                id="announcementLink"
+                type="text"
+                value={announcementLink}
+                onChange={(e) => setAnnouncementLink(e.target.value)}
+                placeholder="e.g. #catalog, /categories/rings, or https://..."
+              />
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Must be a relative link (starts with / or #) or a secure HTTPS URL (E-COM-136).
+              </p>
             </div>
 
             {/* Live Announcement Ribbon Preview */}
@@ -450,7 +469,17 @@ export default function BrandCustomizerDashboard({ initialConfig }: BrandCustomi
         )}
 
         {/* Form Action Controls */}
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <a
+            href="/api/draft/preview?path=/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors shadow-xs"
+          >
+            <Eye className="h-4 w-4 text-accent" />
+            <span>Live Storefront Preview</span>
+          </a>
+
           <Button type="submit" disabled={isSaving} size="lg" className="gap-2">
             {isSaving ? (
               <>

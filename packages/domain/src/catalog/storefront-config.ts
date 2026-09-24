@@ -2,6 +2,15 @@ import { z } from 'zod';
 
 const hexColorRegex = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
+export const safeStorefrontUrlSchema = z
+  .string()
+  .trim()
+  .max(512)
+  .refine(
+    (url) => url.startsWith('/') || url.startsWith('#') || /^https:\/\/[a-zA-Z0-9.-]+/.test(url),
+    { message: 'Link must be a relative path (starting with / or #) or a secure HTTPS URL.' }
+  );
+
 export const storefrontThemeSchema = z.object({
   background: z
     .string()
@@ -44,7 +53,7 @@ export const storefrontHeroSchema = z.object({
       'Exquisite handcrafted nose-pieces and accessories designed for refined everyday elegance.'
     ),
   ctaText: z.string().default('Explore the Collection'),
-  ctaLink: z.string().default('#catalog'),
+  ctaLink: safeStorefrontUrlSchema.default('#catalog'),
   badgeText: z.string().optional(),
   variant: z.enum(['luxury', 'split', 'minimal']).default('luxury'),
   ctaVariant: z.enum(['default', 'gold', 'outline']).default('default'),
@@ -59,7 +68,7 @@ export const storefrontAnnouncementSchema = z.object({
       'Handcrafted in limited batches • Express courier dispatch across India via India Post & DTDC'
     ),
   badge: z.string().default('Signature Drop'),
-  link: z.string().optional(),
+  link: safeStorefrontUrlSchema.optional(),
   variant: z.enum(['default', 'emerald', 'gold', 'subtle']).default('default'),
   badgeVariant: z.enum(['default', 'secondary', 'outline', 'gold']).default('gold')
 });
@@ -106,14 +115,76 @@ export type StorefrontConfig = z.infer<typeof storefrontConfigSchema>;
 export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = storefrontConfigSchema.parse({});
 
 /**
+ * Pure recursive deep merge utility for nested SDUI configurations (E-COM-134).
+ * Preserves existing sibling keys when partial configurations are submitted.
+ */
+export function deepMerge<T extends Record<string, unknown>>(
+  target: T,
+  source?: Record<string, unknown> | null
+): T {
+  if (!source || typeof source !== 'object') {
+    return target;
+  }
+
+  const output = { ...target } as Record<string, unknown>;
+
+  for (const key of Object.keys(source)) {
+    const sourceVal = source[key];
+    const targetVal = output[key];
+
+    if (sourceVal === undefined) {
+      continue;
+    }
+
+    if (
+      sourceVal !== null &&
+      typeof sourceVal === 'object' &&
+      !Array.isArray(sourceVal) &&
+      targetVal !== null &&
+      typeof targetVal === 'object' &&
+      !Array.isArray(targetVal)
+    ) {
+      output[key] = deepMerge(
+        targetVal as Record<string, unknown>,
+        sourceVal as Record<string, unknown>
+      );
+    } else {
+      output[key] = sourceVal;
+    }
+  }
+
+  return output as T;
+}
+
+/**
  * Resolves a partial or raw settings object into a complete, safe StorefrontConfig.
+ * Uses resilient section-level fallbacks to prevent all-or-nothing resets (E-COM-139).
  */
 export function resolveStorefrontConfig(rawConfig?: unknown): StorefrontConfig {
-  const result = storefrontConfigSchema.safeParse(rawConfig ?? {});
-  if (result.success) {
-    return result.data;
+  if (!rawConfig || typeof rawConfig !== 'object') {
+    return DEFAULT_STOREFRONT_CONFIG;
   }
-  return DEFAULT_STOREFRONT_CONFIG;
+
+  const raw = rawConfig as Record<string, unknown>;
+
+  const themeResult = storefrontThemeSchema.safeParse(raw['theme'] ?? {});
+  const heroResult = storefrontHeroSchema.safeParse(raw['hero'] ?? {});
+  const announcementResult = storefrontAnnouncementSchema.safeParse(raw['announcement'] ?? {});
+  const reassurancesResult = z
+    .array(storefrontReassuranceSchema)
+    .safeParse(raw['reassurances'] ?? []);
+
+  return {
+    theme: themeResult.success ? themeResult.data : DEFAULT_STOREFRONT_CONFIG.theme,
+    hero: heroResult.success ? heroResult.data : DEFAULT_STOREFRONT_CONFIG.hero,
+    announcement: announcementResult.success
+      ? announcementResult.data
+      : DEFAULT_STOREFRONT_CONFIG.announcement,
+    reassurances:
+      reassurancesResult.success && reassurancesResult.data.length > 0
+        ? reassurancesResult.data
+        : DEFAULT_STOREFRONT_CONFIG.reassurances
+  };
 }
 
 /**

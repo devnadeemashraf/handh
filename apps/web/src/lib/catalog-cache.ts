@@ -100,6 +100,15 @@ function withNextCache<T, Args extends unknown[]>(
 }
 
 /**
+ * Resolves store details directly from the database, bypassing all caches.
+ * Used during Draft Mode preview to guarantee zero-latency visibility of SDUI updates.
+ */
+export async function getFreshStore(slug: string = 'hh'): Promise<Store | null> {
+  const db = getDatabase();
+  return findStoreBySlug(db, slug);
+}
+
+/**
  * Resolves store details by slug with Redis caching and Next.js ISR edge caching.
  */
 export const getCachedStore = cache(

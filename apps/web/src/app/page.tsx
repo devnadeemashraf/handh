@@ -3,10 +3,17 @@ import { ProductCard } from '@/components/catalog/ProductCard';
 import { HeroSection } from '@/components/home/HeroSection';
 import { ReassuranceSection } from '@/components/home/ReassuranceSection';
 import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
+import { DraftPreviewBanner } from '@/components/layout/DraftPreviewBanner';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { ThemeInjector } from '@/components/layout/ThemeInjector';
-import { getCachedCatalog, getCachedCategories, getCachedStore } from '@/lib/catalog-cache';
+import {
+  getCachedCatalog,
+  getCachedCategories,
+  getCachedStore,
+  getFreshStore
+} from '@/lib/catalog-cache';
+import { isDraftModeEnabled } from '@/lib/draft';
 
 import { resolveStorefrontConfig } from '@hh/domain';
 
@@ -23,8 +30,10 @@ export const revalidate = 60;
 export default async function HomePage({ searchParams }: HomePageProps) {
   const { category: activeCategory } = await searchParams;
 
-  // 1. Resolve flagship store with Redis + Edge caching
-  const store = await getCachedStore('hh');
+  const isDraft = await isDraftModeEnabled();
+
+  // 1. Resolve flagship store with Redis + Edge caching (or direct from DB if in preview mode)
+  const store = isDraft ? await getFreshStore('hh') : await getCachedStore('hh');
 
   if (!store) {
     return (
@@ -49,6 +58,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   return (
     <>
+      {/* Live Preview Mode Indicator Banner */}
+      {isDraft && <DraftPreviewBanner exitPath="/" />}
+
       {/* Server-Driven Theme & Colors */}
       <ThemeInjector theme={storefrontConfig.theme} />
 

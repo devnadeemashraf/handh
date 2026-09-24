@@ -1,6 +1,11 @@
 import { eq } from 'drizzle-orm';
 
-import { NotFoundError, resolveServiceControl, resolveStorefrontConfig } from '@hh/domain';
+import {
+  deepMerge,
+  NotFoundError,
+  resolveServiceControl,
+  resolveStorefrontConfig
+} from '@hh/domain';
 
 import type { CreateStoreInput, ServiceControlConfig, StorefrontConfig } from '@hh/domain';
 
@@ -135,10 +140,9 @@ export async function updateStorefrontConfig(
   const current = resolveStorefrontConfig(
     (store.settings as Record<string, unknown> | undefined)?.['storefront']
   );
-  const updated = resolveStorefrontConfig({
-    ...current,
-    ...settings
-  });
+  // Use deepMerge to recursively merge partial updates without destroying sibling keys (E-COM-134)
+  const merged = deepMerge(current as unknown as Record<string, unknown>, settings);
+  const updated = resolveStorefrontConfig(merged);
 
   await db
     .update(stores)
