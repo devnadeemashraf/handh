@@ -36,6 +36,8 @@ export default function CheckoutPage() {
     reservationRemainingSecs,
     isServicePaused,
     serviceControl,
+    whatsappOptIn,
+    setWhatsappOptIn,
     handleSubmit,
     launchPaymentGateway,
     clearPendingOrder
@@ -181,6 +183,8 @@ export default function CheckoutPage() {
                 onSubmit={handleSubmit}
                 disabled={isServicePaused}
                 destinationState={values.state}
+                whatsappOptIn={whatsappOptIn}
+                onWhatsappOptInChange={setWhatsappOptIn}
               />
             )}
           </div>

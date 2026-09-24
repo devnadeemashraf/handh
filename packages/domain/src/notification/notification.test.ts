@@ -157,6 +157,16 @@ describe('Notification Domain Templates', () => {
       expect(wa.text).toContain('₹15,997.00');
       expect(wa.text).toContain('3 items');
       expect(wa.text).toContain('https://handh.local/track/HH-2026-0001');
+
+      expect(wa.template).toBeDefined();
+      expect(wa.template?.name).toBe('order_confirmation');
+      expect(wa.template?.language.code).toBe('en');
+      expect(wa.template?.components?.[0]?.parameters).toEqual([
+        { type: 'text', text: 'Fatima' },
+        { type: 'text', text: 'HH-2026-0001' },
+        { type: 'text', text: '₹15,997.00' },
+        { type: 'text', text: '3' }
+      ]);
     });
 
     it('formats order dispatched message', () => {
@@ -174,6 +184,16 @@ describe('Notification Domain Templates', () => {
       expect(wa.text).toContain('*#HH-2026-0001*');
       expect(wa.text).toContain('*BlueDart*');
       expect(wa.text).toContain('*BLUEDART-88291039*');
+
+      expect(wa.template).toBeDefined();
+      expect(wa.template?.name).toBe('order_dispatched');
+      expect(wa.template?.language.code).toBe('en');
+      expect(wa.template?.components?.[0]?.parameters).toEqual([
+        { type: 'text', text: 'Fatima' },
+        { type: 'text', text: 'HH-2026-0001' },
+        { type: 'text', text: 'BlueDart' },
+        { type: 'text', text: 'BLUEDART-88291039' }
+      ]);
     });
 
     it('formats order delivered message', () => {
@@ -188,6 +208,14 @@ describe('Notification Domain Templates', () => {
       expect(wa.text).toContain('*H&H Delivery Complete*');
       expect(wa.text).toContain('*#HH-2026-0001*');
       expect(wa.text).toContain('Fatima');
+
+      expect(wa.template).toBeDefined();
+      expect(wa.template?.name).toBe('order_delivered');
+      expect(wa.template?.language.code).toBe('en');
+      expect(wa.template?.components?.[0]?.parameters).toEqual([
+        { type: 'text', text: 'Fatima' },
+        { type: 'text', text: 'HH-2026-0001' }
+      ]);
     });
   });
 });

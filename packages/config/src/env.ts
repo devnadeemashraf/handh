@@ -32,6 +32,13 @@ export const serverEnvSchema = z
       .string({ required_error: 'RESEND_API_KEY is required' })
       .min(1, 'RESEND_API_KEY cannot be empty'),
 
+    // WhatsApp Cloud API (E-COM-081)
+    WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+    WHATSAPP_ACCESS_TOKEN: z.string().optional(),
+    WHATSAPP_BUSINESS_ACCOUNT_ID: z.string().optional(),
+    WHATSAPP_API_VERSION: z.string().default('v21.0'),
+    WHATSAPP_API_URL: z.string().url().default('https://graph.facebook.com'),
+
     // Auth & Security
     ADMIN_SESSION_SECRET: z
       .string({ required_error: 'ADMIN_SESSION_SECRET is required' })

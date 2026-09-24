@@ -84,6 +84,7 @@ import { orderAttributionSchema } from '../analytics/types';
 export const CheckoutSubmissionSchema = z.object({
   items: z.array(CartItemInputSchema).min(1, 'Cart cannot be empty').max(50),
   shippingAddress: ShippingAddressSchema,
+  whatsappOptIn: z.boolean().default(true),
   customerNotes: z.string().trim().max(500).optional(),
   couponCode: z.string().trim().max(32).optional(),
   attribution: orderAttributionSchema.optional(),

@@ -111,6 +111,9 @@ export function useCheckoutFlow({
     customerNotes: ''
   });
 
+  // WhatsApp Notification Opt-In State (E-COM-082)
+  const [whatsappOptIn, setWhatsappOptIn] = React.useState(true);
+
   const [errors, setErrors] = React.useState<Partial<Record<keyof AddressFormValues, string>>>({});
 
   // Check live store operating status
@@ -475,6 +478,7 @@ export function useCheckoutFlow({
           quantity: i.effectiveQuantity
         })),
         shippingAddress: addressValidation.data,
+        whatsappOptIn,
         customerNotes: values.customerNotes ? values.customerNotes.trim() : undefined,
         couponCode: appliedCouponCode || undefined,
         idempotencyKey: idempotencyKey || generateUUID(),
@@ -576,6 +580,8 @@ export function useCheckoutFlow({
     reservationRemainingSecs,
     serviceControl,
     isServicePaused,
+    whatsappOptIn,
+    setWhatsappOptIn,
     handleSubmit,
     launchPaymentGateway,
     clearPendingOrder

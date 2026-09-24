@@ -164,6 +164,37 @@ describe('Checkout Submit API Route (E-COM-063)', () => {
     expect(data.order.orderId).toBe('00000000-0000-0000-0000-000000000001');
     expect(data.order.receiptToken).toBeDefined();
     expect(typeof data.order.receiptToken).toBe('string');
-    expect(dbModule.createPendingCheckoutOrder).toHaveBeenCalled();
+    expect(dbModule.createPendingCheckoutOrder).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        storeId: 'store-1',
+        userId: 'user-123',
+        whatsappOptIn: true
+      })
+    );
+  });
+
+  it('forwards explicit whatsappOptIn = false to createPendingCheckoutOrder (E-COM-082)', async () => {
+    const optOutSubmission = {
+      ...validSubmission,
+      whatsappOptIn: false
+    };
+
+    const req = new Request('http://localhost:3000/api/checkout/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(optOutSubmission)
+    });
+
+    const res = await handleSubmitOrder(req);
+    expect(res.status).toBe(201);
+    expect(dbModule.createPendingCheckoutOrder).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        storeId: 'store-1',
+        userId: 'user-123',
+        whatsappOptIn: false
+      })
+    );
   });
 });

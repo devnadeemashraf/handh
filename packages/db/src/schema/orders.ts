@@ -1,6 +1,7 @@
 import { relations, sql } from 'drizzle-orm';
 import {
   bigint,
+  boolean,
   check,
   index,
   integer,
@@ -68,6 +69,7 @@ export const orders = pgTable(
     couponCode: varchar('coupon_code', { length: 32 }),
     attribution: jsonb('attribution').$type<OrderAttribution>(),
     notes: text('notes'),
+    whatsappOptIn: boolean('whatsapp_opt_in').notNull().default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
   },

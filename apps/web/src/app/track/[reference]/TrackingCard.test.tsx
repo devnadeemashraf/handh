@@ -26,6 +26,7 @@ const mockOrder: Order = {
   customerEmail: 'fatima@example.com',
   customerPhone: '9848012345',
   shippingAddress: mockShippingAddress,
+  whatsappOptIn: true,
   couponCode: null,
   attribution: null,
   notes: null,

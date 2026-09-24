@@ -333,6 +333,19 @@ export async function confirmPaymentAndCaptureOrder(
           totalMinor: order.totalMinor,
           currency: order.currency,
           items: itemsSnapshot,
+          itemsSnapshot,
+          shippingAddressSnapshot: {
+            recipientName: order.customerName,
+            line1: order.shippingAddress.line1,
+            line2: order.shippingAddress.line2 ?? null,
+            city: order.shippingAddress.city,
+            state: order.shippingAddress.state,
+            postalCode: order.shippingAddress.postalCode,
+            country: order.shippingAddress.country,
+            phone: order.customerPhone
+          },
+          userId: order.userId,
+          whatsappOptIn: order.whatsappOptIn,
           providerPaymentId,
           paidAt: now.toISOString()
         },

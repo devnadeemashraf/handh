@@ -46,7 +46,8 @@ export function createWhatsAppWorker(
           const formatted = formatOrderConfirmationWhatsApp(data);
           const result = await whatsappService.send({
             to: data.phone,
-            text: formatted.text
+            text: formatted.text,
+            template: formatted.template
           });
 
           if (!result.success) {
@@ -60,7 +61,8 @@ export function createWhatsAppWorker(
           const formatted = formatOrderDispatchedWhatsApp(data);
           const result = await whatsappService.send({
             to: data.phone,
-            text: formatted.text
+            text: formatted.text,
+            template: formatted.template
           });
 
           if (!result.success) {
@@ -74,7 +76,8 @@ export function createWhatsAppWorker(
           const formatted = formatOrderDeliveredWhatsApp(data);
           const result = await whatsappService.send({
             to: data.phone,
-            text: formatted.text
+            text: formatted.text,
+            template: formatted.template
           });
 
           if (!result.success) {

@@ -34,6 +34,7 @@ export interface OrderPaidPayload {
   shippingAddressSnapshot: ShippingAddressSnapshot;
   userId?: string | null | undefined;
   paidAt: string;
+  whatsappOptIn?: boolean | undefined;
 }
 
 export interface OrderDispatchedPayload {
@@ -49,6 +50,7 @@ export interface OrderDispatchedPayload {
   customerPhone: string;
   userId?: string | null | undefined;
   shippedAt: string;
+  whatsappOptIn?: boolean | undefined;
 }
 
 export interface OrderDeliveredPayload {
@@ -62,6 +64,7 @@ export interface OrderDeliveredPayload {
   customerPhone?: string | undefined;
   userId?: string | null | undefined;
   deliveredAt: string;
+  whatsappOptIn?: boolean | undefined;
 }
 
 // ── Email Job Data ─────────────────────────────────────────────────────────────
@@ -151,6 +154,25 @@ export interface EmailRenderOutput {
   text: string;
 }
 
+export interface WhatsAppTemplateComponentParameter {
+  type: 'text';
+  text: string;
+}
+
+export interface WhatsAppTemplateComponent {
+  type: 'body' | 'header' | 'button';
+  sub_type?: string | undefined;
+  index?: string | undefined;
+  parameters: WhatsAppTemplateComponentParameter[];
+}
+
+export interface WhatsAppTemplatePayload {
+  name: string;
+  language: { code: string };
+  components?: WhatsAppTemplateComponent[] | undefined;
+}
+
 export interface WhatsAppRenderOutput {
   text: string;
+  template?: WhatsAppTemplatePayload | undefined;
 }

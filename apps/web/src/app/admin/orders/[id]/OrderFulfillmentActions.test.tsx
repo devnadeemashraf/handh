@@ -27,6 +27,7 @@ const mockOrder: Order & { shippingAddress: ShippingAddress } = {
   customerEmail: 'meera@example.com',
   customerPhone: '+919876543210',
   shippingAddress: mockShippingAddress,
+  whatsappOptIn: true,
   couponCode: null,
   attribution: null,
   notes: null,

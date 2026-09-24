@@ -206,6 +206,109 @@ describe('Outbox Poller Integration', () => {
     expect(waCallsForThisOrder).toHaveLength(0);
   });
 
+  it('enqueues WhatsApp for guest buyer with explicit whatsappOptIn = true (E-COM-082)', async () => {
+    const { queues, emailSpy, whatsappSpy } = createMockQueues();
+    const orderNumber = `HH-GUEST-OPTIN-${Date.now()}`;
+
+    await insertOutboxEvent(db, {
+      eventName: 'order.paid',
+      aggregateType: 'order',
+      aggregateId: 'ord-poller-guest-1',
+      payload: {
+        orderId: 'ord-poller-guest-1',
+        storeId,
+        orderNumber,
+        customerName: 'Guest Opted In',
+        customerEmail: 'guest-optin@example.com',
+        customerPhone: '+919812345679',
+        totalMinor: 599900,
+        currency: 'INR',
+        itemsSnapshot: [],
+        shippingAddressSnapshot: {
+          recipientName: 'Guest Opted In',
+          line1: '99 Jubilee Hills',
+          city: 'Hyderabad',
+          state: 'Telangana',
+          postalCode: '500033',
+          country: 'IN'
+        },
+        userId: null, // Guest buyer
+        whatsappOptIn: true,
+        paidAt: new Date().toISOString()
+      },
+      status: 'pending',
+      scheduledAt: new Date()
+    });
+
+    await pollOutboxOnce(db, queues, { appUrl: 'https://handh.local' });
+
+    // Customer email is enqueued
+    expect(emailSpy).toHaveBeenCalledWith(
+      EMAIL_JOB_ORDER_CONFIRMATION,
+      expect.objectContaining({ orderNumber }),
+      expect.anything()
+    );
+
+    expect(whatsappSpy).toHaveBeenCalledWith(
+      WHATSAPP_JOB_ORDER_CONFIRMATION,
+      expect.objectContaining({
+        orderNumber,
+        phone: '+919812345679',
+        totalMinor: 599900
+      }),
+      { jobId: `whatsapp:order-confirmed:${orderNumber}` }
+    );
+  });
+
+  it('does NOT enqueue WhatsApp for guest buyer when whatsappOptIn = false (E-COM-082)', async () => {
+    const { queues, emailSpy, whatsappSpy } = createMockQueues();
+    const orderNumber = `HH-GUEST-OPTOUT-${Date.now()}`;
+
+    await insertOutboxEvent(db, {
+      eventName: 'order.paid',
+      aggregateType: 'order',
+      aggregateId: 'ord-poller-guest-2',
+      payload: {
+        orderId: 'ord-poller-guest-2',
+        storeId,
+        orderNumber,
+        customerName: 'Guest Opted Out',
+        customerEmail: 'guest-optout@example.com',
+        customerPhone: '+919812345680',
+        totalMinor: 599900,
+        currency: 'INR',
+        itemsSnapshot: [],
+        shippingAddressSnapshot: {
+          recipientName: 'Guest Opted Out',
+          line1: '99 Jubilee Hills',
+          city: 'Hyderabad',
+          state: 'Telangana',
+          postalCode: '500033',
+          country: 'IN'
+        },
+        userId: null, // Guest buyer
+        whatsappOptIn: false,
+        paidAt: new Date().toISOString()
+      },
+      status: 'pending',
+      scheduledAt: new Date()
+    });
+
+    await pollOutboxOnce(db, queues, { appUrl: 'https://handh.local' });
+
+    // Customer email is still enqueued even when opting out of WhatsApp
+    expect(emailSpy).toHaveBeenCalledWith(
+      EMAIL_JOB_ORDER_CONFIRMATION,
+      expect.objectContaining({ orderNumber }),
+      expect.anything()
+    );
+
+    const waCallsForThisOrder = whatsappSpy.mock.calls.filter(
+      (call) => (call[1] as Record<string, unknown>)?.['orderNumber'] === orderNumber
+    );
+    expect(waCallsForThisOrder).toHaveLength(0);
+  });
+
   it('enqueues dispatch and delivery notifications correctly', async () => {
     const { queues, emailSpy, whatsappSpy } = createMockQueues();
     const orderNumber = `HH-SHIP-${Date.now()}`;

@@ -37,7 +37,13 @@ export async function startWorkerServer(): Promise<{
   const emailService = new EmailService({
     apiKey: env.RESEND_API_KEY
   });
-  const whatsappService = new WhatsAppService();
+  const whatsappService = new WhatsAppService({
+    phoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID,
+    accessToken: env.WHATSAPP_ACCESS_TOKEN,
+    businessAccountId: env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+    apiVersion: env.WHATSAPP_API_VERSION,
+    apiUrl: env.WHATSAPP_API_URL
+  });
 
   // 5. Initialize BullMQ Workers (each worker manages its own dedicated blocking connections)
   const emailWorker = createEmailWorker(redisOptions, emailService);

@@ -248,4 +248,42 @@ describe('Checkout Financial Calculations', () => {
       expect(breakdown.igstMinor).toBe(0);
     });
   });
+
+  describe('CheckoutSubmissionSchema WhatsApp Consent', () => {
+    const validPayload = {
+      items: [{ variantId: '3f6c8d7e-1234-4b5c-8901-abcdef123456', quantity: 1 }],
+      shippingAddress: {
+        fullName: 'Amina Begum',
+        phone: '+919876543210',
+        email: 'amina@example.com',
+        line1: '12 Emerald Crescent',
+        city: 'Hyderabad',
+        state: 'Telangana',
+        postalCode: '500001',
+        country: 'IN' as const
+      },
+      idempotencyKey: 'a1b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d'
+    };
+
+    it('defaults whatsappOptIn to true when omitted by client', () => {
+      const parsed = CheckoutSubmissionSchema.parse(validPayload);
+      expect(parsed.whatsappOptIn).toBe(true);
+    });
+
+    it('preserves explicit whatsappOptIn = false when customer opts out', () => {
+      const parsed = CheckoutSubmissionSchema.parse({
+        ...validPayload,
+        whatsappOptIn: false
+      });
+      expect(parsed.whatsappOptIn).toBe(false);
+    });
+
+    it('preserves explicit whatsappOptIn = true when customer opts in', () => {
+      const parsed = CheckoutSubmissionSchema.parse({
+        ...validPayload,
+        whatsappOptIn: true
+      });
+      expect(parsed.whatsappOptIn).toBe(true);
+    });
+  });
 });

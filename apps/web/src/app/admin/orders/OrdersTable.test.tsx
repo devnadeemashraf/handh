@@ -27,6 +27,7 @@ const mockOrders: TestOrder[] = [
       postalCode: '500034',
       country: 'India'
     },
+    whatsappOptIn: true,
     couponCode: null,
     attribution: null,
     notes: null,
@@ -63,6 +64,7 @@ const mockOrders: TestOrder[] = [
       postalCode: '560034',
       country: 'India'
     },
+    whatsappOptIn: true,
     couponCode: null,
     attribution: null,
     notes: null,
@@ -99,6 +101,7 @@ const mockOrders: TestOrder[] = [
       postalCode: '400050',
       country: 'India'
     },
+    whatsappOptIn: true,
     couponCode: null,
     attribution: null,
     notes: null,

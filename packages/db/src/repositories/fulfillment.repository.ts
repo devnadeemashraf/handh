@@ -116,6 +116,7 @@ export async function createOrderFulfillment(
         customerEmail: order.customerEmail,
         customerPhone: order.customerPhone,
         userId: order.userId,
+        whatsappOptIn: order.whatsappOptIn,
         shippedAt: fulfillment.shippedAt.toISOString()
       },
       status: 'pending',
@@ -248,6 +249,7 @@ export async function processShippingWebhookEvent(
           customerName: order.customerName,
           customerPhone: order.customerPhone,
           userId: order.userId,
+          whatsappOptIn: order.whatsappOptIn,
           deliveredAt: (deliveredAt ?? new Date()).toISOString()
         },
         status: 'pending',

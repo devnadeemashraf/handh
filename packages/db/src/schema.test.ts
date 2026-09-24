@@ -66,6 +66,7 @@ describe('Database Schema Definitions & Inferred Types', () => {
       expect(orders.paymentStatus).toBeDefined();
       expect(orders.fulfillmentStatus).toBeDefined();
       expect(orders.totalMinor).toBeDefined();
+      expect(orders.whatsappOptIn).toBeDefined();
       expect(orderItems.unitPriceMinor).toBeDefined();
       expect(orderItems.skuSnapshot).toBeDefined();
     });

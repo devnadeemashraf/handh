@@ -35,9 +35,10 @@ import {
 
 import type { DatabaseClient } from '../index';
 
-export interface CreateOrderParams extends CheckoutSubmissionInput {
+export interface CreateOrderParams extends Omit<CheckoutSubmissionInput, 'whatsappOptIn'> {
   storeId: string;
   userId?: string | undefined;
+  whatsappOptIn?: boolean | undefined;
 }
 
 /**
@@ -288,7 +289,8 @@ export async function createPendingCheckoutOrder(
           taxableAmountMinor: financials.taxableAmountMinor,
           couponCode: appliedCouponCode,
           attribution: params.attribution ?? null,
-          notes: customerNotes ? customerNotes.trim() : null
+          notes: customerNotes ? customerNotes.trim() : null,
+          whatsappOptIn: params.whatsappOptIn ?? true
         })
         .returning();
 

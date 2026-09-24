@@ -168,6 +168,14 @@ describe('useCheckoutFlow Hook (E-COM-044)', () => {
     // Crucial assertion: clearCart was NEVER invoked on submission!
     expect(clearCartSpy).not.toHaveBeenCalled();
 
+    // Verify WhatsApp opt-in was included in submit payload (E-COM-082)
+    const submitCall = (global.fetch as Mock).mock.calls.find((call) =>
+      call[0].includes('/api/checkout/submit')
+    );
+    expect(submitCall).toBeDefined();
+    const sentBody = JSON.parse(submitCall![1].body);
+    expect(sentBody.whatsappOptIn).toBe(true);
+
     // Pending order is set in hook state
     expect(result.current.orderPlaced).toEqual(mockCreatedOrder);
 
@@ -175,6 +183,70 @@ describe('useCheckoutFlow Hook (E-COM-044)', () => {
     const stored = sessionStorage.getItem(PENDING_ORDER_STORAGE_KEY);
     expect(stored).not.toBeNull();
     expect(JSON.parse(stored!)).toEqual(mockCreatedOrder);
+  });
+
+  it('submits whatsappOptIn = false when customer unchecks WhatsApp updates (E-COM-082)', async () => {
+    const futureDate = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    const mockCreatedOrder = {
+      orderId: 'order-uuid-optout',
+      orderNumber: 'HH-2026-00043',
+      subtotalMinor: 49900,
+      shippingMinor: 0,
+      taxMinor: 0,
+      discountMinor: 0,
+      totalMinor: 49900,
+      currency: 'INR',
+      expiresAt: futureDate
+    };
+
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/api/checkout/submit')) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              success: true,
+              order: mockCreatedOrder
+            })
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ success: true, addresses: [], serviceControl: null })
+      });
+    });
+
+    const { result } = renderHook(() =>
+      useCheckoutFlow({
+        user: mockUser,
+        cartSummary: mockCartSummary,
+        clearCart: mockClearCart,
+        refreshCart: mockRefreshCart,
+        openAuthModal: mockOpenAuthModal
+      })
+    );
+
+    act(() => {
+      result.current.handleFieldChange('fullName', 'Zainab Ahmed');
+      result.current.handleFieldChange('phone', '9876543210');
+      result.current.handleFieldChange('email', 'zainab@example.com');
+      result.current.handleFieldChange('line1', 'House 12');
+      result.current.handleFieldChange('city', 'Hyderabad');
+      result.current.handleFieldChange('state', 'Telangana');
+      result.current.handleFieldChange('postalCode', '500001');
+      result.current.setWhatsappOptIn(false);
+    });
+
+    await act(async () => {
+      await result.current.handleSubmit();
+    });
+
+    const submitCall = (global.fetch as Mock).mock.calls.find((call) =>
+      call[0].includes('/api/checkout/submit')
+    );
+    expect(submitCall).toBeDefined();
+    const sentBody = JSON.parse(submitCall![1].body);
+    expect(sentBody.whatsappOptIn).toBe(false);
   });
 
   it('restores pending order from sessionStorage on initial mount if reservation is active', async () => {

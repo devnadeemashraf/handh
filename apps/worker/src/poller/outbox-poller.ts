@@ -108,9 +108,9 @@ export async function pollOutboxOnce(
             }
           );
 
-          // 4. Check WhatsApp opt-in before enqueuing WhatsApp message
-          let isWhatsAppOptedIn = false;
-          if (payload.userId) {
+          // 4. Check WhatsApp opt-in before enqueuing WhatsApp message (E-COM-082)
+          let isWhatsAppOptedIn = payload.whatsappOptIn ?? false;
+          if (payload.whatsappOptIn === undefined && payload.userId) {
             const user = await findUserById(db, payload.userId);
             isWhatsAppOptedIn = user?.whatsappOptIn === true;
           }
@@ -160,9 +160,9 @@ export async function pollOutboxOnce(
             }
           );
 
-          // 2. Check WhatsApp opt-in
-          let isWhatsAppOptedIn = false;
-          if (payload.userId) {
+          // 2. Check WhatsApp opt-in (E-COM-082)
+          let isWhatsAppOptedIn = payload.whatsappOptIn ?? false;
+          if (payload.whatsappOptIn === undefined && payload.userId) {
             const user = await findUserById(db, payload.userId);
             isWhatsAppOptedIn = user?.whatsappOptIn === true;
           }
@@ -207,9 +207,9 @@ export async function pollOutboxOnce(
             }
           );
 
-          // 2. Check WhatsApp opt-in
-          let isWhatsAppOptedIn = false;
-          if (payload.userId) {
+          // 2. Check WhatsApp opt-in (E-COM-082)
+          let isWhatsAppOptedIn = payload.whatsappOptIn ?? false;
+          if (payload.whatsappOptIn === undefined && payload.userId) {
             const user = await findUserById(db, payload.userId);
             isWhatsAppOptedIn = user?.whatsappOptIn === true;
           }

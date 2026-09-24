@@ -202,4 +202,34 @@ describe('OrderReviewCard Component', () => {
     const proceedBtn = screen.getByRole('button', { name: /Place Order & Proceed to Pay/i });
     expect(proceedBtn).toHaveAttribute('aria-describedby', 'contract-formation-notice');
   });
+
+  it('renders WhatsApp opt-in consent checkbox checked by default (E-COM-082)', () => {
+    const onSubmit = vi.fn();
+    render(
+      <OrderReviewCard cartSummary={mockCartSummary} isSubmitting={false} onSubmit={onSubmit} />
+    );
+
+    const checkbox = screen.getByTestId('whatsapp-opt-in-checkbox') as HTMLInputElement;
+    expect(checkbox).toBeInTheDocument();
+    expect(checkbox.checked).toBe(true);
+    expect(screen.getByText('Receive updates on WhatsApp')).toBeInTheDocument();
+  });
+
+  it('calls onWhatsappOptInChange when checkbox is toggled', () => {
+    const onSubmit = vi.fn();
+    const onWhatsappOptInChange = vi.fn();
+    render(
+      <OrderReviewCard
+        cartSummary={mockCartSummary}
+        isSubmitting={false}
+        onSubmit={onSubmit}
+        whatsappOptIn={true}
+        onWhatsappOptInChange={onWhatsappOptInChange}
+      />
+    );
+
+    const checkbox = screen.getByTestId('whatsapp-opt-in-checkbox') as HTMLInputElement;
+    fireEvent.click(checkbox);
+    expect(onWhatsappOptInChange).toHaveBeenCalledWith(false);
+  });
 });

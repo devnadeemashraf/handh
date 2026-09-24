@@ -29,6 +29,8 @@ describe('Server Environment Validation', () => {
     expect(env.PORT).toBe(3000); // Coerced to number
     expect(env.DATABASE_URL).toBe(validDevEnv.DATABASE_URL);
     expect(env.ADMIN_ACCESS_KEY).toBe('hh_dev_access_key');
+    expect(env.WHATSAPP_API_VERSION).toBe('v21.0');
+    expect(env.WHATSAPP_API_URL).toBe('https://graph.facebook.com');
   });
 
   it('fails fast when critical database or payment variables are missing', () => {

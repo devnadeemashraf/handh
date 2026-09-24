@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Loader2, ShieldCheck, Sparkles, Tag, Truck, X } from 'lucide-react';
+import { Clock, Loader2, MessageSquare, ShieldCheck, Sparkles, Tag, Truck, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import * as React from 'react';
@@ -18,6 +18,8 @@ export interface OrderReviewCardProps {
   onSubmit: (couponCode?: string) => void;
   disabled?: boolean;
   destinationState?: string | undefined;
+  whatsappOptIn?: boolean;
+  onWhatsappOptInChange?: (optIn: boolean) => void;
 }
 
 export function OrderReviewCard({
@@ -25,7 +27,9 @@ export function OrderReviewCard({
   isSubmitting,
   onSubmit,
   disabled = false,
-  destinationState
+  destinationState,
+  whatsappOptIn = true,
+  onWhatsappOptInChange
 }: OrderReviewCardProps) {
   const [couponInput, setCouponInput] = React.useState('');
   const [appliedCoupon, setAppliedCoupon] = React.useState<{
@@ -283,6 +287,31 @@ export function OrderReviewCard({
             <strong>15-Minute Reservation:</strong> Stock is reserved exclusively for you once order
             is initiated, preventing overselling.
           </span>
+        </div>
+
+        {/* WhatsApp Notification Opt-In Consent (E-COM-082) */}
+        <div className="mb-4 rounded-md border border-emerald-200/80 bg-emerald-50/50 p-3 text-xs text-foreground">
+          <label className="flex items-start gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              id="whatsapp-opt-in-checkbox"
+              data-testid="whatsapp-opt-in-checkbox"
+              checked={whatsappOptIn}
+              onChange={(e) => onWhatsappOptInChange?.(e.target.checked)}
+              disabled={disabled || isSubmitting}
+              className="mt-0.5 h-4 w-4 rounded border-emerald-400 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+            />
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-1.5 font-medium text-emerald-950">
+                <MessageSquare className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <span>Receive updates on WhatsApp</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-normal">
+                Instant order confirmation, tracking updates, and concierge support sent to your
+                mobile.
+              </p>
+            </div>
+          </label>
         </div>
 
         {/* Affirmative Pre-Purchase Contract Formation Notice (Consumer Protection Rules & Indian Contract Act) */}

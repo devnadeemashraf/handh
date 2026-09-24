@@ -442,7 +442,24 @@ Your order *#${data.orderNumber}* for *${formattedTotal}* (${data.itemCount} ite
 
 ${data.trackingUrl ? `Track order progress: ${data.trackingUrl}\n\n` : ''}Reply to this message anytime to speak with your personal concierge.`;
 
-  return { text };
+  return {
+    text,
+    template: {
+      name: 'order_confirmation',
+      language: { code: 'en' },
+      components: [
+        {
+          type: 'body',
+          parameters: [
+            { type: 'text', text: data.customerName },
+            { type: 'text', text: data.orderNumber },
+            { type: 'text', text: formattedTotal },
+            { type: 'text', text: String(data.itemCount) }
+          ]
+        }
+      ]
+    }
+  };
 }
 
 export function formatOrderDispatchedWhatsApp(
@@ -456,7 +473,24 @@ Your order *#${data.orderNumber}* has been dispatched via *${data.courierName}*.
 Tracking Number (AWB): *${data.trackingNumber}*
 ${data.trackingUrl ? `Track package: ${data.trackingUrl}\n\n` : ''}Expected delivery is within 2–5 business days.`;
 
-  return { text };
+  return {
+    text,
+    template: {
+      name: 'order_dispatched',
+      language: { code: 'en' },
+      components: [
+        {
+          type: 'body',
+          parameters: [
+            { type: 'text', text: data.customerName },
+            { type: 'text', text: data.orderNumber },
+            { type: 'text', text: data.courierName },
+            { type: 'text', text: data.trackingNumber }
+          ]
+        }
+      ]
+    }
+  };
 }
 
 export function formatOrderDeliveredWhatsApp(
@@ -469,5 +503,20 @@ Your order *#${data.orderNumber}* has been delivered!
 
 We hope your new H&H pieces bring grace and beauty to your wardrobe. Reach out here anytime if you need assistance.`;
 
-  return { text };
+  return {
+    text,
+    template: {
+      name: 'order_delivered',
+      language: { code: 'en' },
+      components: [
+        {
+          type: 'body',
+          parameters: [
+            { type: 'text', text: data.customerName },
+            { type: 'text', text: data.orderNumber }
+          ]
+        }
+      ]
+    }
+  };
 }
