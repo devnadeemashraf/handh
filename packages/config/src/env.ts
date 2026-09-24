@@ -62,6 +62,16 @@ export const serverEnvSchema = z
     TRACKINGMORE_WEBHOOK_SECRET: z.string().optional(),
     MANUAL_WEBHOOK_SECRET: z.string().optional(),
 
+    // Logistics & Origin Warehouse (E-COM-067)
+    WAREHOUSE_NAME: z.string().default('H&H Artisan Atelier'),
+    WAREHOUSE_PHONE: z.string().default('+919876543210'),
+    WAREHOUSE_LINE1: z.string().default('Banjara Hills Road No 10'),
+    WAREHOUSE_LINE2: z.string().optional(),
+    WAREHOUSE_CITY: z.string().default('Hyderabad'),
+    WAREHOUSE_STATE: z.string().default('Telangana'),
+    WAREHOUSE_POSTAL_CODE: z.string().default('500034'),
+    WAREHOUSE_COUNTRY: z.string().default('India'),
+
     // Initial Admin Auto-Provisioning
     INITIAL_ADMIN_EMAIL: z.string().email().default('admin@handh.in'),
     INITIAL_ADMIN_PASSWORD: z.string().min(8).default('hh_admin_master_password_2026'),

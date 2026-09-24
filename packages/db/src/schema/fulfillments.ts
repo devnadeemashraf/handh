@@ -4,7 +4,7 @@ import { index, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-c
 import { orders } from './orders';
 
 export type CourierProvider = 'india_post' | 'dtdc' | 'delhivery' | 'bluedart' | 'other';
-export type FulfillmentRecordStatus = 'shipped' | 'delivered' | 'returned';
+export type FulfillmentRecordStatus = 'shipped' | 'delivered' | 'rto' | 'returned';
 
 export const fulfillments = pgTable(
   'fulfillments',

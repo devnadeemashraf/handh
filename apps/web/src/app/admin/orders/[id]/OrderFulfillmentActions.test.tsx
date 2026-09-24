@@ -297,4 +297,42 @@ describe('OrderFulfillmentActions Component', () => {
       expect(screen.getByText(/Order is fulfilled and completed./i)).toBeInTheDocument();
     });
   });
+
+  it('triggers return intake and restocks inventory when intake button is clicked (E-COM-064)', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        result: {
+          success: true,
+          fulfillmentId: 'fulf-1',
+          orderId: 'order-123',
+          restockedItems: [{ variantId: 'var-1', sku: 'SKU-001', quantity: 1 }]
+        }
+      })
+    });
+    global.fetch = fetchMock;
+
+    render(
+      <OrderFulfillmentActions order={mockOrder} initialFulfillments={[mockInitialFulfillment]} />
+    );
+
+    // Intake return button is visible
+    const returnBtn = screen.getByRole('button', {
+      name: /intake return & restock/i
+    });
+    expect(returnBtn).toBeInTheDocument();
+
+    fireEvent.click(returnBtn);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/admin/fulfillments/fulf-1/return-receive',
+        expect.objectContaining({
+          method: 'POST'
+        })
+      );
+      expect(screen.getAllByText('Returned & Restocked').length).toBeGreaterThanOrEqual(1);
+    });
+  });
 });

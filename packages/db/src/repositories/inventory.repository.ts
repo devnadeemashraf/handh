@@ -24,7 +24,7 @@ import {
   productVariants
 } from '../schema';
 
-import type { DatabaseClient } from '../index';
+import type { DatabaseClient, DbTransaction } from '../index';
 
 export async function listAdminInventory(
   db: DatabaseClient,
@@ -125,10 +125,10 @@ export async function listAdminInventory(
 }
 
 export async function adjustStock(
-  db: DatabaseClient,
+  db: DatabaseClient | DbTransaction,
   input: StockAdjustmentInput
 ): Promise<{ level: InventoryLevel; auditLog: InventoryAuditLog }> {
-  return await db.transaction(async (tx) => {
+  const runner = async (tx: DbTransaction) => {
     const existing = await tx
       .select()
       .from(inventoryLevels)
@@ -191,7 +191,12 @@ export async function adjustStock(
       level: updatedLevel!,
       auditLog: auditLog!
     };
-  });
+  };
+
+  if ('transaction' in db && typeof db.transaction === 'function') {
+    return await db.transaction(runner);
+  }
+  return await runner(db as DbTransaction);
 }
 
 export async function updateVariantPrice(

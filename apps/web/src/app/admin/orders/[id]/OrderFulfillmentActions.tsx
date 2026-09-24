@@ -82,6 +82,50 @@ export default function OrderFulfillmentActions({
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
 
+  // Return intake state (E-COM-064)
+  const [receivingReturnId, setReceivingReturnId] = useState<string | null>(null);
+  const [returnError, setReturnError] = useState<string | null>(null);
+
+  const handleReturnReceive = async (fulfillmentId: string) => {
+    setReceivingReturnId(fulfillmentId);
+    setReturnError(null);
+
+    try {
+      const res = await fetch(`/api/admin/fulfillments/${fulfillmentId}/return-receive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          note: 'Return intake processed at warehouse'
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setReturnError(data.error || 'Failed to process return intake.');
+        setReceivingReturnId(null);
+        return;
+      }
+
+      setFulfillments((prev) =>
+        prev.map((f) =>
+          f.id === fulfillmentId
+            ? {
+                ...f,
+                status: 'returned' as const,
+                latestEvent: 'Physical return received at warehouse and restocked'
+              }
+            : f
+        )
+      );
+      setFulfillmentStatus('returned');
+      setReceivingReturnId(null);
+      router.refresh();
+    } catch {
+      setReturnError('Network error while processing return intake.');
+      setReceivingReturnId(null);
+    }
+  };
+
   // Copy courier label address to clipboard
   const copyAddressToClipboard = async () => {
     const addr = order.shippingAddress;
@@ -348,7 +392,23 @@ export default function OrderFulfillmentActions({
             </div>
           </div>
 
-          {fulfillmentStatus === 'shipped' ? (
+          {fulfillmentStatus === 'returned' ? (
+            <Badge
+              variant="outline"
+              className="gap-1 text-xs border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+            >
+              <Building2 className="h-3.5 w-3.5" />
+              <span>Returned &amp; Restocked</span>
+            </Badge>
+          ) : fulfillmentStatus === 'delivered' ? (
+            <Badge
+              variant="outline"
+              className="gap-1 text-xs border-blue-500/40 text-blue-600 dark:text-blue-400"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span>Delivered</span>
+            </Badge>
+          ) : fulfillmentStatus === 'shipped' ? (
             <Badge variant="default" className="gap-1 text-xs">
               <Truck className="h-3.5 w-3.5" />
               <span>In Transit</span>
@@ -365,6 +425,13 @@ export default function OrderFulfillmentActions({
         </CardHeader>
 
         <CardContent className="p-4 sm:p-5 flex flex-col gap-5">
+          {returnError && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{returnError}</span>
+            </div>
+          )}
+
           {/* Existing Fulfillments List with PDF Label & Live Webhook Scan */}
           {fulfillments.length > 0 && (
             <div className="flex flex-col gap-3">
@@ -400,6 +467,28 @@ export default function OrderFulfillmentActions({
                               Pickup Token: {fulf.pickupToken}
                             </Badge>
                           )}
+                          {fulf.status === 'returned' ? (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-medium border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+                            >
+                              Returned &amp; Restocked
+                            </Badge>
+                          ) : fulf.status === 'rto' ? (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-medium border-amber-500/40 text-amber-600 dark:text-amber-400"
+                            >
+                              RTO (In Transit)
+                            </Badge>
+                          ) : fulf.status === 'delivered' ? (
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] font-medium border-blue-500/40 text-blue-600 dark:text-blue-400"
+                            >
+                              Delivered
+                            </Badge>
+                          ) : null}
                         </div>
                         <p className="text-xs font-mono text-muted-foreground">
                           Tracking Ref: {fulf.trackingReference}
@@ -407,6 +496,23 @@ export default function OrderFulfillmentActions({
                       </div>
 
                       <div className="flex items-center gap-2 flex-wrap">
+                        {fulf.status !== 'returned' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleReturnReceive(fulf.id)}
+                            disabled={receivingReturnId === fulf.id}
+                            className="h-7 px-2.5 text-xs gap-1 border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 cursor-pointer"
+                          >
+                            {receivingReturnId === fulf.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Building2 className="h-3 w-3" />
+                            )}
+                            <span>Intake Return &amp; Restock</span>
+                          </Button>
+                        )}
+
                         {fulf.labelUrl && (
                           <a
                             href={fulf.labelUrl}

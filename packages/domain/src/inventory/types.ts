@@ -4,7 +4,9 @@ export type InventoryAuditReason =
   | 'damaged'
   | 'order_captured'
   | 'order_cancelled'
-  | 'initial_seed';
+  | 'initial_seed'
+  | 'return_restock'
+  | 'rto_restock';
 
 export interface StockAdjustmentInput {
   variantId: string;

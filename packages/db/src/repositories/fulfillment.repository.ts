@@ -5,11 +5,14 @@ import { generateTrackingReference, NotFoundError, ValidationError } from '@hh/d
 import {
   type CourierProvider,
   type Fulfillment,
+  type FulfillmentRecordStatus,
   fulfillments,
   type Order,
+  orderItems,
   orders,
   outboxEvents
 } from '../schema';
+import { adjustStock } from './inventory.repository';
 
 import type { DatabaseClient } from '../index';
 
@@ -206,8 +209,28 @@ export async function processShippingWebhookEvent(
 
     // 2. Determine new status
     const isDelivered = event.status === 'delivered';
-    const newFulfillmentStatus = isDelivered ? 'delivered' : fulfillment.status;
+    const isRto = event.status === 'rto';
+    const isFailedAttempt = event.status === 'failed_attempt';
+
+    let newFulfillmentStatus: FulfillmentRecordStatus = fulfillment.status;
+    if (isDelivered) {
+      newFulfillmentStatus = 'delivered';
+    } else if (isRto) {
+      newFulfillmentStatus = 'rto';
+    }
+
     const deliveredAt = isDelivered ? (event.timestamp ?? new Date()) : fulfillment.deliveredAt;
+    const latestEventDescription =
+      event.description ||
+      (isFailedAttempt
+        ? event.location
+          ? `Delivery attempt failed at ${event.location}`
+          : 'Delivery attempt failed (NDR)'
+        : isRto
+          ? event.location
+            ? `Return to Origin (RTO) initiated at ${event.location}`
+            : 'Return to Origin (RTO) initiated by courier'
+          : event.location || event.status);
 
     // 3. Update fulfillment milestone
     await tx
@@ -215,7 +238,7 @@ export async function processShippingWebhookEvent(
       .set({
         status: newFulfillmentStatus,
         deliveredAt,
-        latestEvent: event.description || event.location || event.status,
+        latestEvent: latestEventDescription,
         rawWebhookPayload: event.rawPayload ? JSON.stringify(event.rawPayload) : null,
         updatedAt: new Date()
       })
@@ -255,6 +278,54 @@ export async function processShippingWebhookEvent(
         status: 'pending',
         scheduledAt: new Date()
       });
+    } else if (isFailedAttempt) {
+      // Emit NDR outbox event
+      await tx.insert(outboxEvents).values({
+        eventName: 'order.delivery_failed',
+        aggregateType: 'order',
+        aggregateId: order.id,
+        payload: {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          fulfillmentId: fulfillment.id,
+          awb: event.awb,
+          providerId: event.providerId,
+          customerEmail: order.customerEmail,
+          customerName: order.customerName,
+          customerPhone: order.customerPhone,
+          userId: order.userId,
+          whatsappOptIn: order.whatsappOptIn,
+          reason: latestEventDescription,
+          location: event.location,
+          failedAt: (event.timestamp ?? new Date()).toISOString()
+        },
+        status: 'pending',
+        scheduledAt: new Date()
+      });
+    } else if (isRto) {
+      // Emit RTO initiated outbox event
+      await tx.insert(outboxEvents).values({
+        eventName: 'order.rto_initiated',
+        aggregateType: 'order',
+        aggregateId: order.id,
+        payload: {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          fulfillmentId: fulfillment.id,
+          awb: event.awb,
+          providerId: event.providerId,
+          customerEmail: order.customerEmail,
+          customerName: order.customerName,
+          customerPhone: order.customerPhone,
+          userId: order.userId,
+          whatsappOptIn: order.whatsappOptIn,
+          reason: latestEventDescription,
+          location: event.location,
+          rtoInitiatedAt: (event.timestamp ?? new Date()).toISOString()
+        },
+        status: 'pending',
+        scheduledAt: new Date()
+      });
     }
 
     return {
@@ -262,6 +333,149 @@ export async function processShippingWebhookEvent(
       orderCompleted,
       fulfillmentId: fulfillment.id,
       orderId: order.id
+    };
+  });
+}
+
+export interface ReceiveFulfillmentReturnParams {
+  fulfillmentId: string;
+  note?: string | undefined;
+  restock?: boolean | undefined;
+}
+
+export interface ReceiveFulfillmentReturnResult {
+  success: boolean;
+  fulfillmentId: string;
+  orderId: string;
+  restockedItems: Array<{
+    variantId: string;
+    sku: string;
+    productTitle: string;
+    quantity: number;
+  }>;
+}
+
+/**
+ * Handles physical warehouse return intake (E-COM-064).
+ * Idempotently restocks inventory to on-hand levels, updates fulfillment status to 'returned',
+ * sets order fulfillmentStatus to 'returned', and emits 'fulfillment.returned' outbox event.
+ */
+export async function receiveFulfillmentReturn(
+  db: DatabaseClient,
+  params: ReceiveFulfillmentReturnParams
+): Promise<ReceiveFulfillmentReturnResult> {
+  const shouldRestock = params.restock ?? true;
+
+  return await db.transaction(async (tx) => {
+    // 1. Locate fulfillment with row lock
+    const lookup = await tx
+      .select({
+        fulfillment: fulfillments,
+        order: orders
+      })
+      .from(fulfillments)
+      .innerJoin(orders, eq(fulfillments.orderId, orders.id))
+      .where(eq(fulfillments.id, params.fulfillmentId))
+      .for('update')
+      .limit(1);
+
+    if (!lookup[0]) {
+      throw new NotFoundError('Fulfillment', params.fulfillmentId);
+    }
+
+    const { fulfillment, order } = lookup[0];
+
+    // 2. Prevent duplicate return intake
+    if (fulfillment.status === 'returned') {
+      throw new ValidationError(
+        `Fulfillment '${fulfillment.trackingReference}' has already been marked as returned and restocked.`
+      );
+    }
+
+    // 3. Retrieve order items to restock
+    const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, order.id));
+
+    const restockedItems: Array<{
+      variantId: string;
+      sku: string;
+      productTitle: string;
+      quantity: number;
+    }> = [];
+
+    if (shouldRestock) {
+      for (const item of items) {
+        if (item.variantId) {
+          await adjustStock(tx, {
+            variantId: item.variantId,
+            delta: item.quantity,
+            reason: 'return_restock',
+            note:
+              params.note ??
+              `Return intake for order #${order.orderNumber} (AWB: ${fulfillment.trackingNumber})`
+          });
+
+          restockedItems.push({
+            variantId: item.variantId,
+            sku: item.skuSnapshot,
+            productTitle: item.productNameSnapshot,
+            quantity: item.quantity
+          });
+        }
+      }
+    }
+
+    // 4. Update fulfillment status to 'returned'
+    const returnNote =
+      params.note ??
+      `Physical return received at warehouse (restocked ${restockedItems.reduce((acc, i) => acc + i.quantity, 0)} units)`;
+
+    await tx
+      .update(fulfillments)
+      .set({
+        status: 'returned',
+        latestEvent: returnNote,
+        updatedAt: new Date()
+      })
+      .where(eq(fulfillments.id, fulfillment.id));
+
+    // 5. Update order fulfillment status to 'returned'
+    await tx
+      .update(orders)
+      .set({
+        fulfillmentStatus: 'returned',
+        updatedAt: new Date()
+      })
+      .where(eq(orders.id, order.id));
+
+    // 6. Emit outbox event
+    await tx.insert(outboxEvents).values({
+      eventName: 'fulfillment.returned',
+      aggregateType: 'order',
+      aggregateId: order.id,
+      payload: {
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        fulfillmentId: fulfillment.id,
+        awb: fulfillment.trackingNumber,
+        courierProvider: fulfillment.courierProvider,
+        customerEmail: order.customerEmail,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        userId: order.userId,
+        whatsappOptIn: order.whatsappOptIn,
+        restockedItems,
+        receivedAt: new Date().toISOString(),
+        note: returnNote
+      },
+      status: 'pending',
+      scheduledAt: new Date()
+    });
+
+    return {
+      success: true,
+      fulfillmentId: fulfillment.id,
+      orderId: order.id,
+      restockedItems
     };
   });
 }

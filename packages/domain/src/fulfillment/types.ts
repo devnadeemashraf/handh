@@ -100,3 +100,10 @@ export function generateTrackingReference(prefix = 'TRK'): string {
   }
   return `${prefix}-${year}-${random}`;
 }
+
+export const ReturnReceiveSchema = z.object({
+  note: z.string().max(500, 'Note cannot exceed 500 characters').optional(),
+  restock: z.boolean().default(true)
+});
+
+export type ReturnReceiveInput = z.infer<typeof ReturnReceiveSchema>;

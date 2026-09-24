@@ -5,6 +5,7 @@ import {
   assertCanTransitionOrder,
   assertCanTransitionPayment,
   assertCanTransitionReservation,
+  canTransitionFulfillment,
   canTransitionOrder,
   canTransitionPayment,
   canTransitionReservation
@@ -54,6 +55,21 @@ describe('State Machine Transitions', () => {
       expect(() => assertCanTransitionReservation('consumed', 'released')).toThrow(
         InvalidStateTransitionError
       );
+    });
+  });
+
+  describe('Fulfillment state transitions (E-COM-064)', () => {
+    it('allows standard forward progression to delivered and return', () => {
+      expect(canTransitionFulfillment('unfulfilled', 'shipped')).toBe(true);
+      expect(canTransitionFulfillment('shipped', 'delivered')).toBe(true);
+      expect(canTransitionFulfillment('shipped', 'returned')).toBe(true);
+      expect(canTransitionFulfillment('delivered', 'returned')).toBe(true);
+    });
+
+    it('blocks illegal fulfillment regressions', () => {
+      expect(canTransitionFulfillment('returned', 'shipped')).toBe(false);
+      expect(canTransitionFulfillment('returned', 'delivered')).toBe(false);
+      expect(canTransitionFulfillment('delivered', 'shipped')).toBe(false);
     });
   });
 });

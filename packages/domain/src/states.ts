@@ -5,7 +5,8 @@ export type OrderStatus =
 
 export type PaymentStatus = 'unpaid' | 'authorized' | 'captured' | 'failed' | 'refunded';
 
-export type FulfillmentStatus = 'unfulfilled' | 'partially_fulfilled' | 'shipped' | 'delivered';
+export type FulfillmentStatus =
+  'unfulfilled' | 'partially_fulfilled' | 'shipped' | 'delivered' | 'returned';
 
 export type ReservationStatus = 'active' | 'consumed' | 'released';
 
@@ -56,8 +57,9 @@ export const VALID_FULFILLMENT_TRANSITIONS: Readonly<
 > = {
   unfulfilled: new Set(['partially_fulfilled', 'shipped']),
   partially_fulfilled: new Set(['shipped']),
-  shipped: new Set(['delivered']),
-  delivered: new Set([]) // Terminal state
+  shipped: new Set(['delivered', 'returned']),
+  delivered: new Set(['returned']),
+  returned: new Set([]) // Terminal state
 };
 
 export function canTransitionOrder(from: OrderStatus, to: OrderStatus): boolean {

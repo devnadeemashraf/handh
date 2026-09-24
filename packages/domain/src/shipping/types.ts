@@ -79,13 +79,27 @@ export interface RegisterCounterAwbResult {
   trackingUrl?: string | undefined;
 }
 
+export const WarehouseOriginSchema = z.object({
+  name: z.string().min(1),
+  phone: z.string().min(1),
+  line1: z.string().min(1),
+  line2: z.string().optional(),
+  city: z.string().min(1),
+  state: z.string().min(1),
+  postalCode: z.string().min(1),
+  country: z.string().default('India')
+});
+
+export type WarehouseOrigin = z.infer<typeof WarehouseOriginSchema>;
+
 export const BookPickupInputSchema = z.object({
   providerId: z.enum(['shiprocket', 'delhivery', 'manual']).default('shiprocket'),
   weightGrams: z.number().int().positive().default(200),
   lengthCm: z.number().int().positive().default(15),
   widthCm: z.number().int().positive().default(10),
   heightCm: z.number().int().positive().default(5),
-  notes: z.string().max(500).optional()
+  notes: z.string().max(500).optional(),
+  origin: WarehouseOriginSchema.optional()
 });
 
 export type BookPickupInput = z.infer<typeof BookPickupInputSchema>;

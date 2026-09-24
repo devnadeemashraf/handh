@@ -50,7 +50,15 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
       );
     }
 
-    const { providerId, weightGrams, lengthCm, widthCm, heightCm, notes } = parsed.data;
+    const {
+      providerId,
+      weightGrams,
+      lengthCm,
+      widthCm,
+      heightCm,
+      notes,
+      origin: requestOrigin
+    } = parsed.data;
     const registry = getShippingRegistry();
     const adapter = registry.getOrThrow(providerId);
 
@@ -66,19 +74,23 @@ export async function POST(request: Request, props: { params: Promise<{ id: stri
 
     const shippingAddr = order.shippingAddress as ShippingAddress;
 
+    // Resolve warehouse origin from request override or validated environment (E-COM-067)
+    const origin = requestOrigin ?? {
+      name: process.env['WAREHOUSE_NAME'] || 'H&H Artisan Atelier',
+      phone: process.env['WAREHOUSE_PHONE'] || '+919876543210',
+      line1: process.env['WAREHOUSE_LINE1'] || 'Banjara Hills Road No 10',
+      ...(process.env['WAREHOUSE_LINE2'] ? { line2: process.env['WAREHOUSE_LINE2'] } : {}),
+      city: process.env['WAREHOUSE_CITY'] || 'Hyderabad',
+      state: process.env['WAREHOUSE_STATE'] || 'Telangana',
+      postalCode: process.env['WAREHOUSE_POSTAL_CODE'] || '500034',
+      country: process.env['WAREHOUSE_COUNTRY'] || 'India'
+    };
+
     // 1. Call adapter to book doorstep courier pickup
     const pickupResult = await adapter.bookDoorstepPickup({
       orderId: order.id,
       orderNumber: order.orderNumber,
-      origin: {
-        name: 'H&H Artisan Atelier',
-        phone: '9876543210',
-        line1: 'Banjara Hills Road No 10',
-        city: 'Hyderabad',
-        state: 'Telangana',
-        postalCode: '500034',
-        country: 'India'
-      },
+      origin,
       destination: {
         fullName: order.customerName,
         phone: order.customerPhone,

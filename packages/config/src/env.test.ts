@@ -31,6 +31,13 @@ describe('Server Environment Validation', () => {
     expect(env.ADMIN_ACCESS_KEY).toBe('hh_dev_access_key');
     expect(env.WHATSAPP_API_VERSION).toBe('v21.0');
     expect(env.WHATSAPP_API_URL).toBe('https://graph.facebook.com');
+    expect(env.WAREHOUSE_NAME).toBe('H&H Artisan Atelier');
+    expect(env.WAREHOUSE_PHONE).toBe('+919876543210');
+    expect(env.WAREHOUSE_LINE1).toBe('Banjara Hills Road No 10');
+    expect(env.WAREHOUSE_CITY).toBe('Hyderabad');
+    expect(env.WAREHOUSE_STATE).toBe('Telangana');
+    expect(env.WAREHOUSE_POSTAL_CODE).toBe('500034');
+    expect(env.WAREHOUSE_COUNTRY).toBe('India');
   });
 
   it('fails fast when critical database or payment variables are missing', () => {

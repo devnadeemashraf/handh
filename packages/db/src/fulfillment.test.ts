@@ -14,9 +14,11 @@ import {
   findFulfillmentsForOrder,
   getAdminOrderMetrics,
   listAdminOrders,
+  processShippingWebhookEvent,
+  receiveFulfillmentReturn,
   transitionOrderStatus
 } from './repositories';
-import { outboxEvents } from './schema';
+import { inventoryAuditLogs, inventoryLevels, outboxEvents } from './schema';
 
 describe('Fulfillment & Admin Order Repository Integration', () => {
   const databaseUrl =
@@ -224,5 +226,155 @@ describe('Fulfillment & Admin Order Repository Integration', () => {
     await expect(
       transitionOrderStatus(db, orderResult.orderId, 'pending_payment')
     ).rejects.toThrowError();
+  });
+
+  it('processes carrier NDR failed_attempt webhook and emits order.delivery_failed outbox event (E-COM-064)', async () => {
+    const orderResult = await createPaidTestOrder();
+    const awb = `NDR-${Date.now()}`;
+    const { fulfillment, order } = await createOrderFulfillment(db, {
+      orderId: orderResult.orderId,
+      courierProvider: 'delhivery',
+      trackingNumber: awb
+    });
+
+    const result = await processShippingWebhookEvent(db, {
+      awb,
+      providerId: 'delhivery',
+      status: 'failed_attempt',
+      location: 'Secunderabad Hub',
+      description: 'Customer not available at premises',
+      rawPayload: { code: 'NDR_01' }
+    });
+
+    expect(result.processed).toBe(true);
+    expect(result.orderCompleted).toBe(false);
+
+    // Verify fulfillment latestEvent updated
+    const updatedFulf = await findFulfillmentByReference(db, fulfillment.trackingReference);
+    expect(updatedFulf?.fulfillment?.latestEvent).toContain('Customer not available at premises');
+
+    // Verify outbox event emitted
+    const events = await db
+      .select()
+      .from(outboxEvents)
+      .where(eq(outboxEvents.aggregateId, order.id));
+    const ndrEvent = events.find((e) => e.eventName === 'order.delivery_failed');
+    expect(ndrEvent).toBeDefined();
+    expect(ndrEvent?.payload).toMatchObject({
+      orderId: order.id,
+      awb,
+      reason: 'Customer not available at premises',
+      location: 'Secunderabad Hub'
+    });
+  });
+
+  it('processes carrier RTO webhook, updates status to rto, and emits order.rto_initiated outbox event (E-COM-064)', async () => {
+    const orderResult = await createPaidTestOrder();
+    const awb = `RTO-${Date.now()}`;
+    const { fulfillment, order } = await createOrderFulfillment(db, {
+      orderId: orderResult.orderId,
+      courierProvider: 'dtdc',
+      trackingNumber: awb
+    });
+
+    const result = await processShippingWebhookEvent(db, {
+      awb,
+      providerId: 'dtdc',
+      status: 'rto',
+      location: 'Hyderabad Gateway Hub',
+      description: 'Returning to origin after 3 failed delivery attempts'
+    });
+
+    expect(result.processed).toBe(true);
+    expect(result.orderCompleted).toBe(false);
+
+    // Verify fulfillment status updated to 'rto'
+    const updatedFulf = await findFulfillmentByReference(db, fulfillment.trackingReference);
+    expect(updatedFulf?.fulfillment?.status).toBe('rto');
+    expect(updatedFulf?.fulfillment?.latestEvent).toContain('Returning to origin');
+
+    // Verify outbox event emitted
+    const events = await db
+      .select()
+      .from(outboxEvents)
+      .where(eq(outboxEvents.aggregateId, order.id));
+    const rtoEvent = events.find((e) => e.eventName === 'order.rto_initiated');
+    expect(rtoEvent).toBeDefined();
+    expect(rtoEvent?.payload).toMatchObject({
+      orderId: order.id,
+      awb,
+      location: 'Hyderabad Gateway Hub'
+    });
+  });
+
+  it('receives physical return, restocks on-hand inventory with audit log, and sets status to returned (E-COM-064)', async () => {
+    const orderResult = await createPaidTestOrder();
+    const awb = `RET-${Date.now()}`;
+    const { fulfillment, order } = await createOrderFulfillment(db, {
+      orderId: orderResult.orderId,
+      courierProvider: 'delhivery',
+      trackingNumber: awb
+    });
+
+    // Check inventory before return
+    const [levelBefore] = await db
+      .select()
+      .from(inventoryLevels)
+      .where(eq(inventoryLevels.variantId, variantId));
+    const onHandBefore = levelBefore?.onHand ?? 0;
+
+    // Receive warehouse return
+    const returnResult = await receiveFulfillmentReturn(db, {
+      fulfillmentId: fulfillment.id,
+      note: 'Returned package inspected - pristine condition, restocked to shelf A-12'
+    });
+
+    expect(returnResult.success).toBe(true);
+    expect(returnResult.fulfillmentId).toBe(fulfillment.id);
+    expect(returnResult.orderId).toBe(order.id);
+    expect(returnResult.restockedItems.length).toBe(1);
+    expect(returnResult.restockedItems[0]?.variantId).toBe(variantId);
+    expect(returnResult.restockedItems[0]?.quantity).toBe(1);
+
+    // Verify inventory on-hand replenished by 1
+    const [levelAfter] = await db
+      .select()
+      .from(inventoryLevels)
+      .where(eq(inventoryLevels.variantId, variantId));
+    expect(levelAfter?.onHand).toBe(onHandBefore + 1);
+
+    // Verify audit log created with reason 'return_restock'
+    const auditLogs = await db
+      .select()
+      .from(inventoryAuditLogs)
+      .where(eq(inventoryAuditLogs.variantId, variantId));
+    const returnLog = auditLogs.find((l) => l.reason === 'return_restock');
+    expect(returnLog).toBeDefined();
+    expect(returnLog?.delta).toBe(1);
+    expect(returnLog?.note).toContain('pristine condition');
+
+    // Verify fulfillment and order status updated to 'returned'
+    const updatedFulf = await findFulfillmentByReference(db, fulfillment.trackingReference);
+    expect(updatedFulf?.fulfillment?.status).toBe('returned');
+    expect(updatedFulf?.order.fulfillmentStatus).toBe('returned');
+
+    // Verify outbox event emitted
+    const events = await db
+      .select()
+      .from(outboxEvents)
+      .where(eq(outboxEvents.aggregateId, order.id));
+    const returnedEvent = events.find((e) => e.eventName === 'fulfillment.returned');
+    expect(returnedEvent).toBeDefined();
+    expect(returnedEvent?.payload).toMatchObject({
+      fulfillmentId: fulfillment.id,
+      orderId: order.id
+    });
+
+    // Verify double-return is blocked fail-closed
+    await expect(
+      receiveFulfillmentReturn(db, {
+        fulfillmentId: fulfillment.id
+      })
+    ).rejects.toThrowError(/already been marked as returned and restocked/);
   });
 });
