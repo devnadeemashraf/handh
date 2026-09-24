@@ -69,6 +69,11 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/hh_dev
         run: pnpm --filter @hh/db exec tsx src/migrate.ts
 
+      - name: Seed Test Database
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/hh_dev
+        run: pnpm --filter @hh/db exec tsx src/seed.ts
+
       - name: Run Test Suite
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/hh_dev
@@ -79,7 +84,22 @@ jobs:
           AUTH_JWT_SECRET: test_jwt_secret_for_ci_pipeline_32char
         run: pnpm test
 
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright E2E Tests
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/hh_dev
+          REDIS_URL: redis://localhost:6379
+          ENABLE_DEV_MOCKS: 'true'
+          ADMIN_ACCESS_KEY: test_admin_access_key
+          ADMIN_PASSWORD: test_admin_master_password
+          ADMIN_SESSION_SECRET: test_session_secret_for_ci_pipeline_32char
+          AUTH_JWT_SECRET: test_jwt_secret_for_ci_pipeline_32char
+        run: pnpm test:e2e
+
       - name: Build Web Application
+
         env:
           NEXT_TELEMETRY_DISABLED: 1
           APP_URL: http://localhost:3000

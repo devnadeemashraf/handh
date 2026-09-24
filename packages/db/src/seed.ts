@@ -310,7 +310,7 @@ async function seed(): Promise<void> {
       sku: 'HH-ACC-NP-04',
       variantTitle: 'Antiqued Brass',
       priceMinor: 59900,
-      initialQuantity: 5,
+      initialQuantity: 100,
       imageUrl:
         'https://images.unsplash.com/photo-1611591475825-9d33bdfc5453?w=800&auto=format&fit=crop&q=80',
       isCustomizable: false,
@@ -328,7 +328,7 @@ async function seed(): Promise<void> {
       sku: 'HH-ACC-NP-05',
       variantTitle: 'Freshwater Pearl / Silver',
       priceMinor: 79900,
-      initialQuantity: 3,
+      initialQuantity: 100,
       imageUrl:
         'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=800&auto=format&fit=crop&q=80',
       isCustomizable: false,

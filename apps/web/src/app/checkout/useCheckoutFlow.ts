@@ -47,11 +47,19 @@ export function useCheckoutFlow({
   cartSummary: CartSummary | null;
   clearCart: () => void;
   refreshCart: () => Promise<void>;
-  openAuthModal: (opts: { reason?: string; initialPhone?: string; onSuccess?: () => void }) => void;
+  openAuthModal: (opts: {
+    reason?: string;
+    initialPhone?: string;
+    onSuccess?: (user?: User) => void;
+  }) => void;
 }) {
   const router = useRouter();
 
+  const userRef = React.useRef<User | null>(user);
+  userRef.current = user;
+
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const [isProcessingPayment, setIsProcessingPayment] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
   const [orderPlaced, setOrderPlaced] = React.useState<CheckoutOrderResult | null>(null);
@@ -450,11 +458,14 @@ export function useCheckoutFlow({
     }
 
     // 2. Account Required to Place Order (User Platform Rule)
-    if (!user) {
+    if (!userRef.current) {
       openAuthModal({
         reason: 'An account is required to place and track your handcrafted order.',
         initialPhone: values.phone,
-        onSuccess: () => {
+        onSuccess: (authedUser?: User) => {
+          if (authedUser) {
+            userRef.current = authedUser;
+          }
           handleSubmit(appliedCouponCode);
         }
       });
@@ -498,7 +509,10 @@ export function useCheckoutFlow({
           openAuthModal({
             reason: 'Please verify your mobile number to complete your order reservation.',
             initialPhone: values.phone,
-            onSuccess: () => {
+            onSuccess: (authedUser?: User) => {
+              if (authedUser) {
+                userRef.current = authedUser;
+              }
               handleSubmit(appliedCouponCode);
             }
           });
