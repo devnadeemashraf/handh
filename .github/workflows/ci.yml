@@ -74,7 +74,7 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/hh_dev
         run: pnpm --filter @hh/db exec tsx src/seed.ts
 
-      - name: Run Test Suite
+      - name: Run Test Suite with Coverage Enforcement
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/hh_dev
           REDIS_URL: redis://localhost:6379
@@ -82,7 +82,15 @@ jobs:
           ADMIN_PASSWORD: test_admin_master_password
           ADMIN_SESSION_SECRET: test_session_secret_for_ci_pipeline_32char
           AUTH_JWT_SECRET: test_jwt_secret_for_ci_pipeline_32char
-        run: pnpm test
+        run: pnpm test:coverage
+
+      - name: Upload Coverage Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium
