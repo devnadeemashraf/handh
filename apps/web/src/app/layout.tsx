@@ -2,6 +2,7 @@ import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import { AttributionTracker } from '@/components/layout/AttributionTracker';
 import { MobileNav } from '@/components/layout/MobileNav';
+import { OfflineBanner } from '@/components/layout/OfflineBanner';
 import { PwaRegister } from '@/components/layout/PwaRegister';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
@@ -77,6 +78,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <AuthProvider>
           <CartProvider>
             <AttributionTracker />
+            <OfflineBanner />
             {children}
             <CartDrawer />
             <MobileNav />
