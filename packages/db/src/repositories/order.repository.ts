@@ -210,7 +210,8 @@ export async function createPendingCheckoutOrder(
           .select()
           .from(coupons)
           .where(and(eq(coupons.storeId, storeId), eq(coupons.code, normalizedCode)))
-          .limit(1);
+          .limit(1)
+          .for('update');
 
         const couponRecord = couponRows[0];
         if (couponRecord) {
@@ -240,7 +241,16 @@ export async function createPendingCheckoutOrder(
                 updatedAt: new Date()
               })
               .where(eq(coupons.id, domainCoupon.id));
+          } else {
+            throw new ConflictError(
+              validation.reason ?? `Promotional code ${normalizedCode} is no longer valid.`,
+              { couponCode: normalizedCode, reason: validation.reason }
+            );
           }
+        } else {
+          throw new NotFoundError('Coupon', normalizedCode, {
+            reason: `Promotional code ${normalizedCode} does not exist.`
+          });
         }
       }
 

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { createDbClient } from './index';
 import {
@@ -22,6 +22,7 @@ import {
   outboxEvents,
   productVariants
 } from './schema';
+import { cleanupTestStore, closeDbClient } from './test-db-helper';
 
 describe('Inventory Repository Integration', () => {
   const databaseUrl =
@@ -355,5 +356,10 @@ describe('Inventory Repository Integration', () => {
       const auditLogsAfter = await listInventoryAuditLogs(db, variantId);
       expect(auditLogsAfter.length).toBe(auditLogsBefore.length);
     });
+  });
+
+  afterAll(async () => {
+    await cleanupTestStore(db, storeId);
+    await closeDbClient(db);
   });
 });

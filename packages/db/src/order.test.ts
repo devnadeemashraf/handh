@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { and, eq } from 'drizzle-orm';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { ConflictError, NotFoundError, ValidationError } from '@hh/domain';
 
@@ -17,6 +17,7 @@ import {
   isIdempotencyConflict
 } from './repositories';
 import { inventoryLevels, orders } from './schema';
+import { cleanupTestStore, closeDbClient } from './test-db-helper';
 
 describe('Order Repository Integration', () => {
   const databaseUrl =
@@ -472,5 +473,10 @@ describe('Order Repository Integration', () => {
     expect(persisted?.cgstMinor).toBe(0);
     expect(persisted?.sgstMinor).toBe(0);
     expect(persisted?.igstMinor).toBe(10647);
+  });
+
+  afterAll(async () => {
+    await cleanupTestStore(db, storeId);
+    await closeDbClient(db);
   });
 });

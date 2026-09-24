@@ -6,6 +6,7 @@ import * as schema from './schema';
 export * from './repositories';
 export * from './schema';
 export * from './services';
+export * from './test-db-helper';
 export { schema };
 export { sql } from 'drizzle-orm';
 
@@ -56,4 +57,37 @@ export function getSharedDbClient(
     db
   });
   return db;
+}
+
+/**
+ * Closes an individual database client connection pool.
+ */
+export async function closeDbClient(db: DatabaseClient): Promise<void> {
+  const client = (
+    db as unknown as { $client?: { end: (opts?: { timeout?: number }) => Promise<void> } }
+  ).$client;
+  if (client && typeof client.end === 'function') {
+    await client.end({ timeout: 5 });
+  }
+}
+
+/**
+ * Closes all cached shared PostgreSQL connection pools.
+ * Useful for test lifecycle teardown and graceful worker shutdown.
+ */
+export async function closeSharedDbClients(): Promise<void> {
+  if (!globalForDb.hhPostgresClients) {
+    return;
+  }
+
+  const entries = Array.from(globalForDb.hhPostgresClients.values());
+  globalForDb.hhPostgresClients.clear();
+
+  await Promise.all(
+    entries.map(async ({ queryClient }) => {
+      if (queryClient && typeof queryClient.end === 'function') {
+        await queryClient.end({ timeout: 5 });
+      }
+    })
+  );
 }
