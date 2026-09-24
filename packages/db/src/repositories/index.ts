@@ -2,6 +2,7 @@ export * from './address.repository';
 export * from './admin-audit.repository';
 export * from './admin-session.repository';
 export * from './admin-user.repository';
+export * from './analytics.repository';
 export * from './cart.repository';
 export * from './category.repository';
 export * from './coupon.repository';

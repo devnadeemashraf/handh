@@ -174,6 +174,7 @@ export async function cleanDatabase(databaseUrl?: string): Promise<void> {
         fulfillments,
         payment_attempts,
         webhook_events,
+        analytics_events,
         outbox_events,
         grievance_tickets,
         orders,

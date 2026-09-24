@@ -1,4 +1,5 @@
 export * from './admin';
+export * from './analytics';
 export * from './categories';
 export * from './coupons';
 export * from './fulfillments';

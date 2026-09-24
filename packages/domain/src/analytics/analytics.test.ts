@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { orderAttributionSchema } from './types';
+import {
+  analyticsBatchIngestSchema,
+  analyticsEventIngestSchema,
+  analyticsIngestPayloadSchema,
+  orderAttributionSchema
+} from './types';
 import { isInstagramTraffic, parseUtmParameters } from './utm';
 
 describe('Analytics & Instagram Attribution Domain', () => {
@@ -59,5 +64,40 @@ describe('Analytics & Instagram Attribution Domain', () => {
     expect(attr.source).toBe('direct');
     expect(attr.medium).toBe('none');
     expect(attr.deviceType).toBe('unknown');
+  });
+
+  it('validates single and batch event ingestion payloads', () => {
+    const singleEvent = {
+      sessionId: 'sess_abc',
+      eventType: 'page_viewed',
+      properties: { path: '/collections/luxury' }
+    };
+    const parsedSingle = analyticsEventIngestSchema.safeParse(singleEvent);
+    expect(parsedSingle.success).toBe(true);
+
+    const batchEvents = {
+      events: [
+        {
+          sessionId: 'sess_abc',
+          eventType: 'product_viewed',
+          properties: { productId: 'prod_123' }
+        },
+        {
+          sessionId: 'sess_abc',
+          eventType: 'cart_item_added',
+          properties: { variantId: 'var_456' }
+        }
+      ]
+    };
+    const parsedBatch = analyticsBatchIngestSchema.safeParse(batchEvents);
+    expect(parsedBatch.success).toBe(true);
+
+    // Test polymorphic payload schema
+    expect(analyticsIngestPayloadSchema.safeParse(singleEvent).success).toBe(true);
+    expect(analyticsIngestPayloadSchema.safeParse(batchEvents).success).toBe(true);
+    expect(analyticsIngestPayloadSchema.safeParse(batchEvents.events).success).toBe(true);
+
+    // Rejects invalid payload
+    expect(analyticsIngestPayloadSchema.safeParse({}).success).toBe(false);
   });
 });

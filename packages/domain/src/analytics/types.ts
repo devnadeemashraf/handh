@@ -112,3 +112,33 @@ export interface AttributionChannelSummary {
   revenueMinor: number;
   averageOrderValueMinor: number;
 }
+
+export const analyticsEventIngestSchema = z.object({
+  storeId: z.string().uuid().optional(),
+  sessionId: z.string().min(1).max(64),
+  anonymousId: z.string().max(64).optional(),
+  userId: z.string().uuid().optional(),
+  eventType: z.string().min(1).max(64),
+  entityType: z.string().max(32).optional(),
+  entityId: z.string().max(64).optional(),
+  properties: z.record(z.unknown()).default({}),
+  pageUrl: z.string().max(2048).optional(),
+  referrer: z.string().max(2048).optional(),
+  userAgent: z.string().max(1024).optional()
+});
+
+export type AnalyticsEventIngestInput = z.infer<typeof analyticsEventIngestSchema>;
+
+export const analyticsBatchIngestSchema = z.object({
+  events: z.array(analyticsEventIngestSchema).min(1).max(100)
+});
+
+export type AnalyticsBatchIngestInput = z.infer<typeof analyticsBatchIngestSchema>;
+
+export const analyticsIngestPayloadSchema = z.union([
+  analyticsEventIngestSchema,
+  analyticsBatchIngestSchema,
+  z.array(analyticsEventIngestSchema).min(1).max(100)
+]);
+
+export type AnalyticsIngestPayload = z.infer<typeof analyticsIngestPayloadSchema>;

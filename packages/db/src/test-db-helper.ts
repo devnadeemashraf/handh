@@ -3,6 +3,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { cleanDatabase } from './clean';
 import { closeDbClient, closeSharedDbClients } from './index';
 import {
+  analyticsEvents,
   categories,
   coupons,
   fulfillments,
@@ -71,6 +72,7 @@ export async function cleanupTestStore(db: DatabaseClient, storeId: string): Pro
   }
 
   // 3. Purge supporting store configurations and categories
+  await db.delete(analyticsEvents).where(eq(analyticsEvents.storeId, storeId));
   await db.delete(categories).where(eq(categories.storeId, storeId));
   await db.delete(coupons).where(eq(coupons.storeId, storeId));
   await db.delete(storeDomains).where(eq(storeDomains.storeId, storeId));
