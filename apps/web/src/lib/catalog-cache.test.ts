@@ -9,12 +9,15 @@ import type { Store } from '@hh/db';
 import type { CategoryTreeItem, PublicProductDetail, PublicProductListItem } from '@hh/domain';
 
 import {
+  clearInFlightPromisesForTesting,
   getCachedCatalog,
   getCachedCategories,
   getCachedProduct,
   getCachedStore,
   getOrSetRedisCache,
   invalidateCatalogCache,
+  NEGATIVE_CACHE_SENTINEL,
+  NEGATIVE_CACHE_TTL,
   safeRevalidatePath,
   safeRevalidateTag
 } from './catalog-cache';
@@ -41,6 +44,7 @@ describe('Catalog Cache & Edge Invalidation Service (E-COM-030, E-COM-116)', () 
 
   beforeEach(() => {
     vi.clearAllMocks();
+    clearInFlightPromisesForTesting();
   });
 
   describe('getOrSetRedisCache', () => {
@@ -73,6 +77,74 @@ describe('Catalog Cache & Edge Invalidation Service (E-COM-030, E-COM-116)', () 
         'EX',
         120
       );
+    });
+
+    it('deduplicates concurrent cache misses with single-flight stampede defense (E-COM-135)', async () => {
+      vi.mocked(redisModule.getRedisClient).mockReturnValue(mockRedis as unknown as Redis);
+      mockRedis.get.mockResolvedValue(null);
+      mockRedis.set.mockResolvedValue('OK');
+
+      let resolveSlowFetcher: (value: { id: string }) => void = () => {};
+      const slowPromise = new Promise<{ id: string }>((resolve) => {
+        resolveSlowFetcher = resolve;
+      });
+      const fetcher = vi.fn().mockImplementation(() => slowPromise);
+
+      // Launch 5 simultaneous requests for the identical cache key
+      const [req1, req2, req3, req4, req5] = [
+        getOrSetRedisCache('catalog:product:stampede-test', 60, fetcher),
+        getOrSetRedisCache('catalog:product:stampede-test', 60, fetcher),
+        getOrSetRedisCache('catalog:product:stampede-test', 60, fetcher),
+        getOrSetRedisCache('catalog:product:stampede-test', 60, fetcher),
+        getOrSetRedisCache('catalog:product:stampede-test', 60, fetcher)
+      ];
+
+      // Resolve the single database operation
+      resolveSlowFetcher({ id: 'prod-single-flight' });
+
+      const results = await Promise.all([req1, req2, req3, req4, req5]);
+
+      // All 5 callers get the exact same resolved value
+      expect(results).toEqual([
+        { id: 'prod-single-flight' },
+        { id: 'prod-single-flight' },
+        { id: 'prod-single-flight' },
+        { id: 'prod-single-flight' },
+        { id: 'prod-single-flight' }
+      ]);
+
+      // Database fetcher was invoked exactly once across all 5 callers!
+      expect(fetcher).toHaveBeenCalledOnce();
+    });
+
+    it('stores negative cache sentinel on 404/null to prevent DB exhaustion (E-COM-135)', async () => {
+      vi.mocked(redisModule.getRedisClient).mockReturnValue(mockRedis as unknown as Redis);
+      mockRedis.get.mockResolvedValue(null);
+      mockRedis.set.mockResolvedValue('OK');
+
+      const fetcher = vi.fn().mockResolvedValue(null);
+      const result = await getOrSetRedisCache('catalog:product:non-existent', 60, fetcher);
+
+      expect(result).toBeNull();
+      expect(fetcher).toHaveBeenCalledOnce();
+      expect(mockRedis.set).toHaveBeenCalledWith(
+        'catalog:product:non-existent',
+        NEGATIVE_CACHE_SENTINEL,
+        'EX',
+        NEGATIVE_CACHE_TTL
+      );
+    });
+
+    it('returns null directly when Redis contains negative cache sentinel without calling DB (E-COM-135)', async () => {
+      vi.mocked(redisModule.getRedisClient).mockReturnValue(mockRedis as unknown as Redis);
+      mockRedis.get.mockResolvedValue(NEGATIVE_CACHE_SENTINEL);
+
+      const fetcher = vi.fn();
+      const result = await getOrSetRedisCache('catalog:product:non-existent', 60, fetcher);
+
+      expect(result).toBeNull();
+      expect(fetcher).not.toHaveBeenCalled();
+      expect(mockRedis.set).not.toHaveBeenCalled();
     });
 
     it('gracefully degrades to fetcher when Redis is null', async () => {

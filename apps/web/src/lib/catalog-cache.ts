@@ -30,7 +30,54 @@ export const CATALOG_CACHE_TTL = {
 } as const;
 
 /**
- * Resilient Redis cache-aside helper with automatic JSON serialization and graceful degradation.
+ * Sentinel value stored in Redis to represent a verified negative cache hit (e.g. 404 non-existent slug).
+ * Prevents continuous database query bombardment during web scraping or enumeration attacks (E-COM-135).
+ */
+export const NEGATIVE_CACHE_SENTINEL = '__HH_NEGATIVE_CACHE_SENTINEL__';
+
+/**
+ * Short TTL (in seconds) for negative cache entries.
+ */
+export const NEGATIVE_CACHE_TTL = 60;
+
+/**
+ * In-flight promise map for single-flight coalescing.
+ * Collapses concurrent cache misses for identical keys into a single database operation (E-COM-135).
+ */
+const inFlightPromises = new Map<string, Promise<unknown>>();
+
+/**
+ * Clears in-flight promises. Provided for deterministic unit test isolation.
+ */
+export function clearInFlightPromisesForTesting(): void {
+  inFlightPromises.clear();
+}
+
+/**
+ * Single-flight promise coalescer: ensures only a single asynchronous operation
+ * runs concurrently for a given cache key. All concurrent callers await the same in-flight Promise.
+ */
+async function singleFlight<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  const existing = inFlightPromises.get(key);
+  if (existing) {
+    return existing as Promise<T>;
+  }
+
+  const promise = (async () => {
+    try {
+      return await fn();
+    } finally {
+      inFlightPromises.delete(key);
+    }
+  })();
+
+  inFlightPromises.set(key, promise);
+  return promise;
+}
+
+/**
+ * Resilient Redis cache-aside helper with automatic JSON serialization,
+ * single-flight stampede defense, and negative 404 caching (E-COM-135).
  */
 export async function getOrSetRedisCache<T>(
   key: string,
@@ -42,6 +89,9 @@ export async function getOrSetRedisCache<T>(
   if (redis) {
     try {
       const cached = await redis.get(key);
+      if (cached === NEGATIVE_CACHE_SENTINEL) {
+        return null as unknown as T;
+      }
       if (cached) {
         return JSON.parse(cached) as T;
       }
@@ -50,17 +100,40 @@ export async function getOrSetRedisCache<T>(
     }
   }
 
-  const result = await fetcher();
-
-  if (redis && result !== null && result !== undefined) {
-    try {
-      await redis.set(key, JSON.stringify(result), 'EX', ttlSeconds);
-    } catch {
-      // Redis write failure is non-fatal
+  // Single-flight stampede protection: collapse simultaneous cache misses into 1 execution
+  return singleFlight(key, async () => {
+    // Double-check Redis inside the single flight in case a prior flight already cached it
+    if (redis) {
+      try {
+        const cached = await redis.get(key);
+        if (cached === NEGATIVE_CACHE_SENTINEL) {
+          return null as unknown as T;
+        }
+        if (cached) {
+          return JSON.parse(cached) as T;
+        }
+      } catch {
+        // Non-fatal fallback
+      }
     }
-  }
 
-  return result;
+    const result = await fetcher();
+
+    if (redis) {
+      try {
+        if (result === null || result === undefined) {
+          // Negative cache entry: protect DB from 404 enumeration scans
+          await redis.set(key, NEGATIVE_CACHE_SENTINEL, 'EX', NEGATIVE_CACHE_TTL);
+        } else {
+          await redis.set(key, JSON.stringify(result), 'EX', ttlSeconds);
+        }
+      } catch {
+        // Redis write failure is non-fatal
+      }
+    }
+
+    return result;
+  });
 }
 
 /**
@@ -186,6 +259,7 @@ export async function invalidateCatalogCache(options?: {
   // 1. Next.js on-demand cache revalidation
   safeRevalidateTag('catalog');
   safeRevalidateTag('storefront');
+  safeRevalidateTag('storefront-config');
   if (options?.slug) {
     safeRevalidateTag(`product:${options.slug}`);
     safeRevalidatePath(`/products/${options.slug}`, 'page');
