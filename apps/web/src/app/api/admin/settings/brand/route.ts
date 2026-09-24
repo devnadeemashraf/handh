@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/admin-auth';
+import { invalidateCatalogCache } from '@/lib/catalog-cache';
 import { getClientIp } from '@/lib/client-ip';
 
 import {
@@ -69,6 +70,9 @@ export async function PATCH(request: Request) {
       ipAddress: getClientIp(request),
       userAgent: request.headers.get('user-agent') ?? null
     });
+
+    // Invalidate edge & Redis storefront and catalog cache upon brand settings change (E-COM-116)
+    await invalidateCatalogCache();
 
     return NextResponse.json({
       success: true,

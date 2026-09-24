@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as adminAuthModule from '@/lib/admin-auth';
+import * as catalogCacheModule from '@/lib/catalog-cache';
 
 import type { AdminSessionContext } from '@/lib/admin-auth';
 
@@ -13,6 +14,10 @@ import { PATCH as handleUpdateStatus } from './status/route';
 vi.mock('@/lib/admin-auth', () => ({
   getAdminSession: vi.fn(),
   getSharedDb: vi.fn().mockReturnValue({})
+}));
+
+vi.mock('@/lib/catalog-cache', () => ({
+  invalidateCatalogCache: vi.fn()
 }));
 
 vi.mock('@hh/db', () => ({
@@ -159,6 +164,7 @@ describe('Admin Inventory API Routes', () => {
           entityId: '11111111-2222-3333-4444-555555555555'
         })
       );
+      expect(catalogCacheModule.invalidateCatalogCache).toHaveBeenCalled();
     });
   });
 
@@ -214,6 +220,7 @@ describe('Admin Inventory API Routes', () => {
           entityId: '11111111-2222-3333-4444-555555555555'
         })
       );
+      expect(catalogCacheModule.invalidateCatalogCache).toHaveBeenCalled();
     });
   });
 
@@ -261,6 +268,7 @@ describe('Admin Inventory API Routes', () => {
           status: 'published'
         })
       );
+      expect(catalogCacheModule.invalidateCatalogCache).toHaveBeenCalled();
     });
   });
 });

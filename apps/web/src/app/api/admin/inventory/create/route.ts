@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAdminSession } from '@/lib/admin-auth';
+import { invalidateCatalogCache } from '@/lib/catalog-cache';
 import { getClientIp } from '@/lib/client-ip';
 
 import {
@@ -87,6 +88,9 @@ export async function POST(request: Request) {
       ipAddress: getClientIp(request),
       userAgent: request.headers.get('user-agent') ?? null
     });
+
+    // Invalidate edge & Redis catalog cache upon product creation (E-COM-116)
+    await invalidateCatalogCache({ slug: result.product.slug });
 
     return NextResponse.json({
       success: true,

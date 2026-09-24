@@ -1,6 +1,6 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { createDbClient } from './index';
+import { closeDbClient, createDbClient } from './index';
 import {
   createCategory,
   createProductWithVariants,
@@ -10,6 +10,7 @@ import {
   getCategoryTree,
   listPublishedProducts
 } from './repositories';
+import { cleanupTestStore } from './test-db-helper';
 
 describe('Catalog Domain Integration', () => {
   const databaseUrl =
@@ -116,6 +117,22 @@ describe('Catalog Domain Integration', () => {
     expect(match?.startingPriceMinor).toBe(59900);
     expect(match?.isAvailable).toBe(true);
 
+    // Verify querying published catalog with subcategory filter
+    const jewelryList = await listPublishedProducts(db, storeId, { categorySlug: 'jewelry' });
+    expect(jewelryList.some((p) => p.slug === productSlug)).toBe(true);
+
+    // Verify querying published catalog with parent category filter (hierarchical traversal)
+    const accessoriesList = await listPublishedProducts(db, storeId, {
+      categorySlug: 'accessories'
+    });
+    expect(accessoriesList.some((p) => p.slug === productSlug)).toBe(true);
+
+    // Verify querying published catalog with non-existent category filter returns empty array
+    const emptyList = await listPublishedProducts(db, storeId, {
+      categorySlug: 'non-existent-cat'
+    });
+    expect(emptyList).toEqual([]);
+
     // Verify querying product detail with variants and stock calculation
     const detail = await findProductBySlug(db, storeId, productSlug);
     expect(detail).not.toBeNull();
@@ -132,5 +149,12 @@ describe('Catalog Domain Integration', () => {
     expect(detail?.commodityName).toBe('Test Gold Nose Piece');
     expect(detail?.manufacturerDetails.name).toBe('H&H Luxury Modest Wear Private Limited');
     expect(detail?.consumerCareDetails?.email).toBe('support@handh.in');
+  });
+
+  afterAll(async () => {
+    if (storeId) {
+      await cleanupTestStore(db, storeId);
+    }
+    await closeDbClient(db);
   });
 });

@@ -6,26 +6,25 @@ import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { ThemeInjector } from '@/components/layout/ThemeInjector';
+import { getCachedCatalog, getCachedCategories, getCachedStore } from '@/lib/catalog-cache';
 
-import { findStoreBySlug, getCategoryTree, getSharedDbClient, listPublishedProducts } from '@hh/db';
 import { resolveStorefrontConfig } from '@hh/domain';
 
 interface HomePageProps {
   searchParams: Promise<{ category?: string }>;
 }
 
-function getDatabase() {
-  const databaseUrl =
-    process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return getSharedDbClient(databaseUrl);
-}
+/**
+ * Incremental Static Regeneration (ISR) with 60-second stale-while-revalidate window.
+ * Absorbs traffic bursts from social drops while keeping published inventory fresh.
+ */
+export const revalidate = 60;
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const { category: activeCategory } = await searchParams;
-  const db = getDatabase();
 
-  // 1. Resolve flagship store
-  const store = await findStoreBySlug(db, 'hh');
+  // 1. Resolve flagship store with Redis + Edge caching
+  const store = await getCachedStore('hh');
 
   if (!store) {
     return (
@@ -42,8 +41,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   // 2. Fetch server-driven config, categories, and published catalog in parallel
   const [categories, products] = await Promise.all([
-    getCategoryTree(db, store.id),
-    listPublishedProducts(db, store.id, activeCategory ? { categorySlug: activeCategory } : {})
+    getCachedCategories(store.id),
+    getCachedCatalog(store.id, activeCategory)
   ]);
 
   const storefrontConfig = resolveStorefrontConfig(store.settings.storefront);

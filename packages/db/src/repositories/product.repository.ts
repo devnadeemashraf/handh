@@ -1,4 +1,4 @@
-import { and, asc, eq, min } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 
 import {
   type CreateProductInput,
@@ -26,18 +26,16 @@ export async function listPublishedProducts(
   storeId: string,
   options: { categorySlug?: string | undefined } = {}
 ): Promise<PublicProductListItem[]> {
-  const baseConditions = [eq(products.storeId, storeId), eq(products.status, 'published')];
+  const conditions = [eq(products.storeId, storeId), eq(products.status, 'published')];
 
   if (options.categorySlug) {
-    const matchedCategory = await db
-      .select({ id: categories.id })
-      .from(categories)
-      .where(and(eq(categories.storeId, storeId), eq(categories.slug, options.categorySlug)))
-      .limit(1);
-
-    if (matchedCategory[0]) {
-      baseConditions.push(eq(products.categoryId, matchedCategory[0].id));
-    }
+    conditions.push(
+      sql`(${categories.slug} = ${options.categorySlug} OR ${products.categoryId} IN (
+        SELECT c_sub.id FROM ${categories} c_sub WHERE c_sub.parent_id = (
+          SELECT c_parent.id FROM ${categories} c_parent WHERE c_parent.slug = ${options.categorySlug} AND c_parent.store_id = ${storeId} LIMIT 1
+        )
+      ))`
+    );
   }
 
   const publishedProducts = await db
@@ -48,59 +46,54 @@ export async function listPublishedProducts(
       department: products.department,
       isCustomizable: products.isCustomizable,
       tags: products.tags,
-      categoryName: categories.name
+      categoryName: categories.name,
+      startingPriceMinor: sql<number>`COALESCE((
+        SELECT MIN(${productVariants.priceMinor})
+        FROM ${productVariants}
+        WHERE ${productVariants.productId} = ${products.id}
+          AND ${productVariants.isActive} = true
+      ), 0)::int`,
+      currency: sql<string>`COALESCE((
+        SELECT ${productVariants.currency}
+        FROM ${productVariants}
+        WHERE ${productVariants.productId} = ${products.id}
+          AND ${productVariants.isActive} = true
+        ORDER BY ${productVariants.sortOrder} ASC
+        LIMIT 1
+      ), 'INR')`,
+      primaryImageUrl: sql<string | null>`(
+        SELECT ${productImages.url}
+        FROM ${productImages}
+        WHERE ${productImages.productId} = ${products.id}
+        ORDER BY ${productImages.sortOrder} ASC
+        LIMIT 1
+      )`,
+      totalAvailable: sql<number>`COALESCE((
+        SELECT SUM(GREATEST(0, ${inventoryLevels.onHand} - ${inventoryLevels.reserved}))
+        FROM ${inventoryLevels}
+        INNER JOIN ${productVariants} ON ${inventoryLevels.variantId} = ${productVariants.id}
+        WHERE ${productVariants.productId} = ${products.id}
+          AND ${productVariants.isActive} = true
+      ), 0)::int`
     })
     .from(products)
     .leftJoin(categories, eq(products.categoryId, categories.id))
-    .where(and(...baseConditions));
+    .where(and(...conditions))
+    .orderBy(asc(products.createdAt));
 
-  const items: PublicProductListItem[] = [];
-
-  for (const prod of publishedProducts) {
-    // Get lowest price and primary image
-    const variantStats = await db
-      .select({ minPrice: min(productVariants.priceMinor) })
-      .from(productVariants)
-      .where(and(eq(productVariants.productId, prod.id), eq(productVariants.isActive, true)));
-
-    const image = await db
-      .select({ url: productImages.url })
-      .from(productImages)
-      .where(eq(productImages.productId, prod.id))
-      .orderBy(asc(productImages.sortOrder))
-      .limit(1);
-
-    // Check availability
-    const inventory = await db
-      .select({
-        onHand: inventoryLevels.onHand,
-        reserved: inventoryLevels.reserved
-      })
-      .from(inventoryLevels)
-      .innerJoin(productVariants, eq(inventoryLevels.variantId, productVariants.id))
-      .where(and(eq(productVariants.productId, prod.id), eq(productVariants.isActive, true)));
-
-    const totalAvailable = inventory.reduce(
-      (sum, row) => sum + Math.max(0, row.onHand - row.reserved),
-      0
-    );
-
-    items.push({
-      id: prod.id,
-      slug: prod.slug,
-      title: prod.title,
-      department: prod.department ?? undefined,
-      isCustomizable: prod.isCustomizable ?? false,
-      tags: (prod.tags as string[]) ?? [],
-      startingPriceMinor: Number(variantStats[0]?.minPrice ?? 0),
-      currency: 'INR',
-      primaryImageUrl: image[0]?.url ?? null,
-      categoryName: prod.categoryName ?? null,
-      isAvailable: totalAvailable > 0
-    });
-  }
-
-  return items;
+  return publishedProducts.map((prod) => ({
+    id: prod.id,
+    slug: prod.slug,
+    title: prod.title,
+    department: prod.department ?? undefined,
+    isCustomizable: prod.isCustomizable ?? false,
+    tags: (prod.tags as string[]) ?? [],
+    startingPriceMinor: Number(prod.startingPriceMinor ?? 0),
+    currency: prod.currency || 'INR',
+    primaryImageUrl: prod.primaryImageUrl ?? null,
+    categoryName: prod.categoryName ?? null,
+    isAvailable: Number(prod.totalAvailable ?? 0) > 0
+  }));
 }
 
 export async function findProductBySlug(

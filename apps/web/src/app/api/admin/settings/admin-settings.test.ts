@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as adminAuthModule from '@/lib/admin-auth';
+import * as catalogCacheModule from '@/lib/catalog-cache';
 
 import type { AdminSessionContext } from '@/lib/admin-auth';
 
@@ -18,6 +19,10 @@ import {
 vi.mock('@/lib/admin-auth', () => ({
   getAdminSession: vi.fn(),
   getSharedDb: vi.fn().mockReturnValue({})
+}));
+
+vi.mock('@/lib/catalog-cache', () => ({
+  invalidateCatalogCache: vi.fn()
 }));
 
 vi.mock('@hh/db', () => ({
@@ -151,6 +156,7 @@ describe('Admin Store Settings API Routes', () => {
           action: 'settings:service_control_updated'
         })
       );
+      expect(catalogCacheModule.invalidateCatalogCache).toHaveBeenCalled();
     });
   });
 
@@ -201,6 +207,7 @@ describe('Admin Store Settings API Routes', () => {
           action: 'settings:brand_updated'
         })
       );
+      expect(catalogCacheModule.invalidateCatalogCache).toHaveBeenCalled();
     });
   });
 });

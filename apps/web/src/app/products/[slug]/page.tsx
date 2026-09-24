@@ -9,32 +9,50 @@ import { LegalMetrologySection } from '@/components/product/LegalMetrologySectio
 import { ProductAccordion } from '@/components/product/ProductAccordion';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductPurchaseCard } from '@/components/product/ProductPurchaseCard';
+import {
+  getCachedCatalog,
+  getCachedCategories,
+  getCachedProduct,
+  getCachedStore
+} from '@/lib/catalog-cache';
 
 import type { Metadata } from 'next';
 
-import { findProductBySlug, findStoreBySlug, getCategoryTree, getSharedDbClient } from '@hh/db';
 import { resolveStorefrontConfig } from '@hh/domain';
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
-function getDatabase() {
-  const databaseUrl =
-    process.env['DATABASE_URL'] ?? 'postgres://postgres:postgres@localhost:5432/hh_dev';
-  return getSharedDbClient(databaseUrl);
+/**
+ * Incremental Static Regeneration (ISR) with 60-second stale-while-revalidate window.
+ * Absorbs traffic bursts from social drops while keeping published inventory fresh.
+ */
+export const revalidate = 60;
+
+/**
+ * Pre-renders the top published catalog product slugs at build time.
+ */
+export async function generateStaticParams() {
+  try {
+    const store = await getCachedStore('hh');
+    if (!store) return [];
+    const products = await getCachedCatalog(store.id);
+    return products.slice(0, 50).map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const db = getDatabase();
-  const store = await findStoreBySlug(db, 'hh');
+  const store = await getCachedStore('hh');
 
   if (!store) {
     return { title: 'Product' };
   }
 
-  const product = await findProductBySlug(db, store.id, slug);
+  const product = await getCachedProduct(store.id, slug);
   if (!product) {
     return { title: 'Piece Not Found' };
   }
@@ -61,14 +79,13 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const db = getDatabase();
 
-  const store = await findStoreBySlug(db, 'hh');
+  const store = await getCachedStore('hh');
   if (!store) notFound();
 
   const [product, categories] = await Promise.all([
-    findProductBySlug(db, store.id, slug),
-    getCategoryTree(db, store.id)
+    getCachedProduct(store.id, slug),
+    getCachedCategories(store.id)
   ]);
 
   if (!product) {
