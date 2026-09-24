@@ -1,6 +1,14 @@
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 
 import type { CartItemInput, CartSummary } from '@hh/domain';
 
@@ -30,6 +38,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
+  const hasInitialValidatedRef = useRef(false);
 
   // 1. Hydrate cart from localStorage on client mount
   useEffect(() => {
@@ -73,6 +82,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         if (data.success && data.cart) {
           setCartSummary(data.cart);
+          // Reconcile client storage if server modified item quantities (e.g. out-of-stock or cap) (E-COM-033)
+          const serverItems: CartItemInput[] = (data.cart.items || []).map(
+            (it: { variantId: string; effectiveQuantity?: number; quantity?: number }) => ({
+              variantId: it.variantId,
+              quantity: it.effectiveQuantity ?? it.quantity ?? 1
+            })
+          );
+          const needsReconciliation =
+            serverItems.length !== currentItems.length ||
+            serverItems.some((sItem, idx) => {
+              const cItem = currentItems[idx];
+              return (
+                !cItem || cItem.variantId !== sItem.variantId || cItem.quantity !== sItem.quantity
+              );
+            });
+
+          if (needsReconciliation) {
+            setItems(serverItems);
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(serverItems));
+            } catch (e) {
+              console.error('Failed to update localStorage cart:', e);
+            }
+          }
         }
       }
     } catch (e) {
@@ -96,10 +129,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [validateWithServer]
   );
 
-  // Validate on initial hydration
+  // Validate only once on initial client hydration (E-COM-146)
   useEffect(() => {
-    if (isHydrated) {
-      void validateWithServer(items);
+    if (isHydrated && !hasInitialValidatedRef.current) {
+      hasInitialValidatedRef.current = true;
+      if (items.length > 0) {
+        void validateWithServer(items);
+      }
     }
   }, [isHydrated, items, validateWithServer]);
 
@@ -160,8 +196,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [items, validateWithServer]);
 
   const totalItemCount = useMemo(() => {
+    if (cartSummary) {
+      return cartSummary.totalQuantity;
+    }
     return items.reduce((sum, item) => sum + item.quantity, 0);
-  }, [items]);
+  }, [cartSummary, items]);
 
   const value = useMemo(
     () => ({

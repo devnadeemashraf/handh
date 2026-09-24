@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import * as React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
+import { triggerHaptic } from '@/lib/haptic';
 import { cn } from '@/lib/utils';
 
 export function MobileNav() {
@@ -31,8 +32,9 @@ export function MobileNav() {
         {/* 1. Home */}
         <Link
           href="/"
+          onClick={() => triggerHaptic('selection')}
           className={cn(
-            'flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium transition-colors select-none',
+            'flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium transition-all duration-150 active:scale-[0.92] select-none',
             isHome ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
           )}
         >
@@ -43,7 +45,8 @@ export function MobileNav() {
         {/* 2. Browse / Collections */}
         <Link
           href="/#catalog"
-          className="flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors select-none"
+          onClick={() => triggerHaptic('selection')}
+          className="flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-[0.92] select-none"
         >
           <Compass className="h-5 w-5 text-muted-foreground" />
           <span>Catalog</span>
@@ -53,13 +56,14 @@ export function MobileNav() {
         <Link
           href="/account/wishlist"
           onClick={(e) => {
+            triggerHaptic('selection');
             if (!user) {
               e.preventDefault();
               openAuthModal({ reason: 'Sign in to access your saved pieces.' });
             }
           }}
           className={cn(
-            'flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium transition-colors select-none',
+            'flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium transition-all duration-150 active:scale-[0.92] select-none',
             isWishlist ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
           )}
         >
@@ -75,8 +79,11 @@ export function MobileNav() {
         {/* 4. Cart / Bag */}
         <button
           type="button"
-          onClick={openCart}
-          className="relative flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors select-none"
+          onClick={() => {
+            triggerHaptic('selection');
+            openCart();
+          }}
+          className="relative flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-[0.92] select-none"
           aria-label={`Open shopping bag with ${totalItemCount} items`}
         >
           <div className="relative">
@@ -90,36 +97,36 @@ export function MobileNav() {
           <span>Bag</span>
         </button>
 
-        {/* 5. Account */}
-        <button
-          type="button"
-          onClick={() => {
-            if (!user) {
+        {/* 5. Account: Conditional Link vs Button to eliminate <a> inside <button> (E-COM-145) */}
+        {user ? (
+          <Link
+            href="/account"
+            onClick={() => triggerHaptic('selection')}
+            className={cn(
+              'flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium transition-all duration-150 active:scale-[0.92] select-none',
+              isAccount ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <UserIcon
+              className={cn('h-5 w-5', isAccount ? 'text-primary' : 'text-muted-foreground')}
+            />
+            <span>Account</span>
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              triggerHaptic('selection');
               openAuthModal({ reason: 'Sign in to access your orders and profile.' });
-            }
-          }}
-          className={cn(
-            'flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium transition-colors select-none',
-            isAccount ? 'text-primary font-bold' : 'text-muted-foreground hover:text-foreground'
-          )}
-        >
-          {user ? (
-            <Link
-              href="/account"
-              className="flex flex-col items-center justify-center gap-1 text-[10px]"
-            >
-              <UserIcon
-                className={cn('h-5 w-5', isAccount ? 'text-primary' : 'text-muted-foreground')}
-              />
-              <span>Account</span>
-            </Link>
-          ) : (
-            <>
-              <UserIcon className="h-5 w-5 text-muted-foreground" />
-              <span>Sign In</span>
-            </>
-          )}
-        </button>
+            }}
+            className={cn(
+              'flex flex-col items-center justify-center gap-1 py-1 text-[10px] font-medium transition-all duration-150 active:scale-[0.92] select-none text-muted-foreground hover:text-foreground'
+            )}
+          >
+            <UserIcon className="h-5 w-5 text-muted-foreground" />
+            <span>Sign In</span>
+          </button>
+        )}
       </div>
     </nav>
   );
