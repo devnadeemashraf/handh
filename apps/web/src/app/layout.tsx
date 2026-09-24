@@ -1,3 +1,4 @@
+import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import { AttributionTracker } from '@/components/layout/AttributionTracker';
 import { MobileNav } from '@/components/layout/MobileNav';
@@ -10,6 +11,18 @@ import type { ReactNode } from 'react';
 
 import '../lib/polyfill-crypto';
 import './globals.css';
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-serif',
+  display: 'swap'
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap'
+});
 
 export const metadata: Metadata = {
   title: {
@@ -59,8 +72,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col pb-16 md:pb-0">
+    <html lang="en" className={`h-full ${playfair.variable} ${plusJakarta.variable}`}>
+      <body className="min-h-full flex flex-col pb-16 md:pb-0 font-sans">
         <AuthProvider>
           <CartProvider>
             <AttributionTracker />

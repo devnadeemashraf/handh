@@ -15,6 +15,8 @@ import {
 } from '@/lib/catalog-cache';
 import { isDraftModeEnabled } from '@/lib/draft';
 
+import type { Metadata } from 'next';
+
 import { resolveStorefrontConfig } from '@hh/domain';
 
 interface HomePageProps {
@@ -26,6 +28,34 @@ interface HomePageProps {
  * Absorbs traffic bursts from social drops while keeping published inventory fresh.
  */
 export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const store = await getCachedStore('hh');
+  const name = store?.name ?? 'H&H';
+  const title = `${name} — Curated Modest Essentials & Jewelry`;
+  const description =
+    'Exquisite handcrafted nose-pieces and accessories designed for refined everyday elegance.';
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: 'https://handh.in',
+      siteName: name
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description
+    },
+    alternates: {
+      canonical: 'https://handh.in'
+    }
+  };
+}
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const { category: activeCategory } = await searchParams;
@@ -56,6 +86,42 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const storefrontConfig = resolveStorefrontConfig(store.settings.storefront);
 
+  // 3. Schema.org JSON-LD Structured Data for Search Engine Rich Snippets (E-COM-151)
+  const homeJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': 'https://handh.in/#website',
+        url: 'https://handh.in',
+        name: store.name,
+        description:
+          storefrontConfig.hero.subtitle ||
+          'Refined modest wear accessories and essentials crafted with precision and purpose.',
+        publisher: {
+          '@id': 'https://handh.in/#organization'
+        }
+      },
+      {
+        '@type': 'JewelryStore',
+        '@id': 'https://handh.in/#organization',
+        name: store.name,
+        legalName: 'H&H Curated Modest Essentials & Jewelry Private Limited',
+        url: 'https://handh.in',
+        logo: 'https://handh.in/icons/icon-512.png',
+        priceRange: '₹₹',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Plot No. 42, Road No. 36, Jubilee Hills',
+          addressLocality: 'Hyderabad',
+          addressRegion: 'Telangana',
+          postalCode: '500033',
+          addressCountry: 'IN'
+        }
+      }
+    ]
+  };
+
   return (
     <>
       {/* Live Preview Mode Indicator Banner */}
@@ -63,6 +129,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       {/* Server-Driven Theme & Colors */}
       <ThemeInjector theme={storefrontConfig.theme} />
+
+      {/* Schema.org Structured Data for Search Engine Rich Snippets (E-COM-151) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
+      />
 
       {/* Top Promotional Bar */}
       <AnnouncementBar announcement={storefrontConfig.announcement} />
@@ -90,11 +162,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         {/* Dynamic Category Tabs */}
         <CategoryFilter categories={categories} activeCategory={activeCategory} />
 
-        {/* Responsive Product Grid */}
+        {/* Responsive Product Grid with Preloaded Above-the-Fold LCP Images (E-COM-149) */}
         {products.length > 0 ? (
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {products.map((product, index) => (
+              <ProductCard key={product.id} product={product} priority={index < 4} />
             ))}
           </div>
         ) : (

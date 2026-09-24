@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-import HomePage from './page';
+import HomePage, { generateMetadata } from './page';
 
 vi.mock('@/lib/catalog-cache', () => ({
   getCachedStore: vi.fn(),
@@ -100,5 +100,47 @@ describe('Storefront Homepage (/page.tsx) - Performance & Edge Caching', () => {
     render(page);
 
     expect(screen.getByText('No pieces are currently cataloged in this collection.')).toBeDefined();
+  });
+
+  it('exports generateMetadata generating rich OpenGraph and canonical tags', async () => {
+    vi.mocked(getCachedStore).mockResolvedValue({
+      id: 'store-1',
+      slug: 'hh',
+      name: 'H&H Luxury Modest Wear',
+      settings: {}
+    } as unknown as Store);
+
+    const meta = await generateMetadata();
+
+    expect(meta.title).toBe('H&H Luxury Modest Wear — Curated Modest Essentials & Jewelry');
+    expect(meta.description).toContain('Exquisite handcrafted nose-pieces');
+    expect(meta.openGraph?.siteName).toBe('H&H Luxury Modest Wear');
+    expect(meta.alternates?.canonical).toBe('https://handh.in');
+  });
+
+  it('injects Schema.org JSON-LD structured data script on homepage (E-COM-151)', async () => {
+    vi.mocked(getCachedStore).mockResolvedValue({
+      id: 'store-1',
+      slug: 'hh',
+      name: 'H&H',
+      settings: {
+        storefront: {
+          hero: { subtitle: 'Refined handcrafted artisanal jewelry.' }
+        }
+      }
+    } as unknown as Store);
+
+    vi.mocked(getCachedCategories).mockResolvedValue([]);
+    vi.mocked(getCachedCatalog).mockResolvedValue([]);
+
+    const { container } = render(await HomePage({ searchParams: Promise.resolve({}) }));
+
+    const jsonLdScript = container.querySelector('script[type="application/ld+json"]');
+    expect(jsonLdScript).not.toBeNull();
+    const content = JSON.parse(jsonLdScript?.textContent || '{}');
+    expect(content['@context']).toBe('https://schema.org');
+    expect(content['@graph'][0]['@type']).toBe('WebSite');
+    expect(content['@graph'][1]['@type']).toBe('JewelryStore');
+    expect(content['@graph'][1]['name']).toBe('H&H');
   });
 });

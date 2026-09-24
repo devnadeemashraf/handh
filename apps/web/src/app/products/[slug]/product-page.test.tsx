@@ -65,7 +65,7 @@ const { mockProduct } = vi.hoisted(() => ({
 vi.mock('@hh/db', () => ({
   getSharedDbClient: vi.fn(() => ({})),
   findStoreBySlug: vi.fn().mockResolvedValue({
-    id: 'store-1',
+    id: '00000000-0000-0000-0000-000000000001',
     name: 'H&H',
     settings: {
       instagramHandle: 'handh_official',

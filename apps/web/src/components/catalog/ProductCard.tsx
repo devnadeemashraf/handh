@@ -9,7 +9,13 @@ import type { PublicProductListItem } from '@hh/domain';
 
 import { WishlistButton } from '../product/WishlistButton';
 
-export function ProductCard({ product }: { product: PublicProductListItem }) {
+export function ProductCard({
+  product,
+  priority = false
+}: {
+  product: PublicProductListItem;
+  priority?: boolean;
+}) {
   const formattedPrice = Money.fromMinor(product.startingPriceMinor, 'INR').format('en-IN');
 
   return (
@@ -27,6 +33,7 @@ export function ProductCard({ product }: { product: PublicProductListItem }) {
               src={product.primaryImageUrl}
               alt={product.title}
               fill
+              priority={priority}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />

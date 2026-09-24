@@ -3,6 +3,10 @@ import { Redis } from 'ioredis';
 let redisInstance: Redis | null = null;
 
 export function getRedisClient(): Redis | null {
+  if (process.env.NODE_ENV === 'test') {
+    return null;
+  }
+
   if (redisInstance) return redisInstance;
 
   const redisUrl = process.env['REDIS_URL'] ?? 'redis://localhost:6379';
