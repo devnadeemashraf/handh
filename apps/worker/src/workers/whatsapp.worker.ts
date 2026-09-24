@@ -1,7 +1,7 @@
 import { Worker } from 'bullmq';
 
-import type { Job } from 'bullmq';
-import type { Redis } from 'ioredis';
+import type { ConnectionOptions, Job } from 'bullmq';
+import type { Redis, RedisOptions } from 'ioredis';
 
 import {
   formatOrderConfirmationWhatsApp,
@@ -25,7 +25,7 @@ import {
 import type { WhatsAppService } from '../services/whatsapp.service';
 
 export function createWhatsAppWorker(
-  connection: Redis,
+  connection: Redis | RedisOptions | ConnectionOptions,
   whatsappService: WhatsAppService,
   concurrency = 5
 ): Worker {

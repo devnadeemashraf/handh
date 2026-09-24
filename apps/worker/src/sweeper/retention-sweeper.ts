@@ -41,21 +41,24 @@ export async function runRetentionSweeperPass(
 /**
  * Starts continuous background sweeping for DPDP Act statutory data retention (E-COM-166).
  * Prevents overlapping/re-entrant runs.
- * Returns a teardown function to cleanly stop the timer.
+ * Returns an asynchronous teardown function that cleanly drains any in-flight pass (E-COM-160).
  */
 export function startRetentionSweeper(
   db: DatabaseClient,
   intervalMs = 3600000,
   options: RetentionSweeperOptions = {}
-): () => void {
+): () => Promise<void> {
   let isSweeping = false;
+  let isStopped = false;
+  let activeSweepPromise: Promise<unknown> | null = null;
 
   const intervalId = setInterval(async () => {
-    if (isSweeping) return;
+    if (isSweeping || isStopped) return;
     isSweeping = true;
 
     try {
-      await runRetentionSweeperPass(db, options);
+      activeSweepPromise = runRetentionSweeperPass(db, options);
+      await activeSweepPromise;
     } catch (err) {
       console.error(
         JSON.stringify({
@@ -66,10 +69,19 @@ export function startRetentionSweeper(
       );
     } finally {
       isSweeping = false;
+      activeSweepPromise = null;
     }
   }, intervalMs);
 
-  return () => {
+  return async () => {
+    isStopped = true;
     clearInterval(intervalId);
+    if (activeSweepPromise) {
+      try {
+        await activeSweepPromise;
+      } catch {
+        // error already logged
+      }
+    }
   };
 }

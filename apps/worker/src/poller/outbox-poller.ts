@@ -262,22 +262,26 @@ export async function pollOutboxOnce(
 
 /**
  * Starts continuous background polling for outbox events.
- * Returns a teardown function to cleanly stop the poller.
+ * Returns an asynchronous teardown function that clears the interval and
+ * awaits any in-flight polling loop to finish before resolving (E-COM-160).
  */
 export function startOutboxPoller(
   db: DatabaseClient,
   queues: NotificationQueues,
   intervalMs = 2000,
   options: OutboxPollerOptions = {}
-): () => void {
+): () => Promise<void> {
   let isPolling = false;
+  let isStopped = false;
+  let activePollPromise: Promise<unknown> | null = null;
 
   const intervalId = setInterval(async () => {
-    if (isPolling) return;
+    if (isPolling || isStopped) return;
     isPolling = true;
 
     try {
-      await pollOutboxOnce(db, queues, options);
+      activePollPromise = pollOutboxOnce(db, queues, options);
+      await activePollPromise;
     } catch (err) {
       console.error(
         JSON.stringify({
@@ -288,10 +292,19 @@ export function startOutboxPoller(
       );
     } finally {
       isPolling = false;
+      activePollPromise = null;
     }
   }, intervalMs);
 
-  return () => {
+  return async () => {
+    isStopped = true;
     clearInterval(intervalId);
+    if (activePollPromise) {
+      try {
+        await activePollPromise;
+      } catch {
+        // In-flight error was logged in tick
+      }
+    }
   };
 }

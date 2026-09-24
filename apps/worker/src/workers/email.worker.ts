@@ -1,7 +1,7 @@
 import { Worker } from 'bullmq';
 
-import type { Job } from 'bullmq';
-import type { Redis } from 'ioredis';
+import type { ConnectionOptions, Job } from 'bullmq';
+import type { Redis, RedisOptions } from 'ioredis';
 
 import {
   renderAdminOrderAlertEmail,
@@ -32,7 +32,7 @@ export interface AdminAlertJobPayload extends AdminOrderAlertEmailData {
 }
 
 export function createEmailWorker(
-  connection: Redis,
+  connection: Redis | RedisOptions | ConnectionOptions,
   emailService: EmailService,
   concurrency = 5
 ): Worker {

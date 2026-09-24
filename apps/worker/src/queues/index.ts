@@ -1,6 +1,7 @@
 import { Queue } from 'bullmq';
 
-import type { Redis } from 'ioredis';
+import type { ConnectionOptions } from 'bullmq';
+import type { Redis, RedisOptions } from 'ioredis';
 
 import { NOTIFICATION_EMAIL_QUEUE, NOTIFICATION_WHATSAPP_QUEUE } from './queue-names';
 
@@ -13,9 +14,13 @@ export interface NotificationQueues {
 }
 
 /**
- * Instantiates the BullMQ notification queues sharing the Redis connection.
+ * Instantiates the BullMQ notification queues.
+ * Supports passing either an existing Redis instance or RedisOptions to enable
+ * dedicated connections per Queue (E-COM-159).
  */
-export function createNotificationQueues(connection: Redis): NotificationQueues {
+export function createNotificationQueues(
+  connectionOrOptions: Redis | RedisOptions | ConnectionOptions
+): NotificationQueues {
   const defaultJobOptions = {
     attempts: 3,
     backoff: {
@@ -32,12 +37,12 @@ export function createNotificationQueues(connection: Redis): NotificationQueues 
   };
 
   const emailQueue = new Queue(NOTIFICATION_EMAIL_QUEUE, {
-    connection,
+    connection: connectionOrOptions,
     defaultJobOptions
   });
 
   const whatsappQueue = new Queue(NOTIFICATION_WHATSAPP_QUEUE, {
-    connection,
+    connection: connectionOrOptions,
     defaultJobOptions
   });
 

@@ -42,17 +42,20 @@ export async function runInventorySweeperPass(
 /**
  * Starts continuous background sweeping for expired inventory holds (E-COM-043, E-COM-117).
  * Prevents re-entrancy / concurrent overlapping sweeps.
- * Returns a teardown function to cleanly stop the timer.
+ * Returns an asynchronous teardown function that cleanly drains any in-flight pass (E-COM-160).
  */
-export function startInventorySweeper(db: DatabaseClient, intervalMs = 60000): () => void {
+export function startInventorySweeper(db: DatabaseClient, intervalMs = 60000): () => Promise<void> {
   let isSweeping = false;
+  let isStopped = false;
+  let activeSweepPromise: Promise<unknown> | null = null;
 
   const intervalId = setInterval(async () => {
-    if (isSweeping) return;
+    if (isSweeping || isStopped) return;
     isSweeping = true;
 
     try {
-      await runInventorySweeperPass(db);
+      activeSweepPromise = runInventorySweeperPass(db);
+      await activeSweepPromise;
     } catch (err) {
       console.error(
         JSON.stringify({
@@ -63,10 +66,19 @@ export function startInventorySweeper(db: DatabaseClient, intervalMs = 60000): (
       );
     } finally {
       isSweeping = false;
+      activeSweepPromise = null;
     }
   }, intervalMs);
 
-  return () => {
+  return async () => {
+    isStopped = true;
     clearInterval(intervalId);
+    if (activeSweepPromise) {
+      try {
+        await activeSweepPromise;
+      } catch {
+        // error already logged
+      }
+    }
   };
 }
