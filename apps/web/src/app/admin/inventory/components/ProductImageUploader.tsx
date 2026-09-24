@@ -1,6 +1,7 @@
 'use client';
 
 import { AlertCircle, Loader2, Star, Upload, X } from 'lucide-react';
+import Image from 'next/image';
 import { type ChangeEvent, type DragEvent, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -193,10 +194,13 @@ export function ProductImageUploader({
             >
               {/* Image Preview Container */}
               <div className="relative aspect-square w-full bg-muted/30 overflow-hidden flex items-center justify-center">
-                <img
+                <Image
                   src={img.url}
                   alt={img.altText || 'Product image'}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 200px"
                   className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  unoptimized
                 />
 
                 {/* Primary Tag */}

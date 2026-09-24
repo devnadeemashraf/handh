@@ -7,7 +7,7 @@
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
   },
-  "packageManager": "pnpm@12.4.2",
+  "packageManager": "pnpm@10.5.2",
   "scripts": {
     "dev": "pnpm --filter=@hh/web dev",
     "build": "pnpm -r build",
@@ -29,18 +29,31 @@
     "db:reset": "pnpm --filter=@hh/db db:reset",
     "db:seed": "pnpm --filter=@hh/db db:seed",
     "db:push": "pnpm --filter=@hh/db db:push",
-    "clean": "pnpm -r --parallel exec rm -rf dist .next .turbo node_modules"
+    "clean": "pnpm -r --parallel exec rm -rf dist .next .turbo node_modules",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@next/eslint-plugin-next": "15.2.1",
     "@playwright/test": "^1.50.1",
     "@types/node": "^22.13.9",
     "@vitest/coverage-v8": "3.2.7",
     "eslint": "^10.10.0",
     "eslint-plugin-simple-import-sort": "^14.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.70.0",
     "vitest": "^3.0.7"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yaml,yml}": [
+      "prettier --write"
+    ]
   }
 }

@@ -1,4 +1,5 @@
 import { Boxes, History } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -91,10 +92,13 @@ export function InventoryTable({
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {item.primaryImageUrl ? (
-                        <img
+                        <Image
                           src={item.primaryImageUrl}
                           alt={item.productTitle}
+                          width={40}
+                          height={40}
                           className="w-10 h-10 rounded-md object-cover border border-border"
+                          unoptimized
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center border border-border">
