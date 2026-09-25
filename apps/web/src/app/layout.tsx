@@ -1,10 +1,11 @@
-import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
+import { Fraunces, Inter } from 'next/font/google';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import { AttributionTracker } from '@/components/layout/AttributionTracker';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { OfflineBanner } from '@/components/layout/OfflineBanner';
 import { PwaRegister } from '@/components/layout/PwaRegister';
 import { ThemeInjector } from '@/components/layout/ThemeInjector';
+import { ToastProvider } from '@/components/ui/toast';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import { getCachedStore } from '@/lib/catalog-cache';
@@ -17,13 +18,14 @@ import { DEFAULT_BRAND_IDENTITY, resolveStorefrontConfig } from '@hh/domain';
 import '../lib/polyfill-crypto';
 import './globals.css';
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-serif',
-  display: 'swap'
+  display: 'swap',
+  axes: ['opsz']
 });
 
-const plusJakarta = Plus_Jakarta_Sans({
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap'
@@ -78,19 +80,21 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const storefrontConfig = resolveStorefrontConfig(store?.settings?.storefront);
 
   return (
-    <html lang="en" className={`h-full ${playfair.variable} ${plusJakarta.variable}`}>
+    <html lang="en" className={`h-full ${fraunces.variable} ${inter.variable}`}>
       <head>
         <ThemeInjector theme={storefrontConfig.theme} />
       </head>
       <body className="min-h-full flex flex-col pb-16 md:pb-0 font-sans">
         <AuthProvider>
           <CartProvider>
-            <AttributionTracker />
-            <OfflineBanner />
-            {children}
-            <CartDrawer />
-            <MobileNav />
-            <PwaRegister />
+            <ToastProvider>
+              <AttributionTracker />
+              <OfflineBanner />
+              {children}
+              <CartDrawer />
+              <MobileNav />
+              <PwaRegister />
+            </ToastProvider>
           </CartProvider>
         </AuthProvider>
       </body>

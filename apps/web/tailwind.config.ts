@@ -10,11 +10,12 @@ const config: Config = {
       center: true,
       padding: '1rem',
       screens: {
-        '2xl': '1200px'
+        '2xl': '1440px'
       }
     },
     extend: {
       colors: {
+        // shadcn/ui semantic HSL bindings
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -48,7 +49,37 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
         },
-        // Direct luxury semantic tokens (Royale Emerald, Gold, Beige, Dark Gray)
+
+        // Luxury Design Tokens (docs/frontend-design-spec/02_DESIGN_TOKENS.md)
+        canvas: 'var(--color-bg-canvas)',
+        surface: 'var(--color-bg-surface)',
+        sunken: 'var(--color-bg-sunken)',
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-tertiary': 'var(--color-text-tertiary)',
+        'border-subtle': 'var(--color-border-subtle)',
+        'border-strong': 'var(--color-border-strong)',
+        scrim: 'var(--color-overlay-scrim)',
+
+        // Royal Accent
+        royal: {
+          DEFAULT: 'var(--color-accent-royal)',
+          hover: 'var(--color-accent-royal-hover)',
+          tint: 'var(--color-accent-royal-tint)'
+        },
+
+        // Semantic Feedback Tokens
+        status: {
+          success: 'var(--color-success)',
+          'success-tint': 'var(--color-success-tint)',
+          error: 'var(--color-error)',
+          'error-tint': 'var(--color-error-tint)',
+          warning: 'var(--color-warning)',
+          'warning-tint': 'var(--color-warning-tint)',
+          sale: 'var(--color-sale)'
+        },
+
+        // Backward compatibility mappings
         emerald: {
           DEFAULT: '#0A2E24',
           hover: '#07221A',
@@ -74,13 +105,31 @@ const config: Config = {
         }
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
+        sm: 'var(--radius-sm, 2px)',
+        md: 'var(--radius-md, 4px)',
+        lg: 'var(--radius-md, 4px)', // Strictly enforces max 4px radius
+        full: '9999px'
+      },
+      boxShadow: {
+        'elevation-0': 'var(--elevation-0, none)',
+        'elevation-1': 'var(--elevation-1, 0 1px 3px rgba(31, 27, 24, 0.06))',
+        'elevation-2': 'var(--elevation-2, 0 8px 24px rgba(31, 27, 24, 0.10))'
       },
       fontFamily: {
-        serif: ['var(--font-serif)', 'Playfair Display', 'Georgia', 'serif'],
-        sans: ['var(--font-sans)', 'system-ui', '-apple-system', 'sans-serif']
+        serif: ['var(--font-serif)', 'Fraunces', 'Georgia', 'serif'],
+        sans: ['var(--font-sans)', 'Inter', '-apple-system', 'sans-serif']
+      },
+      transitionDuration: {
+        instant: 'var(--duration-instant, 100ms)',
+        fast: 'var(--duration-fast, 180ms)',
+        base: 'var(--duration-base, 240ms)',
+        slow: 'var(--duration-slow, 400ms)'
+      },
+      transitionTimingFunction: {
+        standard: 'var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1))',
+        emphasized: 'var(--ease-emphasized, cubic-bezier(0.2, 0, 0, 1))',
+        decelerate: 'var(--ease-decelerate, cubic-bezier(0, 0, 0.2, 1))',
+        accelerate: 'var(--ease-accelerate, cubic-bezier(0.4, 0, 1, 1))'
       },
       keyframes: {
         'accordion-down': {
@@ -90,11 +139,16 @@ const config: Config = {
         'accordion-up': {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' }
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' }
         }
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out'
+        'accordion-down': 'accordion-down 240ms cubic-bezier(0.4, 0, 0.2, 1)',
+        'accordion-up': 'accordion-up 180ms cubic-bezier(0.4, 0, 1, 1)',
+        shimmer: 'shimmer 1.5s infinite'
       }
     }
   },
