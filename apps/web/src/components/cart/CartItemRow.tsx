@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, Minus, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, Bookmark, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -12,6 +12,7 @@ export interface CartItemRowProps {
   item: CartItemDetail;
   onUpdateQuantity: (quantity: number) => void;
   onRemove: () => void;
+  onSaveForLater?: () => void;
   disabled?: boolean;
 }
 
@@ -19,6 +20,7 @@ export function CartItemRow({
   item,
   onUpdateQuantity,
   onRemove,
+  onSaveForLater,
   disabled = false
 }: CartItemRowProps) {
   const formattedUnitPrice = Money.fromMinor(item.priceMinor, 'INR').format();
@@ -29,19 +31,19 @@ export function CartItemRow({
   const isUnavailable = item.statusNotice === 'unavailable';
 
   return (
-    <div className="flex gap-4 py-4 border-b border-border items-start">
-      {/* Thumbnail */}
-      <div className="relative h-18 w-18 shrink-0 overflow-hidden rounded-md border border-border bg-secondary/40">
+    <div className="flex gap-4 py-4 border-b border-border-subtle items-start">
+      {/* Thumbnail: 4:5 cropped aspect ratio (~88px height), rounded-md: 4px */}
+      <div className="relative w-[70px] h-[88px] shrink-0 overflow-hidden rounded-md border border-border-subtle bg-surface-sunken">
         {item.primaryImageUrl ? (
           <Image
             src={item.primaryImageUrl}
             alt={item.productTitle}
             fill
-            sizes="72px"
+            sizes="70px"
             className="object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center p-1 text-center font-serif text-[11px] font-medium text-accent">
+          <div className="flex h-full w-full items-center justify-center p-1 text-center font-serif text-[11px] font-medium text-royal">
             H&amp;H
           </div>
         )}
@@ -54,42 +56,44 @@ export function CartItemRow({
             {item.productSlug ? (
               <Link
                 href={`/products/${item.productSlug}`}
-                className="block text-sm font-semibold text-primary hover:text-accent transition-colors leading-snug line-clamp-1"
+                className="block text-sm font-medium text-text-primary hover:text-royal transition-colors leading-snug line-clamp-1"
               >
                 {item.productTitle}
               </Link>
             ) : (
-              <span className="text-sm font-semibold text-foreground line-clamp-1">
+              <span className="text-sm font-medium text-text-primary line-clamp-1">
                 {item.productTitle}
               </span>
             )}
             {item.variantTitle &&
               item.variantTitle !== 'Default' &&
               item.variantTitle !== 'Default Variant' && (
-                <div className="mt-0.5 text-xs text-muted-foreground">{item.variantTitle}</div>
+                <div className="mt-0.5 text-xs text-text-tertiary">{item.variantTitle}</div>
               )}
           </div>
 
-          <span className="text-sm font-semibold text-foreground shrink-0">
+          <span className="text-sm font-mono tabular-nums font-semibold text-text-primary shrink-0">
             {formattedLineTotal}
           </span>
         </div>
 
         {/* Unit price display if qty > 1 */}
         {item.effectiveQuantity > 1 && (
-          <div className="mt-0.5 text-xs text-muted-foreground">{formattedUnitPrice} each</div>
+          <div className="mt-0.5 text-xs text-text-tertiary font-mono tabular-nums">
+            {formattedUnitPrice} each
+          </div>
         )}
 
         {/* Warning / Error Notices */}
         {isOutOfStock && (
-          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-destructive">
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-status-error">
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
             <span>Out of stock. Please remove to checkout.</span>
           </div>
         )}
 
         {isQuantityReduced && (
-          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-amber-600">
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-status-warning">
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
             <span>
               Only {item.availableQuantity} left in stock (adjusted from {item.requestedQuantity}).
@@ -98,26 +102,26 @@ export function CartItemRow({
         )}
 
         {isUnavailable && (
-          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-destructive">
+          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-status-error">
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
             <span>Product is no longer available.</span>
           </div>
         )}
 
-        {/* Stepper & Remove controls */}
-        <div className="mt-3 flex items-center justify-between">
-          {/* Touch-Friendly Stepper (Mobile First: min 40x40px tap targets) */}
-          <div className="inline-flex items-center rounded-md border border-border bg-card">
+        {/* Stepper & Actions */}
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          {/* Stepper with accessible tap targets (min 44px on mobile) */}
+          <div className="inline-flex items-center rounded-md border border-border-subtle bg-surface">
             <button
               type="button"
               onClick={() => onUpdateQuantity(item.requestedQuantity - 1)}
               disabled={disabled || item.requestedQuantity <= 1}
               aria-label="Decrease quantity"
-              className="flex h-9 w-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+              className="flex h-9 w-9 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 items-center justify-center text-text-secondary transition-colors hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-30"
             >
               <Minus className="h-3.5 w-3.5" />
             </button>
-            <span className="min-w-8 text-center text-xs font-semibold text-foreground">
+            <span className="min-w-8 text-center text-xs font-mono tabular-nums font-semibold text-text-primary">
               {item.requestedQuantity}
             </span>
             <button
@@ -125,22 +129,37 @@ export function CartItemRow({
               onClick={() => onUpdateQuantity(item.requestedQuantity + 1)}
               disabled={disabled || item.requestedQuantity >= Math.min(10, item.availableQuantity)}
               aria-label="Increase quantity"
-              className="flex h-9 w-9 items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+              className="flex h-9 w-9 sm:h-8 sm:w-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 items-center justify-center text-text-secondary transition-colors hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-30"
             >
               <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          {/* Remove Button */}
-          <button
-            type="button"
-            onClick={onRemove}
-            disabled={disabled}
-            aria-label="Remove item"
-            className="flex h-10 w-10 items-center justify-center text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          {/* Destructive and Secondary Actions: text links beneath/beside stepper per spec */}
+          <div className="flex items-center gap-3 text-xs">
+            {onSaveForLater && (
+              <button
+                type="button"
+                onClick={onSaveForLater}
+                disabled={disabled}
+                className="inline-flex items-center gap-1 text-text-tertiary hover:text-royal transition-colors font-medium p-1 min-h-[44px] sm:min-h-0"
+              >
+                <Bookmark className="h-3.5 w-3.5" />
+                <span>Save for later</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onRemove}
+              disabled={disabled}
+              aria-label="Remove item"
+              className="inline-flex items-center gap-1 text-text-tertiary hover:text-status-error transition-colors font-medium p-1 min-h-[44px] sm:min-h-0"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              <span>Remove</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

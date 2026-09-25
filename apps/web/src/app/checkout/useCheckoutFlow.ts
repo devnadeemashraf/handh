@@ -10,7 +10,12 @@ import {
 
 import type { AddressFormValues } from '@/components/checkout/AddressForm';
 
-import { DEFAULT_BRAND_IDENTITY, generateUUID, ShippingAddressSchema } from '@hh/domain';
+import {
+  DEFAULT_BRAND_IDENTITY,
+  extractIndianPhoneDigits,
+  generateUUID,
+  ShippingAddressSchema
+} from '@hh/domain';
 
 import type {
   CartSummary,
@@ -123,7 +128,104 @@ export function useCheckoutFlow({
   // WhatsApp Notification Opt-In State (E-COM-082)
   const [whatsappOptIn, setWhatsappOptIn] = React.useState(true);
 
+  // 5-Step Continuous Accordion Checkout State
+  const [activeStep, setActiveStep] = React.useState<number>(1);
+  const [completedSteps, setCompletedSteps] = React.useState<number[]>([]);
+  const [shippingMethod, setShippingMethod] = React.useState<'standard' | 'express'>('standard');
+  const [paymentMethod, setPaymentMethod] = React.useState<'razorpay' | 'cod'>('razorpay');
+  const [billingSameAsShipping, setBillingSameAsShipping] = React.useState(true);
+  const [emailMarketingOptIn, setEmailMarketingOptIn] = React.useState(false);
+  const [billingAddress, setBillingAddress] = React.useState<AddressFormValues>({
+    fullName: '',
+    phone: '',
+    email: '',
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'IN',
+    customerNotes: ''
+  });
+
   const [errors, setErrors] = React.useState<Partial<Record<keyof AddressFormValues, string>>>({});
+
+  const markStepComplete = (stepNum: number) => {
+    setCompletedSteps((prev) => (prev.includes(stepNum) ? prev : [...prev, stepNum]));
+  };
+
+  const goToStep = (stepNum: number) => {
+    setActiveStep(stepNum);
+  };
+
+  const completeContactStep = (): boolean => {
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim());
+    const phoneDigits =
+      extractIndianPhoneDigits(values.phone) || values.phone.replace(/^\+91/, '').trim();
+    const phoneValid = phoneDigits.length === 10;
+
+    const newErrors: Partial<Record<keyof AddressFormValues, string>> = {};
+    if (!values.email.trim()) {
+      newErrors.email = 'Email address is required.';
+    } else if (!emailValid) {
+      newErrors.email = 'Please enter a valid email address.';
+    }
+
+    if (!values.phone.trim()) {
+      newErrors.phone = 'Mobile number is required.';
+    } else if (!phoneValid) {
+      newErrors.phone = 'Please enter a valid 10-digit Indian mobile number.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors((prev) => ({ ...prev, ...newErrors }));
+      return false;
+    }
+
+    markStepComplete(1);
+    setActiveStep(2);
+    return true;
+  };
+
+  const completeAddressStep = (): boolean => {
+    const addressValidation = ShippingAddressSchema.safeParse({
+      fullName: values.fullName,
+      phone: values.phone,
+      email: values.email,
+      line1: values.line1,
+      line2: values.line2 || undefined,
+      city: values.city,
+      state: values.state,
+      postalCode: values.postalCode,
+      country: 'IN'
+    });
+
+    if (!addressValidation.success) {
+      const fieldErrors: Partial<Record<keyof AddressFormValues, string>> = {};
+      for (const issue of addressValidation.error.issues) {
+        const fieldName = issue.path[0] as keyof AddressFormValues;
+        if (!fieldErrors[fieldName]) {
+          fieldErrors[fieldName] = issue.message;
+        }
+      }
+      setErrors((prev) => ({ ...prev, ...fieldErrors }));
+      return false;
+    }
+
+    markStepComplete(2);
+    setActiveStep(3);
+    return true;
+  };
+
+  const completeShippingStep = () => {
+    markStepComplete(3);
+    setActiveStep(4);
+  };
+
+  const completePaymentStep = () => {
+    markStepComplete(4);
+    setActiveStep(5);
+  };
 
   // Check live store operating status
   React.useEffect(() => {
@@ -284,6 +386,7 @@ export function useCheckoutFlow({
       if (!res.ok || !data.success) {
         setSubmitError(data.error || 'Payment confirmation failed. Please contact support.');
         setIsProcessingPayment(false);
+        setActiveStep(4);
         return;
       }
 
@@ -321,6 +424,7 @@ export function useCheckoutFlow({
       });
       setSubmitError('A network error occurred while confirming payment.');
       setIsProcessingPayment(false);
+      setActiveStep(4);
     }
   };
 
@@ -391,6 +495,10 @@ export function useCheckoutFlow({
           modal: {
             ondismiss: function () {
               setIsProcessingPayment(false);
+              setActiveStep(4);
+              setSubmitError(
+                'Payment was not completed. You can select your preferred payment method and try again.'
+              );
             }
           }
         };
@@ -617,6 +725,25 @@ export function useCheckoutFlow({
     isServicePaused,
     whatsappOptIn,
     setWhatsappOptIn,
+    // 5-Step Continuous Accordion Checkout additions
+    activeStep,
+    setActiveStep,
+    completedSteps,
+    shippingMethod,
+    setShippingMethod,
+    paymentMethod,
+    setPaymentMethod,
+    billingSameAsShipping,
+    setBillingSameAsShipping,
+    emailMarketingOptIn,
+    setEmailMarketingOptIn,
+    billingAddress,
+    setBillingAddress,
+    goToStep,
+    completeContactStep,
+    completeAddressStep,
+    completeShippingStep,
+    completePaymentStep,
     handleSubmit,
     launchPaymentGateway,
     clearPendingOrder
