@@ -4,6 +4,7 @@ import {
   clearStoredAttribution,
   getStoredAttribution,
   trackCheckoutInitiated,
+  trackError,
   trackOrderCompleted
 } from '@/lib/analytics';
 
@@ -313,6 +314,11 @@ export function useCheckoutFlow({
       router.push(`/checkout/success?orderNumber=${params.orderNumber}${tokenQuery}`);
     } catch (err) {
       console.error('Payment verification error:', err);
+      trackError({
+        errorType: 'payment_verification_error',
+        errorMessage: err instanceof Error ? err.message : 'Unknown payment verification error',
+        context: 'useCheckoutFlow.verifyPayment'
+      });
       setSubmitError('A network error occurred while confirming payment.');
       setIsProcessingPayment(false);
     }
@@ -346,6 +352,11 @@ export function useCheckoutFlow({
 
       const initData = await initRes.json();
       if (!initRes.ok || !initData.success) {
+        trackError({
+          errorType: 'payment_initialization_error',
+          errorMessage: initData.error || 'Failed to initialize payment gateway',
+          context: 'useCheckoutFlow.launchPaymentGateway'
+        });
         setSubmitError(initData.error || 'Failed to initialize payment gateway.');
         setIsProcessingPayment(false);
         return;
@@ -397,6 +408,11 @@ export function useCheckoutFlow({
             orderNumber: createdOrder.orderNumber
           });
         } else {
+          trackError({
+            errorType: 'payment_sdk_missing',
+            errorMessage: 'Razorpay Checkout SDK is unavailable',
+            context: 'useCheckoutFlow.launchPaymentGateway'
+          });
           setSubmitError(
             'Payment gateway could not be loaded. Please disable ad-blockers, refresh the page, and try again.'
           );
@@ -405,6 +421,11 @@ export function useCheckoutFlow({
       }
     } catch (err) {
       console.error('Payment launch error:', err);
+      trackError({
+        errorType: 'payment_launch_error',
+        errorMessage: err instanceof Error ? err.message : 'Unknown payment launch error',
+        context: 'useCheckoutFlow.launchPaymentGateway'
+      });
       setSubmitError('Unable to launch payment gateway. Please try again.');
       setIsProcessingPayment(false);
     }

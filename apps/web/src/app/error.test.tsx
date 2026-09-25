@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import * as analyticsModule from '@/lib/analytics';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import RootError from './error';
+
+vi.mock('@/lib/analytics', () => ({
+  trackError: vi.fn()
+}));
 
 describe('RootError Component (E-COM-147)', () => {
   const mockReset = vi.fn();
@@ -29,5 +34,11 @@ describe('RootError Component (E-COM-147)', () => {
     fireEvent.click(tryAgainBtn);
     expect(mockReset).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(analyticsModule.trackError).toHaveBeenCalledWith({
+      errorType: 'root_error_boundary',
+      errorMessage: 'Test failure',
+      errorCode: 'ERR-DIGEST-123',
+      context: 'RootError'
+    });
   });
 });

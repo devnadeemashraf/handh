@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   captureAttributionFromBrowser,
@@ -11,6 +11,9 @@ describe('Analytics Attribution Library', () => {
     window.localStorage.clear();
     // Clear URL params
     window.history.replaceState({}, '', '/');
+    vi.clearAllMocks();
+    // Reset fetch mock between tests
+    vi.restoreAllMocks();
   });
 
   it('captures UTM parameters from browser URL and persists them', () => {
@@ -52,5 +55,41 @@ describe('Analytics Attribution Library', () => {
 
     clearStoredAttribution();
     expect(getStoredAttribution()).toBeNull();
+  });
+
+  it('dual-writes to cookie endpoint on UTM capture (E-COM-110)', () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ success: true }), { status: 200 }));
+
+    window.history.replaceState({}, '', '/?utm_source=tiktok&utm_medium=paid');
+    captureAttributionFromBrowser();
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/api/analytics/attribution',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'same-origin',
+        keepalive: true
+      })
+    );
+  });
+
+  it('fires DELETE to cookie endpoint on clearStoredAttribution (E-COM-111)', () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ success: true }), { status: 200 }));
+
+    // First populate
+    window.history.replaceState({}, '', '/?utm_source=google&utm_medium=cpc');
+    captureAttributionFromBrowser();
+    fetchSpy.mockClear();
+
+    clearStoredAttribution();
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/api/analytics/attribution',
+      expect.objectContaining({ method: 'DELETE', credentials: 'same-origin', keepalive: true })
+    );
   });
 });

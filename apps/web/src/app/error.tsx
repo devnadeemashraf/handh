@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { trackError } from '@/lib/analytics';
 import { triggerHaptic } from '@/lib/haptic';
 
 interface RootErrorProps {
@@ -16,6 +17,12 @@ export default function RootError({ error, reset }: RootErrorProps) {
   useEffect(() => {
     // Log unexpected client exceptions
     console.error('Root error boundary caught exception:', error);
+    trackError({
+      errorType: 'root_error_boundary',
+      errorMessage: error.message || 'Unknown root error',
+      errorCode: error.digest,
+      context: 'RootError'
+    });
   }, [error]);
 
   return (

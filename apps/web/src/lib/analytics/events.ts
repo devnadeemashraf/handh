@@ -13,7 +13,7 @@ export function trackProductView(params: {
   productId: string;
   productName: string;
   priceMinor: number;
-  categoryName?: string;
+  categoryName?: string | undefined;
 }): void {
   const provider = getAnalyticsProvider();
   provider.track('product_viewed', {
@@ -55,6 +55,21 @@ export function trackCheckoutInitiated(params: {
     attribution_source: params.attribution?.source,
     attribution_medium: params.attribution?.medium,
     attribution_campaign: params.attribution?.campaign
+  });
+}
+
+export function trackError(params: {
+  errorType: string;
+  errorMessage: string;
+  context?: string | undefined;
+  errorCode?: string | number | undefined;
+}): void {
+  const provider = getAnalyticsProvider();
+  provider.track('client_error', {
+    error_type: params.errorType,
+    error_message: params.errorMessage,
+    context: params.context,
+    error_code: params.errorCode
   });
 }
 

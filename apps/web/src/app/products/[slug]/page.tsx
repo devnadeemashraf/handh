@@ -10,6 +10,7 @@ import { LegalMetrologySection } from '@/components/product/LegalMetrologySectio
 import { ProductAccordion } from '@/components/product/ProductAccordion';
 import { ProductGallery } from '@/components/product/ProductGallery';
 import { ProductPurchaseCard } from '@/components/product/ProductPurchaseCard';
+import { ProductViewTracker } from '@/components/product/ProductViewTracker';
 import {
   getCachedCatalog,
   getCachedCategories,
@@ -131,6 +132,14 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* Client leaf: fires product_viewed telemetry once on mount (RSC-safe) */}
+      <ProductViewTracker
+        productId={product.id}
+        productName={product.title}
+        priceMinor={primaryVariant?.priceMinor ?? 0}
+        categoryName={product.category?.name}
       />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">

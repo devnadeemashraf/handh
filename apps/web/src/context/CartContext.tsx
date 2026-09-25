@@ -9,6 +9,7 @@ import React, {
   useRef,
   useState
 } from 'react';
+import { trackAddToCart } from '@/lib/analytics';
 
 import type { CartItemInput, CartSummary } from '@hh/domain';
 
@@ -57,74 +58,80 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // 2. Server reconciliation function
-  const validateWithServer = useCallback(async (currentItems: CartItemInput[]) => {
-    if (currentItems.length === 0) {
-      setCartSummary({
-        items: [],
-        subtotalMinor: 0,
-        currency: 'INR',
-        totalQuantity: 0,
-        isValidForCheckout: false
-      });
-      return;
-    }
+  // 2. Server reconciliation function — returns the validated CartSummary for downstream use
+  const validateWithServer = useCallback(
+    async (currentItems: CartItemInput[]): Promise<CartSummary | null> => {
+      if (currentItems.length === 0) {
+        const empty: CartSummary = {
+          items: [],
+          subtotalMinor: 0,
+          currency: 'INR',
+          totalQuantity: 0,
+          isValidForCheckout: false
+        };
+        setCartSummary(empty);
+        return empty;
+      }
 
-    setIsLoading(true);
-    try {
-      const res = await fetch('/api/cart/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: currentItems })
-      });
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/cart/validate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: currentItems })
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && data.cart) {
-          setCartSummary(data.cart);
-          // Reconcile client storage if server modified item quantities (e.g. out-of-stock or cap) (E-COM-033)
-          const serverItems: CartItemInput[] = (data.cart.items || []).map(
-            (it: { variantId: string; effectiveQuantity?: number; quantity?: number }) => ({
-              variantId: it.variantId,
-              quantity: it.effectiveQuantity ?? it.quantity ?? 1
-            })
-          );
-          const needsReconciliation =
-            serverItems.length !== currentItems.length ||
-            serverItems.some((sItem, idx) => {
-              const cItem = currentItems[idx];
-              return (
-                !cItem || cItem.variantId !== sItem.variantId || cItem.quantity !== sItem.quantity
-              );
-            });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.cart) {
+            setCartSummary(data.cart);
+            // Reconcile client storage if server modified item quantities (e.g. out-of-stock or cap) (E-COM-033)
+            const serverItems: CartItemInput[] = (data.cart.items || []).map(
+              (it: { variantId: string; effectiveQuantity?: number; quantity?: number }) => ({
+                variantId: it.variantId,
+                quantity: it.effectiveQuantity ?? it.quantity ?? 1
+              })
+            );
+            const needsReconciliation =
+              serverItems.length !== currentItems.length ||
+              serverItems.some((sItem, idx) => {
+                const cItem = currentItems[idx];
+                return (
+                  !cItem || cItem.variantId !== sItem.variantId || cItem.quantity !== sItem.quantity
+                );
+              });
 
-          if (needsReconciliation) {
-            setItems(serverItems);
-            try {
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(serverItems));
-            } catch (e) {
-              console.error('Failed to update localStorage cart:', e);
+            if (needsReconciliation) {
+              setItems(serverItems);
+              try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(serverItems));
+              } catch (e) {
+                console.error('Failed to update localStorage cart:', e);
+              }
             }
+            return data.cart as CartSummary;
           }
         }
+      } catch (e) {
+        console.error('Failed to validate cart with server:', e);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      console.error('Failed to validate cart with server:', e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      return null;
+    },
+    []
+  );
 
   // 3. Persist and reconcile whenever items change (after initial hydration)
   const syncItems = useCallback(
-    async (newItems: CartItemInput[]) => {
+    async (newItems: CartItemInput[]): Promise<CartSummary | null> => {
       setItems(newItems);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newItems));
       } catch (e) {
         console.error('Failed to persist cart to localStorage:', e);
       }
-      await validateWithServer(newItems);
+      return validateWithServer(newItems);
     },
     [validateWithServer]
   );
@@ -158,8 +165,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updated = [...items, { variantId, quantity: Math.min(10, quantity) }];
       }
 
-      await syncItems(updated);
+      const summary = await syncItems(updated);
       setIsOpen(true);
+
+      // Fire add-to-cart telemetry using server-validated product data (E-COM-111)
+      if (summary) {
+        const addedItem = summary.items.find((it) => it.variantId === variantId);
+        if (addedItem) {
+          trackAddToCart({
+            productId: addedItem.productId,
+            variantId: addedItem.variantId,
+            productName: addedItem.productTitle,
+            quantity: addedItem.effectiveQuantity,
+            priceMinor: addedItem.priceMinor
+          });
+        }
+      }
     },
     [items, syncItems]
   );
