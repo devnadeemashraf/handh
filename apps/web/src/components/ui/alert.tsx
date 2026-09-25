@@ -10,10 +10,13 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        info: 'bg-royal-tint text-royal [&>svg]:text-royal',
-        success: 'bg-status-success-tint text-status-success [&>svg]:text-status-success',
-        warning: 'bg-status-warning-tint text-status-warning [&>svg]:text-status-warning',
-        error: 'bg-status-error-tint text-status-error [&>svg]:text-status-error'
+        info: 'bg-accent text-accent-foreground border border-border [&>svg]:text-accent-foreground',
+        success:
+          'bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 [&>svg]:text-emerald-600',
+        warning:
+          'bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20 [&>svg]:text-amber-600',
+        error:
+          'bg-destructive/10 text-destructive border border-destructive/20 [&>svg]:text-destructive'
       }
     },
     defaultVariants: {

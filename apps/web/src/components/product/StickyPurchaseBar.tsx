@@ -82,7 +82,7 @@ export function StickyPurchaseBar({
       role="region"
       aria-label="Sticky Buying Bar"
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border-subtle p-3 shadow-lg lg:hidden transition-all duration-fast ease-decelerate pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
+        'fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border p-3 shadow-lg lg:hidden transition-all duration-fast ease-decelerate pb-[calc(0.75rem+env(safe-area-inset-bottom))]',
         isVisible
           ? 'translate-y-0 opacity-100 pointer-events-auto'
           : 'translate-y-full opacity-0 pointer-events-none'
@@ -91,10 +91,10 @@ export function StickyPurchaseBar({
       <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
         {/* Left: Price summary */}
         <div className="flex flex-col min-w-0 shrink-0">
-          <span className="font-mono text-base font-semibold tabular-nums text-text-primary">
+          <span className="font-mono text-base font-semibold tabular-nums text-foreground">
             {priceFormatted}
           </span>
-          <span className="text-[10px] text-text-tertiary uppercase tracking-wider">
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
             MRP (incl. taxes)
           </span>
         </div>

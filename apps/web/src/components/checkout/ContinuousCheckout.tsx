@@ -122,13 +122,13 @@ export function ContinuousCheckout({
       {submitError && (
         <div
           role="alert"
-          className="rounded-md border border-status-error/40 bg-status-error-bg/50 p-4 text-sm text-text-primary space-y-1.5"
+          className="rounded-md border border-status-error/40 bg-status-error-bg/50 p-4 text-sm text-foreground space-y-1.5"
         >
           <div className="flex items-center gap-2 font-semibold text-status-error">
             <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Unable to process payment</span>
           </div>
-          <p className="text-xs leading-relaxed text-text-secondary">{submitError}</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{submitError}</p>
         </div>
       )}
 
@@ -139,19 +139,19 @@ export function ContinuousCheckout({
         aria-labelledby="step-1-heading"
         className={cn(
           'rounded-md border bg-card transition-colors duration-fast shadow-sm',
-          activeStep === 1 ? 'border-royal ring-1 ring-royal' : 'border-border-subtle'
+          activeStep === 1 ? 'border-primary ring-1 ring-ring' : 'border-border'
         )}
       >
         {activeStep === 1 ? (
           <div className="p-5 sm:p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2.5">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-royal text-text-inverse text-xs font-semibold">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                   1
                 </span>
                 <h2
                   id="step-1-heading"
-                  className="font-serif text-lg font-semibold text-text-primary"
+                  className="font-serif text-lg font-semibold text-foreground"
                 >
                   Contact Information
                 </h2>
@@ -161,7 +161,7 @@ export function ContinuousCheckout({
                 <button
                   type="button"
                   onClick={onOpenAuthModal}
-                  className="text-xs text-royal hover:underline font-semibold"
+                  className="text-xs text-primary hover:underline font-semibold"
                 >
                   Already have an account? Sign in
                 </button>
@@ -172,7 +172,7 @@ export function ContinuousCheckout({
               <div>
                 <Label
                   htmlFor="contact-email"
-                  className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-text-secondary"
+                  className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                 >
                   Email Address <span className="text-status-error">*</span>
                 </Label>
@@ -192,12 +192,12 @@ export function ContinuousCheckout({
               <div>
                 <Label
                   htmlFor="contact-phone"
-                  className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-text-secondary"
+                  className="mb-1.5 block text-xs uppercase tracking-wider font-semibold text-muted-foreground"
                 >
                   Mobile Number (SMS &amp; Courier) <span className="text-status-error">*</span>
                 </Label>
-                <div className="flex items-center overflow-hidden rounded-md border border-input bg-surface focus-within:ring-1 focus-within:ring-royal">
-                  <span className="border-r border-border-subtle bg-surface-sunken px-3.5 py-2.5 text-sm font-mono font-medium text-text-secondary select-none">
+                <div className="flex items-center overflow-hidden rounded-md border border-input bg-card focus-within:ring-1 focus-within:ring-ring">
+                  <span className="border-r border-border bg-muted px-3.5 py-2.5 text-sm font-mono font-medium text-muted-foreground select-none">
                     +91
                   </span>
                   <input
@@ -215,7 +215,7 @@ export function ContinuousCheckout({
                       onFieldChange('phone', digits ? `+91${digits}` : e.target.value);
                     }}
                     disabled={isSubmitting}
-                    className="w-full bg-transparent px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none font-mono tabular-nums"
+                    className="w-full bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none font-mono tabular-nums"
                   />
                 </div>
                 {errors.phone && (
@@ -227,12 +227,12 @@ export function ContinuousCheckout({
             </div>
 
             {/* Optional Newsletter Checkbox */}
-            <label className="flex items-center gap-2.5 text-xs text-text-secondary select-none cursor-pointer pt-1">
+            <label className="flex items-center gap-2.5 text-xs text-muted-foreground select-none cursor-pointer pt-1">
               <input
                 type="checkbox"
                 checked={emailMarketingOptIn}
                 onChange={(e) => onEmailMarketingOptInChange(e.target.checked)}
-                className="h-4 w-4 rounded-sm border-border-subtle text-royal focus:ring-royal"
+                className="h-4 w-4 rounded-sm border-border text-primary focus:ring-ring"
               />
               <span>Email me with exclusive collection previews and artisanal offers</span>
             </label>
@@ -257,17 +257,17 @@ export function ContinuousCheckout({
                 className={cn(
                   'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold shrink-0',
                   isStepComplete(1)
-                    ? 'bg-status-success text-text-inverse'
-                    : 'bg-surface-sunken text-text-tertiary'
+                    ? 'bg-emerald-600 text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 )}
               >
                 {isStepComplete(1) ? <Check className="h-3.5 w-3.5" /> : '1'}
               </span>
               <div className="min-w-0">
-                <div className="text-xs uppercase tracking-wider font-semibold text-text-secondary">
+                <div className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                   Contact Information
                 </div>
-                <div className="text-sm font-medium text-text-primary truncate">
+                <div className="text-sm font-medium text-foreground truncate">
                   {values.email ? `${values.email} · ${values.phone}` : 'Enter contact details'}
                 </div>
               </div>
@@ -279,7 +279,7 @@ export function ContinuousCheckout({
                 variant="ghost"
                 size="sm"
                 onClick={() => goToStep(1)}
-                className="h-8 px-2.5 text-xs font-semibold text-royal hover:underline gap-1.5 shrink-0"
+                className="h-8 px-2.5 text-xs font-semibold text-primary hover:underline gap-1.5 shrink-0"
               >
                 <Edit2 className="h-3.5 w-3.5" />
                 <span>Edit</span>
@@ -296,19 +296,19 @@ export function ContinuousCheckout({
         aria-labelledby="step-2-heading"
         className={cn(
           'rounded-md border bg-card transition-colors duration-fast shadow-sm',
-          activeStep === 2 ? 'border-royal ring-1 ring-royal' : 'border-border-subtle'
+          activeStep === 2 ? 'border-primary ring-1 ring-ring' : 'border-border'
         )}
       >
         {activeStep === 2 ? (
           <div className="p-5 sm:p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2.5">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-royal text-text-inverse text-xs font-semibold">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                   2
                 </span>
                 <h2
                   id="step-2-heading"
-                  className="font-serif text-lg font-semibold text-text-primary"
+                  className="font-serif text-lg font-semibold text-foreground"
                 >
                   Delivery Address
                 </h2>
@@ -354,17 +354,17 @@ export function ContinuousCheckout({
                 className={cn(
                   'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold shrink-0',
                   isStepComplete(2)
-                    ? 'bg-status-success text-text-inverse'
-                    : 'bg-surface-sunken text-text-tertiary'
+                    ? 'bg-emerald-600 text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 )}
               >
                 {isStepComplete(2) ? <Check className="h-3.5 w-3.5" /> : '2'}
               </span>
               <div className="min-w-0">
-                <div className="text-xs uppercase tracking-wider font-semibold text-text-secondary">
+                <div className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                   Delivery Address
                 </div>
-                <div className="text-sm font-medium text-text-primary truncate">
+                <div className="text-sm font-medium text-foreground truncate">
                   {values.fullName
                     ? `${values.fullName}, ${values.line1}, ${values.city}, ${values.state} ${values.postalCode}`
                     : 'Enter shipping destination'}
@@ -378,7 +378,7 @@ export function ContinuousCheckout({
                 variant="ghost"
                 size="sm"
                 onClick={() => goToStep(2)}
-                className="h-8 px-2.5 text-xs font-semibold text-royal hover:underline gap-1.5 shrink-0"
+                className="h-8 px-2.5 text-xs font-semibold text-primary hover:underline gap-1.5 shrink-0"
               >
                 <Edit2 className="h-3.5 w-3.5" />
                 <span>Edit</span>
@@ -395,19 +395,16 @@ export function ContinuousCheckout({
         aria-labelledby="step-3-heading"
         className={cn(
           'rounded-md border bg-card transition-colors duration-fast shadow-sm',
-          activeStep === 3 ? 'border-royal ring-1 ring-royal' : 'border-border-subtle'
+          activeStep === 3 ? 'border-primary ring-1 ring-ring' : 'border-border'
         )}
       >
         {activeStep === 3 ? (
           <div className="p-5 sm:p-6 space-y-5">
-            <div className="flex items-center gap-2.5 border-b border-border-subtle pb-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-royal text-text-inverse text-xs font-semibold">
+            <div className="flex items-center gap-2.5 border-b border-border pb-3">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                 3
               </span>
-              <h2
-                id="step-3-heading"
-                className="font-serif text-lg font-semibold text-text-primary"
-              >
+              <h2 id="step-3-heading" className="font-serif text-lg font-semibold text-foreground">
                 Shipping Method
               </h2>
             </div>
@@ -418,8 +415,8 @@ export function ContinuousCheckout({
                 className={cn(
                   'flex items-center justify-between p-4 rounded-md border cursor-pointer transition-colors',
                   shippingMethod === 'standard'
-                    ? 'border-royal bg-royal/5 text-text-primary'
-                    : 'border-border-subtle hover:border-border-strong text-text-secondary'
+                    ? 'border-primary bg-primary/5 text-foreground'
+                    : 'border-border hover:border-input text-muted-foreground'
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -429,14 +426,14 @@ export function ContinuousCheckout({
                     value="standard"
                     checked={shippingMethod === 'standard'}
                     onChange={() => onShippingMethodChange('standard')}
-                    className="h-4 w-4 text-royal focus:ring-royal"
+                    className="h-4 w-4 text-primary focus:ring-ring"
                   />
                   <div>
-                    <div className="font-semibold text-sm text-text-primary flex items-center gap-2">
-                      <Truck className="h-4 w-4 text-royal shrink-0" />
+                    <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                      <Truck className="h-4 w-4 text-primary shrink-0" />
                       <span>Standard Courier Delivery (4–6 business days)</span>
                     </div>
-                    <p className="text-xs text-text-tertiary mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Complimentary surface courier across all serviceable Indian pin codes
                     </p>
                   </div>
@@ -444,7 +441,9 @@ export function ContinuousCheckout({
                 <span
                   className={cn(
                     'font-mono tabular-nums text-sm font-semibold shrink-0',
-                    financials.isFreeDelivery ? 'text-status-success' : 'text-text-primary'
+                    financials.isFreeDelivery
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-foreground'
                   )}
                 >
                   {standardFeeFormatted}
@@ -456,8 +455,8 @@ export function ContinuousCheckout({
                 className={cn(
                   'flex items-center justify-between p-4 rounded-md border cursor-pointer transition-colors',
                   shippingMethod === 'express'
-                    ? 'border-royal bg-royal/5 text-text-primary'
-                    : 'border-border-subtle hover:border-border-strong text-text-secondary'
+                    ? 'border-primary bg-primary/5 text-foreground'
+                    : 'border-border hover:border-input text-muted-foreground'
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -467,19 +466,19 @@ export function ContinuousCheckout({
                     value="express"
                     checked={shippingMethod === 'express'}
                     onChange={() => onShippingMethodChange('express')}
-                    className="h-4 w-4 text-royal focus:ring-royal"
+                    className="h-4 w-4 text-primary focus:ring-ring"
                   />
                   <div>
-                    <div className="font-semibold text-sm text-text-primary flex items-center gap-2">
-                      <Package className="h-4 w-4 text-royal shrink-0" />
+                    <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                      <Package className="h-4 w-4 text-primary shrink-0" />
                       <span>Express Air Dispatch (1–2 business days)</span>
                     </div>
-                    <p className="text-xs text-text-tertiary mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Priority courier dispatch with air expedited routing
                     </p>
                   </div>
                 </div>
-                <span className="font-mono tabular-nums text-sm font-semibold text-text-primary shrink-0">
+                <span className="font-mono tabular-nums text-sm font-semibold text-foreground shrink-0">
                   {expressFeeFormatted}
                 </span>
               </label>
@@ -505,17 +504,17 @@ export function ContinuousCheckout({
                 className={cn(
                   'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold shrink-0',
                   isStepComplete(3)
-                    ? 'bg-status-success text-text-inverse'
-                    : 'bg-surface-sunken text-text-tertiary'
+                    ? 'bg-emerald-600 text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 )}
               >
                 {isStepComplete(3) ? <Check className="h-3.5 w-3.5" /> : '3'}
               </span>
               <div className="min-w-0">
-                <div className="text-xs uppercase tracking-wider font-semibold text-text-secondary">
+                <div className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                   Shipping Method
                 </div>
-                <div className="text-sm font-medium text-text-primary truncate">
+                <div className="text-sm font-medium text-foreground truncate">
                   {shippingMethod === 'express'
                     ? 'Express Air Dispatch (1–2 business days)'
                     : 'Standard Courier Delivery (4–6 business days)'}
@@ -529,7 +528,7 @@ export function ContinuousCheckout({
                 variant="ghost"
                 size="sm"
                 onClick={() => goToStep(3)}
-                className="h-8 px-2.5 text-xs font-semibold text-royal hover:underline gap-1.5 shrink-0"
+                className="h-8 px-2.5 text-xs font-semibold text-primary hover:underline gap-1.5 shrink-0"
               >
                 <Edit2 className="h-3.5 w-3.5" />
                 <span>Edit</span>
@@ -546,19 +545,16 @@ export function ContinuousCheckout({
         aria-labelledby="step-4-heading"
         className={cn(
           'rounded-md border bg-card transition-colors duration-fast shadow-sm',
-          activeStep === 4 ? 'border-royal ring-1 ring-royal' : 'border-border-subtle'
+          activeStep === 4 ? 'border-primary ring-1 ring-ring' : 'border-border'
         )}
       >
         {activeStep === 4 ? (
           <div className="p-5 sm:p-6 space-y-5">
-            <div className="flex items-center gap-2.5 border-b border-border-subtle pb-3">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-royal text-text-inverse text-xs font-semibold">
+            <div className="flex items-center gap-2.5 border-b border-border pb-3">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-semibold">
                 4
               </span>
-              <h2
-                id="step-4-heading"
-                className="font-serif text-lg font-semibold text-text-primary"
-              >
+              <h2 id="step-4-heading" className="font-serif text-lg font-semibold text-foreground">
                 Payment Selection
               </h2>
             </div>
@@ -569,8 +565,8 @@ export function ContinuousCheckout({
                 className={cn(
                   'flex items-start justify-between p-4 rounded-md border cursor-pointer transition-colors',
                   paymentMethod === 'razorpay'
-                    ? 'border-royal bg-royal/5 text-text-primary'
-                    : 'border-border-subtle hover:border-border-strong text-text-secondary'
+                    ? 'border-primary bg-primary/5 text-foreground'
+                    : 'border-border hover:border-input text-muted-foreground'
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -580,14 +576,14 @@ export function ContinuousCheckout({
                     value="razorpay"
                     checked={paymentMethod === 'razorpay'}
                     onChange={() => onPaymentMethodChange('razorpay')}
-                    className="h-4 w-4 mt-0.5 text-royal focus:ring-royal"
+                    className="h-4 w-4 mt-0.5 text-primary focus:ring-ring"
                   />
                   <div>
-                    <div className="font-semibold text-sm text-text-primary flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 text-royal shrink-0" />
+                    <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-primary shrink-0" />
                       <span>Razorpay Secure Gateway (Instant Confirmation)</span>
                     </div>
-                    <p className="text-xs text-text-tertiary mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, NetBanking, and Wallets
                     </p>
                   </div>
@@ -599,8 +595,8 @@ export function ContinuousCheckout({
                 className={cn(
                   'flex items-start justify-between p-4 rounded-md border cursor-pointer transition-colors',
                   paymentMethod === 'cod'
-                    ? 'border-royal bg-royal/5 text-text-primary'
-                    : 'border-border-subtle hover:border-border-strong text-text-secondary'
+                    ? 'border-primary bg-primary/5 text-foreground'
+                    : 'border-border hover:border-input text-muted-foreground'
                 )}
               >
                 <div className="flex items-start gap-3">
@@ -610,14 +606,14 @@ export function ContinuousCheckout({
                     value="cod"
                     checked={paymentMethod === 'cod'}
                     onChange={() => onPaymentMethodChange('cod')}
-                    className="h-4 w-4 mt-0.5 text-royal focus:ring-royal"
+                    className="h-4 w-4 mt-0.5 text-primary focus:ring-ring"
                   />
                   <div>
-                    <div className="font-semibold text-sm text-text-primary flex items-center gap-2">
-                      <Package className="h-4 w-4 text-royal shrink-0" />
+                    <div className="font-semibold text-sm text-foreground flex items-center gap-2">
+                      <Package className="h-4 w-4 text-primary shrink-0" />
                       <span>Cash on Delivery (Pay upon Receipt)</span>
                     </div>
-                    <p className="text-xs text-text-tertiary mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Hand payment to delivery courier upon receipt of artisanal package
                     </p>
                   </div>
@@ -626,21 +622,21 @@ export function ContinuousCheckout({
             </div>
 
             {/* Billing Address Same as Shipping */}
-            <div className="pt-2 border-t border-border-subtle">
-              <label className="flex items-center gap-2.5 text-xs text-text-primary select-none cursor-pointer">
+            <div className="pt-2 border-t border-border">
+              <label className="flex items-center gap-2.5 text-xs text-foreground select-none cursor-pointer">
                 <input
                   type="checkbox"
                   checked={billingSameAsShipping}
                   onChange={(e) => onBillingSameAsShippingChange(e.target.checked)}
-                  className="h-4 w-4 rounded-sm border-border-subtle text-royal focus:ring-royal"
+                  className="h-4 w-4 rounded-sm border-border text-primary focus:ring-ring"
                 />
                 <span className="font-medium">Billing address is same as delivery address</span>
               </label>
             </div>
 
             {/* Plain Restrained Trust Reassurance per spec 07_CART_AND_CHECKOUT.md §7.2 */}
-            <div className="flex items-center gap-2 text-xs text-text-tertiary py-1">
-              <Lock className="h-3.5 w-3.5 text-royal shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground py-1">
+              <Lock className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
               <span>
                 Secure checkout with 256-bit encryption. We never store your full card details or
                 passwords.
@@ -667,17 +663,17 @@ export function ContinuousCheckout({
                 className={cn(
                   'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold shrink-0',
                   isStepComplete(4)
-                    ? 'bg-status-success text-text-inverse'
-                    : 'bg-surface-sunken text-text-tertiary'
+                    ? 'bg-emerald-600 text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
                 )}
               >
                 {isStepComplete(4) ? <Check className="h-3.5 w-3.5" /> : '4'}
               </span>
               <div className="min-w-0">
-                <div className="text-xs uppercase tracking-wider font-semibold text-text-secondary">
+                <div className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                   Payment Method
                 </div>
-                <div className="text-sm font-medium text-text-primary truncate">
+                <div className="text-sm font-medium text-foreground truncate">
                   {paymentMethod === 'razorpay'
                     ? 'Razorpay Secure Gateway (UPI, Cards, NetBanking)'
                     : 'Cash on Delivery (Pay on Receipt)'}
@@ -691,7 +687,7 @@ export function ContinuousCheckout({
                 variant="ghost"
                 size="sm"
                 onClick={() => goToStep(4)}
-                className="h-8 px-2.5 text-xs font-semibold text-royal hover:underline gap-1.5 shrink-0"
+                className="h-8 px-2.5 text-xs font-semibold text-primary hover:underline gap-1.5 shrink-0"
               >
                 <Edit2 className="h-3.5 w-3.5" />
                 <span>Edit</span>
@@ -708,22 +704,22 @@ export function ContinuousCheckout({
         aria-labelledby="step-5-heading"
         className={cn(
           'rounded-md border bg-card transition-colors duration-fast shadow-sm',
-          activeStep === 5 ? 'border-royal ring-1 ring-royal' : 'border-border-subtle opacity-75'
+          activeStep === 5 ? 'border-primary ring-1 ring-ring' : 'border-border opacity-75'
         )}
       >
         <div className="p-5 sm:p-6 space-y-5">
-          <div className="flex items-center gap-2.5 border-b border-border-subtle pb-3">
+          <div className="flex items-center gap-2.5 border-b border-border pb-3">
             <span
               className={cn(
                 'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
                 activeStep === 5
-                  ? 'bg-royal text-text-inverse'
-                  : 'bg-surface-sunken text-text-tertiary'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground'
               )}
             >
               5
             </span>
-            <h2 id="step-5-heading" className="font-serif text-lg font-semibold text-text-primary">
+            <h2 id="step-5-heading" className="font-serif text-lg font-semibold text-foreground">
               Review &amp; Place Order
             </h2>
           </div>
@@ -735,7 +731,7 @@ export function ContinuousCheckout({
                 {cartSummary.items.map((item) => (
                   <div
                     key={item.variantId}
-                    className="relative w-14 h-18 aspect-[4/5] shrink-0 rounded-md border border-border-subtle bg-surface-sunken overflow-hidden"
+                    className="relative w-14 h-18 aspect-[4/5] shrink-0 rounded-md border border-border bg-muted overflow-hidden"
                   >
                     {item.primaryImageUrl ? (
                       <Image
@@ -746,11 +742,11 @@ export function ContinuousCheckout({
                         className="object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-royal">
+                      <div className="flex h-full w-full items-center justify-center text-[10px] font-bold text-primary">
                         H&amp;H
                       </div>
                     )}
-                    <span className="absolute bottom-1 right-1 bg-surface text-text-primary text-[10px] font-mono px-1 rounded-sm shadow-sm font-semibold">
+                    <span className="absolute bottom-1 right-1 bg-card text-foreground text-[10px] font-mono px-1 rounded-sm shadow-sm font-semibold">
                       ×{item.effectiveQuantity}
                     </span>
                   </div>
@@ -761,22 +757,22 @@ export function ContinuousCheckout({
               {financials.taxMinor > 0 && (
                 <div
                   data-testid="gst-breakdown"
-                  className="rounded-md bg-surface-sunken/60 p-3.5 border border-border-subtle text-xs space-y-1.5 text-text-secondary"
+                  className="rounded-md bg-muted/60 p-3.5 border border-border text-xs space-y-1.5 text-muted-foreground"
                 >
-                  <div className="flex justify-between font-semibold text-text-primary">
+                  <div className="flex justify-between font-semibold text-foreground">
                     <span>Statutory GST Included ({financials.gst?.ratePercent ?? 18}%)</span>
                     <span className="font-mono tabular-nums">
                       {Money.fromMinor(financials.taxMinor, 'INR').format()}
                     </span>
                   </div>
-                  <div className="flex justify-between text-[11px] pl-2 border-l-2 border-royal/30">
+                  <div className="flex justify-between text-[11px] pl-2 border-l-2 border-primary/30">
                     <span>Taxable Base</span>
                     <span className="font-mono tabular-nums">
                       {Money.fromMinor(financials.taxableAmountMinor, 'INR').format()}
                     </span>
                   </div>
                   {financials.gst?.isInterState ? (
-                    <div className="flex justify-between text-[11px] pl-2 border-l-2 border-royal/30">
+                    <div className="flex justify-between text-[11px] pl-2 border-l-2 border-primary/30">
                       <span>IGST ({financials.gst.ratePercent}%) · Inter-state</span>
                       <span className="font-mono tabular-nums">
                         {Money.fromMinor(financials.igstMinor, 'INR').format()}
@@ -784,13 +780,13 @@ export function ContinuousCheckout({
                     </div>
                   ) : (
                     <>
-                      <div className="flex justify-between text-[11px] pl-2 border-l-2 border-royal/30">
+                      <div className="flex justify-between text-[11px] pl-2 border-l-2 border-primary/30">
                         <span>CGST ({financials.gst ? financials.gst.ratePercent / 2 : 9}%)</span>
                         <span className="font-mono tabular-nums">
                           {Money.fromMinor(financials.cgstMinor, 'INR').format()}
                         </span>
                       </div>
-                      <div className="flex justify-between text-[11px] pl-2 border-l-2 border-royal/30">
+                      <div className="flex justify-between text-[11px] pl-2 border-l-2 border-primary/30">
                         <span>SGST ({financials.gst ? financials.gst.ratePercent / 2 : 9}%)</span>
                         <span className="font-mono tabular-nums">
                           {Money.fromMinor(financials.sgstMinor, 'INR').format()}
@@ -802,7 +798,7 @@ export function ContinuousCheckout({
               )}
 
               {/* WhatsApp Notification Opt-In (E-COM-082) */}
-              <div className="rounded-md border border-status-success/30 bg-status-success-bg/30 p-3 text-xs">
+              <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs">
                 <label className="flex items-start gap-2.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
@@ -811,14 +807,14 @@ export function ContinuousCheckout({
                     checked={whatsappOptIn}
                     onChange={(e) => onWhatsappOptInChange(e.target.checked)}
                     disabled={isSubmitting || isProcessingPayment}
-                    className="mt-0.5 h-4 w-4 rounded-sm border-status-success/40 text-royal focus:ring-royal cursor-pointer"
+                    className="mt-0.5 h-4 w-4 rounded-sm border-emerald-500/40 text-primary focus:ring-ring cursor-pointer"
                   />
                   <div className="space-y-0.5">
-                    <div className="flex items-center gap-1.5 font-medium text-text-primary">
-                      <MessageSquare className="h-3.5 w-3.5 text-status-success shrink-0" />
+                    <div className="flex items-center gap-1.5 font-medium text-foreground">
+                      <MessageSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                       <span>Receive order and delivery updates on WhatsApp</span>
                     </div>
-                    <p className="text-[11px] text-text-secondary leading-normal">
+                    <p className="text-[11px] text-muted-foreground leading-normal">
                       Instant shipment tracking and concierge assistance sent directly to your
                       phone.
                     </p>
@@ -830,14 +826,14 @@ export function ContinuousCheckout({
               <div
                 id="contract-formation-notice"
                 data-testid="contract-formation-notice"
-                className="text-xs text-text-tertiary leading-relaxed text-center px-1"
+                className="text-xs text-muted-foreground leading-relaxed text-center px-1"
               >
                 By placing this order, you confirm and agree to {DEFAULT_BRAND_IDENTITY.name}&apos;s{' '}
                 <Link
                   href="/terms"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-royal font-medium underline underline-offset-2 hover:text-royal/80"
+                  className="text-primary font-medium underline underline-offset-2 hover:text-primary/80"
                 >
                   Terms of Sale
                 </Link>
@@ -846,7 +842,7 @@ export function ContinuousCheckout({
                   href="/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-royal font-medium underline underline-offset-2 hover:text-royal/80"
+                  className="text-primary font-medium underline underline-offset-2 hover:text-primary/80"
                 >
                   Privacy Policy
                 </Link>
@@ -855,7 +851,7 @@ export function ContinuousCheckout({
                   href="/refunds"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-royal font-medium underline underline-offset-2 hover:text-royal/80"
+                  className="text-primary font-medium underline underline-offset-2 hover:text-primary/80"
                 >
                   Refund Policy
                 </Link>
@@ -884,8 +880,8 @@ export function ContinuousCheckout({
               </Button>
 
               {/* Reassurance Seal */}
-              <div className="flex items-center justify-center gap-1.5 text-xs text-text-tertiary">
-                <ShieldCheck className="h-3.5 w-3.5 text-royal" />
+              <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                 <span>256-Bit Encrypted Secure Checkout</span>
               </div>
             </div>

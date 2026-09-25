@@ -26,10 +26,10 @@ export function RelatedProducts({
   return (
     <section className="my-16">
       <div className="mb-6 flex flex-col">
-        <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-text-secondary">
+        <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-muted-foreground">
           {categoryName ? `More from ${categoryName}` : 'Curated Recommendations'}
         </span>
-        <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-text-primary">
+        <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground">
           You May Also Like
         </h3>
       </div>

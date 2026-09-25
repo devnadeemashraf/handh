@@ -148,17 +148,17 @@ export function SearchOverlay() {
       {/* Main Container: Full screen on mobile (<768px), Centered 640px card on desktop (≥768px) */}
       <div
         className={cn(
-          'relative z-10 flex flex-col bg-surface shadow-elevation-2 border-border-subtle overflow-hidden',
+          'relative z-10 flex flex-col bg-card shadow-md border-border overflow-hidden',
           // Mobile: full-screen
           'w-full h-full md:h-auto md:max-h-[85vh] md:w-[640px] md:mt-16 md:rounded-md md:border',
           'animate-in fade-in zoom-in-95 duration-180 ease-out'
         )}
       >
         {/* Search Header Row */}
-        <div className="flex items-center gap-3 border-b border-border-subtle px-4 py-3 sm:px-6">
+        <div className="flex items-center gap-3 border-b border-border px-4 py-3 sm:px-6">
           <div className="flex h-6 w-6 items-center justify-center text-secondary">
             {isLoading ? (
-              <Loader2 className="h-5 w-5 animate-spin text-royal" />
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
             ) : (
               <Search className="h-5 w-5" />
             )}
@@ -191,7 +191,7 @@ export function SearchOverlay() {
           <button
             type="button"
             onClick={closeSearch}
-            className="rounded-sm border border-border-subtle px-2.5 py-1 text-xs font-medium text-secondary hover:text-primary hover:bg-sunken transition-colors"
+            className="rounded-sm border border-border px-2.5 py-1 text-xs font-medium text-secondary hover:text-primary hover:bg-muted transition-colors"
             aria-label="Close search"
           >
             <span className="hidden md:inline">Esc</span>
@@ -227,7 +227,7 @@ export function SearchOverlay() {
                     {recentSearches.map((term) => (
                       <div
                         key={term}
-                        className="inline-flex items-center gap-1.5 rounded-sm bg-sunken pl-3 pr-1.5 py-1 text-xs text-primary transition-colors hover:bg-border-subtle"
+                        className="inline-flex items-center gap-1.5 rounded-sm bg-muted pl-3 pr-1.5 py-1 text-xs text-primary transition-colors hover:bg-border-subtle"
                       >
                         <button
                           type="button"
@@ -264,7 +264,7 @@ export function SearchOverlay() {
                       key={term}
                       type="button"
                       onClick={() => handleSelectChip(term)}
-                      className="rounded-sm border border-border-subtle px-3 py-1 text-xs text-secondary hover:border-royal hover:text-royal transition-colors"
+                      className="rounded-sm border border-border px-3 py-1 text-xs text-secondary hover:border-primary hover:text-primary transition-colors"
                     >
                       {term}
                     </button>
@@ -283,12 +283,12 @@ export function SearchOverlay() {
                       key={cat.slug}
                       href={`/?category=${cat.slug}`}
                       onClick={closeSearch}
-                      className="group flex items-center justify-between rounded-sm border border-border-subtle p-3 hover:border-royal/50 hover:bg-sunken transition-all"
+                      className="group flex items-center justify-between rounded-sm border border-border p-3 hover:border-primary/50 hover:bg-muted transition-all"
                     >
-                      <span className="text-xs font-medium text-primary group-hover:text-royal">
+                      <span className="text-xs font-medium text-primary group-hover:text-primary">
                         {cat.name}
                       </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-tertiary group-hover:text-royal group-hover:translate-x-0.5 transition-all" />
+                      <ArrowRight className="h-3.5 w-3.5 text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                     </Link>
                   ))}
                 </div>
@@ -319,9 +319,9 @@ export function SearchOverlay() {
                           key={product.id}
                           type="button"
                           onClick={() => handleSelectProduct(product)}
-                          className="group flex flex-col text-left rounded-sm border border-border-subtle p-2 hover:border-royal hover:shadow-elevation-1 transition-all bg-canvas"
+                          className="group flex flex-col text-left rounded-sm border border-border p-2 hover:border-primary hover:shadow-sm transition-all bg-background"
                         >
-                          <div className="relative aspect-square w-full overflow-hidden rounded-sm bg-sunken mb-2">
+                          <div className="relative aspect-square w-full overflow-hidden rounded-sm bg-muted mb-2">
                             {product.primaryImageUrl ? (
                               <Image
                                 src={product.primaryImageUrl}
@@ -336,7 +336,7 @@ export function SearchOverlay() {
                               </div>
                             )}
                           </div>
-                          <span className="text-xs font-medium text-primary line-clamp-1 group-hover:text-royal transition-colors">
+                          <span className="text-xs font-medium text-primary line-clamp-1 group-hover:text-primary transition-colors">
                             {product.title}
                           </span>
                           <span className="text-xs font-serif font-medium text-secondary mt-0.5">
@@ -351,7 +351,7 @@ export function SearchOverlay() {
 
               {/* Category / Collection Matches */}
               {categories.length > 0 && (
-                <section className="pt-2 border-t border-border-subtle">
+                <section className="pt-2 border-t border-border">
                   <h3 className="text-xs uppercase font-medium tracking-wider text-secondary mb-2">
                     Collections ({categories.length})
                   </h3>
@@ -361,10 +361,10 @@ export function SearchOverlay() {
                         key={category.id}
                         type="button"
                         onClick={() => handleSelectCategory(category)}
-                        className="group flex w-full items-center justify-between py-2.5 text-left text-xs font-medium text-primary hover:text-royal transition-colors"
+                        className="group flex w-full items-center justify-between py-2.5 text-left text-xs font-medium text-primary hover:text-primary transition-colors"
                       >
                         <span>{category.name}</span>
-                        <ChevronRight className="h-4 w-4 text-tertiary group-hover:text-royal group-hover:translate-x-0.5 transition-all" />
+                        <ChevronRight className="h-4 w-4 text-tertiary group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                       </button>
                     ))}
                   </div>
@@ -374,7 +374,7 @@ export function SearchOverlay() {
               {/* No Results Found */}
               {!isLoading && hasSearched && products.length === 0 && categories.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sunken text-secondary mb-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-secondary mb-3">
                     <Search className="h-6 w-6" />
                   </div>
                   <h4 className="font-serif text-base font-semibold text-primary mb-1">
@@ -393,7 +393,7 @@ export function SearchOverlay() {
                           closeSearch();
                           router.push(`/?category=${cat.slug}`);
                         }}
-                        className="rounded-sm border border-border-subtle px-3 py-1 text-xs text-secondary hover:border-royal hover:text-royal transition-colors"
+                        className="rounded-sm border border-border px-3 py-1 text-xs text-secondary hover:border-primary hover:text-primary transition-colors"
                       >
                         {cat.name}
                       </button>

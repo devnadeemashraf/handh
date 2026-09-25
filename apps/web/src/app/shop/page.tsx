@@ -48,8 +48,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   if (!store) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
-        <h2 className="text-xl font-serif text-text-primary">Store Initializing</h2>
-        <p className="mt-2 text-sm text-text-secondary">
+        <h2 className="text-xl font-serif text-foreground">Store Initializing</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
           Please run the database seed script to initialize the collection.
         </p>
       </main>

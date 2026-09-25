@@ -142,14 +142,14 @@ export function CartView() {
   if (!cartSummary || cartSummary.items.length === 0) {
     return (
       <main className="mx-auto max-w-lg w-full flex-1 px-4 py-20 sm:py-28 text-center">
-        <div className="bg-card rounded-md border border-border-subtle p-8 shadow-sm">
-          <div className="h-16 w-16 rounded-full bg-surface-sunken border border-border-subtle flex items-center justify-center mx-auto mb-5 text-text-tertiary">
+        <div className="bg-card rounded-md border border-border p-8 shadow-sm">
+          <div className="h-16 w-16 rounded-full bg-muted border border-border flex items-center justify-center mx-auto mb-5 text-muted-foreground">
             <ShoppingBag className="h-7 w-7" aria-hidden="true" />
           </div>
-          <h1 className="font-serif text-2xl font-semibold text-text-primary mb-2">
+          <h1 className="font-serif text-2xl font-semibold text-foreground mb-2">
             Your bag is empty
           </h1>
-          <p className="text-sm text-text-secondary mb-6 leading-relaxed">
+          <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
             Everything you add will show up here.
           </p>
           <Button
@@ -179,23 +179,23 @@ export function CartView() {
   return (
     <main className="mx-auto max-w-7xl w-full flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-32 lg:pb-12">
       {/* Top Bar: Back-Chevron & Bag Count in Title per spec */}
-      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 mb-6 sm:mb-8 border-b border-border-subtle pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 mb-6 sm:mb-8 border-b border-border pb-4">
         <div>
           <Link
             href="/shop"
             onClick={() => triggerHaptic('selection')}
-            className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider font-semibold text-text-tertiary hover:text-royal transition-colors mb-2.5 group"
+            className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider font-semibold text-muted-foreground hover:text-primary transition-colors mb-2.5 group"
           >
             <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
             <span>Continue Shopping</span>
           </Link>
-          <h1 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-text-primary">
+          <h1 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
             Your Bag ({totalItemCount})
           </h1>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 text-xs text-text-secondary">
-          <Truck className="h-4 w-4 text-royal shrink-0" />
+        <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
+          <Truck className="h-4 w-4 text-primary shrink-0" />
           <span>Complimentary express shipping across India</span>
         </div>
       </div>
@@ -207,12 +207,12 @@ export function CartView() {
           <FreeShippingBar subtotalMinor={subtotalMinor} />
 
           {/* Line items container */}
-          <div className="bg-card rounded-md border border-border-subtle p-4 sm:p-6 shadow-sm">
-            <div className="border-b border-border-subtle pb-3 mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-text-tertiary">
+          <div className="bg-card rounded-md border border-border p-4 sm:p-6 shadow-sm">
+            <div className="border-b border-border pb-3 mb-2 flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Handcrafted Pieces
               </span>
-              <span className="text-xs text-text-secondary">
+              <span className="text-xs text-muted-foreground">
                 {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'}
               </span>
             </div>
@@ -245,8 +245,8 @@ export function CartView() {
         </div>
 
         {/* Right Column (Desktop Sticky Summary Card) */}
-        <div className="lg:col-span-5 bg-card rounded-md border border-border-subtle p-6 sm:p-8 shadow-sm lg:sticky lg:top-24 space-y-6">
-          <h2 className="font-serif text-xl font-semibold text-text-primary pb-3 border-b border-border-subtle">
+        <div className="lg:col-span-5 bg-card rounded-md border border-border p-6 sm:p-8 shadow-sm lg:sticky lg:top-24 space-y-6">
+          <h2 className="font-serif text-xl font-semibold text-foreground pb-3 border-b border-border">
             Order Summary
           </h2>
 
@@ -261,31 +261,31 @@ export function CartView() {
 
           {/* Price Breakdown */}
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between text-text-secondary">
+            <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
-              <span className="font-mono tabular-nums font-semibold text-text-primary">
+              <span className="font-mono tabular-nums font-semibold text-foreground">
                 {subtotalFormatted}
               </span>
             </div>
 
             {appliedPromo && (
-              <div className="flex justify-between text-status-success font-medium">
+              <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
                 <span>Discount ({appliedPromo.code})</span>
                 <span className="font-mono tabular-nums font-semibold">-{discountFormatted}</span>
               </div>
             )}
 
-            <div className="flex justify-between text-text-secondary">
+            <div className="flex justify-between text-muted-foreground">
               <span>Courier Delivery</span>
-              <span className="text-royal font-medium">Calculated at checkout</span>
+              <span className="text-primary font-medium">Calculated at checkout</span>
             </div>
 
-            <div className="border-t border-border-subtle pt-4 flex justify-between items-baseline">
+            <div className="border-t border-border pt-4 flex justify-between items-baseline">
               <div>
-                <span className="text-base font-semibold text-text-primary">Estimated Total</span>
-                <p className="text-[11px] text-text-tertiary">Inclusive of statutory taxes</p>
+                <span className="text-base font-semibold text-foreground">Estimated Total</span>
+                <p className="text-[11px] text-muted-foreground">Inclusive of statutory taxes</p>
               </div>
-              <span className="font-serif text-2xl font-bold font-mono tabular-nums text-text-primary">
+              <span className="font-serif text-2xl font-bold font-mono tabular-nums text-foreground">
                 {totalFormatted}
               </span>
             </div>
@@ -293,12 +293,12 @@ export function CartView() {
 
           {/* Maintenance Notice */}
           {isServicePaused && serviceControl && (
-            <div className="p-4 bg-status-warning-bg/40 border border-status-warning/30 rounded-md flex flex-col gap-1 text-text-primary">
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-md flex flex-col gap-1 text-foreground">
               <div className="flex items-center gap-1.5 font-semibold text-sm">
-                <Clock className="h-4 w-4 text-status-warning" />
+                <Clock className="h-4 w-4 text-amber-800 dark:text-amber-400" />
                 <span>{serviceControl.headline}</span>
               </div>
-              <p className="text-xs leading-relaxed text-text-secondary">
+              <p className="text-xs leading-relaxed text-muted-foreground">
                 {serviceControl.maintenanceNotice}
               </p>
             </div>
@@ -329,23 +329,23 @@ export function CartView() {
           </Button>
 
           {!isCheckoutReady && !isServicePaused && (
-            <p className="text-xs text-status-error text-center font-medium">
+            <p className="text-xs text-destructive text-center font-medium">
               Please resolve stock notices above before proceeding.
             </p>
           )}
 
           {/* Trust Guarantees */}
-          <div className="border-t border-border-subtle pt-5 flex flex-col gap-3 text-xs text-text-tertiary">
+          <div className="border-t border-border pt-5 flex flex-col gap-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-2.5">
-              <Sparkles className="h-4 w-4 text-royal shrink-0" />
+              <Sparkles className="h-4 w-4 text-primary shrink-0" />
               <span>Limited Batch Quality Guarantee</span>
             </div>
             <div className="flex items-center gap-2.5">
-              <Truck className="h-4 w-4 text-royal shrink-0" />
+              <Truck className="h-4 w-4 text-primary shrink-0" />
               <span>Direct Courier Dispatch across India</span>
             </div>
             <div className="flex items-center gap-2.5">
-              <ShieldCheck className="h-4 w-4 text-royal shrink-0" />
+              <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
               <span>Secure Razorpay Encrypted Checkout</span>
             </div>
           </div>
@@ -353,13 +353,13 @@ export function CartView() {
       </div>
 
       {/* Mobile Sticky Bottom Bar per spec 07_CART_AND_CHECKOUT.md §7.1 */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border-subtle p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-elevation-3">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border p-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] shadow-lg">
         <div className="flex items-center justify-between gap-4 max-w-md mx-auto">
           <div>
-            <span className="text-[11px] uppercase tracking-wider text-text-tertiary font-semibold block">
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold block">
               Total
             </span>
-            <span className="font-serif text-xl font-bold font-mono tabular-nums text-text-primary">
+            <span className="font-serif text-xl font-bold font-mono tabular-nums text-foreground">
               {totalFormatted}
             </span>
           </div>

@@ -137,9 +137,9 @@ export function DesktopFilterSidebar({
       )}
       aria-label="Product filters"
     >
-      <div className="flex items-center justify-between border-b border-border-subtle pb-3">
-        <h2 className="font-serif text-lg font-medium text-text-primary flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-text-secondary" />
+      <div className="flex items-center justify-between border-b border-border pb-3">
+        <h2 className="font-serif text-lg font-medium text-foreground flex items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
           Filters
         </h2>
         {hasActiveFilters && (
@@ -153,7 +153,7 @@ export function DesktopFilterSidebar({
                 priceRange: 'all'
               })
             }
-            className="text-xs uppercase tracking-wider text-text-secondary hover:text-royal transition-colors font-medium"
+            className="text-xs uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors font-medium"
           >
             Clear all
           </button>
@@ -168,7 +168,7 @@ export function DesktopFilterSidebar({
         {/* Category Accordion */}
         {categories.length > 0 && (
           <AccordionItem value="category">
-            <AccordionTrigger className="text-sm font-sans font-medium uppercase tracking-wider text-text-primary py-3">
+            <AccordionTrigger className="text-sm font-sans font-medium uppercase tracking-wider text-foreground py-3">
               Categories
             </AccordionTrigger>
             <AccordionContent>
@@ -179,12 +179,12 @@ export function DesktopFilterSidebar({
                   className={cn(
                     'flex w-full items-center justify-between py-1.5 px-2 rounded-sm text-xs transition-colors text-left',
                     filters.categorySlug === ''
-                      ? 'bg-accent-royal-tint text-royal font-medium'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-sunken/40'
+                      ? 'bg-accent text-primary font-medium'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                   )}
                 >
                   <span>All Categories</span>
-                  <span className="text-[11px] text-text-tertiary">{allProducts.length}</span>
+                  <span className="text-[11px] text-muted-foreground">{allProducts.length}</span>
                 </button>
 
                 {categories.map((cat) => {
@@ -203,12 +203,12 @@ export function DesktopFilterSidebar({
                       className={cn(
                         'flex w-full items-center justify-between py-1.5 px-2 rounded-sm text-xs transition-colors text-left',
                         isSelected
-                          ? 'bg-accent-royal-tint text-royal font-medium'
-                          : 'text-text-secondary hover:text-text-primary hover:bg-sunken/40'
+                          ? 'bg-accent text-primary font-medium'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                       )}
                     >
                       <span className="truncate">{cat.name}</span>
-                      <span className="text-[11px] text-text-tertiary">{count}</span>
+                      <span className="text-[11px] text-muted-foreground">{count}</span>
                     </button>
                   );
                 })}
@@ -219,17 +219,17 @@ export function DesktopFilterSidebar({
 
         {/* Availability Accordion */}
         <AccordionItem value="availability">
-          <AccordionTrigger className="text-sm font-sans font-medium uppercase tracking-wider text-text-primary py-3">
+          <AccordionTrigger className="text-sm font-sans font-medium uppercase tracking-wider text-foreground py-3">
             Availability
           </AccordionTrigger>
           <AccordionContent>
             <div className="pt-1">
-              <label className="flex items-center gap-2.5 cursor-pointer py-1.5 px-2 rounded-sm hover:bg-sunken/40 text-xs text-text-primary">
+              <label className="flex items-center gap-2.5 cursor-pointer py-1.5 px-2 rounded-sm hover:bg-muted/40 text-xs text-foreground">
                 <input
                   type="checkbox"
                   checked={filters.inStockOnly}
                   onChange={(e) => onFilterChange({ ...filters, inStockOnly: e.target.checked })}
-                  className="h-4 w-4 rounded-sm border-border-strong text-royal focus:ring-royal"
+                  className="h-4 w-4 rounded-sm border-input text-primary focus:ring-ring"
                 />
                 <span>In Stock Only</span>
               </label>
@@ -239,7 +239,7 @@ export function DesktopFilterSidebar({
 
         {/* Price Range Accordion */}
         <AccordionItem value="price">
-          <AccordionTrigger className="text-sm font-sans font-medium uppercase tracking-wider text-text-primary py-3">
+          <AccordionTrigger className="text-sm font-sans font-medium uppercase tracking-wider text-foreground py-3">
             Price Range
           </AccordionTrigger>
           <AccordionContent>
@@ -247,7 +247,7 @@ export function DesktopFilterSidebar({
               {PRICE_RANGE_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
-                  className="flex items-center gap-2.5 cursor-pointer py-1.5 px-2 rounded-sm hover:bg-sunken/40 text-xs text-text-primary"
+                  className="flex items-center gap-2.5 cursor-pointer py-1.5 px-2 rounded-sm hover:bg-muted/40 text-xs text-foreground"
                 >
                   <input
                     type="radio"
@@ -255,7 +255,7 @@ export function DesktopFilterSidebar({
                     value={opt.value}
                     checked={filters.priceRange === opt.value}
                     onChange={() => onFilterChange({ ...filters, priceRange: opt.value })}
-                    className="h-4 w-4 border-border-strong text-royal focus:ring-royal"
+                    className="h-4 w-4 border-input text-primary focus:ring-ring"
                   />
                   <span>{opt.label}</span>
                 </label>
@@ -318,9 +318,9 @@ export function MobileFilterBottomSheet({
   return (
     <ModalSheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <ModalSheetContent className="max-h-[90vh] flex flex-col p-5">
-        <ModalSheetHeader className="border-b border-border-subtle pb-3">
+        <ModalSheetHeader className="border-b border-border pb-3">
           <ModalSheetTitle className="font-serif text-lg">Filter Catalog</ModalSheetTitle>
-          <ModalSheetDescription className="text-xs text-text-secondary">
+          <ModalSheetDescription className="text-xs text-muted-foreground">
             Refine selection by category, availability, and price.
           </ModalSheetDescription>
         </ModalSheetHeader>
@@ -330,7 +330,7 @@ export function MobileFilterBottomSheet({
           {/* Categories */}
           {categories.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-text-primary mb-2.5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2.5">
                 Category
               </h3>
               <div className="grid grid-cols-2 gap-2">
@@ -340,8 +340,8 @@ export function MobileFilterBottomSheet({
                   className={cn(
                     'flex items-center justify-between rounded-sm border p-2.5 text-xs text-left min-h-[44px]',
                     draftFilters.categorySlug === ''
-                      ? 'border-royal bg-accent-royal-tint text-royal font-medium'
-                      : 'border-border-subtle bg-surface text-text-primary'
+                      ? 'border-primary bg-accent text-primary font-medium'
+                      : 'border-border bg-card text-foreground'
                   )}
                 >
                   <span className="truncate">All Categories</span>
@@ -357,8 +357,8 @@ export function MobileFilterBottomSheet({
                       className={cn(
                         'flex items-center justify-between rounded-sm border p-2.5 text-xs text-left min-h-[44px]',
                         isSelected
-                          ? 'border-royal bg-accent-royal-tint text-royal font-medium'
-                          : 'border-border-subtle bg-surface text-text-primary'
+                          ? 'border-primary bg-accent text-primary font-medium'
+                          : 'border-border bg-card text-foreground'
                       )}
                     >
                       <span className="truncate">{cat.name}</span>
@@ -372,23 +372,23 @@ export function MobileFilterBottomSheet({
 
           {/* Availability */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-primary mb-2.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2.5">
               Availability
             </h3>
-            <label className="flex items-center justify-between rounded-sm border border-border-subtle p-3 min-h-[44px] cursor-pointer bg-surface">
-              <span className="text-xs font-medium text-text-primary">In Stock Only</span>
+            <label className="flex items-center justify-between rounded-sm border border-border p-3 min-h-[44px] cursor-pointer bg-card">
+              <span className="text-xs font-medium text-foreground">In Stock Only</span>
               <input
                 type="checkbox"
                 checked={draftFilters.inStockOnly}
                 onChange={(e) => setDraftFilters((d) => ({ ...d, inStockOnly: e.target.checked }))}
-                className="h-4 w-4 rounded-sm border-border-strong text-royal focus:ring-royal"
+                className="h-4 w-4 rounded-sm border-input text-primary focus:ring-ring"
               />
             </label>
           </div>
 
           {/* Price Range */}
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-text-primary mb-2.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground mb-2.5">
               Price Range
             </h3>
             <div className="space-y-2">
@@ -400,8 +400,8 @@ export function MobileFilterBottomSheet({
                     className={cn(
                       'flex items-center justify-between rounded-sm border p-3 min-h-[44px] cursor-pointer transition-colors',
                       isSelected
-                        ? 'border-royal bg-accent-royal-tint text-royal font-medium'
-                        : 'border-border-subtle bg-surface text-text-primary'
+                        ? 'border-primary bg-accent text-primary font-medium'
+                        : 'border-border bg-card text-foreground'
                     )}
                   >
                     <span className="text-xs">{opt.label}</span>
@@ -422,7 +422,7 @@ export function MobileFilterBottomSheet({
         </div>
 
         {/* Fixed Action Footer per 03 & 05 Design Spec: Clear All + Live Counter Primary CTA */}
-        <ModalSheetFooter className="grid grid-cols-2 gap-3 pt-3 border-t border-border-subtle">
+        <ModalSheetFooter className="grid grid-cols-2 gap-3 pt-3 border-t border-border">
           <Button
             type="button"
             variant="secondary"
@@ -464,7 +464,7 @@ export function MobileSortBottomSheet({
   return (
     <ModalSheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <ModalSheetContent className="p-5 max-w-sm">
-        <ModalSheetHeader className="border-b border-border-subtle pb-3">
+        <ModalSheetHeader className="border-b border-border pb-3">
           <ModalSheetTitle className="font-serif text-lg">Sort Collection</ModalSheetTitle>
           <ModalSheetDescription className="sr-only">
             Select ordering for catalog items
@@ -485,12 +485,12 @@ export function MobileSortBottomSheet({
                 className={cn(
                   'flex w-full items-center justify-between rounded-sm border p-3 text-xs font-medium min-h-[44px] transition-colors text-left',
                   isSelected
-                    ? 'border-royal bg-accent-royal-tint text-royal'
-                    : 'border-border-subtle bg-surface text-text-primary hover:border-border-strong'
+                    ? 'border-primary bg-accent text-primary'
+                    : 'border-border bg-card text-foreground hover:border-input'
                 )}
               >
                 <span>{opt.label}</span>
-                {isSelected && <Check className="h-4 w-4 shrink-0 text-royal" />}
+                {isSelected && <Check className="h-4 w-4 shrink-0 text-primary" />}
               </button>
             );
           })}
@@ -554,26 +554,23 @@ export function ActiveFilterChips({
 
   return (
     <div
-      className={cn(
-        'flex flex-wrap items-center gap-2 py-3 border-b border-border-subtle',
-        className
-      )}
+      className={cn('flex flex-wrap items-center gap-2 py-3 border-b border-border', className)}
       aria-label="Active filters"
     >
-      <span className="text-[11px] uppercase tracking-wider text-text-secondary font-medium mr-1">
+      <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mr-1">
         Active:
       </span>
 
       {activeChips.map((chip) => (
         <span
           key={chip.id}
-          className="inline-flex items-center gap-1.5 rounded-sm border border-border-subtle bg-accent-royal-tint px-2.5 py-1 text-xs font-medium text-royal transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-accent px-2.5 py-1 text-xs font-medium text-primary transition-colors"
         >
           <span>{chip.label}</span>
           <button
             type="button"
             onClick={chip.onRemove}
-            className="rounded-xs hover:bg-royal/10 p-0.5 focus:outline-none"
+            className="rounded-xs hover:bg-primary/10 p-0.5 focus:outline-none"
             aria-label={`Remove filter ${chip.label}`}
           >
             <X className="h-3 w-3" />
@@ -585,7 +582,7 @@ export function ActiveFilterChips({
         <button
           type="button"
           onClick={onClearAll}
-          className="text-xs uppercase tracking-wider text-text-secondary hover:text-royal transition-colors underline ml-2"
+          className="text-xs uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors underline ml-2"
         >
           Clear all
         </button>

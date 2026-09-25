@@ -214,7 +214,7 @@ export function FaqClient() {
         </div>
       ) : (
         /* Empty State */
-        <div className="rounded-sm border border-border-subtle bg-surface p-10 sm:p-12 text-center space-y-4">
+        <div className="rounded-sm border border-border bg-card p-10 sm:p-12 text-center space-y-4">
           <div className="flex justify-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-secondary text-muted-foreground">
               <HelpCircle className="w-6 h-6" />

@@ -126,17 +126,17 @@ function ToastSingle({ item, onDismiss }: { item: ToastItem; onDismiss: () => vo
     <div
       role="status"
       className={cn(
-        'pointer-events-auto flex items-center justify-between gap-3 p-3.5 bg-surface text-text-primary rounded-md border border-border-subtle shadow-elevation-2 animate-in fade-in-0 slide-in-from-bottom-2 duration-base ease-decelerate select-none'
+        'pointer-events-auto flex items-center justify-between gap-3 p-3.5 bg-card text-card-foreground rounded-md border border-border shadow-lg animate-in fade-in-0 slide-in-from-bottom-2 duration-base ease-decelerate select-none'
       )}
     >
       <div className="flex items-center gap-2.5 min-w-0">
         <Icon
           className={cn(
             'h-4 w-4 shrink-0',
-            item.variant === 'success' && 'text-status-success',
-            item.variant === 'error' && 'text-status-error',
-            item.variant === 'info' && 'text-royal',
-            (!item.variant || item.variant === 'default') && 'text-royal'
+            item.variant === 'success' && 'text-emerald-600',
+            item.variant === 'error' && 'text-destructive',
+            item.variant === 'info' && 'text-primary',
+            (!item.variant || item.variant === 'default') && 'text-primary'
           )}
           aria-hidden="true"
         />
@@ -148,7 +148,7 @@ function ToastSingle({ item, onDismiss }: { item: ToastItem; onDismiss: () => vo
           <button
             type="button"
             onClick={item.action.onClick}
-            className="text-xs font-semibold text-royal hover:underline focus:outline-none"
+            className="text-xs font-semibold text-primary hover:underline focus:outline-none"
           >
             {item.action.label}
           </button>
@@ -157,7 +157,7 @@ function ToastSingle({ item, onDismiss }: { item: ToastItem; onDismiss: () => vo
           type="button"
           onClick={onDismiss}
           aria-label="Close notification"
-          className="text-text-tertiary hover:text-text-primary p-0.5 rounded-sm"
+          className="text-muted-foreground hover:text-foreground p-0.5 rounded-sm"
         >
           <X className="h-3.5 w-3.5" />
         </button>

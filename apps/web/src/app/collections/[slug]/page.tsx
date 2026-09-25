@@ -85,7 +85,7 @@ export default async function CollectionPage({
   if (!store) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
-        <h2 className="text-xl font-serif text-text-primary">Store Initializing</h2>
+        <h2 className="text-xl font-serif text-foreground">Store Initializing</h2>
       </main>
     );
   }
@@ -120,7 +120,7 @@ export default async function CollectionPage({
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         {/* Dynamic Editorial Hero Banner: 16:9 mobile, 21:9 desktop per Design Spec 05.3 */}
-        <section className="relative mb-8 md:mb-12 overflow-hidden rounded-md border border-border-subtle bg-sunken">
+        <section className="relative mb-8 md:mb-12 overflow-hidden rounded-md border border-border bg-muted">
           <div className="relative aspect-[16/9] md:aspect-[21/9] w-full">
             <Image
               src={bannerMeta.image}

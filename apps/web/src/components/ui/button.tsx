@@ -7,23 +7,23 @@ import { Slot } from '@radix-ui/react-slot';
 import type { VariantProps } from 'class-variance-authority';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-sm text-sm font-medium tracking-[0.02em] transition-all duration-instant ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-40 select-none active:scale-[0.98]',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-sm text-sm font-medium tracking-[0.02em] transition-all duration-instant ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-40 select-none active:scale-[0.98]',
   {
     variants: {
       variant: {
         primary:
-          'bg-royal text-white hover:bg-royal-hover active:bg-royal-hover shadow-none border border-transparent',
+          'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/95 shadow-none border border-transparent',
         default:
-          'bg-royal text-white hover:bg-royal-hover active:bg-royal-hover shadow-none border border-transparent',
+          'bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/95 shadow-none border border-transparent',
         secondary:
-          'border border-border-strong bg-transparent text-text-primary hover:bg-sunken active:bg-sunken/80',
+          'border border-input bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70',
         outline:
-          'border border-border-strong bg-transparent text-text-primary hover:bg-sunken active:bg-sunken/80',
-        ghost: 'text-text-primary hover:bg-sunken active:bg-sunken/80',
+          'border border-input bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80',
+        ghost: 'text-foreground hover:bg-accent hover:text-accent-foreground active:bg-accent/80',
         destructive:
-          'border border-status-error/30 text-status-error hover:bg-status-error-tint active:bg-status-error-tint/80',
-        link: 'text-royal underline-offset-4 hover:underline p-0 h-auto active:scale-100',
-        gold: 'bg-accent text-primary font-semibold hover:bg-gold-hover shadow-sm border border-accent/40 active:scale-[0.98]'
+          'bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/80',
+        link: 'text-primary underline-offset-4 hover:underline p-0 h-auto active:scale-100',
+        gold: 'bg-accent text-accent-foreground font-semibold hover:bg-accent/80 shadow-sm border border-accent/40 active:scale-[0.98]'
       },
       size: {
         default: 'h-11 min-h-[44px] px-5 py-2.5',

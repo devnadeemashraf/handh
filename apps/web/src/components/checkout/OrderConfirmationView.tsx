@@ -86,7 +86,7 @@ export function OrderConfirmationView({
         {/* 1. Success Moment Hero */}
         <div className="bg-card border border-border/80 rounded-md p-6 sm:p-10 text-center shadow-xs">
           {/* Animated stroke-draw checkmark */}
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-royal/5 border border-royal/20 text-royal mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/5 border border-primary/20 text-primary mb-4">
             <svg
               className="w-8 h-8 stroke-current"
               viewBox="0 0 24 24"
@@ -120,11 +120,11 @@ export function OrderConfirmationView({
             <button
               type="button"
               onClick={copyOrderNumber}
-              className="text-foreground hover:text-royal transition-colors p-1 -m-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-royal rounded-sm"
+              className="text-foreground hover:text-primary transition-colors p-1 -m-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm"
               aria-label="Copy order reference"
             >
               {copied ? (
-                <Check className="w-3.5 h-3.5 text-royal" />
+                <Check className="w-3.5 h-3.5 text-primary" />
               ) : (
                 <Copy className="w-3.5 h-3.5 text-muted-foreground" />
               )}
@@ -140,13 +140,16 @@ export function OrderConfirmationView({
         {/* 2. Priority Estimated Delivery Card */}
         <div className="bg-card border border-border/80 rounded-md p-5 sm:p-6 shadow-xs flex flex-col gap-4">
           <div className="flex items-center justify-between border-b border-border/60 pb-3">
-            <div className="flex items-center gap-2 text-royal">
+            <div className="flex items-center gap-2 text-primary">
               <Truck className="w-4 h-4" />
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Estimated Delivery Window
               </span>
             </div>
-            <Badge variant="outline" className="text-xs text-royal border-royal/30 bg-royal/5">
+            <Badge
+              variant="outline"
+              className="text-xs text-primary border-primary/30 bg-primary/5"
+            >
               Standard Express
             </Badge>
           </div>
@@ -162,7 +165,7 @@ export function OrderConfirmationView({
 
           <div className="bg-secondary/40 border border-border/60 rounded-md p-3.5 text-xs text-muted-foreground flex flex-col gap-1">
             <div className="flex items-start gap-2.5">
-              <Package className="w-4 h-4 text-royal shrink-0 mt-0.5" />
+              <Package className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <div>
                 <div>
                   <strong className="text-foreground">{order.customerName}</strong>
@@ -240,7 +243,7 @@ export function OrderConfirmationView({
             )}
             <div className="flex justify-between text-sm font-bold text-foreground pt-2 border-t border-border/60">
               <span className="font-sans">Total Paid</span>
-              <span className="text-royal">
+              <span className="text-primary">
                 {Money.fromMinor(order.totalMinor, 'INR').format('en-IN')}
               </span>
             </div>
@@ -249,7 +252,7 @@ export function OrderConfirmationView({
           {/* Statutory Tax Invoice CTA */}
           <div className="pt-3 border-t border-border/60 flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <ShieldCheck className="w-4 h-4 text-royal" />
+              <ShieldCheck className="w-4 h-4 text-primary" />
               <span>Includes statutory GST breakdown</span>
             </div>
             <Button
@@ -267,9 +270,9 @@ export function OrderConfirmationView({
 
         {/* 4. Guest Account Registration Prompt (if applicable) */}
         {isGuest && !guestDismissed && (
-          <div className="bg-secondary/30 border border-royal/20 rounded-md p-5 shadow-xs relative">
+          <div className="bg-secondary/30 border border-primary/20 rounded-md p-5 shadow-xs relative">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-sm bg-royal/10 text-royal flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-9 h-9 rounded-sm bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
                 <UserPlus className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
@@ -284,7 +287,7 @@ export function OrderConfirmationView({
                   <Button
                     asChild
                     size="sm"
-                    className="h-8 text-xs font-medium bg-royal hover:bg-royal/90 text-white rounded-sm"
+                    className="h-8 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm"
                   >
                     <Link href={`/account?claimOrder=${order.orderNumber}`}>Create Account</Link>
                   </Button>
@@ -307,7 +310,7 @@ export function OrderConfirmationView({
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
             asChild
-            className="flex-1 h-11 bg-royal hover:bg-royal/90 text-white font-medium rounded-sm active:scale-[0.98] transition-transform"
+            className="flex-1 h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-sm active:scale-[0.98] transition-transform"
           >
             <Link
               href={`/track/${order.orderNumber}`}
@@ -335,7 +338,7 @@ export function OrderConfirmationView({
           Questions about your order?{' '}
           <Link
             href={`/contact?order=${encodeURIComponent(order.orderNumber)}`}
-            className="text-royal font-medium underline underline-offset-2 hover:text-royal/80"
+            className="text-primary font-medium underline underline-offset-2 hover:text-primary/80"
           >
             Contact Customer Support
           </Link>

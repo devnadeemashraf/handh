@@ -26,7 +26,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     return (
       <div className="min-h-[75vh] flex items-center justify-center bg-background p-6">
         <div className="max-w-md w-full bg-card rounded-md border border-border/80 p-8 sm:p-9 text-center shadow-xs">
-          <div className="h-14 w-14 rounded-full bg-royal/10 text-royal flex items-center justify-center mx-auto mb-4 border border-royal/20">
+          <div className="h-14 w-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4 border border-primary/20">
             <Lock className="h-6 w-6" />
           </div>
 
@@ -43,7 +43,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
               triggerHaptic('medium');
               openAuthModal({ reason: 'Sign in to access your patron account.' });
             }}
-            className="w-full h-11 text-xs font-medium bg-royal hover:bg-royal/90 text-white rounded-sm active:scale-[0.98] transition-transform"
+            className="w-full h-11 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm active:scale-[0.98] transition-transform"
           >
             Sign In with Mobile OTP
           </Button>

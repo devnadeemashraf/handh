@@ -79,15 +79,18 @@ export function CartPromoCode({
     return (
       <div
         className={cn(
-          'flex items-center justify-between rounded-md border border-status-success/30 bg-status-success-bg/40 px-3 py-2 text-xs text-text-primary',
+          'flex items-center justify-between rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-foreground',
           className
         )}
       >
         <div className="flex items-center gap-2">
-          <Tag className="h-3.5 w-3.5 text-status-success shrink-0" aria-hidden="true" />
+          <Tag
+            className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"
+            aria-hidden="true"
+          />
           <span className="font-medium">
             <span className="font-mono uppercase font-semibold">{appliedPromo.code}</span> applied (
-            <span className="font-mono tabular-nums text-status-success font-semibold">
+            <span className="font-mono tabular-nums text-emerald-600 dark:text-emerald-400 font-semibold">
               -{Money.fromMinor(appliedPromo.discountMinor, 'INR').format()}
             </span>
             )
@@ -98,7 +101,7 @@ export function CartPromoCode({
           onClick={onRemove}
           disabled={disabled}
           aria-label={`Remove promo code ${appliedPromo.code}`}
-          className="text-text-tertiary hover:text-text-primary transition-colors p-1"
+          className="text-muted-foreground hover:text-foreground transition-colors p-1"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -113,9 +116,9 @@ export function CartPromoCode({
           type="button"
           onClick={() => setIsOpen(true)}
           disabled={disabled}
-          className="text-royal hover:underline font-medium inline-flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-royal rounded-sm"
+          className="text-primary hover:underline font-medium inline-flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm"
         >
-          <Tag className="h-3.5 w-3.5 text-royal" aria-hidden="true" />
+          <Tag className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
           <span>Have a promo code?</span>
         </button>
       </div>
@@ -157,13 +160,13 @@ export function CartPromoCode({
           }}
           disabled={disabled || isLoading}
           aria-label="Cancel promo code"
-          className="h-10 px-2 text-xs text-text-tertiary hover:text-text-primary rounded-md"
+          className="h-10 px-2 text-xs text-muted-foreground hover:text-foreground rounded-md"
         >
           <X className="h-4 w-4" />
         </Button>
       </form>
       {error && (
-        <p className="text-xs text-status-error font-medium" role="alert">
+        <p className="text-xs text-destructive font-medium" role="alert">
           {error}
         </p>
       )}

@@ -145,7 +145,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         <div className="md:hidden flex items-center justify-between mb-2">
           <Link
             href="/shop"
-            className="inline-flex items-center gap-1 text-xs font-medium text-text-secondary hover:text-text-primary min-h-[44px]"
+            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground min-h-[44px]"
           >
             &larr; Back to Shop
           </Link>
@@ -153,25 +153,25 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
         {/* Desktop Breadcrumb Navigation */}
         <nav
-          className="hidden md:flex mb-8 items-center gap-2 text-xs text-text-secondary"
+          className="hidden md:flex mb-8 items-center gap-2 text-xs text-muted-foreground"
           aria-label="Breadcrumb"
         >
-          <Link href="/shop" className="transition-colors hover:text-text-primary">
+          <Link href="/shop" className="transition-colors hover:text-foreground">
             Shop
           </Link>
-          <span className="text-border-strong">/</span>
+          <span className="text-muted-foreground/40">/</span>
           {product.category && (
             <>
               <Link
                 href={`/collections/${product.category.slug}`}
-                className="transition-colors hover:text-text-primary"
+                className="transition-colors hover:text-foreground"
               >
                 {product.category.name}
               </Link>
-              <span className="text-border-strong">/</span>
+              <span className="text-muted-foreground/40">/</span>
             </>
           )}
-          <span className="font-medium text-royal truncate max-w-xs">{product.title}</span>
+          <span className="font-medium text-foreground truncate max-w-xs">{product.title}</span>
         </nav>
 
         {/* Coordinated PDP View: Gallery, Purchasing, Progressive Accordions, and Cross-Sell */}

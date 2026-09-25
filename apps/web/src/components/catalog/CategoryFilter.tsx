@@ -38,8 +38,8 @@ export function CategoryFilter({
             className={cn(
               'inline-flex shrink-0 items-center justify-center rounded-sm px-4 py-2 text-xs font-medium tracking-wider uppercase transition-all select-none min-h-[36px]',
               isActive
-                ? 'bg-royal text-white shadow-elevation-1'
-                : 'border border-border-subtle bg-surface text-text-secondary hover:text-text-primary hover:border-border-strong'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'border border-border bg-card text-muted-foreground hover:text-foreground hover:border-input'
             )}
           >
             {tab.label}

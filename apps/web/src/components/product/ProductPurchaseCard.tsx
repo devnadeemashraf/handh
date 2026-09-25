@@ -262,7 +262,7 @@ export function ProductPurchaseCard({
                           title={`${v.title}${!v.isAvailable ? ' (Sold Out)' : ''}`}
                           aria-label={v.title}
                           className={cn(
-                            'group relative h-8 w-8 rounded-full border border-border-subtle transition-all duration-fast focus-visible:outline-none select-none',
+                            'group relative h-8 w-8 rounded-full border border-border transition-all duration-fast focus-visible:outline-none select-none',
                             isSelected &&
                               'ring-2 ring-primary ring-offset-2 ring-offset-background scale-105',
                             !v.isAvailable && 'opacity-60'

@@ -168,7 +168,7 @@ export default function AccountAddressesPage() {
             triggerHaptic('selection');
             handleOpenAdd();
           }}
-          className="gap-2 h-9 px-4 text-xs font-medium bg-royal hover:bg-royal/90 text-white rounded-sm active:scale-[0.98] transition-transform"
+          className="gap-2 h-9 px-4 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm active:scale-[0.98] transition-transform"
         >
           <Plus className="h-3.5 w-3.5" /> Add Address
         </Button>
@@ -198,7 +198,7 @@ export default function AccountAddressesPage() {
               triggerHaptic('selection');
               handleOpenAdd();
             }}
-            className="px-5 h-9 text-xs font-medium bg-royal hover:bg-royal/90 text-white rounded-sm active:scale-[0.98] transition-transform"
+            className="px-5 h-9 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm active:scale-[0.98] transition-transform"
           >
             Add First Address
           </Button>
@@ -210,7 +210,7 @@ export default function AccountAddressesPage() {
               key={addr.id}
               className={`rounded-md p-5 relative border transition-all ${
                 addr.isDefault
-                  ? 'border-royal ring-1 ring-royal/20 bg-royal/5'
+                  ? 'border-primary ring-1 ring-primary/20 bg-primary/5'
                   : 'border-border/80 bg-card hover:border-border'
               }`}
             >
@@ -222,7 +222,7 @@ export default function AccountAddressesPage() {
                 {addr.isDefault && (
                   <Badge
                     variant="outline"
-                    className="gap-1 bg-royal/10 text-royal border-royal/30 font-medium text-xs rounded-sm"
+                    className="gap-1 bg-primary/10 text-primary border-primary/30 font-medium text-xs rounded-sm"
                   >
                     <Check className="h-3 w-3" /> Default
                   </Badge>
@@ -248,7 +248,7 @@ export default function AccountAddressesPage() {
                       triggerHaptic('selection');
                       handleSetDefault(addr.id);
                     }}
-                    className="text-xs font-semibold text-royal hover:underline cursor-pointer p-0"
+                    className="text-xs font-semibold text-primary hover:underline cursor-pointer p-0"
                   >
                     Set Default
                   </button>
@@ -420,7 +420,7 @@ export default function AccountAddressesPage() {
                   type="checkbox"
                   checked={formData.isDefault}
                   onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                  className="rounded-sm border-border text-royal accent-royal h-4 w-4"
+                  className="rounded-sm border-border text-primary accent-primary h-4 w-4"
                 />
                 <span className="text-xs text-foreground font-medium">
                   Set as default delivery address
@@ -440,7 +440,7 @@ export default function AccountAddressesPage() {
                 <Button
                   type="submit"
                   size="sm"
-                  className="h-9 text-xs font-medium bg-royal hover:bg-royal/90 text-white rounded-sm active:scale-[0.98] transition-transform"
+                  className="h-9 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm active:scale-[0.98] transition-transform"
                 >
                   {editingAddress ? 'Update Address' : 'Save Address'}
                 </Button>

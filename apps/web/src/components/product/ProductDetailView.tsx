@@ -31,7 +31,7 @@ export function ProductDetailView({ product, suggestedProducts }: ProductDetailV
       return {
         label: 'Sold Out',
         variant: 'secondary' as const,
-        className: 'bg-sunken text-text-tertiary border-transparent'
+        className: 'bg-muted text-muted-foreground border-transparent'
       };
     }
     const hasSale = product.variants.some(
@@ -41,7 +41,7 @@ export function ProductDetailView({ product, suggestedProducts }: ProductDetailV
       return {
         label: 'Sale',
         variant: 'secondary' as const,
-        className: 'bg-sale/10 text-sale border-transparent'
+        className: 'bg-destructive/10 text-destructive border-transparent'
       };
     }
     const isNew =
@@ -52,7 +52,7 @@ export function ProductDetailView({ product, suggestedProducts }: ProductDetailV
       return {
         label: 'New',
         variant: 'secondary' as const,
-        className: 'bg-accent-royal-tint text-royal border-transparent'
+        className: 'bg-primary/10 text-primary border-transparent'
       };
     }
     const isLowStock = product.variants.some(
@@ -132,7 +132,7 @@ export function ProductDetailView({ product, suggestedProducts }: ProductDetailV
       </div>
 
       {/* Centered Accordion: Progressive Disclosure (Description, Materials, Size Guide, Care, Shipping, Reviews) */}
-      <div className="mt-16 pt-8 border-t border-border-subtle">
+      <div className="mt-16 pt-8 border-t border-border">
         <ProductAccordion
           description={product.description}
           specifications={product.specifications}

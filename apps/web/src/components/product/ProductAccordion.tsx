@@ -84,25 +84,25 @@ export function ProductAccordion({
       <Accordion
         type="multiple"
         defaultValue={['description']}
-        className="w-full divide-y divide-border-subtle border-t border-b border-border-subtle"
+        className="w-full divide-y divide-border border-t border-b border-border"
       >
         {/* ================================================================= */}
         {/* 1. Description (Open by default, ≤68ch measure) */}
         {/* ================================================================= */}
         <AccordionItem value="description" className="border-none">
-          <AccordionTrigger className="text-base font-semibold text-text-primary hover:no-underline hover:text-royal py-5 select-none">
+          <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline hover:text-primary py-5 select-none">
             Description &amp; Design Notes
           </AccordionTrigger>
-          <AccordionContent className="text-sm leading-relaxed text-text-secondary pb-6 max-w-[68ch]">
+          <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-6 max-w-[68ch]">
             <p className="whitespace-pre-line">{defaultDescription}</p>
             {specifications && Object.keys(specifications).length > 0 && (
-              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border-subtle pt-3 text-xs">
+              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs">
                 {Object.entries(specifications).map(([key, val]) => (
                   <div key={key} className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-wider text-text-tertiary">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                       {key.replace(/_/g, ' ')}
                     </span>
-                    <span className="font-medium text-text-primary">{String(val)}</span>
+                    <span className="font-medium text-foreground">{String(val)}</span>
                   </div>
                 ))}
               </div>
@@ -114,17 +114,17 @@ export function ProductAccordion({
         {/* 2. Materials & Fabric */}
         {/* ================================================================= */}
         <AccordionItem value="materials" className="border-none">
-          <AccordionTrigger className="text-base font-semibold text-text-primary hover:no-underline hover:text-royal py-5 select-none">
+          <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline hover:text-primary py-5 select-none">
             Materials &amp; Craftsmanship
           </AccordionTrigger>
-          <AccordionContent className="text-sm leading-relaxed text-text-secondary pb-6 max-w-[68ch] space-y-3">
+          <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-6 max-w-[68ch] space-y-3">
             <p>{defaultMaterials}</p>
-            <div className="rounded-sm border border-border-subtle bg-sunken/40 p-3 text-xs space-y-1.5">
-              <div className="flex items-center gap-1.5 font-medium text-text-primary">
-                <Sparkles className="h-3.5 w-3.5 text-royal" />
+            <div className="rounded-sm border border-border bg-muted/40 p-3 text-xs space-y-1.5">
+              <div className="flex items-center gap-1.5 font-medium text-foreground">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
                 <span>Anti-Snag Guaranteed Guarantee</span>
               </div>
-              <p className="text-text-secondary">
+              <p className="text-muted-foreground">
                 Each edge is micro-beveled and polished by hand to guarantee zero thread pulls on
                 delicate fabrics including Mulberry Silk, Georgette, and Medina Chiffon.
               </p>
@@ -136,26 +136,26 @@ export function ProductAccordion({
         {/* 3. Size Guide */}
         {/* ================================================================= */}
         <AccordionItem value="size-guide" className="border-none">
-          <AccordionTrigger className="text-base font-semibold text-text-primary hover:no-underline hover:text-royal py-5 select-none">
+          <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline hover:text-primary py-5 select-none">
             <span className="flex items-center gap-2">
               <span>Size &amp; Fit Guide</span>
             </span>
           </AccordionTrigger>
-          <AccordionContent className="text-sm leading-relaxed text-text-secondary pb-6">
+          <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-text-secondary">
+                <span className="text-xs text-muted-foreground">
                   Body measurements for modest silhouette draping
                 </span>
-                <div className="inline-flex rounded-sm border border-border-subtle p-0.5 bg-sunken">
+                <div className="inline-flex rounded-sm border border-border p-0.5 bg-muted">
                   <button
                     type="button"
                     onClick={() => setSizeUnit('cm')}
                     className={cn(
                       'px-2.5 py-0.5 text-[11px] font-medium rounded-sm transition-all',
                       sizeUnit === 'cm'
-                        ? 'bg-surface text-text-primary shadow-xs font-semibold'
-                        : 'text-text-secondary hover:text-text-primary'
+                        ? 'bg-card text-foreground shadow-xs font-semibold'
+                        : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
                     cm
@@ -166,8 +166,8 @@ export function ProductAccordion({
                     className={cn(
                       'px-2.5 py-0.5 text-[11px] font-medium rounded-sm transition-all',
                       sizeUnit === 'in'
-                        ? 'bg-surface text-text-primary shadow-xs font-semibold'
-                        : 'text-text-secondary hover:text-text-primary'
+                        ? 'bg-card text-foreground shadow-xs font-semibold'
+                        : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
                     in
@@ -176,10 +176,10 @@ export function ProductAccordion({
               </div>
 
               {/* Measurement Table */}
-              <div className="overflow-x-auto border border-border-subtle rounded-sm">
+              <div className="overflow-x-auto border border-border rounded-sm">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-border-subtle bg-sunken/60 text-text-secondary font-medium uppercase tracking-wider text-[10px]">
+                    <tr className="border-b border-border bg-muted/60 text-muted-foreground font-medium uppercase tracking-wider text-[10px]">
                       <th className="py-2 px-3">Size</th>
                       <th className="py-2 px-3">Bust</th>
                       <th className="py-2 px-3">Waist</th>
@@ -187,7 +187,7 @@ export function ProductAccordion({
                       <th className="py-2 px-3">Length</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border-subtle">
+                  <tbody className="divide-y divide-border">
                     {[
                       { s: 'XS', b: [84, 33], w: [66, 26], h: [91, 36], l: [137, 54] },
                       { s: 'S', b: [89, 35], w: [71, 28], h: [96, 38], l: [140, 55] },
@@ -195,18 +195,18 @@ export function ProductAccordion({
                       { s: 'L', b: [102, 40], w: [84, 33], h: [109, 43], l: [145, 57] },
                       { s: 'XL', b: [110, 43], w: [92, 36], h: [117, 46], l: [147, 58] }
                     ].map((row) => (
-                      <tr key={row.s} className="hover:bg-sunken/30">
-                        <td className="py-2 px-3 font-semibold text-text-primary">{row.s}</td>
-                        <td className="py-2 px-3 font-mono tabular-nums text-text-secondary">
+                      <tr key={row.s} className="hover:bg-muted/30">
+                        <td className="py-2 px-3 font-semibold text-foreground">{row.s}</td>
+                        <td className="py-2 px-3 font-mono tabular-nums text-muted-foreground">
                           {sizeUnit === 'cm' ? `${row.b[0]} cm` : `${row.b[1]}″`}
                         </td>
-                        <td className="py-2 px-3 font-mono tabular-nums text-text-secondary">
+                        <td className="py-2 px-3 font-mono tabular-nums text-muted-foreground">
                           {sizeUnit === 'cm' ? `${row.w[0]} cm` : `${row.w[1]}″`}
                         </td>
-                        <td className="py-2 px-3 font-mono tabular-nums text-text-secondary">
+                        <td className="py-2 px-3 font-mono tabular-nums text-muted-foreground">
                           {sizeUnit === 'cm' ? `${row.h[0]} cm` : `${row.h[1]}″`}
                         </td>
-                        <td className="py-2 px-3 font-mono tabular-nums text-text-secondary">
+                        <td className="py-2 px-3 font-mono tabular-nums text-muted-foreground">
                           {sizeUnit === 'cm' ? `${row.l[0]} cm` : `${row.l[1]}″`}
                         </td>
                       </tr>
@@ -222,10 +222,10 @@ export function ProductAccordion({
         {/* 4. Care Instructions */}
         {/* ================================================================= */}
         <AccordionItem value="care" className="border-none">
-          <AccordionTrigger className="text-base font-semibold text-text-primary hover:no-underline hover:text-royal py-5 select-none">
+          <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline hover:text-primary py-5 select-none">
             Care &amp; Longevity
           </AccordionTrigger>
-          <AccordionContent className="text-sm leading-relaxed text-text-secondary pb-6 max-w-[68ch]">
+          <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-6 max-w-[68ch]">
             <ul className="space-y-2 list-disc list-inside text-xs sm:text-sm">
               <li>
                 Keep away from direct contact with alcohol perfumes, lotions, and chlorinated water.
@@ -249,35 +249,35 @@ export function ProductAccordion({
         {/* 5. Shipping & Returns */}
         {/* ================================================================= */}
         <AccordionItem value="shipping" className="border-none">
-          <AccordionTrigger className="text-base font-semibold text-text-primary hover:no-underline hover:text-royal py-5 select-none">
+          <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline hover:text-primary py-5 select-none">
             Shipping &amp; 7-Day Returns
           </AccordionTrigger>
-          <AccordionContent className="text-sm leading-relaxed text-text-secondary pb-6 max-w-[68ch] space-y-4">
+          <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-6 max-w-[68ch] space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="rounded-sm border border-border-subtle p-3 bg-sunken/30 space-y-1">
-                <div className="flex items-center gap-1.5 font-semibold text-text-primary">
-                  <Truck className="h-4 w-4 text-royal" />
+              <div className="rounded-sm border border-border p-3 bg-muted/30 space-y-1">
+                <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                  <Truck className="h-4 w-4 text-primary" />
                   <span>Express Courier</span>
                 </div>
-                <p className="text-text-secondary">
+                <p className="text-muted-foreground">
                   Dispatched within 24–48 hours. Delivered in 3–5 business days across India via
                   Speed Post / DTDC Express.
                 </p>
               </div>
 
-              <div className="rounded-sm border border-border-subtle p-3 bg-sunken/30 space-y-1">
-                <div className="flex items-center gap-1.5 font-semibold text-text-primary">
-                  <Shield className="h-4 w-4 text-royal" />
+              <div className="rounded-sm border border-border p-3 bg-muted/30 space-y-1">
+                <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                  <Shield className="h-4 w-4 text-primary" />
                   <span>7-Day Return Window</span>
                 </div>
-                <p className="text-text-secondary">
+                <p className="text-muted-foreground">
                   Hassle-free exchange or store credit within 7 days of delivery for unworn items in
                   original packaging.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 text-xs font-medium text-royal">
+            <div className="flex items-center gap-4 text-xs font-medium text-primary">
               <Link href="/shipping" className="hover:underline">
                 View Full Shipping Details &rarr;
               </Link>
@@ -292,24 +292,24 @@ export function ProductAccordion({
         {/* 6. Customer Reviews */}
         {/* ================================================================= */}
         <AccordionItem value="reviews" id="reviews" className="border-none">
-          <AccordionTrigger className="text-base font-semibold text-text-primary hover:no-underline hover:text-royal py-5 select-none">
+          <AccordionTrigger className="text-base font-semibold text-foreground hover:no-underline hover:text-primary py-5 select-none">
             <span className="flex items-center gap-2">
               <span>Customer Reviews</span>
-              <span className="text-xs font-normal text-text-tertiary">(42)</span>
+              <span className="text-xs font-normal text-muted-foreground">(42)</span>
             </span>
           </AccordionTrigger>
-          <AccordionContent className="text-sm leading-relaxed text-text-secondary pb-6">
+          <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-6">
             {/* Reviews Summary Stats */}
-            <div className="mb-6 rounded-sm border border-border-subtle bg-sunken/30 p-4">
+            <div className="mb-6 rounded-sm border border-border bg-muted/30 p-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                <div className="flex flex-col items-center sm:items-start text-center sm:text-left border-b sm:border-b-0 sm:border-r border-border-subtle pb-3 sm:pb-0 sm:pr-4">
-                  <span className="font-serif text-3xl font-bold text-text-primary">4.9</span>
+                <div className="flex flex-col items-center sm:items-start text-center sm:text-left border-b sm:border-b-0 sm:border-r border-border pb-3 sm:pb-0 sm:pr-4">
+                  <span className="font-serif text-3xl font-bold text-foreground">4.9</span>
                   <div className="flex items-center gap-0.5 my-1 text-accent">
                     {[1, 2, 3, 4, 5].map((i) => (
                       <Star key={i} className="h-4 w-4 fill-accent text-accent" />
                     ))}
                   </div>
-                  <span className="text-[11px] text-text-tertiary">
+                  <span className="text-[11px] text-muted-foreground">
                     Based on 42 verified reviews
                   </span>
                 </div>
@@ -324,16 +324,16 @@ export function ProductAccordion({
                     { star: 1, pct: 0 }
                   ].map((row) => (
                     <div key={row.star} className="flex items-center gap-2">
-                      <span className="w-5 text-right font-mono text-[11px] text-text-secondary">
+                      <span className="w-5 text-right font-mono text-[11px] text-muted-foreground">
                         {row.star}★
                       </span>
-                      <div className="h-2 flex-1 rounded-sm bg-sunken overflow-hidden">
+                      <div className="h-2 flex-1 rounded-sm bg-muted overflow-hidden">
                         <div
-                          className="h-full bg-royal rounded-sm transition-all duration-slow"
+                          className="h-full bg-primary rounded-sm transition-all duration-slow"
                           style={{ width: `${row.pct}%` }}
                         />
                       </div>
-                      <span className="w-8 font-mono text-[11px] text-text-tertiary tabular-nums">
+                      <span className="w-8 font-mono text-[11px] text-muted-foreground tabular-nums">
                         {row.pct}%
                       </span>
                     </div>
@@ -347,17 +347,15 @@ export function ProductAccordion({
               {SAMPLE_REVIEWS.slice(0, visibleReviewCount).map((rev) => (
                 <div
                   key={rev.id}
-                  className="rounded-sm border border-border-subtle p-4 bg-surface space-y-2 shadow-xs"
+                  className="rounded-sm border border-border p-4 bg-card space-y-2 shadow-xs"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-sunken font-serif text-xs font-semibold text-text-primary">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted font-serif text-xs font-semibold text-foreground">
                         {rev.author.charAt(0)}
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-text-primary">
-                          {rev.author}
-                        </span>
+                        <span className="text-xs font-semibold text-foreground">{rev.author}</span>
                         {rev.verified && (
                           <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-medium">
                             <CheckCircle2 className="h-3 w-3" />
@@ -372,12 +370,12 @@ export function ProductAccordion({
                           <Star key={i} className="h-3 w-3 fill-accent text-accent" />
                         ))}
                       </div>
-                      <span className="text-[10px] text-text-tertiary ml-1.5">{rev.date}</span>
+                      <span className="text-[10px] text-muted-foreground ml-1.5">{rev.date}</span>
                     </div>
                   </div>
 
-                  <h5 className="text-xs font-semibold text-text-primary">{rev.title}</h5>
-                  <p className="text-xs text-text-secondary leading-relaxed">{rev.comment}</p>
+                  <h5 className="text-xs font-semibold text-foreground">{rev.title}</h5>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{rev.comment}</p>
                 </div>
               ))}
             </div>

@@ -188,7 +188,7 @@ export default function AccountWishlistPage() {
       {/* Empty State (Spec 11 line 23) */}
       {items.length === 0 ? (
         <div className="py-16 px-4 text-center max-w-sm mx-auto">
-          <div className="h-12 w-12 rounded-full bg-royal/10 text-royal flex items-center justify-center mx-auto mb-3 border border-royal/20">
+          <div className="h-12 w-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3 border border-primary/20">
             <Heart className="h-6 w-6" />
           </div>
           <h2 className="font-serif text-xl font-medium text-foreground mb-1.5">
@@ -200,7 +200,7 @@ export default function AccountWishlistPage() {
           <Button
             asChild
             onClick={() => triggerHaptic('selection')}
-            className="px-6 h-10 text-xs font-medium bg-royal hover:bg-royal/90 text-white rounded-sm active:scale-[0.98] transition-transform"
+            className="px-6 h-10 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm active:scale-[0.98] transition-transform"
           >
             <Link href="/shop">Explore the Collection</Link>
           </Button>
@@ -218,7 +218,7 @@ export default function AccountWishlistPage() {
             return (
               <div
                 key={item.id}
-                className="group relative flex flex-col bg-card border border-border/80 rounded-sm overflow-hidden shadow-xs hover:border-royal/40 transition-colors"
+                className="group relative flex flex-col bg-card border border-border/80 rounded-sm overflow-hidden shadow-xs hover:border-primary/40 transition-colors"
               >
                 {/* 4:5 Aspect Ratio Image Canvas */}
                 <div className="relative aspect-[4/5] w-full bg-secondary/30 overflow-hidden">
@@ -253,9 +253,9 @@ export default function AccountWishlistPage() {
                     type="button"
                     onClick={() => handleRemove(item)}
                     aria-label={`Remove ${prod?.title || 'item'} from wishlist`}
-                    className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 dark:bg-card/90 backdrop-blur-xs shadow-xs flex items-center justify-center text-royal hover:scale-110 active:scale-95 transition-transform cursor-pointer border border-border/40"
+                    className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 dark:bg-card/90 backdrop-blur-xs shadow-xs flex items-center justify-center text-primary hover:scale-110 active:scale-95 transition-transform cursor-pointer border border-border/40"
                   >
-                    <Heart className="w-4 h-4 fill-royal text-royal" />
+                    <Heart className="w-4 h-4 fill-primary text-primary" />
                   </button>
                 </div>
 
@@ -268,14 +268,14 @@ export default function AccountWishlistPage() {
                   <h3 className="font-serif font-medium text-xs sm:text-sm text-foreground truncate">
                     <Link
                       href={`/products/${prod?.slug || '#'}`}
-                      className="hover:text-royal transition-colors"
+                      className="hover:text-primary transition-colors"
                     >
                       {prod?.title || 'Artisanal Piece'}
                     </Link>
                   </h3>
 
                   {/* Price */}
-                  <div className="font-mono tabular-nums text-xs sm:text-sm font-semibold text-royal mt-0.5">
+                  <div className="font-mono tabular-nums text-xs sm:text-sm font-semibold text-primary mt-0.5">
                     {priceFormatted}
                   </div>
 
@@ -292,7 +292,7 @@ export default function AccountWishlistPage() {
                         }}
                         className="w-full h-8 text-[11px] font-medium border-border text-foreground hover:bg-secondary/60 rounded-sm gap-1.5"
                       >
-                        <Bell className="w-3.5 h-3.5 text-royal" />
+                        <Bell className="w-3.5 h-3.5 text-primary" />
                         <span>Notify Me</span>
                       </Button>
                     ) : (
@@ -301,7 +301,7 @@ export default function AccountWishlistPage() {
                         size="sm"
                         onClick={() => handleAddToBag(item)}
                         disabled={addingId === item.productId}
-                        className="w-full h-8 text-[11px] font-medium bg-royal hover:bg-royal/90 text-white rounded-sm gap-1.5 active:scale-[0.98] transition-transform"
+                        className="w-full h-8 text-[11px] font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm gap-1.5 active:scale-[0.98] transition-transform"
                       >
                         <ShoppingBag className="w-3.5 h-3.5" />
                         <span>{addingId === item.productId ? 'Adding...' : 'Add to Bag'}</span>
@@ -319,14 +319,14 @@ export default function AccountWishlistPage() {
       <div className="border-t border-border/60 pt-8 mt-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-royal" />
+            <Sparkles className="w-4 h-4 text-primary" />
             <h2 className="font-serif text-lg font-medium text-foreground tracking-tight">
               You Might Also Like
             </h2>
           </div>
           <Link
             href="/shop"
-            className="text-xs font-medium text-royal hover:text-royal/80 inline-flex items-center gap-1"
+            className="text-xs font-medium text-primary hover:text-primary/80 inline-flex items-center gap-1"
           >
             <span>View All</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -339,44 +339,44 @@ export default function AccountWishlistPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="p-4 bg-secondary/30 rounded-sm border border-border/60 text-center flex flex-col items-center justify-center gap-2">
-            <Package className="w-6 h-6 text-royal opacity-60" />
+            <Package className="w-6 h-6 text-primary opacity-60" />
             <span className="text-xs font-semibold text-foreground">Artisanal Abayas</span>
             <Link
               href="/shop?category=abayas"
-              className="text-[11px] text-royal underline underline-offset-2"
+              className="text-[11px] text-primary underline underline-offset-2"
             >
               Explore Collection
             </Link>
           </div>
 
           <div className="p-4 bg-secondary/30 rounded-sm border border-border/60 text-center flex flex-col items-center justify-center gap-2">
-            <Package className="w-6 h-6 text-royal opacity-60" />
+            <Package className="w-6 h-6 text-primary opacity-60" />
             <span className="text-xs font-semibold text-foreground">Pure Silk Hijabs</span>
             <Link
               href="/shop?category=hijabs"
-              className="text-[11px] text-royal underline underline-offset-2"
+              className="text-[11px] text-primary underline underline-offset-2"
             >
               Explore Collection
             </Link>
           </div>
 
           <div className="p-4 bg-secondary/30 rounded-sm border border-border/60 text-center flex flex-col items-center justify-center gap-2">
-            <Package className="w-6 h-6 text-royal opacity-60" />
+            <Package className="w-6 h-6 text-primary opacity-60" />
             <span className="text-xs font-semibold text-foreground">Signature Kaftans</span>
             <Link
               href="/shop?category=kaftans"
-              className="text-[11px] text-royal underline underline-offset-2"
+              className="text-[11px] text-primary underline underline-offset-2"
             >
               Explore Collection
             </Link>
           </div>
 
           <div className="p-4 bg-secondary/30 rounded-sm border border-border/60 text-center flex flex-col items-center justify-center gap-2">
-            <Package className="w-6 h-6 text-royal opacity-60" />
+            <Package className="w-6 h-6 text-primary opacity-60" />
             <span className="text-xs font-semibold text-foreground">Handcrafted Pins</span>
             <Link
               href="/shop?category=accessories"
-              className="text-[11px] text-royal underline underline-offset-2"
+              className="text-[11px] text-primary underline underline-offset-2"
             >
               Explore Collection
             </Link>

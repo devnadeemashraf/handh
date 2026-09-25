@@ -92,11 +92,11 @@ export function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps) {
     <ModalSheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <ModalSheetContent className="max-w-lg">
         <ModalSheetHeader>
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-text-secondary">
+          <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Measurement & Fit Guide
           </span>
           <ModalSheetTitle className="text-xl font-serif">Size Guide</ModalSheetTitle>
-          <ModalSheetDescription className="text-xs text-text-secondary">
+          <ModalSheetDescription className="text-xs text-muted-foreground">
             Body measurements for our standard modest silhouette. If you are between sizes, we
             recommend sizing up for comfortable draping.
           </ModalSheetDescription>
@@ -104,15 +104,15 @@ export function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps) {
 
         {/* Unit Toggle */}
         <div className="flex justify-end pt-2 pb-1">
-          <div className="inline-flex rounded-sm border border-border-subtle p-0.5 bg-sunken">
+          <div className="inline-flex rounded-sm border border-border p-0.5 bg-muted">
             <button
               type="button"
               onClick={() => setUnit('cm')}
               className={cn(
                 'px-3 py-1 text-xs font-medium rounded-sm transition-all select-none',
                 unit === 'cm'
-                  ? 'bg-surface text-text-primary shadow-sm font-semibold'
-                  : 'text-text-secondary hover:text-text-primary'
+                  ? 'bg-card text-foreground shadow-sm font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
               Metric (cm)
@@ -123,8 +123,8 @@ export function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps) {
               className={cn(
                 'px-3 py-1 text-xs font-medium rounded-sm transition-all select-none',
                 unit === 'in'
-                  ? 'bg-surface text-text-primary shadow-sm font-semibold'
-                  : 'text-text-secondary hover:text-text-primary'
+                  ? 'bg-card text-foreground shadow-sm font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
               Imperial (in)
@@ -133,10 +133,10 @@ export function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps) {
         </div>
 
         {/* Measurements Table */}
-        <div className="overflow-x-auto border border-border-subtle rounded-sm">
+        <div className="overflow-x-auto border border-border rounded-sm">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-border-subtle bg-sunken/60 text-text-secondary font-medium uppercase tracking-wider text-[11px]">
+              <tr className="border-b border-border bg-muted/60 text-muted-foreground font-medium uppercase tracking-wider text-[11px]">
                 <th className="py-2.5 px-3">Size</th>
                 <th className="py-2.5 px-3">Bust</th>
                 <th className="py-2.5 px-3">Waist</th>
@@ -144,20 +144,20 @@ export function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps) {
                 <th className="py-2.5 px-3">Length</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-subtle">
+            <tbody className="divide-y divide-border">
               {MEASUREMENTS.map((row) => (
-                <tr key={row.size} className="hover:bg-sunken/30 transition-colors">
-                  <td className="py-2.5 px-3 font-semibold text-text-primary">{row.size}</td>
-                  <td className="py-2.5 px-3 font-mono tabular-nums text-text-secondary">
+                <tr key={row.size} className="hover:bg-muted/30 transition-colors">
+                  <td className="py-2.5 px-3 font-semibold text-foreground">{row.size}</td>
+                  <td className="py-2.5 px-3 font-mono tabular-nums text-muted-foreground">
                     {unit === 'cm' ? `${row.bustCm} cm` : `${row.bustIn}″`}
                   </td>
-                  <td className="py-2.5 px-3 font-mono tabular-nums text-text-secondary">
+                  <td className="py-2.5 px-3 font-mono tabular-nums text-muted-foreground">
                     {unit === 'cm' ? `${row.waistCm} cm` : `${row.waistIn}″`}
                   </td>
-                  <td className="py-2.5 px-3 font-mono tabular-nums text-text-secondary">
+                  <td className="py-2.5 px-3 font-mono tabular-nums text-muted-foreground">
                     {unit === 'cm' ? `${row.hipCm} cm` : `${row.hipIn}″`}
                   </td>
-                  <td className="py-2.5 px-3 font-mono tabular-nums text-text-secondary">
+                  <td className="py-2.5 px-3 font-mono tabular-nums text-muted-foreground">
                     {unit === 'cm' ? `${row.lengthCm} cm` : `${row.lengthIn}″`}
                   </td>
                 </tr>
@@ -167,25 +167,25 @@ export function SizeGuideModal({ isOpen, onClose }: SizeGuideModalProps) {
         </div>
 
         {/* How to Measure Instructions */}
-        <div className="mt-4 rounded-sm border border-border-subtle bg-sunken/40 p-3.5 space-y-2 text-xs">
-          <h4 className="font-semibold text-text-primary uppercase tracking-wider text-[11px]">
+        <div className="mt-4 rounded-sm border border-border bg-muted/40 p-3.5 space-y-2 text-xs">
+          <h4 className="font-semibold text-foreground uppercase tracking-wider text-[11px]">
             How to Measure
           </h4>
-          <ul className="space-y-1.5 text-text-secondary leading-relaxed">
+          <ul className="space-y-1.5 text-muted-foreground leading-relaxed">
             <li>
-              <strong className="text-text-primary">Bust:</strong> Measure around the fullest part
-              of your chest, keeping tape horizontal.
+              <strong className="text-foreground">Bust:</strong> Measure around the fullest part of
+              your chest, keeping tape horizontal.
             </li>
             <li>
-              <strong className="text-text-primary">Waist:</strong> Measure around your natural
+              <strong className="text-foreground">Waist:</strong> Measure around your natural
               waistline, keeping tape comfortably loose.
             </li>
             <li>
-              <strong className="text-text-primary">Hips:</strong> Measure around the fullest part
-              of your hips, approximately 20cm below your waistline.
+              <strong className="text-foreground">Hips:</strong> Measure around the fullest part of
+              your hips, approximately 20cm below your waistline.
             </li>
             <li>
-              <strong className="text-text-primary">Length:</strong> Measure vertically from the
+              <strong className="text-foreground">Length:</strong> Measure vertically from the
               highest point of your shoulder down to your desired hemline.
             </li>
           </ul>

@@ -23,16 +23,16 @@ describe('Design System Primitives (Sprint 11.1)', () => {
       render(<Button>Shop Collection</Button>);
       const btn = screen.getByRole('button', { name: /shop collection/i });
       expect(btn).toBeInTheDocument();
-      expect(btn.className).toContain('bg-royal');
+      expect(btn.className).toContain('bg-primary');
       expect(btn.className).toContain('min-h-[44px]');
       expect(btn.className).toContain('rounded-sm');
     });
 
-    it('renders secondary variant with hairline border-strong', () => {
+    it('renders secondary variant with hairline border-input', () => {
       render(<Button variant="secondary">View Cart</Button>);
       const btn = screen.getByRole('button', { name: /view cart/i });
-      expect(btn.className).toContain('border-border-strong');
-      expect(btn.className).toContain('bg-transparent');
+      expect(btn.className).toContain('border-input');
+      expect(btn.className).toContain('bg-secondary');
     });
 
     it('renders loading state with spinner and disables button', () => {
@@ -58,7 +58,7 @@ describe('Design System Primitives (Sprint 11.1)', () => {
       const input = screen.getByPlaceholderText('Enter email');
       expect(input.className).toContain('h-11');
       expect(input.className).toContain('rounded-sm');
-      expect(input.className).toContain('border-border-subtle');
+      expect(input.className).toContain('border-input');
     });
 
     it('displays reserved error space and marks aria-invalid when error is provided', () => {
@@ -74,21 +74,21 @@ describe('Design System Primitives (Sprint 11.1)', () => {
     it('renders new, sale, lowStock, and soldOut variants with uppercase tracking', () => {
       const { rerender } = render(<Badge variant="new">New Arrival</Badge>);
       let badge = screen.getByText('New Arrival');
-      expect(badge.className).toContain('bg-royal-tint');
+      expect(badge.className).toContain('bg-accent');
       expect(badge.className).toContain('uppercase');
       expect(badge.className).toContain('rounded-sm');
 
       rerender(<Badge variant="sale">Sale</Badge>);
       badge = screen.getByText('Sale');
-      expect(badge.className).toContain('text-status-sale');
+      expect(badge.className).toContain('text-destructive');
 
       rerender(<Badge variant="lowStock">Low Stock</Badge>);
       badge = screen.getByText('Low Stock');
-      expect(badge.className).toContain('text-status-warning');
+      expect(badge.className).toContain('text-amber-700');
 
       rerender(<Badge variant="soldOut">Sold Out</Badge>);
       badge = screen.getByText('Sold Out');
-      expect(badge.className).toContain('bg-sunken');
+      expect(badge.className).toContain('bg-muted');
     });
   });
 
@@ -102,7 +102,7 @@ describe('Design System Primitives (Sprint 11.1)', () => {
       );
       const alert = screen.getByRole('alert');
       expect(alert).toBeInTheDocument();
-      expect(alert.className).toContain('bg-royal-tint');
+      expect(alert.className).toContain('bg-accent');
 
       const dismissBtn = screen.getByRole('button', { name: /dismiss alert/i });
       await userEvent.click(dismissBtn);
@@ -153,10 +153,10 @@ describe('Design System Primitives (Sprint 11.1)', () => {
   });
 
   describe('Skeleton Primitive', () => {
-    it('renders with sunken background and shimmer animation', () => {
+    it('renders with muted background and shimmer animation', () => {
       render(<Skeleton data-testid="test-skeleton" className="h-40 w-full" />);
       const skeleton = screen.getByTestId('test-skeleton');
-      expect(skeleton.className).toContain('bg-sunken');
+      expect(skeleton.className).toContain('bg-muted');
       expect(skeleton.className).toContain('rounded-md');
       expect(skeleton.className).toContain('after:animate-shimmer');
     });

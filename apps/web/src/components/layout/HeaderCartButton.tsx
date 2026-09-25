@@ -22,7 +22,7 @@ export function HeaderCartButton() {
         }
       }}
       className={cn(
-        'relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-sm p-2 text-primary transition-colors hover:text-royal hover:bg-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal'
+        'relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-sm p-2 text-primary transition-colors hover:text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
       )}
       aria-label={`Shopping Bag with ${totalItemCount} items`}
     >
@@ -31,7 +31,7 @@ export function HeaderCartButton() {
         {totalItemCount > 0 && (
           <span
             className={cn(
-              'absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-royal px-1 text-[10px] font-medium leading-none text-white',
+              'absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium leading-none text-white',
               'animate-in zoom-in-75 duration-100'
             )}
           >

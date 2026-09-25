@@ -134,8 +134,8 @@ export function WishlistButton({
       onClick={handleToggle}
       disabled={isBusy}
       className={cn(
-        'inline-flex h-11 w-11 items-center justify-center rounded-sm border border-border-subtle/80 bg-surface/90 backdrop-blur-sm shadow-elevation-1 transition-transform active:scale-125 duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal disabled:cursor-not-allowed disabled:opacity-50 select-none',
-        isWishlisted ? 'text-royal' : 'text-text-primary hover:text-royal'
+        'inline-flex h-11 w-11 items-center justify-center rounded-sm border border-border/80 bg-card/90 backdrop-blur-sm shadow-xs transition-transform active:scale-125 duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 select-none',
+        isWishlisted ? 'text-primary' : 'text-foreground hover:text-primary'
       )}
       aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
       title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
@@ -144,7 +144,7 @@ export function WishlistButton({
         size={size}
         className={cn(
           'transition-all duration-fast',
-          isWishlisted ? 'fill-royal text-royal' : 'text-current'
+          isWishlisted ? 'fill-primary text-primary' : 'text-current'
         )}
       />
     </button>

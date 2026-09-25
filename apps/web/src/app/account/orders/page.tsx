@@ -50,7 +50,7 @@ export default function AccountOrdersPage() {
       case 'paid':
       case 'processing':
         return {
-          className: 'bg-royal/10 text-royal border-royal/30 font-medium text-xs rounded-sm',
+          className: 'bg-primary/10 text-primary border-primary/30 font-medium text-xs rounded-sm',
           text: 'Processing'
         };
       case 'shipped':
@@ -248,7 +248,7 @@ export default function AccountOrdersPage() {
           <Button
             asChild
             onClick={() => triggerHaptic('selection')}
-            className="px-6 h-10 text-xs font-medium bg-royal hover:bg-royal/90 text-white rounded-sm active:scale-[0.98] transition-transform"
+            className="px-6 h-10 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm active:scale-[0.98] transition-transform"
           >
             <Link href="/shop">Start Shopping</Link>
           </Button>
@@ -293,7 +293,7 @@ export default function AccountOrdersPage() {
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block">
                       Total Amount
                     </span>
-                    <p className="font-mono tabular-nums font-bold text-xs sm:text-sm text-royal">
+                    <p className="font-mono tabular-nums font-bold text-xs sm:text-sm text-primary">
                       {Money.fromMinor(ord.totalMinor, 'INR').format('en-IN')}
                     </p>
                   </div>
@@ -314,7 +314,7 @@ export default function AccountOrdersPage() {
                         }}
                         disabled={payingOrderId === ord.id}
                         aria-label={`Pay Now for Order ${ord.orderNumber}`}
-                        className="gap-1.5 h-8 text-xs font-medium bg-royal hover:bg-royal/90 text-white rounded-sm active:scale-[0.98] transition-transform"
+                        className="gap-1.5 h-8 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-sm active:scale-[0.98] transition-transform"
                       >
                         {payingOrderId === ord.id ? (
                           <>

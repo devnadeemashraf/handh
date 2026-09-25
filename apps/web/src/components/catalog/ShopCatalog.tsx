@@ -101,10 +101,10 @@ export function ShopCatalog({
   return (
     <div className="w-full">
       {/* Sticky Sub-Header: Item count left, Filter & Sort buttons right */}
-      <div className="sticky top-16 z-30 flex items-center justify-between border-b border-border-subtle bg-canvas/95 py-3.5 backdrop-blur-md">
+      <div className="sticky top-16 z-30 flex items-center justify-between border-b border-border bg-background/95 py-3.5 backdrop-blur-md">
         <div className="flex items-baseline gap-2">
-          <h1 className="font-serif text-lg sm:text-xl font-medium text-text-primary">{title}</h1>
-          <span className="font-mono text-xs tabular-nums text-text-tertiary">
+          <h1 className="font-serif text-lg sm:text-xl font-medium text-foreground">{title}</h1>
+          <span className="font-mono text-xs tabular-nums text-muted-foreground">
             ({filteredProducts.length} {filteredProducts.length === 1 ? 'item' : 'items'})
           </span>
         </div>
@@ -117,12 +117,12 @@ export function ShopCatalog({
             variant="secondary"
             size="sm"
             onClick={() => setIsFilterSheetOpen(true)}
-            className="flex md:hidden items-center gap-1.5 h-9 rounded-sm border-border-strong text-xs uppercase tracking-wider"
+            className="flex md:hidden items-center gap-1.5 h-9 rounded-sm border-input text-xs uppercase tracking-wider"
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
             <span>Filter</span>
             {(filters.categorySlug || filters.inStockOnly || filters.priceRange !== 'all') && (
-              <span className="h-1.5 w-1.5 rounded-full bg-royal" />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
             )}
           </Button>
 
@@ -132,7 +132,7 @@ export function ShopCatalog({
             variant="ghost"
             size="sm"
             onClick={() => setIsSortSheetOpen(true)}
-            className="flex md:hidden items-center gap-1.5 h-9 rounded-sm text-xs uppercase tracking-wider text-text-secondary"
+            className="flex md:hidden items-center gap-1.5 h-9 rounded-sm text-xs uppercase tracking-wider text-muted-foreground"
           >
             <ArrowUpDown className="h-3.5 w-3.5" />
             <span>Sort</span>
@@ -140,20 +140,20 @@ export function ShopCatalog({
 
           {/* Desktop Sort Dropdown Menu */}
           <div className="hidden md:flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wider text-text-tertiary font-medium">
+            <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
               Sort by:
             </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-1.5 rounded-sm border border-border-subtle bg-surface px-3 py-1.5 text-xs font-medium text-text-primary hover:border-border-strong focus:outline-none focus:ring-2 focus:ring-royal"
+                  className="flex items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground hover:border-input focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   <span>{currentSortLabel}</span>
-                  <ChevronDown className="h-3.5 w-3.5 text-text-secondary" />
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-surface border-border-subtle">
+              <DropdownMenuContent align="end" className="w-48 bg-card border-border">
                 {SORT_OPTIONS.map((opt) => (
                   <DropdownMenuItem
                     key={opt.value}
@@ -161,8 +161,8 @@ export function ShopCatalog({
                     className={cn(
                       'text-xs cursor-pointer',
                       filters.sort === opt.value
-                        ? 'font-medium text-royal bg-accent-royal-tint'
-                        : 'text-text-primary'
+                        ? 'font-medium text-primary bg-accent'
+                        : 'text-foreground'
                     )}
                   >
                     {opt.label}
@@ -199,7 +199,7 @@ export function ShopCatalog({
         {/* Products Grid Column */}
         <div className="flex-1">
           {description && (
-            <p className="text-xs sm:text-sm text-text-secondary mb-6 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-6 max-w-2xl leading-relaxed">
               {description}
             </p>
           )}
@@ -230,14 +230,14 @@ export function ShopCatalog({
             </>
           ) : (
             /* Calm Empty State (Design Spec 11) */
-            <div className="flex flex-col items-center justify-center rounded-md border border-border-subtle bg-surface p-12 text-center my-8">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sunken text-text-tertiary mb-4">
+            <div className="flex flex-col items-center justify-center rounded-md border border-border bg-card p-12 text-center my-8">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground mb-4">
                 <PackageX className="h-6 w-6" />
               </div>
-              <h3 className="font-serif text-base sm:text-lg font-medium text-text-primary">
+              <h3 className="font-serif text-base sm:text-lg font-medium text-foreground">
                 No matching pieces found
               </h3>
-              <p className="mt-1 text-xs text-text-secondary max-w-sm">
+              <p className="mt-1 text-xs text-muted-foreground max-w-sm">
                 We could not find any items matching your current filters. Try resetting the filters
                 to explore the full collection.
               </p>

@@ -29,27 +29,30 @@ export function FreeShippingBar({
       className={cn(
         'rounded-md border p-3.5 transition-colors duration-fast',
         isFree
-          ? 'border-status-success/30 bg-status-success-bg/40 text-text-primary'
-          : 'border-royal/20 bg-royal/5 text-text-primary',
+          ? 'border-emerald-500/30 bg-emerald-500/10 text-foreground'
+          : 'border-primary/20 bg-primary/5 text-foreground',
         className
       )}
     >
       <div className="flex items-center justify-between gap-2 mb-2 text-xs">
         <div className="flex items-center gap-2 font-medium">
           {isFree ? (
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-status-success" aria-hidden="true" />
+            <CheckCircle2
+              className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+              aria-hidden="true"
+            />
           ) : (
-            <Truck className="h-4 w-4 shrink-0 text-royal" aria-hidden="true" />
+            <Truck className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
           )}
           <span>
             {isFree ? (
-              <span className="font-semibold text-status-success">
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                 You&apos;ve unlocked Free Express Delivery!
               </span>
             ) : (
               <span>
                 Add{' '}
-                <strong className="font-mono tabular-nums font-semibold text-royal">
+                <strong className="font-mono tabular-nums font-semibold text-primary">
                   {remainingFormatted}
                 </strong>{' '}
                 more for free express delivery
@@ -57,7 +60,7 @@ export function FreeShippingBar({
             )}
           </span>
         </div>
-        <span className="font-mono tabular-nums text-[11px] text-text-tertiary shrink-0">
+        <span className="font-mono tabular-nums text-[11px] text-muted-foreground shrink-0">
           {percent}%
         </span>
       </div>
@@ -74,7 +77,7 @@ export function FreeShippingBar({
         <div
           className={cn(
             'h-full transition-all duration-300 ease-decelerate',
-            isFree ? 'bg-status-success' : 'bg-royal'
+            isFree ? 'bg-emerald-600' : 'bg-primary'
           )}
           style={{ width: `${percent}%` }}
         />

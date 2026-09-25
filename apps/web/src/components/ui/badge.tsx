@@ -9,18 +9,20 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-royal-tint text-royal border-none',
-        new: 'bg-royal-tint text-royal border-none',
-        sale: 'bg-status-sale/10 text-status-sale font-semibold border-none',
-        lowStock: 'bg-status-warning-tint text-status-warning border-none',
-        soldOut: 'bg-sunken text-text-tertiary border-none',
-        chip: 'border border-border-subtle bg-transparent text-text-primary hover:border-border-strong',
-        chipSelected: 'border border-transparent bg-royal-tint text-royal font-medium',
-        secondary: 'bg-sunken text-text-secondary border-none',
-        destructive: 'bg-status-error-tint text-status-error border-none',
-        outline: 'border border-border-subtle text-text-primary',
-        gold: 'border border-accent/30 bg-gold-light text-gold-bronze',
-        emerald: 'bg-emerald-subtle text-emerald border-none'
+        default: 'border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80',
+        new: 'border-transparent bg-accent text-accent-foreground',
+        sale: 'border-transparent bg-destructive/10 text-destructive font-semibold',
+        lowStock: 'border-transparent bg-amber-500/10 text-amber-700 dark:text-amber-400',
+        soldOut: 'border-transparent bg-muted text-muted-foreground',
+        chip: 'border border-input bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground',
+        chipSelected: 'border border-transparent bg-accent text-accent-foreground font-medium',
+        secondary:
+          'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        destructive:
+          'border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80',
+        outline: 'border border-border text-foreground',
+        gold: 'border border-accent bg-accent/40 text-foreground',
+        emerald: 'border-transparent bg-emerald-500/10 text-emerald-700'
       }
     },
     defaultVariants: {

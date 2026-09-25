@@ -19,10 +19,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={!!error}
           aria-describedby={errorId || helperId}
           className={cn(
-            'flex h-11 w-full rounded-sm border bg-surface px-3 py-2 text-sm text-text-primary transition-colors duration-fast file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-text-tertiary focus-visible:outline-none focus-visible:border-royal focus-visible:ring-1 focus-visible:ring-royal disabled:cursor-not-allowed disabled:bg-sunken disabled:text-text-tertiary',
+            'flex h-11 w-full rounded-sm border bg-background px-3 py-2 text-sm text-foreground transition-colors duration-fast file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-muted',
             error
-              ? 'border-status-error bg-status-error-tint/20 focus-visible:border-status-error focus-visible:ring-status-error'
-              : 'border-border-subtle hover:border-border-strong',
+              ? 'border-destructive bg-destructive/10 focus-visible:border-destructive focus-visible:ring-destructive'
+              : 'border-input hover:border-ring/50',
             className
           )}
           ref={ref}
@@ -33,7 +33,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={errorId || helperId}
             className={cn(
               'mt-1 min-h-[18px] text-xs transition-opacity duration-fast',
-              error ? 'text-status-error font-medium' : 'text-text-secondary'
+              error ? 'text-destructive font-medium' : 'text-muted-foreground'
             )}
           >
             {error || helperText}

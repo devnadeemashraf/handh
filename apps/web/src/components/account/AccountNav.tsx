@@ -45,7 +45,7 @@ export function AccountNav() {
     <div className="bg-card border border-border/80 rounded-md shadow-xs overflow-hidden">
       {/* 1. Header: Initials circle + Name + Phone/Email */}
       <div className="p-4 sm:p-5 border-b border-border/60 flex items-center gap-3.5 bg-secondary/20">
-        <div className="w-12 h-12 rounded-full bg-royal/10 text-royal border border-royal/20 flex items-center justify-center font-serif text-base font-semibold shrink-0">
+        <div className="w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-serif text-base font-semibold shrink-0">
           {initials}
         </div>
         <div className="min-w-0 flex-1">
@@ -72,7 +72,7 @@ export function AccountNav() {
               className={cn(
                 'min-h-[56px] px-4 py-3.5 flex items-center justify-between text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-royal/10 text-royal font-semibold'
+                  ? 'bg-primary/10 text-primary font-semibold'
                   : 'text-foreground hover:bg-secondary/40'
               )}
             >
@@ -80,7 +80,7 @@ export function AccountNav() {
                 <Icon
                   className={cn(
                     'w-4 h-4 shrink-0',
-                    isActive ? 'text-royal' : 'text-muted-foreground'
+                    isActive ? 'text-primary' : 'text-muted-foreground'
                   )}
                 />
                 <span>{link.label}</span>
@@ -88,7 +88,7 @@ export function AccountNav() {
               <ChevronRight
                 className={cn(
                   'w-4 h-4 transition-transform',
-                  isActive ? 'text-royal translate-x-0.5' : 'text-muted-foreground/60'
+                  isActive ? 'text-primary translate-x-0.5' : 'text-muted-foreground/60'
                 )}
               />
             </Link>
@@ -101,7 +101,7 @@ export function AccountNav() {
         <div className="p-3 border-t border-border/60 bg-secondary/10">
           <Link
             href="/admin"
-            className="flex items-center justify-between h-10 px-3 rounded-sm bg-royal text-white text-xs font-semibold hover:bg-royal/90 transition-colors"
+            className="flex items-center justify-between h-10 px-3 rounded-sm bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors"
           >
             <div className="flex items-center gap-2">
               <Shield className="w-3.5 h-3.5" />

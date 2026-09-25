@@ -77,7 +77,7 @@ describe('Header Component (Sprint 11.2)', () => {
       window.dispatchEvent(new Event('scroll'));
     });
 
-    expect(headerEl).toHaveClass('border-border-subtle');
+    expect(headerEl).toHaveClass('border-border');
   });
 
   it('renders back button on mobile when navigating a non-root page', () => {

@@ -50,14 +50,11 @@ export function CartComplementary({
   return (
     <section
       aria-labelledby="complementary-heading"
-      className={cn('mt-8 pt-6 border-t border-border-subtle', className)}
+      className={cn('mt-8 pt-6 border-t border-border', className)}
     >
       <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="h-4 w-4 text-royal" aria-hidden="true" />
-        <h2
-          id="complementary-heading"
-          className="font-serif text-lg font-semibold text-text-primary"
-        >
+        <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+        <h2 id="complementary-heading" className="font-serif text-lg font-semibold text-foreground">
           Pairs Well With Your Bag
         </h2>
       </div>

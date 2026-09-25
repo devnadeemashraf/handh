@@ -26,7 +26,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-border-subtle bg-surface/95 backdrop-blur-md pb-safe md:hidden shadow-elevation-1 supports-[backdrop-filter]:bg-surface/85"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background/95 backdrop-blur-md pb-safe md:hidden shadow-sm supports-[backdrop-filter]:bg-background/85"
       aria-label="Mobile Navigation Bar"
     >
       <div className="grid h-14 grid-cols-5 items-center px-1">
@@ -36,14 +36,14 @@ export function MobileBottomNav() {
           onClick={() => triggerHaptic('selection')}
           className={cn(
             'flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 py-1 text-[10px] uppercase tracking-wider font-medium transition-all duration-150 active:scale-95 select-none',
-            isHome ? 'text-royal font-semibold' : 'text-secondary hover:text-primary'
+            isHome ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'
           )}
           aria-label="Home"
         >
           <Home
             className={cn(
               'h-5 w-5',
-              isHome ? 'text-royal fill-royal/10 stroke-[2.2]' : 'text-secondary'
+              isHome ? 'text-primary fill-primary/10 stroke-[2.2]' : 'text-secondary'
             )}
           />
           <span>Home</span>
@@ -55,14 +55,14 @@ export function MobileBottomNav() {
           onClick={() => triggerHaptic('selection')}
           className={cn(
             'flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 py-1 text-[10px] uppercase tracking-wider font-medium transition-all duration-150 active:scale-95 select-none',
-            isShop ? 'text-royal font-semibold' : 'text-secondary hover:text-primary'
+            isShop ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'
           )}
           aria-label="Shop"
         >
           <Compass
             className={cn(
               'h-5 w-5',
-              isShop ? 'text-royal fill-royal/10 stroke-[2.2]' : 'text-secondary'
+              isShop ? 'text-primary fill-primary/10 stroke-[2.2]' : 'text-secondary'
             )}
           />
           <span>Shop</span>
@@ -77,12 +77,12 @@ export function MobileBottomNav() {
           }}
           className={cn(
             'flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 py-1 text-[10px] uppercase tracking-wider font-medium transition-all duration-150 active:scale-95 select-none',
-            isSearchOpen ? 'text-royal font-semibold' : 'text-secondary hover:text-primary'
+            isSearchOpen ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'
           )}
           aria-label="Search catalog"
         >
           <Search
-            className={cn('h-5 w-5', isSearchOpen ? 'text-royal stroke-[2.5]' : 'text-secondary')}
+            className={cn('h-5 w-5', isSearchOpen ? 'text-primary stroke-[2.5]' : 'text-secondary')}
           />
           <span>Search</span>
         </button>
@@ -99,12 +99,12 @@ export function MobileBottomNav() {
           }}
           className={cn(
             'flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 py-1 text-[10px] uppercase tracking-wider font-medium transition-all duration-150 active:scale-95 select-none',
-            isWishlist ? 'text-royal font-semibold' : 'text-secondary hover:text-primary'
+            isWishlist ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'
           )}
           aria-label="Wishlist"
         >
           <Heart
-            className={cn('h-5 w-5', isWishlist ? 'fill-royal text-royal' : 'text-secondary')}
+            className={cn('h-5 w-5', isWishlist ? 'fill-primary text-primary' : 'text-secondary')}
           />
           <span>Wishlist</span>
         </Link>
@@ -116,12 +116,12 @@ export function MobileBottomNav() {
             onClick={() => triggerHaptic('selection')}
             className={cn(
               'flex flex-col items-center justify-center min-h-[44px] min-w-[44px] gap-0.5 py-1 text-[10px] uppercase tracking-wider font-medium transition-all duration-150 active:scale-95 select-none',
-              isAccount ? 'text-royal font-semibold' : 'text-secondary hover:text-primary'
+              isAccount ? 'text-primary font-semibold' : 'text-secondary hover:text-primary'
             )}
             aria-label="Account"
           >
             <UserIcon
-              className={cn('h-5 w-5', isAccount ? 'text-royal stroke-[2.5]' : 'text-secondary')}
+              className={cn('h-5 w-5', isAccount ? 'text-primary stroke-[2.5]' : 'text-secondary')}
             />
             <span>Account</span>
           </Link>

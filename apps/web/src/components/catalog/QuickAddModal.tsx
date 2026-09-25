@@ -121,7 +121,7 @@ export function QuickAddModal({ product, isOpen, onClose }: QuickAddModalProps) 
     <ModalSheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <ModalSheetContent className="max-w-md">
         <ModalSheetHeader>
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-text-secondary">
+          <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-muted-foreground">
             {product.categoryName || 'Curated Piece'}
           </span>
           <ModalSheetTitle className="text-base sm:text-lg font-serif">
@@ -133,8 +133,8 @@ export function QuickAddModal({ product, isOpen, onClose }: QuickAddModalProps) 
         </ModalSheetHeader>
 
         {/* Product Snapshot */}
-        <div className="flex gap-4 border-b border-border-subtle pb-4">
-          <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-sm bg-sunken">
+        <div className="flex gap-4 border-b border-border pb-4">
+          <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-sm bg-muted">
             {product.primaryImageUrl ? (
               <Image
                 src={product.primaryImageUrl}
@@ -147,16 +147,16 @@ export function QuickAddModal({ product, isOpen, onClose }: QuickAddModalProps) 
           </div>
           <div className="flex flex-col justify-center">
             <div className="flex items-baseline gap-2">
-              <span className="font-mono text-base font-semibold tabular-nums text-text-primary">
+              <span className="font-mono text-base font-semibold tabular-nums text-foreground">
                 {formattedPrice}
               </span>
               {formattedComparePrice && (
-                <span className="font-mono text-xs tabular-nums text-text-tertiary line-through">
+                <span className="font-mono text-xs tabular-nums text-muted-foreground line-through">
                   {formattedComparePrice}
                 </span>
               )}
             </div>
-            <span className="text-[10px] text-text-tertiary uppercase tracking-wider">
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
               MRP (incl. taxes)
             </span>
           </div>
@@ -165,13 +165,13 @@ export function QuickAddModal({ product, isOpen, onClose }: QuickAddModalProps) 
         {/* Variant Selectors */}
         <div className="space-y-4 py-4">
           {isLoadingDetails ? (
-            <div className="flex items-center justify-center py-6 text-text-secondary">
+            <div className="flex items-center justify-center py-6 text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin mr-2" />
               <span className="text-xs">Loading options...</span>
             </div>
           ) : productDetail && productDetail.variants.length > 1 ? (
             <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-text-secondary">
+              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Select Option / Size
               </label>
               <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
@@ -187,10 +187,10 @@ export function QuickAddModal({ product, isOpen, onClose }: QuickAddModalProps) 
                       className={cn(
                         'flex items-center justify-between rounded-sm border p-2.5 text-xs font-medium transition-all text-left min-h-[44px]',
                         isSelected
-                          ? 'border-royal bg-accent-royal-tint text-royal'
-                          : 'border-border-subtle bg-surface text-text-primary hover:border-border-strong',
+                          ? 'border-primary bg-accent text-primary'
+                          : 'border-border bg-card text-foreground hover:border-input',
                         !isAvailable &&
-                          'cursor-not-allowed opacity-40 line-through bg-sunken text-text-tertiary'
+                          'cursor-not-allowed opacity-40 line-through bg-muted text-muted-foreground'
                       )}
                     >
                       <span className="truncate">{v.title}</span>
@@ -204,27 +204,27 @@ export function QuickAddModal({ product, isOpen, onClose }: QuickAddModalProps) 
 
           {/* Quantity Selector */}
           <div className="flex items-center justify-between pt-2">
-            <span className="text-xs font-medium uppercase tracking-wider text-text-secondary">
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Quantity
             </span>
-            <div className="inline-flex h-9 items-center rounded-sm border border-border-subtle bg-surface">
+            <div className="inline-flex h-9 items-center rounded-sm border border-border bg-card">
               <button
                 type="button"
                 disabled={quantity <= 1 || isSubmitting}
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="flex h-9 w-9 items-center justify-center text-text-primary hover:bg-sunken disabled:opacity-30 disabled:pointer-events-none"
+                className="flex h-9 w-9 items-center justify-center text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none"
                 aria-label="Decrease quantity"
               >
                 −
               </button>
-              <span className="w-10 text-center font-mono text-xs tabular-nums text-text-primary">
+              <span className="w-10 text-center font-mono text-xs tabular-nums text-foreground">
                 {quantity}
               </span>
               <button
                 type="button"
                 disabled={quantity >= 10 || isSubmitting}
                 onClick={() => setQuantity((q) => Math.min(10, q + 1))}
-                className="flex h-9 w-9 items-center justify-center text-text-primary hover:bg-sunken disabled:opacity-30 disabled:pointer-events-none"
+                className="flex h-9 w-9 items-center justify-center text-foreground hover:bg-muted disabled:opacity-30 disabled:pointer-events-none"
                 aria-label="Increase quantity"
               >
                 +

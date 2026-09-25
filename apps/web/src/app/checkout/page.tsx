@@ -90,14 +90,14 @@ export default function CheckoutPage() {
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <CheckoutHeader />
         <main className="mx-auto flex-1 max-w-lg px-4 py-24 text-center">
-          <div className="rounded-md border border-border-subtle bg-card p-8 shadow-sm">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-sunken text-text-tertiary">
+          <div className="rounded-md border border-border bg-card p-8 shadow-sm">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted text-muted-foreground">
               <ShoppingBag className="h-8 w-8" />
             </div>
-            <h2 className="font-serif text-2xl font-semibold text-text-primary mb-2">
+            <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
               Your bag is empty
             </h2>
-            <p className="text-sm text-text-secondary mb-6 leading-relaxed">
+            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
               Everything you add will show up here.
             </p>
             <Button asChild size="lg" className="w-full rounded-md">
@@ -128,13 +128,13 @@ export default function CheckoutPage() {
         {isServicePaused && serviceControl && (
           <div
             role="alert"
-            className="mb-6 rounded-md border border-status-warning/40 bg-status-warning-bg/40 p-4 text-sm text-text-primary"
+            className="mb-6 rounded-md border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground"
           >
-            <div className="flex items-center gap-2 font-semibold text-status-warning mb-1">
+            <div className="flex items-center gap-2 font-semibold text-amber-800 dark:text-amber-400 mb-1">
               <Clock className="h-4 w-4 shrink-0" />
               <span>{serviceControl.headline}</span>
             </div>
-            <p className="text-xs text-text-secondary leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               {serviceControl.maintenanceNotice}
             </p>
           </div>

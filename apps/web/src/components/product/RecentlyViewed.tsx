@@ -44,12 +44,12 @@ export function RecentlyViewed({ currentProduct }: RecentlyViewedProps) {
   }
 
   return (
-    <section className="my-16 border-t border-border-subtle pt-12">
+    <section className="my-16 border-t border-border pt-12">
       <div className="mb-6 flex flex-col">
-        <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-text-secondary">
+        <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Browsing History
         </span>
-        <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-text-primary">
+        <h3 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground">
           Recently Viewed
         </h3>
       </div>

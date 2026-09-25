@@ -29,7 +29,7 @@ export function Header({ storeName = DEFAULT_BRAND_IDENTITY.name, categories = [
   const router = useRouter();
   const { openSearch } = useSearch();
 
-  // Scroll listener for border-on-scroll (transparent at scroll 0, 1px border-border-subtle after 32px)
+  // Scroll listener for border-on-scroll (transparent at scroll 0, 1px border-border after 32px)
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 32);
@@ -53,10 +53,8 @@ export function Header({ storeName = DEFAULT_BRAND_IDENTITY.name, categories = [
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 w-full bg-canvas/95 backdrop-blur-md transition-[border-color,box-shadow,background-color] duration-180 ease-out supports-[backdrop-filter]:bg-canvas/85',
-        isScrolled
-          ? 'border-b border-border-subtle shadow-elevation-1'
-          : 'border-b border-transparent shadow-none'
+        'sticky top-0 z-40 w-full bg-background/95 backdrop-blur-md transition-[border-color,box-shadow,background-color] duration-180 ease-out supports-[backdrop-filter]:bg-background/85',
+        isScrolled ? 'border-b border-border shadow-sm' : 'border-b border-transparent shadow-none'
       )}
     >
       <div className="mx-auto flex h-16 sm:h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -92,7 +90,7 @@ export function Header({ storeName = DEFAULT_BRAND_IDENTITY.name, categories = [
             href="/shop"
             className={cn(
               'relative py-1 text-xs uppercase font-medium tracking-widest text-secondary hover:text-primary transition-colors',
-              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-royal after:transition-all after:duration-180",
+              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-primary after:transition-all after:duration-180",
               isShopActive ? 'text-primary after:w-full' : 'after:w-0 hover:after:w-full'
             )}
           >
@@ -104,7 +102,7 @@ export function Header({ storeName = DEFAULT_BRAND_IDENTITY.name, categories = [
             <DropdownMenuTrigger
               className={cn(
                 'group flex items-center gap-1 py-1 text-xs uppercase font-medium tracking-widest text-secondary hover:text-primary transition-colors focus-visible:outline-none',
-                "relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-royal after:transition-all after:duration-180 after:w-0 hover:after:w-full"
+                "relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-primary after:transition-all after:duration-180 after:w-0 hover:after:w-full"
               )}
             >
               <span>Collections</span>
@@ -112,12 +110,12 @@ export function Header({ storeName = DEFAULT_BRAND_IDENTITY.name, categories = [
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="start"
-              className="w-52 p-1.5 bg-surface border-border-subtle shadow-elevation-2 rounded-sm"
+              className="w-52 p-1.5 bg-card border-border shadow-md rounded-sm"
             >
               <DropdownMenuItem asChild>
                 <Link
                   href="/collections/new-arrivals"
-                  className="flex items-center justify-between px-3 py-2 text-xs font-medium text-primary rounded-sm hover:bg-sunken cursor-pointer"
+                  className="flex items-center justify-between px-3 py-2 text-xs font-medium text-primary rounded-sm hover:bg-muted cursor-pointer"
                 >
                   <span>New Arrivals</span>
                 </Link>
@@ -126,7 +124,7 @@ export function Header({ storeName = DEFAULT_BRAND_IDENTITY.name, categories = [
                 <DropdownMenuItem key={cat.id} asChild>
                   <Link
                     href={`/?category=${cat.slug}`}
-                    className="flex items-center justify-between px-3 py-2 text-xs font-medium text-primary rounded-sm hover:bg-sunken cursor-pointer"
+                    className="flex items-center justify-between px-3 py-2 text-xs font-medium text-primary rounded-sm hover:bg-muted cursor-pointer"
                   >
                     <span>{cat.name}</span>
                   </Link>
@@ -140,7 +138,7 @@ export function Header({ storeName = DEFAULT_BRAND_IDENTITY.name, categories = [
             href="/about"
             className={cn(
               'relative py-1 text-xs uppercase font-medium tracking-widest text-secondary hover:text-primary transition-colors',
-              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-royal after:transition-all after:duration-180",
+              "after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-primary after:transition-all after:duration-180",
               isAboutActive ? 'text-primary after:w-full' : 'after:w-0 hover:after:w-full'
             )}
           >
@@ -154,7 +152,7 @@ export function Header({ storeName = DEFAULT_BRAND_IDENTITY.name, categories = [
           <button
             type="button"
             onClick={openSearch}
-            className="hidden md:inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-sm p-2 text-secondary hover:text-primary hover:bg-sunken transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal"
+            className="hidden md:inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-sm p-2 text-secondary hover:text-primary hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Search catalog (Cmd+K)"
           >
             <Search className="h-5 w-5" strokeWidth={1.8} />
@@ -163,7 +161,7 @@ export function Header({ storeName = DEFAULT_BRAND_IDENTITY.name, categories = [
           {/* Desktop Wishlist Button */}
           <Link
             href="/account/wishlist"
-            className="hidden md:inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-sm p-2 text-secondary hover:text-primary hover:bg-sunken transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal"
+            className="hidden md:inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-sm p-2 text-secondary hover:text-primary hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Saved Wishlist"
           >
             <Heart className="h-5 w-5" strokeWidth={1.8} />

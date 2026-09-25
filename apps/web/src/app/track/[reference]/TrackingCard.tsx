@@ -77,7 +77,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
       <div className="max-w-2xl mx-auto flex flex-col gap-6">
         {/* Brand Header */}
         <div className="text-center">
-          <div className="h-12 w-12 rounded-full bg-royal/10 text-royal inline-flex items-center justify-center mb-3 border border-royal/20 text-base font-serif font-bold">
+          <div className="h-12 w-12 rounded-full bg-primary/10 text-primary inline-flex items-center justify-center mb-3 border border-primary/20 text-base font-serif font-bold">
             H&amp;H
           </div>
           <h1 className="text-2xl sm:text-3xl font-serif font-medium text-foreground tracking-tight mb-1.5">
@@ -85,7 +85,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground m-0">
             Order Reference:{' '}
-            <span className="font-mono text-royal font-semibold tabular-nums">
+            <span className="font-mono text-primary font-semibold tabular-nums">
               {order.orderNumber}
             </span>
           </p>
@@ -96,7 +96,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
           {/* Header Row */}
           <div className="flex items-center justify-between border-b border-border/60 pb-5 flex-wrap gap-3">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-sm bg-royal/10 text-royal flex items-center justify-center border border-royal/20 shrink-0">
+              <div className="h-10 w-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shrink-0">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
@@ -122,14 +122,14 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
           <div className="hidden md:flex items-center justify-between px-2 pt-2 pb-6 border-b border-border/60 relative">
             <div className="absolute top-[28px] left-[30px] right-[30px] h-[2px] bg-border/60 z-0">
               <div
-                className="h-full bg-royal transition-all duration-500"
+                className="h-full bg-primary transition-all duration-500"
                 style={{ width: '40%' }}
               />
             </div>
 
             {/* Stage 1: Placed */}
             <div className="relative z-10 flex flex-col items-center text-center max-w-[90px]">
-              <div className="w-8 h-8 rounded-full bg-royal text-white flex items-center justify-center mb-1 text-xs">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center mb-1 text-xs">
                 <Check className="w-4 h-4" />
               </div>
               <span className="text-[11px] font-semibold text-foreground">Placed</span>
@@ -138,7 +138,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
 
             {/* Stage 2: Payment */}
             <div className="relative z-10 flex flex-col items-center text-center max-w-[90px]">
-              <div className="w-8 h-8 rounded-full bg-royal text-white flex items-center justify-center mb-1 text-xs">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center mb-1 text-xs">
                 <Check className="w-4 h-4" />
               </div>
               <span className="text-[11px] font-semibold text-foreground">Paid</span>
@@ -147,11 +147,11 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
 
             {/* Stage 3: Processing (Active) */}
             <div className="relative z-10 flex flex-col items-center text-center max-w-[90px]">
-              <div className="w-8 h-8 rounded-full bg-royal text-white ring-4 ring-royal/30 animate-pulse flex items-center justify-center mb-1 text-xs">
+              <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground ring-4 ring-primary/30 animate-pulse flex items-center justify-center mb-1 text-xs">
                 <Sparkles className="w-4 h-4" />
               </div>
-              <span className="text-[11px] font-bold text-royal">Processing</span>
-              <span className="text-[10px] text-royal font-medium">Workshop</span>
+              <span className="text-[11px] font-bold text-primary">Processing</span>
+              <span className="text-[10px] text-primary font-medium">Workshop</span>
             </div>
 
             {/* Stage 4: Shipped */}
@@ -177,7 +177,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
           <div className="flex flex-col gap-4">
             {/* Step 1: Order Confirmed */}
             <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-royal text-white flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 mt-0.5">
                 <PackageCheck className="h-4 w-4" />
               </div>
               <div className="flex-1">
@@ -192,11 +192,11 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
 
             {/* Step 2: Workshop Preparation (Active with pulsing ring) */}
             <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-royal text-white ring-4 ring-royal/30 animate-pulse flex items-center justify-center shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground ring-4 ring-primary/30 animate-pulse flex items-center justify-center shrink-0 mt-0.5">
                 <Sparkles className="h-4 w-4" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-royal m-0">
+                <p className="text-sm font-semibold text-primary m-0">
                   Artisanal Quality Inspection &amp; Packing
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
@@ -226,20 +226,20 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
           {/* Delivery Destination & Info Card */}
           <div className="bg-secondary/40 border border-border/60 rounded-md p-4 flex flex-col gap-2.5 text-xs sm:text-sm">
             <div className="flex items-center gap-2 text-foreground">
-              <MapPin className="h-4 w-4 text-royal shrink-0" />
+              <MapPin className="h-4 w-4 text-primary shrink-0" />
               <span>
                 Shipping to: <strong>{order.customerName}</strong> — {shippingAddr.city},{' '}
                 {shippingAddr.state} ({shippingAddr.postalCode})
               </span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4 text-royal shrink-0" />
+              <Calendar className="h-4 w-4 text-primary shrink-0" />
               <span>Dispatches within 24-48 business hours from our Hyderabad atelier.</span>
             </div>
           </div>
 
           {/* Workshop Notice */}
-          <div className="p-3.5 rounded-sm bg-royal/5 border border-royal/20 text-xs text-muted-foreground leading-relaxed">
+          <div className="p-3.5 rounded-sm bg-primary/5 border border-primary/20 text-xs text-muted-foreground leading-relaxed">
             <strong className="text-foreground">Live Tracking Note:</strong> As soon as your parcel
             is collected by the courier, your live Air Waybill (AWB) consignment number and official
             tracking portal link will update on this page automatically.
@@ -279,7 +279,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => triggerHaptic('selection')}
-            className="inline-flex items-center gap-1.5 text-royal hover:text-royal/80 transition-colors font-medium active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors font-medium active:scale-[0.98]"
           >
             <MessageCircle className="h-3.5 w-3.5" />
             <span>Chat with H&amp;H Concierge on WhatsApp</span>
@@ -294,7 +294,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
       {/* Brand Header */}
       <div className="text-center">
-        <div className="h-12 w-12 rounded-full bg-royal/10 text-royal inline-flex items-center justify-center mb-3 border border-royal/20 text-base font-serif font-bold">
+        <div className="h-12 w-12 rounded-full bg-primary/10 text-primary inline-flex items-center justify-center mb-3 border border-primary/20 text-base font-serif font-bold">
           H&amp;H
         </div>
         <h1 className="text-2xl sm:text-3xl font-serif font-medium text-foreground tracking-tight mb-1.5">
@@ -302,7 +302,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
         </h1>
         <p className="text-xs sm:text-sm text-muted-foreground m-0">
           Consignment Reference:{' '}
-          <span className="font-mono text-royal font-semibold tabular-nums">
+          <span className="font-mono text-primary font-semibold tabular-nums">
             {fulfillment.trackingReference}
           </span>
         </p>
@@ -313,7 +313,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
         {/* Status Badge & Label */}
         <div className="flex items-center justify-between border-b border-border/60 pb-5 flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-sm bg-royal/10 text-royal flex items-center justify-center border border-royal/20 shrink-0">
+            <div className="h-10 w-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center border border-primary/20 shrink-0">
               <Truck className="h-5 w-5" />
             </div>
             <div>
@@ -328,7 +328,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
 
           <Badge
             variant="outline"
-            className="px-3 py-1 gap-1.5 text-xs text-royal border-royal/30 bg-royal/5"
+            className="px-3 py-1 gap-1.5 text-xs text-primary border-primary/30 bg-primary/5"
           >
             <ShieldCheck className="h-3.5 w-3.5" />
             Verified Dispatch
@@ -339,14 +339,14 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
         <div className="hidden md:flex items-center justify-between px-2 pt-2 pb-6 border-b border-border/60 relative">
           <div className="absolute top-[28px] left-[30px] right-[30px] h-[2px] bg-border/60 z-0">
             <div
-              className="h-full bg-royal transition-all duration-500"
+              className="h-full bg-primary transition-all duration-500"
               style={{ width: isDelivered ? '100%' : '75%' }}
             />
           </div>
 
           {/* Step 1: Confirmed */}
           <div className="relative z-10 flex flex-col items-center text-center max-w-[90px]">
-            <div className="w-8 h-8 rounded-full bg-royal text-white flex items-center justify-center mb-1 text-xs">
+            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center mb-1 text-xs">
               <Check className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold text-foreground">Confirmed</span>
@@ -355,7 +355,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
 
           {/* Step 2: Workshop Packed */}
           <div className="relative z-10 flex flex-col items-center text-center max-w-[90px]">
-            <div className="w-8 h-8 rounded-full bg-royal text-white flex items-center justify-center mb-1 text-xs">
+            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center mb-1 text-xs">
               <Check className="w-4 h-4" />
             </div>
             <span className="text-[11px] font-semibold text-foreground">Packed</span>
@@ -367,14 +367,14 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 text-xs ${
                 isDelivered
-                  ? 'bg-royal text-white'
-                  : 'bg-royal text-white ring-4 ring-royal/30 animate-pulse'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-primary text-primary-foreground ring-4 ring-primary/30 animate-pulse'
               }`}
             >
               {isDelivered ? <Check className="w-4 h-4" /> : <Truck className="w-4 h-4" />}
             </div>
             <span
-              className={`text-[11px] ${isDelivered ? 'font-semibold text-foreground' : 'font-bold text-royal'}`}
+              className={`text-[11px] ${isDelivered ? 'font-semibold text-foreground' : 'font-bold text-primary'}`}
             >
               In Transit
             </span>
@@ -407,7 +407,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
         <div className="flex flex-col gap-4">
           {/* Step 1: Confirmed */}
           <div className="flex items-start gap-3">
-            <div className="w-7 h-7 rounded-full bg-royal text-white flex items-center justify-center shrink-0 mt-0.5">
+            <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 mt-0.5">
               <PackageCheck className="h-4 w-4" />
             </div>
             <div className="flex-1">
@@ -422,7 +422,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
 
           {/* Step 2: Packed */}
           <div className="flex items-start gap-3">
-            <div className="w-7 h-7 rounded-full bg-royal text-white flex items-center justify-center shrink-0 mt-0.5">
+            <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 mt-0.5">
               <Sparkles className="h-4 w-4" />
             </div>
             <div className="flex-1">
@@ -440,8 +440,8 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             <div
               className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
                 fulfillment.status === 'delivered'
-                  ? 'bg-royal text-white'
-                  : 'bg-royal text-white ring-4 ring-royal/30 animate-pulse'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-primary text-primary-foreground ring-4 ring-primary/30 animate-pulse'
               }`}
             >
               <Truck className="h-4 w-4" />
@@ -449,7 +449,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             <div className="flex-1">
               <p
                 className={`text-sm font-semibold m-0 ${
-                  fulfillment.status === 'delivered' ? 'text-foreground' : 'text-royal'
+                  fulfillment.status === 'delivered' ? 'text-foreground' : 'text-primary'
                 }`}
               >
                 {fulfillment.status === 'delivered'
@@ -510,7 +510,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
               className={`h-2.5 w-2.5 rounded-full shrink-0 ${
                 fulfillment.status === 'delivered'
                   ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
-                  : 'bg-royal shadow-[0_0_8px_rgba(30,58,138,0.5)]'
+                  : 'bg-primary shadow-[0_0_8px_rgba(30,58,138,0.5)]'
               }`}
             />
             <div className="flex flex-col gap-0.5">
@@ -540,7 +540,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
               <button
                 type="button"
                 onClick={copyAwb}
-                className="text-royal hover:text-royal/80 transition-colors flex items-center gap-1 text-xs font-medium cursor-pointer"
+                className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1 text-xs font-medium cursor-pointer"
                 title="Copy tracking number"
               >
                 {hasCopiedAwb ? (
@@ -551,7 +551,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
                 <span>{hasCopiedAwb ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
-            <p className="text-sm font-mono font-bold text-royal tabular-nums m-0">
+            <p className="text-sm font-mono font-bold text-primary tabular-nums m-0">
               {fulfillment.trackingNumber}
             </p>
           </div>
@@ -560,12 +560,12 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
         {/* Timeline & Destination */}
         <div className="flex flex-col gap-2.5 text-xs sm:text-sm p-4 rounded-sm bg-secondary/30 border border-border/60">
           <div className="flex items-center gap-2.5 text-foreground">
-            <Calendar className="h-4 w-4 text-royal shrink-0" />
+            <Calendar className="h-4 w-4 text-primary shrink-0" />
             <span>Dispatched from Hyderabad workshop on {formatDate(fulfillment.shippedAt)}</span>
           </div>
 
           <div className="flex items-center gap-2.5 text-foreground border-t border-border/40 pt-2.5">
-            <MapPin className="h-4 w-4 text-royal shrink-0" />
+            <MapPin className="h-4 w-4 text-primary shrink-0" />
             <span>
               Destination: {shippingAddr.city}, {shippingAddr.state} ({shippingAddr.postalCode})
             </span>
@@ -579,7 +579,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => triggerHaptic('selection')}
-            className="w-full min-h-11 text-sm font-medium bg-royal hover:bg-royal/90 text-white shadow-xs active:scale-[0.98] transition-transform duration-150 inline-flex items-center justify-center gap-2 rounded-sm"
+            className="w-full min-h-11 text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs active:scale-[0.98] transition-transform duration-150 inline-flex items-center justify-center gap-2 rounded-sm"
           >
             <span>Track on Official Courier Website</span>
             <ExternalLink className="h-4 w-4" />
@@ -659,7 +659,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => triggerHaptic('selection')}
-          className="inline-flex items-center gap-1.5 text-royal hover:text-royal/80 transition-colors font-medium active:scale-[0.98]"
+          className="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 transition-colors font-medium active:scale-[0.98]"
         >
           <MessageCircle className="h-3.5 w-3.5" />
           <span>Chat with H&amp;H Concierge on WhatsApp</span>

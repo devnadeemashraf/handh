@@ -81,7 +81,7 @@ export function ProductGallery({ images, title, badge, productId }: ProductGalle
 
   if (displayImages.length === 0) {
     return (
-      <div className="flex aspect-[4/5] w-full items-center justify-center rounded-md border border-border-subtle bg-sunken text-sm text-text-tertiary">
+      <div className="flex aspect-[4/5] w-full items-center justify-center rounded-md border border-border bg-muted text-sm text-muted-foreground">
         No Image Available
       </div>
     );
@@ -93,7 +93,7 @@ export function ProductGallery({ images, title, badge, productId }: ProductGalle
       {/* Mobile: Full-bleed edge-to-edge swipeable carousel (4:5) */}
       {/* ========================================================================= */}
       <div className="block lg:hidden -mx-4 sm:-mx-6">
-        <div className="relative aspect-[4/5] w-full overflow-hidden bg-sunken">
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
           {/* Top-Left Priority Badge */}
           {badge && (
             <div className="absolute top-4 left-4 z-10 pointer-events-none">
@@ -112,7 +112,7 @@ export function ProductGallery({ images, title, badge, productId }: ProductGalle
           {/* Top-Right Floating Wishlist Button */}
           {productId && (
             <div className="absolute top-4 right-4 z-10">
-              <div className="rounded-sm bg-surface/90 shadow-sm backdrop-blur-sm p-0.5">
+              <div className="rounded-sm bg-card/90 shadow-sm backdrop-blur-sm p-0.5">
                 <WishlistButton productId={productId} variant="icon" size={18} />
               </div>
             </div>
@@ -174,8 +174,8 @@ export function ProductGallery({ images, title, badge, productId }: ProductGalle
                 className={cn(
                   'h-1.5 w-1.5 rounded-full transition-all duration-fast',
                   activeMobileIndex === idx
-                    ? 'bg-royal scale-125'
-                    : 'bg-border-strong hover:bg-text-secondary'
+                    ? 'bg-primary scale-125'
+                    : 'bg-muted-foreground/40 hover:bg-muted-foreground'
                 )}
               />
             ))}
@@ -196,7 +196,7 @@ export function ProductGallery({ images, title, badge, productId }: ProductGalle
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') setLightboxIndex(idx);
             }}
-            className="group relative aspect-[4/5] w-full overflow-hidden rounded-md border border-border-subtle bg-sunken cursor-zoom-in shadow-xs transition-shadow hover:shadow-md"
+            className="group relative aspect-[4/5] w-full overflow-hidden rounded-md border border-border bg-muted cursor-zoom-in shadow-xs transition-shadow hover:shadow-md"
             aria-label={`Open photo ${idx + 1} of ${displayImages.length} in lightbox`}
           >
             {/* Top-Left Badge on first image only */}
@@ -217,7 +217,7 @@ export function ProductGallery({ images, title, badge, productId }: ProductGalle
             {/* Top-Right Wishlist Button on first image */}
             {idx === 0 && productId && (
               <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
-                <div className="rounded-sm bg-surface/90 shadow-sm backdrop-blur-sm p-0.5">
+                <div className="rounded-sm bg-card/90 shadow-sm backdrop-blur-sm p-0.5">
                   <WishlistButton productId={productId} variant="icon" size={20} />
                 </div>
               </div>
@@ -233,8 +233,8 @@ export function ProductGallery({ images, title, badge, productId }: ProductGalle
             />
 
             {/* Hover subtle zoom icon */}
-            <div className="absolute bottom-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-sm bg-surface/80 opacity-0 shadow-sm backdrop-blur-sm transition-opacity group-hover:opacity-100">
-              <ZoomIn className="h-4 w-4 text-text-primary" />
+            <div className="absolute bottom-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-sm bg-card/80 opacity-0 shadow-sm backdrop-blur-sm transition-opacity group-hover:opacity-100">
+              <ZoomIn className="h-4 w-4 text-foreground" />
             </div>
           </div>
         ))}

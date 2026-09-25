@@ -124,12 +124,12 @@ export function FrequentlyBoughtTogether({
   };
 
   return (
-    <section className="my-12 rounded-md border border-border-subtle bg-surface p-6 sm:p-8 shadow-xs">
+    <section className="my-12 rounded-md border border-border bg-card p-6 sm:p-8 shadow-xs">
       <div className="mb-6">
-        <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-text-secondary">
+        <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Curated Pairing
         </span>
-        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-text-primary">
+        <h3 className="font-serif text-xl sm:text-2xl font-semibold text-foreground">
           Frequently Bought Together
         </h3>
       </div>
@@ -140,7 +140,7 @@ export function FrequentlyBoughtTogether({
           {items.map((item, idx) => (
             <React.Fragment key={item.id}>
               {idx > 0 && (
-                <div className="flex items-center justify-center text-text-tertiary">
+                <div className="flex items-center justify-center text-muted-foreground">
                   <Plus className="h-4 w-4" />
                 </div>
               )}
@@ -148,11 +148,11 @@ export function FrequentlyBoughtTogether({
                 className={cn(
                   'flex items-center gap-3 rounded-sm border p-2.5 transition-all max-w-[220px]',
                   item.selected
-                    ? 'border-border-strong bg-sunken/40 shadow-xs'
-                    : 'border-border-subtle bg-surface opacity-60'
+                    ? 'border-input bg-muted/40 shadow-xs'
+                    : 'border-border bg-card opacity-60'
                 )}
               >
-                <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-sm bg-sunken">
+                <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-sm bg-muted">
                   {item.imageUrl && (
                     <Image
                       src={item.imageUrl}
@@ -169,13 +169,13 @@ export function FrequentlyBoughtTogether({
                       type="checkbox"
                       checked={item.selected}
                       onChange={() => toggleItem(item.id)}
-                      className="h-3.5 w-3.5 rounded-sm border-border-strong text-royal accent-royal focus:ring-royal cursor-pointer"
+                      className="h-3.5 w-3.5 rounded-sm border-input text-primary accent-primary focus:ring-ring cursor-pointer"
                     />
-                    <span className="truncate text-xs font-semibold text-text-primary">
+                    <span className="truncate text-xs font-semibold text-foreground">
                       {item.isMain ? 'This Piece' : item.title}
                     </span>
                   </label>
-                  <span className="mt-1 font-mono text-xs tabular-nums text-text-secondary">
+                  <span className="mt-1 font-mono text-xs tabular-nums text-muted-foreground">
                     {Money.fromMinor(item.priceMinor, currency).format('en-IN')}
                   </span>
                 </div>
@@ -185,15 +185,15 @@ export function FrequentlyBoughtTogether({
         </div>
 
         {/* Bundle Summary and Checkout CTA */}
-        <div className="flex w-full lg:w-auto flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end justify-between gap-4 border-t lg:border-t-0 lg:border-l border-border-subtle pt-4 lg:pt-0 lg:pl-8">
+        <div className="flex w-full lg:w-auto flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end justify-between gap-4 border-t lg:border-t-0 lg:border-l border-border pt-4 lg:pt-0 lg:pl-8">
           <div className="flex flex-col lg:text-right">
-            <span className="text-[11px] uppercase tracking-wider text-text-tertiary">
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
               Total for {selectedItems.length} {selectedItems.length === 1 ? 'item' : 'items'}
             </span>
-            <span className="font-mono text-xl sm:text-2xl font-bold tabular-nums text-text-primary">
+            <span className="font-mono text-xl sm:text-2xl font-bold tabular-nums text-foreground">
               {formattedTotal}
             </span>
-            <span className="text-[10px] text-text-tertiary">MRP (Inclusive of all taxes)</span>
+            <span className="text-[10px] text-muted-foreground">MRP (Inclusive of all taxes)</span>
           </div>
 
           <Button

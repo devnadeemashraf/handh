@@ -203,8 +203,8 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             ))}
           </div>
         ) : (
-          <div className="mt-8 rounded-sm border border-border-subtle bg-surface p-12 text-center">
-            <p className="text-sm text-text-secondary">
+          <div className="mt-8 rounded-sm border border-border bg-card p-12 text-center">
+            <p className="text-sm text-muted-foreground">
               No pieces are currently cataloged in this collection.
             </p>
           </div>
