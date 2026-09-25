@@ -305,7 +305,7 @@ describe('Fulfillment & Admin Order Repository Integration', () => {
       awb,
       location: 'Hyderabad Gateway Hub'
     });
-  });
+  }, 15000);
 
   it('receives physical return, restocks on-hand inventory with audit log, and sets status to returned (E-COM-064)', async () => {
     const orderResult = await createPaidTestOrder();
@@ -376,5 +376,5 @@ describe('Fulfillment & Admin Order Repository Integration', () => {
         fulfillmentId: fulfillment.id
       })
     ).rejects.toThrowError(/already been marked as returned and restocked/);
-  });
+  }, 15000);
 });

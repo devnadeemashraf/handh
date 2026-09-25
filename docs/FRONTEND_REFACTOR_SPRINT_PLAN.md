@@ -92,7 +92,7 @@ flowchart TD
 
 ---
 
-## Sprint 11.3: Product Discovery, Collection Grids & Adaptive Filters
+## Sprint 11.3: Product Discovery, Collection Grids & Adaptive Filters — 🟢 COMPLETED (Commit `6be62a5`)
 
 **Design Specs:** `03_COMPONENT_LIBRARY.md` (§ Product Card), `05_HOME_AND_DISCOVERY.md` (§5.2 Shop, §5.3 Collections)  
 **Goal:** Implement the standard Product Card, the 2-column mobile / 3-4 column desktop Shop grid, bottom sheet filters with live count, and editorial collection headers.
@@ -125,7 +125,7 @@ flowchart TD
 
 ---
 
-## Sprint 11.4: Product Detail Page (PDP) & Buying Controls
+## Sprint 11.4: Product Detail Page (PDP) & Buying Controls (🟢 Completed)
 
 **Design Specs:** `03_COMPONENT_LIBRARY.md` (§ Gallery, Selectors), `06_PRODUCT_DETAILS.md`, `13_MOTION_AND_MICROINTERACTIONS.md`  
 **Goal:** Re-architect the PDP into an editorial, high-trust landing page with responsive image layouts, interactive selectors, sticky purchase bar, and progressive disclosure accordions.

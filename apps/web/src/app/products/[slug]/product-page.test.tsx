@@ -75,7 +75,8 @@ vi.mock('@hh/db', () => ({
     }
   }),
   findProductBySlug: vi.fn().mockResolvedValue(mockProduct),
-  getCategoryTree: vi.fn().mockResolvedValue([])
+  getCategoryTree: vi.fn().mockResolvedValue([]),
+  listPublishedProducts: vi.fn().mockResolvedValue([])
 }));
 
 describe('Product Detail Page (/products/[slug])', () => {

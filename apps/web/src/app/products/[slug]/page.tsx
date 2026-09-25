@@ -6,10 +6,7 @@ import { DraftPreviewBanner } from '@/components/layout/DraftPreviewBanner';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { ThemeInjector } from '@/components/layout/ThemeInjector';
-import { LegalMetrologySection } from '@/components/product/LegalMetrologySection';
-import { ProductAccordion } from '@/components/product/ProductAccordion';
-import { ProductGallery } from '@/components/product/ProductGallery';
-import { ProductPurchaseCard } from '@/components/product/ProductPurchaseCard';
+import { ProductDetailView } from '@/components/product/ProductDetailView';
 import { ProductViewTracker } from '@/components/product/ProductViewTracker';
 import {
   getCachedCatalog,
@@ -89,9 +86,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   const store = isDraft ? await getFreshStore('hh') : await getCachedStore('hh');
   if (!store) notFound();
 
-  const [product, categories] = await Promise.all([
+  const [product, categories, catalog] = await Promise.all([
     getCachedProduct(store.id, slug),
-    getCachedCategories(store.id)
+    getCachedCategories(store.id),
+    getCachedCatalog(store.id)
   ]);
 
   if (!product) {
@@ -142,65 +140,42 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         categoryName={product.category?.name}
       />
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-8">
-        {/* Breadcrumb Navigation */}
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8">
+        {/* Mobile Back Link */}
+        <div className="md:hidden flex items-center justify-between mb-2">
+          <Link
+            href="/shop"
+            className="inline-flex items-center gap-1 text-xs font-medium text-text-secondary hover:text-text-primary min-h-[44px]"
+          >
+            &larr; Back to Shop
+          </Link>
+        </div>
+
+        {/* Desktop Breadcrumb Navigation */}
         <nav
-          className="mb-8 flex items-center gap-2 text-xs text-muted-foreground"
+          className="hidden md:flex mb-8 items-center gap-2 text-xs text-text-secondary"
           aria-label="Breadcrumb"
         >
-          <Link href="/" className="transition-colors hover:text-foreground">
-            Catalog
+          <Link href="/shop" className="transition-colors hover:text-text-primary">
+            Shop
           </Link>
-          <span>/</span>
+          <span className="text-border-strong">/</span>
           {product.category && (
             <>
               <Link
-                href={`/?category=${product.category.slug}#catalog`}
-                className="transition-colors hover:text-foreground"
+                href={`/collections/${product.category.slug}`}
+                className="transition-colors hover:text-text-primary"
               >
                 {product.category.name}
               </Link>
-              <span>/</span>
+              <span className="text-border-strong">/</span>
             </>
           )}
-          <span className="font-medium text-foreground">{product.title}</span>
+          <span className="font-medium text-royal truncate max-w-xs">{product.title}</span>
         </nav>
 
-        {/* 2-Column Responsive Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-start">
-          <div>
-            <ProductGallery images={product.images} title={product.title} />
-          </div>
-
-          <div className="lg:sticky lg:top-24">
-            {product.category && (
-              <span className="mb-2 block text-xs uppercase tracking-[0.25em] font-semibold text-accent">
-                {product.category.name}
-              </span>
-            )}
-
-            <h1 className="mb-4 font-serif text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-primary leading-tight">
-              {product.title}
-            </h1>
-
-            <div className="mb-8 text-sm sm:text-base leading-relaxed text-muted-foreground">
-              {product.description}
-            </div>
-
-            {/* Interactive Purchase Card with Real-Time Stock */}
-            <ProductPurchaseCard
-              variants={product.variants}
-              initialVariantId={primaryVariant?.id}
-              productId={product.id}
-            />
-
-            {/* Craftsmanship, Shipping & Care Accordion */}
-            <ProductAccordion />
-
-            {/* Statutory Legal Metrology Declarations */}
-            <LegalMetrologySection product={product} selectedVariant={primaryVariant} />
-          </div>
-        </div>
+        {/* Coordinated PDP View: Gallery, Purchasing, Progressive Accordions, and Cross-Sell */}
+        <ProductDetailView product={product} suggestedProducts={catalog} />
 
         {/* Brand Reassurance Section */}
         <ReassuranceSection items={storefrontConfig.reassurances} />
