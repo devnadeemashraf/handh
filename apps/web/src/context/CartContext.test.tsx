@@ -128,4 +128,65 @@ describe('CartContext (E-COM-146, E-COM-033)', () => {
     const storedInLocalStorage = JSON.parse(localStorage.getItem('hh_guest_cart') || '[]');
     expect(storedInLocalStorage).toEqual([{ variantId: 'var-limited', quantity: 2 }]);
   });
+
+  it('sanitizes corrupt items from localStorage on mount and never stores quantity 0', async () => {
+    // Corrupt items from bad storage or legacy state
+    const corruptItems = [
+      { variantId: 'var-valid', quantity: 1 },
+      { variantId: 'var-broken', quantity: 0 },
+      { variantId: '', quantity: 2 }
+    ];
+    localStorage.setItem('hh_guest_cart', JSON.stringify(corruptItems));
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        cart: {
+          items: [
+            {
+              variantId: 'var-valid',
+              productId: 'prod-1',
+              productTitle: 'Valid Piece',
+              variantTitle: 'Default',
+              sku: 'VAL-01',
+              priceMinor: 1000,
+              requestedQuantity: 1,
+              effectiveQuantity: 0, // Out of stock on server
+              lineTotalMinor: 0,
+              isAvailable: false,
+              statusNotice: 'out_of_stock'
+            }
+          ],
+          subtotalMinor: 0,
+          totalQuantity: 0,
+          isValidForCheckout: false
+        }
+      })
+    });
+    global.fetch = fetchMock;
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <CartProvider>{children}</CartProvider>
+    );
+
+    const { result } = renderHook(() => useCart(), { wrapper });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // Sent to validateWithServer should only include the valid item with quantity >= 1
+    expect(fetchMock).toHaveBeenCalledWith('/api/cart/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: [{ variantId: 'var-valid', quantity: 1 }] })
+    });
+
+    // Client storage should retain requested quantity 1 (never quantity 0)
+    const stored = JSON.parse(localStorage.getItem('hh_guest_cart') || '[]');
+    expect(stored).toEqual([{ variantId: 'var-valid', quantity: 1 }]);
+    expect(result.current.items).toEqual([{ variantId: 'var-valid', quantity: 1 }]);
+    expect(result.current.cartSummary?.items[0]?.statusNotice).toBe('out_of_stock');
+  });
 });

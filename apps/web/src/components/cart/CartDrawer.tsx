@@ -13,8 +13,16 @@ import { CartItemRow } from './CartItemRow';
 import { useCartDrawerService } from './useCartDrawerService';
 
 export function CartDrawer() {
-  const { isOpen, closeCart, cartSummary, totalItemCount, updateQuantity, removeItem, isLoading } =
-    useCart();
+  const {
+    isOpen,
+    closeCart,
+    cartSummary,
+    totalItemCount,
+    updateQuantity,
+    removeItem,
+    isLoading,
+    items
+  } = useCart();
 
   const { serviceControl, isServicePaused } = useCartDrawerService(isOpen);
 
@@ -35,7 +43,21 @@ export function CartDrawer() {
 
         {/* Drawer Scrollable Content */}
         <div className="flex-1 overflow-y-auto px-6">
-          {cartSummary && cartSummary.items.length > 0 ? (
+          {isLoading &&
+          (!cartSummary || cartSummary.items.length === 0) &&
+          items &&
+          items.length > 0 ? (
+            <div className="py-8 space-y-4">
+              <div className="flex gap-4 animate-pulse py-4 border-b border-border">
+                <div className="w-[70px] h-[88px] bg-muted rounded-md shrink-0" />
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="h-4 bg-muted rounded-sm w-3/4" />
+                  <div className="h-3 bg-muted rounded-sm w-1/2" />
+                  <div className="h-4 bg-muted rounded-sm w-1/4 mt-4" />
+                </div>
+              </div>
+            </div>
+          ) : cartSummary && cartSummary.items.length > 0 ? (
             <div className="divide-y divide-border">
               {cartSummary.items.map((item) => (
                 <CartItemRow

@@ -135,8 +135,11 @@ export function ProductPurchaseCard({
   const isAvailable = selectedVariant.isAvailable && selectedVariant.availableQuantity > 0;
   const maxAllowed = Math.min(selectedVariant.availableQuantity, 5);
 
-  // Check if variants represent colors
-  const hasColorVariants = variants.some((v) => getColorHex(v.title) !== null);
+  // Check if variants represent distinct colors
+  const distinctColorHexes = new Set(
+    variants.map((v) => getColorHex(v.title)).filter((hex): hex is string => hex !== null)
+  );
+  const hasColorVariants = distinctColorHexes.size > 1;
 
   const handleAddToCart = async () => {
     if (!isAvailable || !selectedVariant || isAdding) return;

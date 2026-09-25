@@ -58,9 +58,14 @@ export function FrequentlyBoughtTogether({
       });
     }
 
-    suggestedProducts.slice(0, 2).forEach((prod) => {
+    const seenProductIds = new Set<string>([currentProduct.id]);
+
+    suggestedProducts.forEach((prod) => {
+      if (seenProductIds.has(prod.id)) return;
+      if (list.length >= 3) return; // Keep primary piece + up to 2 complementary items
       const variantId = prod.firstVariantId;
       if (variantId) {
+        seenProductIds.add(prod.id);
         list.push({
           id: prod.id,
           title: prod.title,
@@ -89,9 +94,11 @@ export function FrequentlyBoughtTogether({
     return null;
   }
 
-  const toggleItem = (id: string) => {
+  const toggleItem = (variantId: string) => {
     setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, selected: !item.selected } : item))
+      prev.map((item) =>
+        item.variantId === variantId ? { ...item, selected: !item.selected } : item
+      )
     );
   };
 
@@ -138,7 +145,7 @@ export function FrequentlyBoughtTogether({
         {/* Products Row with '+' separators */}
         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           {items.map((item, idx) => (
-            <React.Fragment key={item.id}>
+            <React.Fragment key={`${item.id}-${item.variantId}`}>
               {idx > 0 && (
                 <div className="flex items-center justify-center text-muted-foreground">
                   <Plus className="h-4 w-4" />
@@ -168,7 +175,7 @@ export function FrequentlyBoughtTogether({
                     <input
                       type="checkbox"
                       checked={item.selected}
-                      onChange={() => toggleItem(item.id)}
+                      onChange={() => toggleItem(item.variantId)}
                       className="h-3.5 w-3.5 rounded-sm border-input text-primary accent-primary focus:ring-ring cursor-pointer"
                     />
                     <span className="truncate text-xs font-semibold text-foreground">

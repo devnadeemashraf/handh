@@ -138,6 +138,19 @@ export function CartView() {
     saveSavedItems(savedItems.filter((i) => i.variantId !== variantId));
   };
 
+  // Loading skeleton state while fetching cart details
+  if (isLoading && (!cartSummary || cartSummary.items.length === 0) && totalItemCount > 0) {
+    return (
+      <main className="mx-auto max-w-7xl w-full flex-1 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="animate-pulse space-y-6 max-w-2xl mx-auto py-12">
+          <div className="h-8 bg-muted rounded-sm w-1/3" />
+          <div className="h-24 bg-muted rounded-md" />
+          <div className="h-24 bg-muted rounded-md" />
+        </div>
+      </main>
+    );
+  }
+
   // Empty Cart State per 11_UX_STATE_CATALOGUE.md
   if (!cartSummary || cartSummary.items.length === 0) {
     return (

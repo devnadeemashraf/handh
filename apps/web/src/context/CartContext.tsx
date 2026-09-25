@@ -48,7 +48,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (stored) {
         const parsed = JSON.parse(stored) as CartItemInput[];
         if (Array.isArray(parsed)) {
-          setItems(parsed);
+          const sanitized = parsed
+            .filter(
+              (it): it is CartItemInput =>
+                typeof it === 'object' &&
+                it !== null &&
+                typeof it.variantId === 'string' &&
+                it.variantId.trim().length > 0 &&
+                typeof it.quantity === 'number' &&
+                it.quantity >= 1
+            )
+            .map((it) => ({
+              variantId: it.variantId.trim(),
+              quantity: Math.min(10, Math.max(1, Math.round(it.quantity)))
+            }));
+
+          setItems(sanitized);
+          if (sanitized.length !== parsed.length) {
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+            } catch {
+              // ignore storage write errors
+            }
+          }
         }
       }
     } catch (e) {
@@ -61,7 +83,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // 2. Server reconciliation function — returns the validated CartSummary for downstream use
   const validateWithServer = useCallback(
     async (currentItems: CartItemInput[]): Promise<CartSummary | null> => {
-      if (currentItems.length === 0) {
+      const validItems = currentItems
+        .filter(
+          (it) =>
+            typeof it === 'object' &&
+            it !== null &&
+            typeof it.variantId === 'string' &&
+            it.variantId.trim().length > 0 &&
+            typeof it.quantity === 'number' &&
+            it.quantity >= 1
+        )
+        .map((it) => ({
+          variantId: it.variantId.trim(),
+          quantity: Math.min(10, Math.max(1, Math.round(it.quantity)))
+        }));
+
+      if (validItems.length === 0) {
         const empty: CartSummary = {
           items: [],
           subtotalMinor: 0,
@@ -70,6 +107,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           isValidForCheckout: false
         };
         setCartSummary(empty);
+        if (currentItems.length > 0) {
+          setItems([]);
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+          } catch (e) {
+            console.error('Failed to clear invalid cart storage:', e);
+          }
+        }
         return empty;
       }
 
@@ -78,7 +123,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const res = await fetch('/api/cart/validate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: currentItems })
+          body: JSON.stringify({ items: validItems })
         });
 
         if (res.ok) {
@@ -86,12 +131,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           if (data.success && data.cart) {
             setCartSummary(data.cart);
             // Reconcile client storage if server modified item quantities (e.g. out-of-stock or cap) (E-COM-033)
-            const serverItems: CartItemInput[] = (data.cart.items || []).map(
-              (it: { variantId: string; effectiveQuantity?: number; quantity?: number }) => ({
-                variantId: it.variantId,
-                quantity: it.effectiveQuantity ?? it.quantity ?? 1
-              })
-            );
+            // Unavailable items are pruned; out-of-stock items preserve requested quantity (min 1) so schema is valid.
+            const serverItems: CartItemInput[] = (data.cart.items || [])
+              .filter((it: { statusNotice?: string }) => it.statusNotice !== 'unavailable')
+              .map(
+                (it: {
+                  variantId: string;
+                  requestedQuantity?: number;
+                  effectiveQuantity?: number;
+                  quantity?: number;
+                }) => {
+                  const effective = it.effectiveQuantity ?? 0;
+                  const requested = it.requestedQuantity ?? it.quantity ?? 1;
+                  const qty = effective > 0 ? effective : Math.max(1, requested);
+                  return {
+                    variantId: it.variantId,
+                    quantity: Math.min(10, Math.max(1, qty))
+                  };
+                }
+              );
+
             const needsReconciliation =
               serverItems.length !== currentItems.length ||
               serverItems.some((sItem, idx) => {

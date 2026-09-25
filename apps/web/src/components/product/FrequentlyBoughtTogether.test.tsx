@@ -114,4 +114,34 @@ describe('FrequentlyBoughtTogether Component', () => {
     expect(mockAddItem).toHaveBeenCalledWith('var-main-1', 1);
     expect(mockAddItem).toHaveBeenCalledWith('var-sub-1', 1);
   });
+
+  it('filters out current product from suggestedProducts to prevent duplicate keys', () => {
+    const suggestedWithSelf: PublicProductListItem[] = [
+      {
+        id: 'prod-main', // Same ID as currentProduct
+        slug: 'medina-silk-abaya',
+        title: 'Medina Silk Abaya',
+        startingPriceMinor: 249900,
+        currency: 'INR',
+        primaryImageUrl: 'https://images.unsplash.com/photo-1',
+        categoryName: 'Abayas',
+        isAvailable: true,
+        firstVariantId: 'var-main-1'
+      },
+      ...mockSuggested
+    ];
+
+    render(
+      <FrequentlyBoughtTogether
+        currentProduct={mockProductDetail}
+        suggestedProducts={suggestedWithSelf}
+      />
+    );
+
+    // Only 2 checkboxes should exist: the main product and the distinct chiffon hijab
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes.length).toBe(2);
+    expect(screen.getByText('This Piece')).toBeInTheDocument();
+    expect(screen.getByText('Chiffon Hijab')).toBeInTheDocument();
+  });
 });
