@@ -127,15 +127,15 @@ export function WishlistButton({
     );
   }
 
-  // Default 'icon' floating style
+  // Default 'icon' floating style with 44x44px touch target (03_COMPONENT_LIBRARY.md)
   return (
     <button
       type="button"
       onClick={handleToggle}
       disabled={isBusy}
       className={cn(
-        'inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/5 bg-white/90 backdrop-blur-sm shadow-sm transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
-        isWishlisted ? 'text-accent' : 'text-foreground hover:text-accent'
+        'inline-flex h-11 w-11 items-center justify-center rounded-sm border border-border-subtle/80 bg-surface/90 backdrop-blur-sm shadow-elevation-1 transition-transform active:scale-125 duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-royal disabled:cursor-not-allowed disabled:opacity-50 select-none',
+        isWishlisted ? 'text-royal' : 'text-text-primary hover:text-royal'
       )}
       aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
       title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
@@ -143,8 +143,8 @@ export function WishlistButton({
       <Heart
         size={size}
         className={cn(
-          'transition-colors',
-          isWishlisted ? 'fill-accent text-accent' : 'text-current'
+          'transition-all duration-fast',
+          isWishlisted ? 'fill-royal text-royal' : 'text-current'
         )}
       />
     </button>

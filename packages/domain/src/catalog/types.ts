@@ -25,14 +25,23 @@ export interface PublicProductListItem {
   id: string;
   slug: string;
   title: string;
-  department?: string;
-  isCustomizable?: boolean;
+  department?: string | undefined;
+  isCustomizable?: boolean | undefined;
   startingPriceMinor: number;
+  compareAtPriceMinor?: number | null | undefined;
   currency: string;
   primaryImageUrl: string | null;
+  secondaryImageUrl?: string | null | undefined;
   categoryName: string | null;
-  tags?: string[];
+  tags?: string[] | undefined;
   isAvailable: boolean;
+  totalAvailable?: number | undefined;
+  firstVariantId?: string | null | undefined;
+  hasMultipleVariants?: boolean | undefined;
+  isNew?: boolean | undefined;
+  isOnSale?: boolean | undefined;
+  isLowStock?: boolean | undefined;
+  colorCount?: number | undefined;
 }
 
 export interface ManufacturerDetails {

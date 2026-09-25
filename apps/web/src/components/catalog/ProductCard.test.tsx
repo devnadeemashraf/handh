@@ -1,9 +1,26 @@
-import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 import { DEFAULT_BRAND_IDENTITY, type PublicProductListItem } from '@hh/domain';
 
-import { ProductCard } from './ProductCard';
+import { ProductCard, ProductCardSkeleton } from './ProductCard';
+
+const mockAddItem = vi.fn();
+const mockOpenCart = vi.fn();
+
+vi.mock('@/context/CartContext', () => ({
+  useCart: () => ({
+    addItem: mockAddItem,
+    openCart: mockOpenCart
+  })
+}));
+
+const mockToast = vi.fn();
+vi.mock('@/components/ui/toast', () => ({
+  useToast: () => ({
+    toast: mockToast
+  })
+}));
 
 const mockProduct: PublicProductListItem = {
   id: 'prod-123',
@@ -17,6 +34,10 @@ const mockProduct: PublicProductListItem = {
 };
 
 describe('ProductCard Component', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders product details, category, and tax-inclusive MRP price', () => {
     render(<ProductCard product={mockProduct} />);
 
@@ -48,5 +69,60 @@ describe('ProductCard Component', () => {
     render(<ProductCard product={mockProduct} priority={true} />);
     const priorityImg = screen.getByRole('img', { name: 'Regal Emerald Nose Stud' });
     expect(priorityImg).not.toHaveAttribute('loading', 'lazy');
+  });
+
+  it('renders Sale badge and struck-through compare price when on sale', () => {
+    render(
+      <ProductCard
+        product={{
+          ...mockProduct,
+          startingPriceMinor: 149900,
+          compareAtPriceMinor: 199900,
+          isOnSale: true
+        }}
+      />
+    );
+
+    expect(screen.getByText('Sale')).toBeInTheDocument();
+    expect(screen.getByText(/1,999/)).toBeInTheDocument();
+  });
+
+  it('renders New badge when isNew is true and not on sale', () => {
+    render(<ProductCard product={{ ...mockProduct, isNew: true }} />);
+
+    expect(screen.getByText('New')).toBeInTheDocument();
+  });
+
+  it('renders Low Stock badge when isLowStock is true', () => {
+    render(<ProductCard product={{ ...mockProduct, isLowStock: true }} />);
+
+    expect(screen.getByText('Low Stock')).toBeInTheDocument();
+  });
+
+  it('handles quick add click directly for single-variant product', async () => {
+    mockAddItem.mockResolvedValueOnce(undefined);
+
+    render(
+      <ProductCard
+        product={{
+          ...mockProduct,
+          firstVariantId: 'var-123',
+          hasMultipleVariants: false
+        }}
+      />
+    );
+
+    const quickAddBtns = screen.getAllByRole('button', { name: /quick add/i });
+    expect(quickAddBtns.length).toBeGreaterThan(0);
+    await act(async () => {
+      fireEvent.click(quickAddBtns[0]!);
+    });
+
+    expect(mockAddItem).toHaveBeenCalledWith('var-123', 1);
+  });
+
+  it('renders ProductCardSkeleton with layout-preserving elements', () => {
+    const { container } = render(<ProductCardSkeleton />);
+    expect(container.querySelector('.aspect-\\[4\\/5\\]')).toBeInTheDocument();
   });
 });

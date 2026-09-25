@@ -68,6 +68,36 @@ export async function listPublishedProducts(
         ORDER BY ${productImages.sortOrder} ASC
         LIMIT 1
       )`,
+      secondaryImageUrl: sql<string | null>`(
+        SELECT ${productImages.url}
+        FROM ${productImages}
+        WHERE ${productImages.productId} = ${products.id}
+        ORDER BY ${productImages.sortOrder} ASC
+        LIMIT 1 OFFSET 1
+      )`,
+      compareAtPriceMinor: sql<number | null>`(
+        SELECT ${productVariants.compareAtPriceMinor}
+        FROM ${productVariants}
+        WHERE ${productVariants.productId} = ${products.id}
+          AND ${productVariants.isActive} = true
+        ORDER BY ${productVariants.sortOrder} ASC
+        LIMIT 1
+      )`,
+      activeVariantCount: sql<number>`(
+        SELECT COUNT(*)::int
+        FROM ${productVariants}
+        WHERE ${productVariants.productId} = ${products.id}
+          AND ${productVariants.isActive} = true
+      )`,
+      firstVariantId: sql<string | null>`(
+        SELECT ${productVariants.id}
+        FROM ${productVariants}
+        WHERE ${productVariants.productId} = ${products.id}
+          AND ${productVariants.isActive} = true
+        ORDER BY ${productVariants.sortOrder} ASC
+        LIMIT 1
+      )`,
+      createdAt: products.createdAt,
       totalAvailable: sql<number>`COALESCE((
         SELECT SUM(GREATEST(0, ${inventoryLevels.onHand} - ${inventoryLevels.reserved}))
         FROM ${inventoryLevels}
@@ -81,19 +111,39 @@ export async function listPublishedProducts(
     .where(and(...conditions))
     .orderBy(asc(products.createdAt));
 
-  return publishedProducts.map((prod) => ({
-    id: prod.id,
-    slug: prod.slug,
-    title: prod.title,
-    department: prod.department ?? undefined,
-    isCustomizable: prod.isCustomizable ?? false,
-    tags: (prod.tags as string[]) ?? [],
-    startingPriceMinor: Number(prod.startingPriceMinor ?? 0),
-    currency: prod.currency || 'INR',
-    primaryImageUrl: prod.primaryImageUrl ?? null,
-    categoryName: prod.categoryName ?? null,
-    isAvailable: Number(prod.totalAvailable ?? 0) > 0
-  }));
+  return publishedProducts.map((prod) => {
+    const totalAvail = Number(prod.totalAvailable ?? 0);
+    const startPrice = Number(prod.startingPriceMinor ?? 0);
+    const compPrice = prod.compareAtPriceMinor != null ? Number(prod.compareAtPriceMinor) : null;
+    const isSale = compPrice != null && compPrice > startPrice;
+    const isLow = totalAvail > 0 && totalAvail <= 5;
+    const isNew = prod.createdAt
+      ? Date.now() - new Date(prod.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000
+      : false;
+    const variantCount = Number(prod.activeVariantCount ?? 1);
+
+    return {
+      id: prod.id,
+      slug: prod.slug,
+      title: prod.title,
+      department: prod.department ?? undefined,
+      isCustomizable: prod.isCustomizable ?? false,
+      tags: (prod.tags as string[]) ?? [],
+      startingPriceMinor: startPrice,
+      compareAtPriceMinor: compPrice,
+      currency: prod.currency || 'INR',
+      primaryImageUrl: prod.primaryImageUrl ?? null,
+      secondaryImageUrl: prod.secondaryImageUrl ?? null,
+      categoryName: prod.categoryName ?? null,
+      isAvailable: totalAvail > 0,
+      totalAvailable: totalAvail,
+      firstVariantId: prod.firstVariantId ?? null,
+      hasMultipleVariants: variantCount > 1,
+      isOnSale: isSale,
+      isLowStock: isLow,
+      isNew
+    };
+  });
 }
 
 export async function findProductBySlug(

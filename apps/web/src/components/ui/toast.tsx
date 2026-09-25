@@ -54,12 +54,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+const DEFAULT_TOAST_CONTEXT: ToastContextType = {
+  toasts: [],
+  toast: () => {},
+  dismiss: () => {}
+};
+
 export function useToast() {
   const context = React.useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
+  return context ?? DEFAULT_TOAST_CONTEXT;
 }
 
 function ToastViewport({

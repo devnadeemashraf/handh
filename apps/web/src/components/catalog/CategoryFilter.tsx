@@ -13,7 +13,7 @@ export function CategoryFilter({
   const isAllActive = !activeCategory;
 
   // Flatten primary categories for quick tab selection
-  const flatTabs = [{ slug: '', label: 'All Collections' }];
+  const flatTabs = [{ slug: '', label: 'All Pieces' }];
 
   for (const cat of categories) {
     flatTabs.push({ slug: cat.slug, label: cat.name });
@@ -23,7 +23,10 @@ export function CategoryFilter({
   }
 
   return (
-    <div className="my-8 flex items-center justify-start sm:justify-center overflow-x-auto pb-2 scrollbar-none gap-2 px-1">
+    <nav
+      className="my-8 flex items-center justify-start sm:justify-center overflow-x-auto pb-2 scrollbar-none gap-2 px-1"
+      aria-label="Category tabs"
+    >
       {flatTabs.map((tab) => {
         const isActive = tab.slug === '' ? isAllActive : activeCategory === tab.slug;
         const href = tab.slug ? `/?category=${tab.slug}#catalog` : '/#catalog';
@@ -33,16 +36,16 @@ export function CategoryFilter({
             key={tab.slug}
             href={href}
             className={cn(
-              'inline-flex shrink-0 items-center justify-center rounded-full px-4 py-2 text-xs font-medium tracking-wider uppercase transition-all select-none',
+              'inline-flex shrink-0 items-center justify-center rounded-sm px-4 py-2 text-xs font-medium tracking-wider uppercase transition-all select-none min-h-[36px]',
               isActive
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'border border-border bg-card/60 text-muted-foreground hover:bg-secondary hover:text-foreground'
+                ? 'bg-royal text-white shadow-elevation-1'
+                : 'border border-border-subtle bg-surface text-text-secondary hover:text-text-primary hover:border-border-strong'
             )}
           >
             {tab.label}
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }

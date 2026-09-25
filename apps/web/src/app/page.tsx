@@ -159,16 +159,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         {/* Dynamic Category Tabs */}
         <CategoryFilter categories={categories} activeCategory={activeCategory} />
 
-        {/* Responsive Product Grid with Preloaded Above-the-Fold LCP Images (E-COM-149) */}
+        {/* Responsive Product Grid: 2-column mobile / 3-4 column desktop per Design Spec 05 */}
         {products.length > 0 ? (
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
             {products.map((product, index) => (
               <ProductCard key={product.id} product={product} priority={index < 4} />
             ))}
           </div>
         ) : (
-          <div className="mt-8 rounded-lg border border-border bg-card p-12 text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="mt-8 rounded-md border border-border-subtle bg-surface p-12 text-center">
+            <p className="text-sm text-text-secondary">
               No pieces are currently cataloged in this collection.
             </p>
           </div>
