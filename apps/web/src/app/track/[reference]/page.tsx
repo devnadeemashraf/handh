@@ -21,54 +21,26 @@ export default async function TrackingPage(props: { params: Promise<{ reference:
   if (!record) {
     return (
       <div className="track-wrapper">
-        <div
-          className="admin-card track-box"
-          style={{
-            textAlign: 'center',
-            padding: '40px 24px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '16px',
-            marginTop: '40px'
-          }}
-        >
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '16px',
-              backgroundColor: 'rgba(127, 29, 29, 0.4)',
-              border: '1px solid rgba(220, 38, 38, 0.4)',
-              color: '#F87171',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <PackageX style={{ width: '24px', height: '24px' }} />
+        <div className="admin-card track-box text-center p-8 sm:p-10 flex flex-col items-center gap-4 mt-10">
+          <div className="w-12 h-12 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive flex items-center justify-center">
+            <PackageX className="w-6 h-6" />
           </div>
-          <h1 style={{ fontSize: '1.25rem', fontFamily: 'serif', color: '#FDFBF7', margin: 0 }}>
+          <h1 className="text-xl sm:text-2xl font-serif font-semibold text-foreground m-0">
             Shipment Not Found
           </h1>
-          <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', lineHeight: 1.6, margin: 0 }}>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed m-0 max-w-md">
             We could not find an active dispatch matching reference{' '}
-            <span style={{ fontFamily: 'monospace', color: '#C5A880' }}>{params.reference}</span>.
-            Please verify your consignment link or reach out to our workshop concierge.
+            <span className="font-mono text-accent font-semibold">{params.reference}</span>. Please
+            verify your consignment link or reach out to our workshop concierge.
           </p>
-          <div style={{ paddingTop: '8px' }}>
+          <div className="pt-2">
             <a
               href="https://wa.me/919876543210"
               target="_blank"
               rel="noopener noreferrer"
-              className="admin-btn-secondary"
-              style={{
-                color: '#C5A880',
-                borderColor: '#1C4D3E',
-                textDecoration: 'none'
-              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-border/80 bg-card hover:bg-muted/50 text-foreground transition-colors"
             >
-              <MessageCircle style={{ width: '16px', height: '16px' }} />
+              <MessageCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>Contact Concierge on WhatsApp</span>
             </a>
           </div>

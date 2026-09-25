@@ -2,6 +2,10 @@
 
 import { Check, CheckCircle2, MessageSquare, Phone } from 'lucide-react';
 import React, { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { triggerHaptic } from '@/lib/haptic';
 
 import { useAuth } from '../../context/AuthContext';
 
@@ -40,6 +44,7 @@ export default function AccountProfilePage() {
 
       await refreshUser();
       setSaveSuccess(true);
+      triggerHaptic('success');
       setIsSaving(false);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch {
@@ -49,226 +54,98 @@ export default function AccountProfilePage() {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: '#FFFFFF',
-        border: '1px solid #EBE7DF',
-        borderRadius: '12px',
-        padding: '28px',
-        boxShadow: '0 4px 12px rgba(10, 46, 36, 0.03)'
-      }}
-    >
-      <div
-        style={{ borderBottom: '1px solid #F0ECE4', paddingBottom: '16px', marginBottom: '24px' }}
-      >
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.6rem',
-            color: '#0A2E24',
-            margin: '0 0 6px'
-          }}
-        >
+    <div className="bg-card rounded-2xl border border-border/80 p-6 sm:p-8 shadow-sm">
+      <div className="border-b border-border/60 pb-4 mb-6">
+        <h1 className="font-serif text-2xl font-semibold text-foreground mb-1.5">
           My Profile & Preferences
         </h1>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#5C6460' }}>
+        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
           Manage your personal details, email receipts, and WhatsApp concierge communication
           preferences.
         </p>
       </div>
 
       {saveSuccess && (
-        <div
-          style={{
-            backgroundColor: '#ECFDF5',
-            border: '1px solid #A7F3D0',
-            borderRadius: '8px',
-            padding: '12px 16px',
-            color: '#065F46',
-            fontSize: '0.88rem',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          <CheckCircle2 size={16} color="#059669" />
+        <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl mb-5 flex items-center gap-2 text-emerald-700 dark:text-emerald-300 text-sm">
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
           <span>Your profile preferences were updated successfully.</span>
         </div>
       )}
 
       {errorMessage && (
-        <div
-          style={{
-            backgroundColor: '#FEF2F2',
-            border: '1px solid #FCA5A5',
-            borderRadius: '8px',
-            padding: '12px 16px',
-            color: '#991B1B',
-            fontSize: '0.88rem',
-            marginBottom: '20px'
-          }}
-        >
+        <div className="p-3.5 bg-destructive/10 border border-destructive/30 rounded-xl mb-5 text-destructive text-sm font-medium">
           {errorMessage}
         </div>
       )}
 
-      <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <form onSubmit={handleSave} className="flex flex-col gap-5">
         {/* Mobile Number (Read-only / verified primary key) */}
         <div>
-          <label
-            style={{
-              display: 'block',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: '#171A19',
-              marginBottom: '6px'
-            }}
-          >
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
             Registered Mobile Number
           </label>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 14px',
-              backgroundColor: '#FAFAF8',
-              border: '1px solid #EBE7DF',
-              borderRadius: '8px',
-              color: '#171A19',
-              fontSize: '0.95rem',
-              fontWeight: 600
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Phone size={16} color="#5C6460" />
+          <div className="flex items-center justify-between p-3 bg-muted/40 border border-border/70 rounded-lg text-foreground text-sm font-medium">
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
               <span>{user?.phone}</span>
             </div>
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                fontSize: '0.75rem',
-                color: '#059669',
-                backgroundColor: '#ECFDF5',
-                padding: '4px 8px',
-                borderRadius: '12px',
-                fontWeight: 600
-              }}
+            <Badge
+              variant="outline"
+              className="gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 font-medium text-xs"
             >
-              <Check size={12} /> Verified
-            </span>
+              <Check className="h-3 w-3" /> Verified
+            </Badge>
           </div>
-          <span
-            style={{ fontSize: '0.75rem', color: '#8C928F', marginTop: '4px', display: 'block' }}
-          >
+          <span className="text-[11px] text-muted-foreground/80 mt-1 block">
             Primary account identifier used for OTP verification and WhatsApp delivery updates.
           </span>
         </div>
 
         {/* Full Name */}
         <div>
-          <label
-            style={{
-              display: 'block',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: '#171A19',
-              marginBottom: '6px'
-            }}
-          >
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
             Full Name
           </label>
-          <input
+          <Input
             type="text"
             placeholder="e.g. Fatima Al-Zahra"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              border: '1px solid #EBE7DF',
-              borderRadius: '8px',
-              fontSize: '0.92rem',
-              color: '#171A19',
-              outline: 'none',
-              boxSizing: 'border-box'
-            }}
+            className="h-10 text-sm"
           />
         </div>
 
         {/* Email Address */}
         <div>
-          <label
-            style={{
-              display: 'block',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              color: '#171A19',
-              marginBottom: '6px'
-            }}
-          >
+          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
             Email Address (for tax invoices & receipts)
           </label>
-          <input
+          <Input
             type="email"
             placeholder="e.g. patron@handh.in"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              border: '1px solid #EBE7DF',
-              borderRadius: '8px',
-              fontSize: '0.92rem',
-              color: '#171A19',
-              outline: 'none',
-              boxSizing: 'border-box'
-            }}
+            className="h-10 text-sm"
           />
         </div>
 
         {/* WhatsApp Concierge Communication */}
-        <div
-          style={{
-            padding: '16px',
-            backgroundColor: '#FBF9F5',
-            border: '1px solid #F0ECE4',
-            borderRadius: '8px'
-          }}
-        >
-          <label
-            style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}
-          >
+        <div className="p-4 bg-secondary/40 border border-border/70 rounded-xl">
+          <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={whatsappOptIn}
-              onChange={(e) => setWhatsappOptIn(e.target.checked)}
-              style={{ marginTop: '3px', accentColor: '#0A2E24' }}
+              onChange={(e) => {
+                triggerHaptic('selection');
+                setWhatsappOptIn(e.target.checked);
+              }}
+              className="mt-1 h-4 w-4 rounded border-border accent-primary cursor-pointer"
             />
             <div>
-              <span
-                style={{
-                  fontWeight: 700,
-                  color: '#0A2E24',
-                  fontSize: '0.9rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  marginBottom: '2px'
-                }}
-              >
-                <MessageSquare size={15} color="#164335" /> WhatsApp Concierge Updates
+              <span className="font-semibold text-sm text-foreground flex items-center gap-1.5 mb-1">
+                <MessageSquare className="h-4 w-4 text-primary" /> WhatsApp Concierge Updates
               </span>
-              <p style={{ margin: 0, fontSize: '0.82rem', color: '#5C6460', lineHeight: 1.4 }}>
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 Receive instant order placement confirmations, live DTDC / India Post courier scan
                 alerts, and doorstep delivery notifications directly to your WhatsApp.
               </p>
@@ -276,25 +153,14 @@ export default function AccountProfilePage() {
           </label>
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={isSaving}
-          style={{
-            alignSelf: 'flex-start',
-            padding: '12px 28px',
-            backgroundColor: '#0A2E24',
-            color: '#FDFBF7',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '0.9rem',
-            fontWeight: 600,
-            cursor: isSaving ? 'not-allowed' : 'pointer',
-            opacity: isSaving ? 0.7 : 1,
-            letterSpacing: '0.04em'
-          }}
+          onClick={() => triggerHaptic('medium')}
+          className="self-start px-6 h-10 text-sm font-medium active:scale-[0.96] transition-transform duration-150"
         >
           {isSaving ? 'Saving Changes...' : 'Save Profile Details'}
-        </button>
+        </Button>
       </form>
     </div>
   );

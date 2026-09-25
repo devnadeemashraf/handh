@@ -4,11 +4,15 @@ import { AttributionTracker } from '@/components/layout/AttributionTracker';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { OfflineBanner } from '@/components/layout/OfflineBanner';
 import { PwaRegister } from '@/components/layout/PwaRegister';
+import { ThemeInjector } from '@/components/layout/ThemeInjector';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
+import { getCachedStore } from '@/lib/catalog-cache';
 
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+
+import { resolveStorefrontConfig } from '@hh/domain';
 
 import '../lib/polyfill-crypto';
 import './globals.css';
@@ -71,9 +75,15 @@ export const viewport: Viewport = {
   viewportFit: 'cover'
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const store = await getCachedStore('hh');
+  const storefrontConfig = resolveStorefrontConfig(store?.settings?.storefront);
+
   return (
     <html lang="en" className={`h-full ${playfair.variable} ${plusJakarta.variable}`}>
+      <head>
+        <ThemeInjector theme={storefrontConfig.theme} />
+      </head>
       <body className="min-h-full flex flex-col pb-16 md:pb-0 font-sans">
         <AuthProvider>
           <CartProvider>

@@ -15,6 +15,7 @@ import {
   Truck
 } from 'lucide-react';
 import { useState } from 'react';
+import { triggerHaptic } from '@/lib/haptic';
 
 import { COURIER_LABELS, type CourierProvider, resolveCourierTrackingUrl } from '@hh/domain';
 
@@ -39,6 +40,7 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
     if (!fulfillment) return;
     try {
       await navigator.clipboard.writeText(fulfillment.trackingNumber);
+      triggerHaptic('success');
       setHasCopiedAwb(true);
       setTimeout(() => setHasCopiedAwb(false), 2000);
     } catch {
@@ -63,106 +65,41 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
   // Case 1: Pre-dispatch / In Workshop Preparation (no courier assigned yet)
   if (!fulfillment) {
     return (
-      <div className="track-box" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div className="track-box flex flex-col gap-6">
         {/* Brand Header */}
-        <div style={{ textAlign: 'center' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '50%',
-              backgroundColor: '#164335',
-              color: '#C5A880',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '12px',
-              border: '1px solid #235847',
-              fontSize: '1rem',
-              fontFamily: 'serif'
-            }}
-          >
+        <div className="text-center">
+          <div className="h-12 w-12 rounded-full bg-primary/20 text-accent inline-flex items-center justify-center mb-3 border border-primary/40 text-base font-serif">
             H&amp;H
           </div>
-          <h1
-            style={{
-              fontSize: '1.75rem',
-              fontFamily: 'serif',
-              color: '#FDFBF7',
-              margin: '0 0 6px'
-            }}
-          >
+          <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-foreground mb-1.5">
             Order Live Status
           </h1>
-          <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: 0 }}>
+          <p className="text-xs sm:text-sm text-muted-foreground m-0">
             Order Reference:{' '}
-            <span style={{ fontFamily: 'monospace', color: '#C5A880', fontWeight: 600 }}>
-              {order.orderNumber}
-            </span>
+            <span className="font-mono text-accent font-semibold">{order.orderNumber}</span>
           </p>
         </div>
 
         {/* Status Card */}
-        <div
-          className="admin-card"
-          style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '28px' }}
-        >
+        <div className="admin-card flex flex-col gap-6 p-6 sm:p-7">
           {/* Header Row */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid #1C4D3E',
-              paddingBottom: '20px',
-              flexWrap: 'wrap',
-              gap: '12px'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '12px',
-                  backgroundColor: '#164335',
-                  color: '#C5A880',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid #235847'
-                }}
-              >
-                <Sparkles style={{ width: '20px', height: '20px' }} />
+          <div className="flex items-center justify-between border-b border-border/60 pb-5 flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/20 text-accent flex items-center justify-center border border-primary/40 shrink-0">
+                <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <p
-                  style={{
-                    fontSize: '0.75rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    color: '#8BAAA0',
-                    fontWeight: 600,
-                    margin: 0
-                  }}
-                >
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold m-0">
                   Live Progress
                 </p>
-                <h2
-                  style={{
-                    fontSize: '1.0625rem',
-                    fontWeight: 600,
-                    color: '#FDFBF7',
-                    margin: '2px 0 0'
-                  }}
-                >
+                <h2 className="text-base font-semibold text-foreground mt-0.5">
                   Workshop Preparation &amp; Packing
                 </h2>
               </div>
             </div>
 
-            <span className="admin-badge admin-badge-amber" style={{ padding: '6px 12px' }}>
-              <Clock style={{ width: '14px', height: '14px' }} />
+            <span className="admin-badge admin-badge-amber px-3 py-1.5 gap-1.5 inline-flex items-center text-xs">
+              <Clock className="h-3.5 w-3.5" />
               Order Confirmed
             </span>
           </div>
@@ -172,13 +109,13 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             {/* Step 1: Order Confirmed */}
             <div className="track-step-item">
               <div className="track-step-icon done">
-                <PackageCheck style={{ width: '18px', height: '18px' }} />
+                <PackageCheck className="h-4.5 w-4.5" />
               </div>
-              <div style={{ paddingTop: '6px' }}>
-                <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+              <div className="pt-1.5">
+                <p className="text-sm font-semibold text-foreground m-0">
                   Order Confirmed &amp; Payment Captured
                 </p>
-                <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Transaction verified on {formatDate(order.createdAt)}
                 </p>
               </div>
@@ -187,13 +124,13 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             {/* Step 2: Workshop Preparation (Active) */}
             <div className="track-step-item">
               <div className="track-step-icon active">
-                <Sparkles style={{ width: '18px', height: '18px' }} />
+                <Sparkles className="h-4.5 w-4.5" />
               </div>
-              <div style={{ paddingTop: '6px' }}>
-                <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#C5A880', margin: 0 }}>
+              <div className="pt-1.5">
+                <p className="text-sm font-semibold text-accent m-0">
                   Artisanal Quality Inspection &amp; Packing
                 </p>
-                <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Hand-crafted pieces are being individually examined and packed into bespoke
                   H&amp;H gift boxes.
                 </p>
@@ -203,13 +140,13 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             {/* Step 3: Courier Handover (Pending) */}
             <div className="track-step-item">
               <div className="track-step-icon pending">
-                <Truck style={{ width: '18px', height: '18px' }} />
+                <Truck className="h-4.5 w-4.5" />
               </div>
-              <div style={{ paddingTop: '6px' }}>
-                <p style={{ fontSize: '0.875rem', fontWeight: 500, color: '#53766A', margin: 0 }}>
+              <div className="pt-1.5">
+                <p className="text-sm font-medium text-muted-foreground m-0">
                   Courier Handover &amp; Live Tracking
                 </p>
-                <p style={{ fontSize: '0.75rem', color: '#53766A', margin: '2px 0 0' }}>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Consignment will be handed to DTDC / India Post / Delhivery with instant AWB
                   tracking.
                 </p>
@@ -218,60 +155,39 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
           </div>
 
           {/* Delivery Destination & Info Card */}
-          <div
-            className="admin-card-inner"
-            style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.8125rem' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#E8ECE9' }}>
-              <MapPin style={{ width: '16px', height: '16px', color: '#C5A880', flexShrink: 0 }} />
+          <div className="admin-card-inner flex flex-col gap-2.5 text-xs sm:text-sm">
+            <div className="flex items-center gap-2 text-foreground">
+              <MapPin className="h-4 w-4 text-accent shrink-0" />
               <span>
                 Shipping to: <strong>{order.customerName}</strong> — {shippingAddr.city},{' '}
                 {shippingAddr.state} ({shippingAddr.postalCode})
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#8BAAA0' }}>
-              <Calendar
-                style={{ width: '16px', height: '16px', color: '#C5A880', flexShrink: 0 }}
-              />
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Calendar className="h-4 w-4 text-accent shrink-0" />
               <span>Dispatches within 24-48 business hours from our Hyderabad atelier.</span>
             </div>
           </div>
 
           {/* Workshop Notice */}
-          <div
-            style={{
-              padding: '14px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(22, 67, 53, 0.4)',
-              border: '1px solid #1C4D3E',
-              fontSize: '0.75rem',
-              color: '#8BAAA0',
-              lineHeight: 1.6
-            }}
-          >
-            <strong style={{ color: '#FDFBF7' }}>Live Tracking Note:</strong> As soon as your parcel
+          <div className="p-3.5 rounded-xl bg-primary/10 border border-primary/30 text-xs text-muted-foreground leading-relaxed">
+            <strong className="text-foreground">Live Tracking Note:</strong> As soon as your parcel
             is collected by the courier, your live Air Waybill (AWB) consignment number and official
             tracking portal link will update on this page automatically.
           </div>
         </div>
 
         {/* Concierge Support Footer */}
-        <div style={{ textAlign: 'center', fontSize: '0.75rem', color: '#8BAAA0' }}>
-          <p style={{ margin: '0 0 6px' }}>Have questions about your order or customization?</p>
+        <div className="text-center text-xs text-muted-foreground">
+          <p className="mb-1.5">Have questions about your order or customization?</p>
           <a
             href="https://wa.me/919876543210"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              color: '#C5A880',
-              textDecoration: 'none',
-              fontWeight: 500
-            }}
+            onClick={() => triggerHaptic('selection')}
+            className="inline-flex items-center gap-1.5 text-accent hover:text-accent/80 transition-colors font-medium active:scale-[0.98]"
           >
-            <MessageCircle style={{ width: '14px', height: '14px' }} />
+            <MessageCircle className="h-3.5 w-3.5" />
             <span>Chat with H&amp;H Concierge on WhatsApp</span>
           </a>
         </div>
@@ -281,106 +197,43 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
 
   // Case 2: Parcel has been dispatched with Courier Tracking
   return (
-    <div className="track-box" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="track-box flex flex-col gap-6">
       {/* Brand Header */}
-      <div style={{ textAlign: 'center' }}>
-        <div
-          style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '50%',
-            backgroundColor: '#164335',
-            color: '#C5A880',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: '12px',
-            border: '1px solid #235847',
-            fontSize: '1rem',
-            fontFamily: 'serif'
-          }}
-        >
+      <div className="text-center">
+        <div className="h-12 w-12 rounded-full bg-primary/20 text-accent inline-flex items-center justify-center mb-3 border border-primary/40 text-base font-serif">
           H&amp;H
         </div>
-        <h1
-          style={{
-            fontSize: '1.75rem',
-            fontFamily: 'serif',
-            color: '#FDFBF7',
-            margin: '0 0 6px'
-          }}
-        >
+        <h1 className="text-2xl sm:text-3xl font-serif font-semibold text-foreground mb-1.5">
           Shipment Progress
         </h1>
-        <p style={{ fontSize: '0.8125rem', color: '#8BAAA0', margin: 0 }}>
+        <p className="text-xs sm:text-sm text-muted-foreground m-0">
           Consignment Reference:{' '}
-          <span style={{ fontFamily: 'monospace', color: '#C5A880', fontWeight: 600 }}>
+          <span className="font-mono text-accent font-semibold">
             {fulfillment.trackingReference}
           </span>
         </p>
       </div>
 
       {/* Main Status Card */}
-      <div
-        className="admin-card"
-        style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: '28px' }}
-      >
+      <div className="admin-card flex flex-col gap-6 p-6 sm:p-7">
         {/* Status Badge & Animation */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: '1px solid #1C4D3E',
-            paddingBottom: '20px',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '12px',
-                backgroundColor: '#164335',
-                color: '#C5A880',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px solid #235847'
-              }}
-            >
-              <Truck style={{ width: '20px', height: '20px' }} />
+        <div className="flex items-center justify-between border-b border-border/60 pb-5 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-primary/20 text-accent flex items-center justify-center border border-primary/40 shrink-0">
+              <Truck className="h-5 w-5" />
             </div>
             <div>
-              <p
-                style={{
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: '#8BAAA0',
-                  fontWeight: 600,
-                  margin: 0
-                }}
-              >
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold m-0">
                 Status
               </p>
-              <h2
-                style={{
-                  fontSize: '1.0625rem',
-                  fontWeight: 600,
-                  color: '#FDFBF7',
-                  margin: '2px 0 0'
-                }}
-              >
+              <h2 className="text-base font-semibold text-foreground mt-0.5">
                 {fulfillment.status === 'shipped' ? 'Handed to Courier (In Transit)' : 'Delivered'}
               </h2>
             </div>
           </div>
 
-          <span className="admin-badge admin-badge-emerald" style={{ padding: '6px 12px' }}>
-            <ShieldCheck style={{ width: '14px', height: '14px' }} />
+          <span className="admin-badge admin-badge-emerald px-3 py-1.5 gap-1.5 inline-flex items-center text-xs">
+            <ShieldCheck className="h-3.5 w-3.5" />
             Verified Dispatch
           </span>
         </div>
@@ -390,13 +243,13 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
           {/* Step 1: Confirmed */}
           <div className="track-step-item">
             <div className="track-step-icon done">
-              <PackageCheck style={{ width: '18px', height: '18px' }} />
+              <PackageCheck className="h-4.5 w-4.5" />
             </div>
-            <div style={{ paddingTop: '6px' }}>
-              <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+            <div className="pt-1.5">
+              <p className="text-sm font-semibold text-foreground m-0">
                 Order Confirmed &amp; Payment Captured
               </p>
-              <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Payment verified on {formatDate(order.createdAt)}
               </p>
             </div>
@@ -405,13 +258,13 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
           {/* Step 2: Packed */}
           <div className="track-step-item">
             <div className="track-step-icon done">
-              <Sparkles style={{ width: '18px', height: '18px' }} />
+              <Sparkles className="h-4.5 w-4.5" />
             </div>
-            <div style={{ paddingTop: '6px' }}>
-              <p style={{ fontSize: '0.875rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+            <div className="pt-1.5">
+              <p className="text-sm font-semibold text-foreground m-0">
                 Handcrafted &amp; Packed at Hyderabad Atelier
               </p>
-              <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Artisanal inspection completed and dispatched on {formatDate(fulfillment.shippedAt)}
               </p>
             </div>
@@ -424,22 +277,19 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
                 fulfillment.status === 'delivered' ? 'done' : 'active'
               }`}
             >
-              <Truck style={{ width: '18px', height: '18px' }} />
+              <Truck className="h-4.5 w-4.5" />
             </div>
-            <div style={{ paddingTop: '6px' }}>
+            <div className="pt-1.5">
               <p
-                style={{
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  color: fulfillment.status === 'delivered' ? '#FDFBF7' : '#C5A880',
-                  margin: 0
-                }}
+                className={`text-sm font-semibold m-0 ${
+                  fulfillment.status === 'delivered' ? 'text-foreground' : 'text-accent'
+                }`}
               >
                 {fulfillment.status === 'delivered'
                   ? 'Courier Transit Completed'
                   : 'In Transit with Courier Partner'}
               </p>
-              <p style={{ fontSize: '0.75rem', color: '#8BAAA0', margin: '2px 0 0' }}>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Handed to{' '}
                 {COURIER_LABELS[fulfillment.courierProvider as CourierProvider] ||
                   fulfillment.courierProvider}{' '}
@@ -455,27 +305,24 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
                 fulfillment.status === 'delivered' ? 'done' : 'pending'
               }`}
             >
-              <CheckCircle2 style={{ width: '18px', height: '18px' }} />
+              <CheckCircle2 className="h-4.5 w-4.5" />
             </div>
-            <div style={{ paddingTop: '6px' }}>
+            <div className="pt-1.5">
               <p
-                style={{
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  color: fulfillment.status === 'delivered' ? '#34D399' : '#53766A',
-                  margin: 0
-                }}
+                className={`text-sm font-semibold m-0 ${
+                  fulfillment.status === 'delivered' ? 'text-emerald-400' : 'text-muted-foreground'
+                }`}
               >
                 {fulfillment.status === 'delivered'
                   ? 'Delivered to Customer'
                   : 'Final Delivery to Destination'}
               </p>
               <p
-                style={{
-                  fontSize: '0.75rem',
-                  color: fulfillment.status === 'delivered' ? '#8BAAA0' : '#53766A',
-                  margin: '2px 0 0'
-                }}
+                className={`text-xs mt-0.5 ${
+                  fulfillment.status === 'delivered'
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground/60'
+                }`}
               >
                 {fulfillment.status === 'delivered'
                   ? `Successfully delivered on ${formatDate(fulfillment.deliveredAt || fulfillment.updatedAt)}`
@@ -487,43 +334,19 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
 
         {/* Real-time Courier Webhook Event Banner */}
         {fulfillment.latestEvent && (
-          <div
-            style={{
-              padding: '12px 14px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(22, 67, 53, 0.6)',
-              border: '1px solid #235847',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}
-          >
+          <div className="p-3 sm:p-3.5 rounded-xl bg-primary/20 border border-primary/40 flex items-center gap-3">
             <div
-              style={{
-                width: '10px',
-                height: '10px',
-                borderRadius: '50%',
-                backgroundColor: fulfillment.status === 'delivered' ? '#34D399' : '#C5A880',
-                boxShadow:
-                  fulfillment.status === 'delivered'
-                    ? '0 0 8px rgba(52, 211, 153, 0.8)'
-                    : '0 0 8px rgba(197, 168, 128, 0.8)',
-                flexShrink: 0
-              }}
+              className={`h-2.5 w-2.5 rounded-full shrink-0 ${
+                fulfillment.status === 'delivered'
+                  ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]'
+                  : 'bg-accent shadow-[0_0_8px_rgba(197,168,128,0.8)]'
+              }`}
             />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <span
-                style={{
-                  fontSize: '0.6875rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: '#8BAAA0',
-                  fontWeight: 600
-                }}
-              >
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
                 Latest Courier Scan Update
               </span>
-              <span style={{ fontSize: '0.875rem', color: '#FDFBF7', fontWeight: 500 }}>
+              <span className="text-xs sm:text-sm text-foreground font-medium">
                 {fulfillment.latestEvent}
               </span>
             </div>
@@ -531,87 +354,47 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
         )}
 
         {/* Courier Details Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '12px'
-          }}
-        >
-          <div
-            className="admin-card-inner"
-            style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
-          >
-            <span style={{ fontSize: '0.75rem', color: '#8BAAA0' }}>Courier Partner</span>
-            <p style={{ fontSize: '0.9375rem', fontWeight: 600, color: '#FDFBF7', margin: 0 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="admin-card-inner flex flex-col gap-1 p-3.5 rounded-xl bg-muted/20 border border-border/60">
+            <span className="text-xs text-muted-foreground">Courier Partner</span>
+            <p className="text-sm font-semibold text-foreground m-0">
               {COURIER_LABELS[fulfillment.courierProvider as CourierProvider] ||
                 fulfillment.courierProvider}
             </p>
           </div>
 
-          <div
-            className="admin-card-inner"
-            style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '0.75rem', color: '#8BAAA0' }}>Consignment / AWB #</span>
+          <div className="admin-card-inner flex flex-col gap-1 p-3.5 rounded-xl bg-muted/20 border border-border/60">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Consignment / AWB #</span>
               <button
+                type="button"
                 onClick={copyAwb}
-                style={{
-                  color: '#C5A880',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '0.6875rem'
-                }}
+                className="text-accent hover:text-accent/80 transition-colors flex items-center gap-1 text-xs font-medium cursor-pointer"
                 title="Copy tracking number"
               >
                 {hasCopiedAwb ? (
-                  <Check style={{ width: '12px', height: '12px', color: '#34D399' }} />
+                  <Check className="h-3 w-3 text-emerald-400" />
                 ) : (
-                  <Copy style={{ width: '12px', height: '12px' }} />
+                  <Copy className="h-3 w-3" />
                 )}
                 <span>{hasCopiedAwb ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
-            <p
-              style={{
-                fontSize: '0.9375rem',
-                fontFamily: 'monospace',
-                fontWeight: 700,
-                color: '#C5A880',
-                margin: 0
-              }}
-            >
+            <p className="text-sm font-mono font-bold text-accent m-0">
               {fulfillment.trackingNumber}
             </p>
           </div>
         </div>
 
         {/* Timeline & Destination */}
-        <div
-          className="admin-card-inner"
-          style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.8125rem' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#E8ECE9' }}>
-            <Calendar style={{ width: '16px', height: '16px', color: '#C5A880', flexShrink: 0 }} />
+        <div className="admin-card-inner flex flex-col gap-2.5 text-xs sm:text-sm p-4 rounded-xl bg-muted/20 border border-border/60">
+          <div className="flex items-center gap-2.5 text-foreground">
+            <Calendar className="h-4 w-4 text-accent shrink-0" />
             <span>Dispatched from Hyderabad workshop on {formatDate(fulfillment.shippedAt)}</span>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              color: '#E8ECE9',
-              borderTop: '1px solid rgba(28, 77, 62, 0.6)',
-              paddingTop: '10px'
-            }}
-          >
-            <MapPin style={{ width: '16px', height: '16px', color: '#C5A880', flexShrink: 0 }} />
+          <div className="flex items-center gap-2.5 text-foreground border-t border-border/40 pt-2.5">
+            <MapPin className="h-4 w-4 text-accent shrink-0" />
             <span>
               Destination: {shippingAddr.city}, {shippingAddr.state} ({shippingAddr.postalCode})
             </span>
@@ -624,50 +407,30 @@ export default function TrackingCard({ fulfillment, order }: TrackingCardProps) 
             href={officialUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="admin-btn-primary"
-            style={{
-              width: '100%',
-              minHeight: '48px',
-              fontSize: '0.9375rem',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-            }}
+            onClick={() => triggerHaptic('selection')}
+            className="admin-btn-primary w-full min-h-12 text-sm font-medium shadow-md active:scale-[0.98] transition-transform duration-150 inline-flex items-center justify-center gap-2 rounded-xl"
           >
             <span>Track on Official Courier Website</span>
-            <ExternalLink style={{ width: '16px', height: '16px' }} />
+            <ExternalLink className="h-4 w-4" />
           </a>
         ) : (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '12px',
-              borderRadius: '10px',
-              backgroundColor: 'rgba(22, 67, 53, 0.4)',
-              fontSize: '0.75rem',
-              color: '#8BAAA0'
-            }}
-          >
+          <div className="text-center p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs text-muted-foreground">
             Please use your AWB number on the courier partner&apos;s mobile app or local counter.
           </div>
         )}
       </div>
 
       {/* Concierge Support Footer */}
-      <div style={{ textAlign: 'center', fontSize: '0.75rem', color: '#8BAAA0' }}>
-        <p style={{ margin: '0 0 6px' }}>Questions regarding your delivery schedule?</p>
+      <div className="text-center text-xs text-muted-foreground">
+        <p className="mb-1.5">Questions regarding your delivery schedule?</p>
         <a
           href="https://wa.me/919876543210"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: '#C5A880',
-            textDecoration: 'none',
-            fontWeight: 500
-          }}
+          onClick={() => triggerHaptic('selection')}
+          className="inline-flex items-center gap-1.5 text-accent hover:text-accent/80 transition-colors font-medium active:scale-[0.98]"
         >
-          <MessageCircle style={{ width: '14px', height: '14px' }} />
+          <MessageCircle className="h-3.5 w-3.5" />
           <span>Chat with H&amp;H Concierge on WhatsApp</span>
         </a>
       </div>

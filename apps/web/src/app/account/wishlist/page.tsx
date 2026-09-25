@@ -4,6 +4,8 @@ import { Check, Heart, ShoppingBag, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { triggerHaptic } from '@/lib/haptic';
 
 import { Money, type WishlistItemWithDetails } from '@hh/domain';
 
@@ -70,42 +72,16 @@ export default function AccountWishlistPage() {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div style={{ borderBottom: '1px solid var(--color-border)', paddingBottom: '20px' }}>
-          <div
-            style={{
-              height: '28px',
-              width: '180px',
-              backgroundColor: '#eee9e0',
-              borderRadius: '4px',
-              marginBottom: '8px'
-            }}
-          />
-          <div
-            style={{
-              height: '16px',
-              width: '280px',
-              backgroundColor: '#f5f0e8',
-              borderRadius: '4px'
-            }}
-          />
+      <div className="flex flex-col gap-5">
+        <div className="border-b border-border/60 pb-5">
+          <div className="h-7 w-44 bg-muted/60 rounded-md mb-2 animate-pulse" />
+          <div className="h-4 w-72 bg-muted/40 rounded-md animate-pulse" />
         </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-            gap: '24px'
-          }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {[1, 2, 3].map((n) => (
             <div
               key={n}
-              style={{
-                height: '380px',
-                backgroundColor: '#f9f6f0',
-                borderRadius: '8px',
-                border: '1px solid var(--color-border)'
-              }}
+              className="h-96 bg-muted/30 rounded-2xl border border-border/60 animate-pulse"
             />
           ))}
         </div>
@@ -114,125 +90,49 @@ export default function AccountWishlistPage() {
   }
 
   return (
-    <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'baseline',
-          borderBottom: '1px solid var(--color-border)',
-          paddingBottom: '20px',
-          marginBottom: '32px'
-        }}
-      >
+    <div className="bg-card rounded-2xl border border-border/80 p-6 sm:p-8 shadow-sm">
+      <div className="flex justify-between items-baseline border-b border-border/60 pb-5 mb-8">
         <div>
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.75rem',
-              fontWeight: 500,
-              color: 'var(--color-primary)',
-              margin: '0 0 4px 0'
-            }}
-          >
+          <h1 className="font-serif text-2xl font-semibold text-foreground mb-1">
             Saved Creations
           </h1>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+          <p className="text-xs sm:text-sm text-muted-foreground m-0">
             Your curated collection of bespoke modest couture.
           </p>
         </div>
-        <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
+        <span className="text-xs font-medium text-muted-foreground">
           {items.length} {items.length === 1 ? 'piece' : 'pieces'} saved
         </span>
       </div>
 
       {error && (
-        <div
-          style={{
-            padding: '12px 16px',
-            backgroundColor: '#FEF2F2',
-            border: '1px solid #F87171',
-            borderRadius: 'var(--radius-sm, 4px)',
-            color: '#991B1B',
-            fontSize: '0.85rem',
-            marginBottom: '24px'
-          }}
-        >
+        <div className="p-3.5 bg-destructive/10 border border-destructive/30 rounded-xl text-destructive text-sm font-medium mb-6">
           {error}
         </div>
       )}
 
       {items.length === 0 ? (
-        <div
-          style={{
-            padding: '64px 24px',
-            textAlign: 'center',
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md, 8px)'
-          }}
-        >
-          <div
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(197, 168, 128, 0.12)',
-              color: 'var(--color-accent)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px'
-            }}
-          >
-            <Heart size={26} />
+        <div className="py-16 px-6 text-center bg-card rounded-2xl border border-border/60 max-w-md mx-auto">
+          <div className="h-14 w-14 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 text-accent">
+            <Heart className="h-6 w-6" />
           </div>
-          <h2
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.25rem',
-              fontWeight: 500,
-              color: 'var(--color-primary)',
-              margin: '0 0 8px 0'
-            }}
-          >
+          <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
             Your Wishlist is Empty
           </h2>
-          <p
-            style={{
-              fontSize: '0.9rem',
-              color: 'var(--color-text-muted)',
-              maxWidth: '380px',
-              margin: '0 auto 24px',
-              lineHeight: 1.6
-            }}
-          >
+          <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
             Explore our artisanal abayas and modest essentials. Save pieces as you browse to review
             or order anytime.
           </p>
-          <Link
-            href="/#catalog"
-            className="royale-button-primary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 28px',
-              textDecoration: 'none',
-              fontSize: '0.85rem'
-            }}
+          <Button
+            asChild
+            onClick={() => triggerHaptic('selection')}
+            className="px-6 h-10 text-sm font-medium active:scale-[0.96] transition-transform duration-150"
           >
-            <span>Explore Collection</span>
-          </Link>
+            <Link href="/#catalog">Explore Collection</Link>
+          </Button>
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-            gap: '24px'
-          }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {items.map((item) => {
             const prod = item.product;
             const priceFormatted = prod
@@ -246,45 +146,20 @@ export default function AccountWishlistPage() {
             return (
               <div
                 key={item.id}
-                style={{
-                  backgroundColor: 'var(--color-surface)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md, 8px)',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  position: 'relative'
-                }}
+                className="bg-card border border-border/80 rounded-2xl overflow-hidden flex flex-col relative shadow-xs group"
               >
                 {/* Image Container */}
-                <div
-                  style={{
-                    position: 'relative',
-                    width: '100%',
-                    aspectRatio: '3 / 4',
-                    backgroundColor: '#f4f1ea'
-                  }}
-                >
+                <div className="relative w-full aspect-3/4 bg-muted/30 overflow-hidden">
                   {prod?.imageUrl ? (
                     <Image
                       src={prod.imageUrl}
                       alt={prod.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      style={{ objectFit: 'cover' }}
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--color-text-muted)',
-                        fontSize: '0.85rem'
-                      }}
-                    >
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs font-serif">
                       H&amp;H Signature
                     </div>
                   )}
@@ -292,56 +167,28 @@ export default function AccountWishlistPage() {
                   {/* Remove Button */}
                   <button
                     type="button"
-                    onClick={() => handleRemove(item.productId)}
-                    disabled={removingId === item.productId}
-                    style={{
-                      position: 'absolute',
-                      top: '12px',
-                      right: '12px',
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                      border: '1px solid rgba(0, 0, 0, 0.08)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#991B1B',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
-                      transition: 'transform 0.2s ease'
+                    onClick={() => {
+                      triggerHaptic('heavy');
+                      handleRemove(item.productId);
                     }}
+                    disabled={removingId === item.productId}
+                    className="absolute top-3 right-3 h-8 w-8 rounded-full bg-background/90 backdrop-blur-xs border border-border/60 flex items-center justify-center text-destructive/80 hover:text-destructive shadow-sm cursor-pointer active:scale-90 transition-transform duration-150"
                     title="Remove from saved"
                     aria-label="Remove item"
                   >
-                    <Trash2 size={15} />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
 
                 {/* Content */}
-                <div
-                  style={{
-                    padding: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    flex: 1,
-                    justifyContent: 'space-between'
-                  }}
-                >
+                <div className="p-4 flex flex-col flex-1 justify-between gap-3">
                   <div>
-                    <h2
-                      style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontSize: '1rem',
-                        fontWeight: 500,
-                        color: 'var(--color-text)',
-                        margin: '0 0 6px 0'
-                      }}
-                    >
+                    <h2 className="font-serif text-sm font-semibold text-foreground mb-1 line-clamp-1">
                       {prod ? (
                         <Link
                           href={`/products/${prod.slug}`}
-                          style={{ color: 'inherit', textDecoration: 'none' }}
+                          onClick={() => triggerHaptic('selection')}
+                          className="hover:underline"
                         >
                           {prod.title}
                         </Link>
@@ -350,33 +197,14 @@ export default function AccountWishlistPage() {
                       )}
                     </h2>
 
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'baseline',
-                        gap: '8px',
-                        marginBottom: '16px'
-                      }}
-                    >
+                    <div className="flex items-baseline gap-2 mb-2">
                       {priceFormatted && (
-                        <span
-                          style={{
-                            fontWeight: 600,
-                            color: 'var(--color-primary)',
-                            fontSize: '0.95rem'
-                          }}
-                        >
+                        <span className="font-semibold text-foreground text-sm">
                           {priceFormatted}
                         </span>
                       )}
                       {comparePriceFormatted && (
-                        <span
-                          style={{
-                            fontSize: '0.8rem',
-                            color: 'var(--color-text-muted)',
-                            textDecoration: 'line-through'
-                          }}
-                        >
+                        <span className="text-xs text-muted-foreground line-through">
                           {comparePriceFormatted}
                         </span>
                       )}
@@ -384,38 +212,31 @@ export default function AccountWishlistPage() {
                   </div>
 
                   {/* Move to Bag Action */}
-                  <button
+                  <Button
                     type="button"
-                    onClick={() => handleMoveToCart(item)}
+                    onClick={() => {
+                      triggerHaptic('medium');
+                      handleMoveToCart(item);
+                    }}
                     disabled={
                       !prod?.isAvailable ||
                       addingId === item.productId ||
                       addedId === item.productId
                     }
-                    className="royale-button-primary"
-                    style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      fontSize: '0.85rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      backgroundColor: addedId === item.productId ? '#0e5a3a' : undefined
-                    }}
+                    className="w-full h-9 text-xs font-medium gap-1.5 active:scale-[0.96] transition-transform duration-150"
                   >
                     {addedId === item.productId ? (
                       <>
-                        <Check size={16} />
+                        <Check className="h-4 w-4 text-emerald-400" />
                         <span>Added to Bag</span>
                       </>
                     ) : (
                       <>
-                        <ShoppingBag size={16} />
+                        <ShoppingBag className="h-4 w-4" />
                         <span>{prod?.isAvailable ? 'Add to Bag' : 'Sold Out'}</span>
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </div>
             );

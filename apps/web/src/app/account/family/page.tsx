@@ -2,6 +2,10 @@
 
 import { Edit2, Plus, Trash2, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { triggerHaptic } from '@/lib/haptic';
 
 import type { FamilyMember } from '@hh/domain';
 
@@ -132,114 +136,61 @@ export default function AccountFamilyPage() {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: '#FFFFFF',
-        border: '1px solid #EBE7DF',
-        borderRadius: '12px',
-        padding: '28px',
-        boxShadow: '0 4px 12px rgba(10, 46, 36, 0.03)'
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid #F0ECE4',
-          paddingBottom: '16px',
-          marginBottom: '24px'
-        }}
-      >
+    <div className="bg-card rounded-2xl border border-border/80 p-6 sm:p-8 shadow-sm">
+      <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-6">
         <div>
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.6rem',
-              color: '#0A2E24',
-              margin: '0 0 6px'
-            }}
-          >
+          <h1 className="font-serif text-2xl font-semibold text-foreground mb-1.5">
             Family Members & Size Profiles
           </h1>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#5C6460' }}>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             Store bespoke measurements, modest styling nuances, and size preferences for yourself
             and loved ones.
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 18px',
-            backgroundColor: '#0A2E24',
-            color: '#FDFBF7',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '0.88rem',
-            fontWeight: 600,
-            cursor: 'pointer'
+        <Button
+          onClick={() => {
+            triggerHaptic('selection');
+            handleOpenAdd();
           }}
+          className="gap-2 h-10 px-4 text-sm font-medium active:scale-[0.96] transition-transform duration-150"
         >
-          <Plus size={16} /> Add Profile
-        </button>
+          <Plus className="h-4 w-4" /> Add Profile
+        </Button>
       </div>
 
       {error && (
-        <div
-          style={{
-            backgroundColor: '#FEF2F2',
-            border: '1px solid #FCA5A5',
-            borderRadius: '8px',
-            padding: '12px',
-            color: '#991B1B',
-            fontSize: '0.85rem',
-            marginBottom: '20px'
-          }}
-        >
+        <div className="p-3.5 bg-destructive/10 border border-destructive/30 rounded-xl text-destructive text-sm font-medium mb-5">
           {error}
         </div>
       )}
 
       {isLoading ? (
-        <p style={{ color: '#5C6460' }}>Loading family size profiles...</p>
+        <p className="text-muted-foreground text-sm py-8 text-center animate-pulse">
+          Loading family size profiles...
+        </p>
       ) : members.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <Users size={36} color="#C5A880" style={{ margin: '0 auto 12px' }} />
-          <p style={{ fontWeight: 600, color: '#0A2E24', margin: '0 0 4px' }}>
+        <div className="text-center py-12">
+          <Users className="h-9 w-9 text-accent mx-auto mb-3" />
+          <p className="font-serif text-lg font-semibold text-foreground mb-1">
             No Family Profiles Saved
           </p>
-          <p style={{ fontSize: '0.85rem', color: '#5C6460', margin: '0 0 16px' }}>
+          <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto leading-relaxed">
             Add sizes for yourself, your daughter, spouse, or mother to make gifting and sizing
             effortless.
           </p>
-          <button
-            onClick={handleOpenAdd}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#0A2E24',
-              color: '#FDFBF7',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              cursor: 'pointer'
+          <Button
+            onClick={() => {
+              triggerHaptic('selection');
+              handleOpenAdd();
             }}
+            className="px-5 h-10 text-sm font-medium active:scale-[0.96] transition-transform duration-150"
           >
             Create First Profile
-          </button>
+          </Button>
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: '20px'
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {members.map((mem) => {
             const sizes = mem.preferences?.sizes || {};
             const style = mem.preferences?.style || {};
@@ -247,180 +198,97 @@ export default function AccountFamilyPage() {
             return (
               <div
                 key={mem.id}
-                style={{
-                  border: '1px solid #EBE7DF',
-                  borderRadius: '12px',
-                  padding: '20px',
-                  backgroundColor: '#FFFFFF',
-                  boxShadow: '0 2px 8px rgba(10, 46, 36, 0.02)'
-                }}
+                className="rounded-xl p-5 border border-border/80 bg-card hover:border-border transition-all flex flex-col justify-between"
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '12px'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontWeight: 700, fontSize: '1.05rem', color: '#0A2E24' }}>
-                      {mem.name}
-                    </span>
-                    {mem.relationship && (
-                      <span
-                        style={{
-                          fontSize: '0.72rem',
-                          fontWeight: 600,
-                          backgroundColor: '#F5EFE6',
-                          color: '#0A2E24',
-                          padding: '2px 8px',
-                          borderRadius: '12px'
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-base text-foreground">{mem.name}</span>
+                      {mem.relationship && (
+                        <Badge variant="secondary" className="text-[11px] font-semibold">
+                          {mem.relationship}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('selection');
+                          handleOpenEdit(mem);
                         }}
+                        aria-label="Edit profile"
+                        className="text-muted-foreground hover:text-foreground p-1 transition-colors cursor-pointer"
                       >
-                        {mem.relationship}
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          triggerHaptic('heavy');
+                          handleDelete(mem.id);
+                        }}
+                        aria-label="Delete profile"
+                        className="text-destructive/80 hover:text-destructive p-1 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sizes Pill Grid */}
+                  <div className="flex flex-wrap gap-1.5 mb-3.5">
+                    {sizes.abaya && (
+                      <span className="text-xs bg-muted/50 border border-border/60 px-2.5 py-1 rounded-md text-foreground">
+                        Abaya: <strong className="font-semibold">{sizes.abaya}</strong>
+                      </span>
+                    )}
+                    {sizes.hijab && (
+                      <span className="text-xs bg-muted/50 border border-border/60 px-2.5 py-1 rounded-md text-foreground">
+                        Hijab: <strong className="font-semibold">{sizes.hijab}</strong>
+                      </span>
+                    )}
+                    {sizes.ring && (
+                      <span className="text-xs bg-muted/50 border border-border/60 px-2.5 py-1 rounded-md text-foreground">
+                        Ring: <strong className="font-semibold">{sizes.ring}</strong>
+                      </span>
+                    )}
+                    {sizes.shoe && (
+                      <span className="text-xs bg-muted/50 border border-border/60 px-2.5 py-1 rounded-md text-foreground">
+                        Shoe: <strong className="font-semibold">{sizes.shoe}</strong>
                       </span>
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <button
-                      onClick={() => handleOpenEdit(mem)}
-                      aria-label="Edit profile"
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#5C6460',
-                        cursor: 'pointer',
-                        padding: '4px'
-                      }}
-                    >
-                      <Edit2 size={15} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(mem.id)}
-                      aria-label="Delete profile"
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#991B1B',
-                        cursor: 'pointer',
-                        padding: '4px'
-                      }}
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
-                </div>
+                  {/* Modesty & Style */}
+                  {style.modestyLevel && (
+                    <p className="text-xs text-muted-foreground mb-1.5">
+                      Modesty Preference:{' '}
+                      <strong className="text-foreground capitalize font-medium">
+                        {style.modestyLevel.replace('_', ' ')}
+                      </strong>
+                    </p>
+                  )}
 
-                {/* Sizes Pill Grid */}
-                <div
-                  style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}
-                >
-                  {sizes.abaya && (
-                    <span
-                      style={{
-                        fontSize: '0.78rem',
-                        backgroundColor: '#FBF9F5',
-                        border: '1px solid #EBE7DF',
-                        padding: '4px 8px',
-                        borderRadius: '6px'
-                      }}
-                    >
-                      Abaya: <strong>{sizes.abaya}</strong>
-                    </span>
-                  )}
-                  {sizes.hijab && (
-                    <span
-                      style={{
-                        fontSize: '0.78rem',
-                        backgroundColor: '#FBF9F5',
-                        border: '1px solid #EBE7DF',
-                        padding: '4px 8px',
-                        borderRadius: '6px'
-                      }}
-                    >
-                      Hijab: <strong>{sizes.hijab}</strong>
-                    </span>
-                  )}
-                  {sizes.ring && (
-                    <span
-                      style={{
-                        fontSize: '0.78rem',
-                        backgroundColor: '#FBF9F5',
-                        border: '1px solid #EBE7DF',
-                        padding: '4px 8px',
-                        borderRadius: '6px'
-                      }}
-                    >
-                      Ring: <strong>{sizes.ring}</strong>
-                    </span>
-                  )}
-                  {sizes.shoe && (
-                    <span
-                      style={{
-                        fontSize: '0.78rem',
-                        backgroundColor: '#FBF9F5',
-                        border: '1px solid #EBE7DF',
-                        padding: '4px 8px',
-                        borderRadius: '6px'
-                      }}
-                    >
-                      Shoe: <strong>{sizes.shoe}</strong>
-                    </span>
+                  {style.preferredColors && style.preferredColors.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                      <span className="text-[11px] text-muted-foreground">Favorite Tones:</span>
+                      {style.preferredColors.map((col) => (
+                        <span
+                          key={col}
+                          className="text-[11px] bg-secondary text-secondary-foreground px-2 py-0.5 rounded font-medium"
+                        >
+                          {col}
+                        </span>
+                      ))}
+                    </div>
                   )}
                 </div>
-
-                {/* Modesty & Style */}
-                {style.modestyLevel && (
-                  <p style={{ margin: '0 0 6px', fontSize: '0.8rem', color: '#5C6460' }}>
-                    Modesty Preference:{' '}
-                    <strong style={{ color: '#0A2E24', textTransform: 'capitalize' }}>
-                      {style.modestyLevel.replace('_', ' ')}
-                    </strong>
-                  </p>
-                )}
-
-                {style.preferredColors && style.preferredColors.length > 0 && (
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      flexWrap: 'wrap',
-                      marginBottom: '8px'
-                    }}
-                  >
-                    <span style={{ fontSize: '0.75rem', color: '#8C928F' }}>Favorite Tones:</span>
-                    {style.preferredColors.map((col) => (
-                      <span
-                        key={col}
-                        style={{
-                          fontSize: '0.72rem',
-                          backgroundColor: '#ECFDF5',
-                          color: '#065F46',
-                          padding: '2px 6px',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        {col}
-                      </span>
-                    ))}
-                  </div>
-                )}
 
                 {mem.preferences?.notes && (
-                  <p
-                    style={{
-                      margin: '8px 0 0',
-                      fontSize: '0.78rem',
-                      fontStyle: 'italic',
-                      color: '#5C6460',
-                      borderTop: '1px solid #F0ECE4',
-                      paddingTop: '8px'
-                    }}
-                  >
-                    "{mem.preferences.notes}"
+                  <p className="text-xs italic text-muted-foreground border-t border-border/60 pt-2.5 mt-2">
+                    &ldquo;{mem.preferences.notes}&rdquo;
                   </p>
                 )}
               </div>
@@ -431,105 +299,42 @@ export default function AccountFamilyPage() {
 
       {/* Modal */}
       {showModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            backgroundColor: 'rgba(10, 46, 36, 0.6)',
-            backdropFilter: 'blur(6px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px'
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '540px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              backgroundColor: '#FFFFFF',
-              borderRadius: '16px',
-              border: '1px solid #EBE7DF',
-              boxShadow: '0 24px 48px rgba(10, 46, 36, 0.2)'
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: '#0A2E24',
-                padding: '18px 24px',
-                color: '#FDFBF7',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
-              <h2 style={{ margin: 0, fontSize: '1.2rem', fontFamily: 'var(--font-serif)' }}>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-card rounded-2xl border border-border/80 shadow-xl animate-in zoom-in-95 duration-200">
+            <div className="bg-primary px-6 py-4 text-primary-foreground flex items-center justify-between">
+              <h2 className="font-serif text-lg font-semibold">
                 {editingMember ? 'Edit Size & Style Profile' : 'New Family Size Profile'}
               </h2>
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                style={{ background: 'none', border: 'none', color: '#FDFBF7', cursor: 'pointer' }}
+                className="text-primary-foreground/80 hover:text-primary-foreground cursor-pointer text-lg leading-none"
               >
                 ✕
               </button>
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}
-            >
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
-                <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      color: '#171A19',
-                      marginBottom: '4px'
-                    }}
-                  >
-                    Name
-                  </label>
-                  <input
+            <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">Name</label>
+                  <Input
                     type="text"
                     required
                     placeholder="e.g. Fatima (Self) or Maryam"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #EBE7DF',
-                      borderRadius: '6px'
-                    }}
+                    className="h-9 text-xs"
                   />
                 </div>
                 <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      color: '#171A19',
-                      marginBottom: '4px'
-                    }}
-                  >
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Relationship
                   </label>
                   <select
                     value={relationship}
                     onChange={(e) => setRelationship(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #EBE7DF',
-                      borderRadius: '6px',
-                      backgroundColor: '#FFFFFF'
-                    }}
+                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-foreground text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <option value="Self">Self</option>
                     <option value="Daughter">Daughter</option>
@@ -542,35 +347,13 @@ export default function AccountFamilyPage() {
               </div>
 
               {/* Sizing Subsection */}
-              <div
-                style={{
-                  padding: '12px',
-                  backgroundColor: '#FBF9F5',
-                  borderRadius: '8px',
-                  border: '1px solid #F0ECE4'
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    color: '#0A2E24',
-                    display: 'block',
-                    marginBottom: '10px'
-                  }}
-                >
+              <div className="p-3.5 bg-muted/30 rounded-xl border border-border/60">
+                <span className="text-xs font-semibold text-foreground block mb-2.5">
                   Standard Measurements & Fit
                 </span>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label
-                      style={{
-                        display: 'block',
-                        fontSize: '0.75rem',
-                        color: '#5C6460',
-                        marginBottom: '2px'
-                      }}
-                    >
+                    <label className="block text-[11px] text-muted-foreground mb-1">
                       Abaya Size
                     </label>
                     <select
@@ -578,13 +361,7 @@ export default function AccountFamilyPage() {
                       onChange={(e) =>
                         setAbayaSize(e.target.value as 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL' | '')
                       }
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '1px solid #EBE7DF',
-                        borderRadius: '6px',
-                        backgroundColor: '#FFFFFF'
-                      }}
+                      className="w-full h-8 px-2.5 rounded-md border border-input bg-background text-foreground text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     >
                       <option value="">None specified</option>
                       <option value="XS">XS</option>
@@ -596,75 +373,39 @@ export default function AccountFamilyPage() {
                     </select>
                   </div>
                   <div>
-                    <label
-                      style={{
-                        display: 'block',
-                        fontSize: '0.75rem',
-                        color: '#5C6460',
-                        marginBottom: '2px'
-                      }}
-                    >
+                    <label className="block text-[11px] text-muted-foreground mb-1">
                       Hijab Preference / Size
                     </label>
-                    <input
+                    <Input
                       type="text"
                       placeholder="e.g. Chiffon 75x180"
                       value={hijabPref}
                       onChange={(e) => setHijabPref(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '1px solid #EBE7DF',
-                        borderRadius: '6px'
-                      }}
+                      className="h-8 text-xs"
                     />
                   </div>
                   <div>
-                    <label
-                      style={{
-                        display: 'block',
-                        fontSize: '0.75rem',
-                        color: '#5C6460',
-                        marginBottom: '2px'
-                      }}
-                    >
+                    <label className="block text-[11px] text-muted-foreground mb-1">
                       Ring Size (US)
                     </label>
-                    <input
+                    <Input
                       type="text"
                       placeholder="e.g. 6 or 7"
                       value={ringSize}
                       onChange={(e) => setRingSize(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '1px solid #EBE7DF',
-                        borderRadius: '6px'
-                      }}
+                      className="h-8 text-xs"
                     />
                   </div>
                   <div>
-                    <label
-                      style={{
-                        display: 'block',
-                        fontSize: '0.75rem',
-                        color: '#5C6460',
-                        marginBottom: '2px'
-                      }}
-                    >
+                    <label className="block text-[11px] text-muted-foreground mb-1">
                       Shoe Size (EU/UK)
                     </label>
-                    <input
+                    <Input
                       type="text"
                       placeholder="e.g. EU 38"
                       value={shoeSize}
                       onChange={(e) => setShoeSize(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: '1px solid #EBE7DF',
-                        borderRadius: '6px'
-                      }}
+                      className="h-8 text-xs"
                     />
                   </div>
                 </div>
@@ -672,15 +413,7 @@ export default function AccountFamilyPage() {
 
               {/* Style & Colors */}
               <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    color: '#171A19',
-                    marginBottom: '4px'
-                  }}
-                >
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Modesty Silhouette
                 </label>
                 <select
@@ -688,13 +421,7 @@ export default function AccountFamilyPage() {
                   onChange={(e) =>
                     setModestyLevel(e.target.value as 'full_coverage' | 'moderate' | 'light')
                   }
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #EBE7DF',
-                    borderRadius: '6px',
-                    backgroundColor: '#FFFFFF'
-                  }}
+                  className="w-full h-9 px-3 rounded-md border border-input bg-background text-foreground text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   <option value="full_coverage">
                     Full Coverage (Classic modesty, flowing drape)
@@ -705,41 +432,20 @@ export default function AccountFamilyPage() {
               </div>
 
               <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    color: '#171A19',
-                    marginBottom: '4px'
-                  }}
-                >
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Preferred Colors / Tones (comma-separated)
                 </label>
-                <input
+                <Input
                   type="text"
                   placeholder="e.g. Emerald Green, Dusty Rose, Pearl White"
                   value={colorsInput}
                   onChange={(e) => setColorsInput(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #EBE7DF',
-                    borderRadius: '6px'
-                  }}
+                  className="h-9 text-xs"
                 />
               </div>
 
               <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    color: '#171A19',
-                    marginBottom: '4px'
-                  }}
-                >
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Personal Notes / Fabric Sensitivities
                 </label>
                 <textarea
@@ -747,50 +453,26 @@ export default function AccountFamilyPage() {
                   placeholder="e.g. Allergic to nickel; prefers breathable organic crepe for monsoon"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #EBE7DF',
-                    borderRadius: '6px'
-                  }}
+                  className="w-full p-2.5 rounded-md border border-input bg-background text-foreground text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 />
               </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '10px',
-                  marginTop: '8px'
-                }}
-              >
-                <button
+              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-border/60">
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowModal(false)}
-                  style={{
-                    padding: '10px 16px',
-                    border: '1px solid #EBE7DF',
-                    borderRadius: '6px',
-                    background: 'none',
-                    cursor: 'pointer'
-                  }}
+                  className="h-9 px-4 text-xs font-medium"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#0A2E24',
-                    color: '#FDFBF7',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
+                  onClick={() => triggerHaptic('selection')}
+                  className="h-9 px-4 text-xs font-medium active:scale-[0.96] transition-transform duration-150"
                 >
                   {editingMember ? 'Update Profile' : 'Save Profile'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

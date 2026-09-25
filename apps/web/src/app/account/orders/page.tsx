@@ -3,6 +3,9 @@ import { CreditCard, Loader2, ShoppingBag, Truck } from 'lucide-react';
 import Link from 'next/link';
 import Script from 'next/script';
 import React, { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { triggerHaptic } from '@/lib/haptic';
 
 import { Money } from '@hh/domain';
 
@@ -39,15 +42,31 @@ export default function AccountOrdersPage() {
     switch (status) {
       case 'paid':
       case 'processing':
-        return { bg: '#EFF6FF', color: '#1D4ED8', text: 'Processing' };
+        return {
+          className: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30',
+          text: 'Processing'
+        };
       case 'shipped':
-        return { bg: '#ECFDF5', color: '#047857', text: 'Shipped & En Route' };
+        return {
+          className:
+            'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+          text: 'Shipped & En Route'
+        };
       case 'delivered':
-        return { bg: '#F0FDF4', color: '#15803D', text: 'Delivered' };
+        return {
+          className: 'bg-green-500/10 text-green-700 dark:text-green-300 border-green-500/30',
+          text: 'Delivered'
+        };
       case 'cancelled':
-        return { bg: '#FEF2F2', color: '#B91C1C', text: 'Cancelled' };
+        return {
+          className: 'bg-destructive/10 text-destructive border-destructive/30',
+          text: 'Cancelled'
+        };
       default:
-        return { bg: '#FFFBEB', color: '#B45309', text: 'Pending Payment' };
+        return {
+          className: 'bg-amber-500/10 text-amber-800 dark:text-amber-200 border-amber-500/30',
+          text: 'Pending Payment'
+        };
     }
   };
 
@@ -157,94 +176,47 @@ export default function AccountOrdersPage() {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: '#FFFFFF',
-        border: '1px solid #EBE7DF',
-        borderRadius: '12px',
-        padding: '28px',
-        boxShadow: '0 4px 12px rgba(10, 46, 36, 0.03)'
-      }}
-    >
+    <div className="bg-card rounded-2xl border border-border/80 p-6 sm:p-8 shadow-sm">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
-      <div
-        style={{ borderBottom: '1px solid #F0ECE4', paddingBottom: '16px', marginBottom: '24px' }}
-      >
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.6rem',
-            color: '#0A2E24',
-            margin: '0 0 6px'
-          }}
-        >
+      <div className="border-b border-border/60 pb-4 mb-6">
+        <h1 className="font-serif text-2xl font-semibold text-foreground mb-1.5">
           Order History & Tracking
         </h1>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#5C6460' }}>
+        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
           Review your previous bespoke orders, view line item details, and track live courier
           shipments.
         </p>
       </div>
 
       {isLoading ? (
-        <div style={{ padding: '48px 0', textAlign: 'center', color: '#5C6460' }}>
+        <div className="py-12 text-center text-sm text-muted-foreground animate-pulse">
           Loading your order history...
         </div>
       ) : error ? (
-        <div
-          style={{
-            padding: '16px',
-            backgroundColor: '#FEF2F2',
-            color: '#991B1B',
-            borderRadius: '8px',
-            fontSize: '0.88rem'
-          }}
-        >
+        <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl text-destructive text-sm font-medium">
           {error}
         </div>
       ) : orders.length === 0 ? (
-        <div style={{ padding: '48px 0', textAlign: 'center' }}>
-          <div
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              backgroundColor: '#F5EFE6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 16px',
-              color: '#0A2E24'
-            }}
-          >
-            <ShoppingBag size={24} />
+        <div className="py-12 text-center">
+          <div className="h-14 w-14 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 text-primary">
+            <ShoppingBag className="h-6 w-6" />
           </div>
-          <h2 style={{ fontSize: '1.2rem', color: '#0A2E24', margin: '0 0 8px' }}>
+          <h2 className="font-serif text-xl font-semibold text-foreground mb-2">
             No Orders Placed Yet
           </h2>
-          <p style={{ fontSize: '0.85rem', color: '#5C6460', margin: '0 0 20px' }}>
+          <p className="text-sm text-muted-foreground mb-5 max-w-sm mx-auto leading-relaxed">
             When you complete an order, its details and live courier tracking will appear here.
           </p>
-          <Link
-            href="/"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '10px 20px',
-              backgroundColor: '#0A2E24',
-              color: '#FDFBF7',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              textDecoration: 'none'
-            }}
+          <Button
+            asChild
+            onClick={() => triggerHaptic('selection')}
+            className="px-6 h-10 text-sm font-medium active:scale-[0.96] transition-transform duration-150"
           >
-            Explore Collections
-          </Link>
+            <Link href="/">Explore Collections</Link>
+          </Button>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="flex flex-col gap-5">
           {orders.map((ord) => {
             const badge = getStatusBadge(ord.status);
             const dateStr = new Date(ord.createdAt).toLocaleDateString('en-IN', {
@@ -256,187 +228,103 @@ export default function AccountOrdersPage() {
             return (
               <div
                 key={ord.id}
-                style={{
-                  border: '1px solid #EBE7DF',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  backgroundColor: '#FFFFFF'
-                }}
+                className="border border-border/80 rounded-xl overflow-hidden bg-card shadow-xs"
               >
                 {/* Header ribbon */}
-                <div
-                  style={{
-                    backgroundColor: '#FBF9F5',
-                    padding: '14px 18px',
-                    borderBottom: '1px solid #EBE7DF',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '12px'
-                  }}
-                >
+                <div className="bg-muted/30 px-4 sm:px-5 py-3.5 border-b border-border/60 flex items-center justify-between flex-wrap gap-3">
                   <div>
-                    <span
-                      style={{ fontSize: '0.75rem', color: '#8C928F', textTransform: 'uppercase' }}
-                    >
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block">
                       Order Placed
                     </span>
-                    <p
-                      style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: '#0A2E24' }}
-                    >
-                      {dateStr}
-                    </p>
+                    <p className="font-bold text-sm text-foreground">{dateStr}</p>
                   </div>
 
                   <div>
-                    <span
-                      style={{ fontSize: '0.75rem', color: '#8C928F', textTransform: 'uppercase' }}
-                    >
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block">
                       Order Reference
                     </span>
-                    <p
-                      style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: '#0A2E24' }}
-                    >
-                      {ord.orderNumber}
-                    </p>
+                    <p className="font-bold text-sm text-foreground">{ord.orderNumber}</p>
                   </div>
 
                   <div>
-                    <span
-                      style={{ fontSize: '0.75rem', color: '#8C928F', textTransform: 'uppercase' }}
-                    >
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block">
                       Total Amount
                     </span>
-                    <p
-                      style={{ margin: 0, fontWeight: 700, fontSize: '0.92rem', color: '#0A2E24' }}
-                    >
+                    <p className="font-bold text-sm text-foreground">
                       {Money.fromMinor(ord.totalMinor, 'INR').format('en-IN')}
                     </p>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span
-                      style={{
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        padding: '4px 10px',
-                        borderRadius: '12px',
-                        backgroundColor: badge.bg,
-                        color: badge.color
-                      }}
-                    >
+                  <div className="flex items-center gap-2.5">
+                    <Badge variant="outline" className={badge.className}>
                       {badge.text}
-                    </span>
+                    </Badge>
 
                     {ord.status === 'pending_payment' ? (
-                      <button
+                      <Button
                         type="button"
-                        onClick={() => handlePayNow(ord)}
+                        size="sm"
+                        onClick={() => {
+                          triggerHaptic('medium');
+                          handlePayNow(ord);
+                        }}
                         disabled={payingOrderId === ord.id}
                         aria-label={`Pay Now for Order ${ord.orderNumber}`}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '6px 14px',
-                          backgroundColor: '#0A2E24',
-                          color: '#FDFBF7',
-                          borderRadius: '6px',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          border: 'none',
-                          cursor: payingOrderId === ord.id ? 'not-allowed' : 'pointer',
-                          opacity: payingOrderId === ord.id ? 0.7 : 1
-                        }}
+                        className="gap-1.5 h-8 text-xs font-medium active:scale-[0.96] transition-transform duration-150"
                       >
                         {payingOrderId === ord.id ? (
                           <>
-                            <Loader2 size={13} className="animate-spin" />
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
                             <span>Opening Gateway...</span>
                           </>
                         ) : (
                           <>
-                            <CreditCard size={13} />
+                            <CreditCard className="h-3.5 w-3.5" />
                             <span>Pay Now</span>
                           </>
                         )}
-                      </button>
+                      </Button>
                     ) : ord.status !== 'cancelled' ? (
-                      <Link
-                        href={`/track/${ord.orderNumber}`}
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '4px',
-                          padding: '6px 12px',
-                          backgroundColor: '#0A2E24',
-                          color: '#FDFBF7',
-                          borderRadius: '6px',
-                          fontSize: '0.78rem',
-                          fontWeight: 600,
-                          textDecoration: 'none'
-                        }}
+                      <Button
+                        asChild
+                        size="sm"
+                        variant="outline"
+                        onClick={() => triggerHaptic('selection')}
+                        className="gap-1.5 h-8 text-xs font-medium active:scale-[0.96] transition-transform duration-150"
                       >
-                        <Truck size={13} />
-                        <span>Track Shipment</span>
-                      </Link>
+                        <Link href={`/track/${ord.orderNumber}`}>
+                          <Truck className="h-3.5 w-3.5" />
+                          <span>Track Shipment</span>
+                        </Link>
+                      </Button>
                     ) : null}
                   </div>
                 </div>
 
                 {paymentError && payingOrderId === ord.id && (
-                  <div
-                    style={{
-                      padding: '10px 18px',
-                      backgroundColor: '#FEF2F2',
-                      borderBottom: '1px solid #FECACA',
-                      color: '#991B1B',
-                      fontSize: '0.8rem'
-                    }}
-                  >
+                  <div className="px-5 py-2.5 bg-destructive/10 border-b border-destructive/20 text-destructive text-xs font-medium">
                     {paymentError}
                   </div>
                 )}
 
                 {/* Items */}
-                <div
-                  style={{
-                    padding: '16px 18px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px'
-                  }}
-                >
+                <div className="p-4 sm:p-5 flex flex-col gap-3">
                   {ord.items.map((item) => (
                     <div
                       key={item.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        paddingBottom: '10px',
-                        borderBottom: '1px solid #F5EFE6'
-                      }}
+                      className="flex items-center justify-between pb-2.5 border-b border-border/40 last:border-0"
                     >
                       <div>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontWeight: 600,
-                            fontSize: '0.9rem',
-                            color: '#171A19'
-                          }}
-                        >
+                        <p className="font-semibold text-sm text-foreground">
                           {item.productNameSnapshot}
                         </p>
-                        <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#5C6460' }}>
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           Variant: {item.variantNameSnapshot} • SKU: {item.skuSnapshot} • Qty:{' '}
                           {item.quantity}
                         </p>
                       </div>
 
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#0A2E24' }}>
+                      <div className="font-semibold text-sm text-foreground">
                         {Money.fromMinor(item.unitPriceMinor * item.quantity, 'INR').format(
                           'en-IN'
                         )}
@@ -445,10 +333,10 @@ export default function AccountOrdersPage() {
                   ))}
 
                   {/* Destination */}
-                  <div style={{ fontSize: '0.8rem', color: '#5C6460', marginTop: '4px' }}>
-                    <strong>Delivery Address:</strong> {ord.shippingAddress.line1},{' '}
-                    {ord.shippingAddress.city}, {ord.shippingAddress.state} -{' '}
-                    {ord.shippingAddress.postalCode}
+                  <div className="text-xs text-muted-foreground mt-1">
+                    <strong className="text-foreground">Delivery Address:</strong>{' '}
+                    {ord.shippingAddress.line1}, {ord.shippingAddress.city},{' '}
+                    {ord.shippingAddress.state} - {ord.shippingAddress.postalCode}
                   </div>
                 </div>
               </div>

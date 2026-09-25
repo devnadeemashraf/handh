@@ -11,7 +11,9 @@ import {
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { CartItemRow } from '@/components/cart/CartItemRow';
+import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
+import { triggerHaptic } from '@/lib/haptic';
 
 import { Money, type ServiceControlConfig } from '@hh/domain';
 
@@ -43,349 +45,156 @@ export default function CartPage() {
   const isCheckoutReady = (cartSummary?.isValidForCheckout ?? false) && !isServicePaused;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <main className="royale-container" style={{ flex: 1, padding: '48px 16px 96px' }}>
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <main className="mx-auto max-w-7xl w-full flex-1 px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Navigation Breadcrumb */}
-        <div style={{ marginBottom: '32px' }}>
+        <div className="mb-8">
           <Link
             href="/"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              fontSize: '0.875rem',
-              color: 'var(--color-primary-emerald)',
-              textDecoration: 'none',
-              fontWeight: 500
-            }}
+            onClick={() => triggerHaptic('selection')}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group active:scale-[0.98]"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
             <span>Continue Shopping</span>
           </Link>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '32px' }}>
-          <h1 className="royale-heading" style={{ fontSize: '2rem', margin: 0 }}>
+        <div className="flex items-baseline gap-3 mb-8">
+          <h1 className="font-serif text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
             Your Collection Bag
           </h1>
           {totalItemCount > 0 && (
-            <span style={{ fontSize: '1rem', color: 'var(--color-text-muted)' }}>
+            <span className="text-sm font-medium text-muted-foreground">
               ({totalItemCount} {totalItemCount === 1 ? 'item' : 'items'})
             </span>
           )}
         </div>
 
         {cartSummary && cartSummary.items.length > 0 ? (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '48px',
-              alignItems: 'flex-start'
-            }}
-          >
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             {/* Left: Cart Items List */}
-            <div
-              style={{
-                backgroundColor: 'var(--color-surface)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--color-border)',
-                padding: '24px'
-              }}
-            >
-              <div
-                style={{
-                  borderBottom: '1px solid var(--color-border)',
-                  paddingBottom: '12px',
-                  marginBottom: '8px'
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    color: 'var(--color-text-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}
-                >
+            <div className="lg:col-span-7 bg-card rounded-2xl border border-border/80 p-4 sm:p-6 shadow-sm">
+              <div className="border-b border-border/60 pb-3 mb-3">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Handcrafted Pieces
                 </span>
               </div>
 
-              {cartSummary.items.map((item) => (
-                <CartItemRow
-                  key={item.variantId}
-                  item={item}
-                  onUpdateQuantity={(newQty) => updateQuantity(item.variantId, newQty)}
-                  onRemove={() => removeItem(item.variantId)}
-                  disabled={isLoading}
-                />
-              ))}
+              <div className="divide-y divide-border/60">
+                {cartSummary.items.map((item) => (
+                  <CartItemRow
+                    key={item.variantId}
+                    item={item}
+                    onUpdateQuantity={(newQty) => updateQuantity(item.variantId, newQty)}
+                    onRemove={() => removeItem(item.variantId)}
+                    disabled={isLoading}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Right: Authoritative Order Summary Card */}
-            <div
-              style={{
-                backgroundColor: 'var(--color-surface)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--color-border)',
-                padding: '32px 24px',
-                position: 'sticky',
-                top: '96px'
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.35rem',
-                  color: 'var(--color-primary-emerald)',
-                  margin: '0 0 20px',
-                  borderBottom: '1px solid var(--color-border)',
-                  paddingBottom: '12px'
-                }}
-              >
+            <div className="lg:col-span-5 bg-card rounded-2xl border border-border/80 p-6 sm:p-8 shadow-sm lg:sticky lg:top-24">
+              <h2 className="font-serif text-xl font-semibold text-foreground pb-4 border-b border-border/60 mb-5">
                 Order Summary
               </h2>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '12px',
-                  fontSize: '0.95rem'
-                }}
-              >
-                <span style={{ color: 'var(--color-text-muted)' }}>Subtotal</span>
-                <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                  {subtotalFormatted}
-                </span>
+              <div className="flex justify-between mb-3 text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-semibold text-foreground">{subtotalFormatted}</span>
               </div>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginBottom: '16px',
-                  fontSize: '0.95rem'
-                }}
-              >
-                <span style={{ color: 'var(--color-text-muted)' }}>Courier Delivery</span>
-                <span style={{ color: 'var(--color-accent-gold)', fontWeight: 500 }}>
-                  Calculated at checkout
-                </span>
+              <div className="flex justify-between mb-4 text-sm">
+                <span className="text-muted-foreground">Courier Delivery</span>
+                <span className="text-accent font-medium">Calculated at checkout</span>
               </div>
 
-              <div
-                style={{
-                  borderTop: '1px solid var(--color-border)',
-                  paddingTop: '16px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'baseline',
-                  marginBottom: '24px'
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '1.05rem',
-                    fontWeight: 600,
-                    color: 'var(--color-text-primary)'
-                  }}
-                >
-                  Estimated Total
-                </span>
-                <span
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: '1.5rem',
-                    fontWeight: 700,
-                    color: 'var(--color-primary-emerald)'
-                  }}
-                >
+              <div className="border-t border-border/60 pt-4 flex justify-between items-baseline mb-6">
+                <span className="text-base font-semibold text-foreground">Estimated Total</span>
+                <span className="font-serif text-2xl font-bold text-foreground">
                   {subtotalFormatted}
                 </span>
               </div>
 
               {/* Customer Reassurance Maintenance Banner */}
               {isServicePaused && serviceControl && (
-                <div
-                  style={{
-                    padding: '14px 16px',
-                    backgroundColor: '#FFFBEB',
-                    border: '1px solid #FDE68A',
-                    borderRadius: '8px',
-                    marginBottom: '16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '4px'
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      color: '#B45309',
-                      fontWeight: 700,
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    <Clock size={16} />
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-4 flex flex-col gap-1 text-amber-800 dark:text-amber-200">
+                  <div className="flex items-center gap-1.5 font-semibold text-sm">
+                    <Clock className="h-4 w-4" />
                     <span>{serviceControl.headline}</span>
                   </div>
-                  <p style={{ margin: 0, fontSize: '0.8rem', color: '#78350F', lineHeight: 1.4 }}>
+                  <p className="text-xs leading-relaxed opacity-90">
                     {serviceControl.maintenanceNotice}
                   </p>
                 </div>
               )}
 
               {/* Checkout CTA */}
-              <Link
-                href="/checkout"
-                onClick={(e) => {
-                  if (!isCheckoutReady) {
-                    e.preventDefault();
+              <Button
+                asChild={isCheckoutReady}
+                disabled={!isCheckoutReady}
+                onClick={() => {
+                  if (isCheckoutReady) {
+                    triggerHaptic('medium');
                   }
                 }}
-                className={`royale-button-primary ${!isCheckoutReady ? 'disabled' : ''}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  width: '100%',
-                  padding: '16px',
-                  fontSize: '1rem',
-                  textDecoration: 'none',
-                  pointerEvents: isCheckoutReady ? 'auto' : 'none',
-                  opacity: isCheckoutReady ? 1 : 0.6
-                }}
+                className="w-full h-12 text-base font-medium gap-2 active:scale-[0.96] transition-transform duration-150"
               >
-                <span>
-                  {isServicePaused ? 'Checkout Temporarily Paused' : 'Proceed to Checkout'}
-                </span>
-                <ArrowRight size={18} />
-              </Link>
+                {isCheckoutReady ? (
+                  <Link href="/checkout">
+                    <span>
+                      {isServicePaused ? 'Checkout Temporarily Paused' : 'Proceed to Checkout'}
+                    </span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <span>
+                    {isServicePaused ? 'Checkout Temporarily Paused' : 'Proceed to Checkout'}
+                  </span>
+                )}
+              </Button>
 
               {!isCheckoutReady && !isServicePaused && (
-                <p
-                  style={{
-                    fontSize: '0.8rem',
-                    color: '#DC2626',
-                    marginTop: '10px',
-                    textAlign: 'center'
-                  }}
-                >
+                <p className="text-xs text-destructive mt-2.5 text-center font-medium">
                   Please resolve stock warnings above before proceeding.
                 </p>
               )}
 
               {/* Trust Guarantees */}
-              <div
-                style={{
-                  marginTop: '32px',
-                  borderTop: '1px solid var(--color-border)',
-                  paddingTop: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '14px'
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    fontSize: '0.8rem',
-                    color: 'var(--color-text-muted)'
-                  }}
-                >
-                  <Sparkles size={16} color="var(--color-accent-gold)" />
+              <div className="mt-8 border-t border-border/60 pt-5 flex flex-col gap-3.5 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2.5">
+                  <Sparkles className="h-4 w-4 text-accent shrink-0" />
                   <span>Limited Batch Quality Guarantee</span>
                 </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    fontSize: '0.8rem',
-                    color: 'var(--color-text-muted)'
-                  }}
-                >
-                  <Truck size={16} color="var(--color-primary)" />
+                <div className="flex items-center gap-2.5">
+                  <Truck className="h-4 w-4 text-foreground shrink-0" />
                   <span>Direct Courier Dispatch across India</span>
                 </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    fontSize: '0.8rem',
-                    color: 'var(--color-text-muted)'
-                  }}
-                >
-                  <ShieldCheck size={16} color="var(--color-primary)" />
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck className="h-4 w-4 text-foreground shrink-0" />
                   <span>Secure Razorpay Encrypted Checkout</span>
                 </div>
               </div>
             </div>
           </div>
         ) : (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '96px 24px',
-              backgroundColor: 'var(--color-surface)',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-border)',
-              maxWidth: '540px',
-              margin: '0 auto'
-            }}
-          >
-            <div
-              style={{
-                width: '72px',
-                height: '72px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--color-bg)',
-                border: '1px solid var(--color-border)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '20px',
-                color: 'var(--color-accent-gold)'
-              }}
-            >
-              <ShoppingBag size={32} />
+          <div className="text-center py-20 px-6 bg-card rounded-2xl border border-border/80 max-w-lg mx-auto shadow-sm">
+            <div className="h-16 w-16 rounded-full bg-muted/60 border border-border flex items-center justify-center mx-auto mb-5 text-muted-foreground">
+              <ShoppingBag className="h-7 w-7" />
             </div>
-            <h2
-              style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: '1.4rem',
-                color: 'var(--color-primary-emerald)',
-                marginBottom: '10px'
-              }}
-            >
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-foreground mb-2">
               Your Collection Bag is Empty
             </h2>
-            <p
-              style={{
-                fontSize: '0.95rem',
-                color: 'var(--color-text-muted)',
-                marginBottom: '32px',
-                lineHeight: 1.6
-              }}
-            >
+            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
               Explore our artisanal handcrafted nose pieces and modest wear essentials.
             </p>
-            <Link
-              href="/"
-              className="royale-button-primary"
-              style={{ padding: '14px 32px', textDecoration: 'none' }}
+            <Button
+              asChild
+              onClick={() => triggerHaptic('selection')}
+              className="px-8 h-11 text-sm font-medium active:scale-[0.96] transition-transform duration-150"
             >
-              Explore Collection
-            </Link>
+              <Link href="/">Explore Collection</Link>
+            </Button>
           </div>
         )}
       </main>

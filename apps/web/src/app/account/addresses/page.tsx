@@ -2,6 +2,10 @@
 
 import { Check, Edit2, MapPin, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { triggerHaptic } from '@/lib/haptic';
 
 import { INDIAN_STATES } from '@hh/domain';
 
@@ -131,245 +135,128 @@ export default function AccountAddressesPage() {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: '#FFFFFF',
-        border: '1px solid #EBE7DF',
-        borderRadius: '12px',
-        padding: '28px',
-        boxShadow: '0 4px 12px rgba(10, 46, 36, 0.03)'
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid #F0ECE4',
-          paddingBottom: '16px',
-          marginBottom: '24px'
-        }}
-      >
+    <div className="bg-card rounded-2xl border border-border/80 p-6 sm:p-8 shadow-sm">
+      <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-6">
         <div>
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.6rem',
-              color: '#0A2E24',
-              margin: '0 0 6px'
-            }}
-          >
+          <h1 className="font-serif text-2xl font-semibold text-foreground mb-1.5">
             Saved Delivery Addresses
           </h1>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#5C6460' }}>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             Manage shipping destinations for swift, single-tap dispatch at checkout.
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 18px',
-            backgroundColor: '#0A2E24',
-            color: '#FDFBF7',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '0.88rem',
-            fontWeight: 600,
-            cursor: 'pointer'
+        <Button
+          onClick={() => {
+            triggerHaptic('selection');
+            handleOpenAdd();
           }}
+          className="gap-2 h-10 px-4 text-sm font-medium active:scale-[0.96] transition-transform duration-150"
         >
-          <Plus size={16} /> Add Address
-        </button>
+          <Plus className="h-4 w-4" /> Add Address
+        </Button>
       </div>
 
       {error && (
-        <div
-          style={{
-            backgroundColor: '#FEF2F2',
-            border: '1px solid #FCA5A5',
-            borderRadius: '8px',
-            padding: '12px',
-            color: '#991B1B',
-            fontSize: '0.85rem',
-            marginBottom: '20px'
-          }}
-        >
+        <div className="p-3.5 bg-destructive/10 border border-destructive/30 rounded-xl text-destructive text-sm font-medium mb-5">
           {error}
         </div>
       )}
 
       {isLoading ? (
-        <p style={{ color: '#5C6460' }}>Loading addresses...</p>
+        <p className="text-muted-foreground text-sm py-8 text-center animate-pulse">
+          Loading addresses...
+        </p>
       ) : addresses.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <MapPin size={32} color="#C5A880" style={{ margin: '0 auto 12px' }} />
-          <p style={{ fontWeight: 600, color: '#0A2E24', margin: '0 0 4px' }}>No Saved Addresses</p>
-          <p style={{ fontSize: '0.85rem', color: '#5C6460', margin: '0 0 16px' }}>
+        <div className="text-center py-12">
+          <MapPin className="h-8 w-8 text-accent mx-auto mb-3" />
+          <p className="font-serif text-lg font-semibold text-foreground mb-1">
+            No Saved Addresses
+          </p>
+          <p className="text-sm text-muted-foreground mb-4 max-w-xs mx-auto leading-relaxed">
             Save your home or work address for seamless doorstep delivery.
           </p>
-          <button
-            onClick={handleOpenAdd}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#0A2E24',
-              color: '#FDFBF7',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.85rem',
-              fontWeight: 600,
-              cursor: 'pointer'
+          <Button
+            onClick={() => {
+              triggerHaptic('selection');
+              handleOpenAdd();
             }}
+            className="px-5 h-10 text-sm font-medium active:scale-[0.96] transition-transform duration-150"
           >
             Add First Address
-          </button>
+          </Button>
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '16px'
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {addresses.map((addr) => (
             <div
               key={addr.id}
-              style={{
-                border: addr.isDefault ? '2px solid #0A2E24' : '1px solid #EBE7DF',
-                borderRadius: '12px',
-                padding: '20px',
-                backgroundColor: addr.isDefault ? '#FBF9F5' : '#FFFFFF',
-                position: 'relative'
-              }}
+              className={`rounded-xl p-5 relative border transition-all ${
+                addr.isDefault
+                  ? 'border-primary ring-1 ring-primary/20 bg-muted/20'
+                  : 'border-border/80 bg-card hover:border-border'
+              }`}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: '10px'
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.08em',
-                    color: '#0A2E24',
-                    backgroundColor: '#F5EFE6',
-                    padding: '3px 8px',
-                    borderRadius: '4px'
-                  }}
-                >
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-foreground bg-secondary px-2 py-0.5 rounded-md">
                   {addr.label}
                 </span>
 
                 {addr.isDefault && (
-                  <span
-                    style={{
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: '#059669',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
+                  <Badge
+                    variant="outline"
+                    className="gap-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 font-medium text-xs"
                   >
-                    <Check size={12} /> Default
-                  </span>
+                    <Check className="h-3 w-3" /> Default
+                  </Badge>
                 )}
               </div>
 
-              <p
-                style={{
-                  margin: '0 0 4px',
-                  fontWeight: 700,
-                  fontSize: '0.95rem',
-                  color: '#171A19'
-                }}
-              >
-                {addr.recipientName}
-              </p>
-              <p style={{ margin: '0 0 2px', fontSize: '0.85rem', color: '#5C6460' }}>
-                {addr.line1}
-              </p>
-              {addr.line2 && (
-                <p style={{ margin: '0 0 2px', fontSize: '0.85rem', color: '#5C6460' }}>
-                  {addr.line2}
-                </p>
-              )}
-              <p style={{ margin: '0 0 6px', fontSize: '0.85rem', color: '#5C6460' }}>
+              <p className="font-bold text-sm text-foreground mb-1">{addr.recipientName}</p>
+              <p className="text-xs text-muted-foreground">{addr.line1}</p>
+              {addr.line2 && <p className="text-xs text-muted-foreground">{addr.line2}</p>}
+              <p className="text-xs text-muted-foreground mb-2">
                 {addr.city}, {addr.state} — {addr.postalCode}
               </p>
-              <p
-                style={{
-                  margin: '0 0 16px',
-                  fontSize: '0.82rem',
-                  color: '#0A2E24',
-                  fontWeight: 600
-                }}
-              >
-                Phone: {addr.phone}
-              </p>
+              <p className="text-xs font-medium text-foreground mb-4">Phone: {addr.phone}</p>
 
               {/* Actions */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  borderTop: '1px solid #F0ECE4',
-                  paddingTop: '12px'
-                }}
-              >
+              <div className="flex items-center gap-2 border-t border-border/60 pt-3">
                 {!addr.isDefault && (
                   <button
-                    onClick={() => handleSetDefault(addr.id)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      fontSize: '0.78rem',
-                      color: '#0A2E24',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      padding: 0
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      handleSetDefault(addr.id);
                     }}
+                    className="text-xs font-semibold text-primary hover:underline cursor-pointer p-0"
                   >
                     Set Default
                   </button>
                 )}
 
-                <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                <div className="ml-auto flex items-center gap-2">
                   <button
-                    onClick={() => handleOpenEdit(addr)}
-                    aria-label="Edit address"
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#5C6460',
-                      cursor: 'pointer',
-                      padding: '4px'
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      handleOpenEdit(addr);
                     }}
+                    aria-label="Edit address"
+                    className="text-muted-foreground hover:text-foreground p-1 transition-colors cursor-pointer"
                   >
-                    <Edit2 size={15} />
+                    <Edit2 className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(addr.id)}
-                    aria-label="Delete address"
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#991B1B',
-                      cursor: 'pointer',
-                      padding: '4px'
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('heavy');
+                      handleDelete(addr.id);
                     }}
+                    aria-label="Delete address"
+                    className="text-destructive/80 hover:text-destructive p-1 transition-colors cursor-pointer"
                   >
-                    <Trash2 size={15} />
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -380,239 +267,108 @@ export default function AccountAddressesPage() {
 
       {/* Add / Edit Modal */}
       {showAddModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            backgroundColor: 'rgba(10, 46, 36, 0.6)',
-            backdropFilter: 'blur(6px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '16px'
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '520px',
-              backgroundColor: '#FFFFFF',
-              borderRadius: '16px',
-              border: '1px solid #EBE7DF',
-              overflow: 'hidden',
-              boxShadow: '0 24px 48px rgba(10, 46, 36, 0.2)'
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: '#0A2E24',
-                padding: '18px 24px',
-                color: '#FDFBF7',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
-              <h2 style={{ margin: 0, fontSize: '1.2rem', fontFamily: 'var(--font-serif)' }}>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-card rounded-2xl border border-border/80 overflow-hidden shadow-xl animate-in zoom-in-95 duration-200">
+            <div className="bg-primary px-6 py-4 text-primary-foreground flex items-center justify-between">
+              <h2 className="font-serif text-lg font-semibold">
                 {editingAddress ? 'Edit Delivery Address' : 'New Delivery Address'}
               </h2>
               <button
+                type="button"
                 onClick={() => setShowAddModal(false)}
-                style={{ background: 'none', border: 'none', color: '#FDFBF7', cursor: 'pointer' }}
+                className="text-primary-foreground/80 hover:text-primary-foreground cursor-pointer text-lg leading-none"
               >
                 ✕
               </button>
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}
-            >
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px' }}>
+            <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      color: '#171A19',
-                      marginBottom: '4px'
-                    }}
-                  >
-                    Label
-                  </label>
-                  <input
+                  <label className="block text-xs font-semibold text-foreground mb-1">Label</label>
+                  <Input
                     type="text"
                     required
                     placeholder="Home / Work"
                     value={formData.label}
                     onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #EBE7DF',
-                      borderRadius: '6px'
-                    }}
+                    className="h-9 text-xs"
                   />
                 </div>
-                <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      color: '#171A19',
-                      marginBottom: '4px'
-                    }}
-                  >
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     Recipient Name
                   </label>
-                  <input
+                  <Input
                     type="text"
                     required
                     placeholder="Full recipient name"
                     value={formData.recipientName}
                     onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #EBE7DF',
-                      borderRadius: '6px'
-                    }}
+                    className="h-9 text-xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    color: '#171A19',
-                    marginBottom: '4px'
-                  }}
-                >
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Delivery Contact Phone (+91)
                 </label>
-                <input
+                <Input
                   type="tel"
                   required
                   placeholder="+919876543210"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #EBE7DF',
-                    borderRadius: '6px'
-                  }}
+                  className="h-9 text-xs"
                 />
               </div>
 
               <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    color: '#171A19',
-                    marginBottom: '4px'
-                  }}
-                >
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Address Line 1
                 </label>
-                <input
+                <Input
                   type="text"
                   required
                   placeholder="Flat / Villa / Street"
                   value={formData.line1}
                   onChange={(e) => setFormData({ ...formData, line1: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #EBE7DF',
-                    borderRadius: '6px'
-                  }}
+                  className="h-9 text-xs"
                 />
               </div>
 
               <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    color: '#171A19',
-                    marginBottom: '4px'
-                  }}
-                >
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Address Line 2 (Optional)
                 </label>
-                <input
+                <Input
                   type="text"
                   placeholder="Apartment name, Landmark"
                   value={formData.line2}
                   onChange={(e) => setFormData({ ...formData, line2: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #EBE7DF',
-                    borderRadius: '6px'
-                  }}
+                  className="h-9 text-xs"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      color: '#171A19',
-                      marginBottom: '4px'
-                    }}
-                  >
-                    City
-                  </label>
-                  <input
+                  <label className="block text-xs font-semibold text-foreground mb-1">City</label>
+                  <Input
                     type="text"
                     required
                     placeholder="City"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #EBE7DF',
-                      borderRadius: '6px'
-                    }}
+                    className="h-9 text-xs"
                   />
                 </div>
                 <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      color: '#171A19',
-                      marginBottom: '4px'
-                    }}
-                  >
-                    State
-                  </label>
+                  <label className="block text-xs font-semibold text-foreground mb-1">State</label>
                   <select
                     value={formData.state}
                     onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #EBE7DF',
-                      borderRadius: '6px',
-                      backgroundColor: '#FFFFFF'
-                    }}
+                    className="w-full h-9 px-3 border border-input rounded-md bg-background text-foreground text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     {INDIAN_STATES.map((st) => (
                       <option key={st} value={st}>
@@ -622,91 +378,54 @@ export default function AccountAddressesPage() {
                   </select>
                 </div>
                 <div>
-                  <label
-                    style={{
-                      display: 'block',
-                      fontSize: '0.78rem',
-                      fontWeight: 600,
-                      color: '#171A19',
-                      marginBottom: '4px'
-                    }}
-                  >
+                  <label className="block text-xs font-semibold text-foreground mb-1">
                     PIN Code
                   </label>
-                  <input
+                  <Input
                     type="text"
                     required
                     maxLength={6}
                     placeholder="6 digits"
                     value={formData.postalCode}
                     onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #EBE7DF',
-                      borderRadius: '6px'
-                    }}
+                    className="h-9 text-xs"
                   />
                 </div>
               </div>
 
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  cursor: 'pointer',
-                  marginTop: '4px'
-                }}
-              >
+              <label className="flex items-center gap-2 cursor-pointer mt-1">
                 <input
                   type="checkbox"
                   checked={formData.isDefault}
-                  onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                  style={{ accentColor: '#0A2E24' }}
+                  onChange={(e) => {
+                    triggerHaptic('selection');
+                    setFormData({ ...formData, isDefault: e.target.checked });
+                  }}
+                  className="h-4 w-4 rounded border-border accent-primary cursor-pointer"
                 />
-                <span style={{ fontSize: '0.85rem', color: '#171A19' }}>
+                <span className="text-xs text-foreground font-medium">
                   Make this my default shipping address
                 </span>
               </label>
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'flex-end',
-                  gap: '10px',
-                  marginTop: '8px'
-                }}
-              >
-                <button
+              <div className="flex justify-end gap-2.5 mt-2">
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() => setShowAddModal(false)}
-                  style={{
-                    padding: '10px 16px',
-                    border: '1px solid #EBE7DF',
-                    borderRadius: '6px',
-                    backgroundColor: 'transparent',
-                    cursor: 'pointer',
-                    fontSize: '0.85rem'
-                  }}
+                  className="h-9 text-xs"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#0A2E24',
-                    color: '#FDFBF7',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
+                  size="sm"
+                  onClick={() => triggerHaptic('medium')}
+                  className="h-9 text-xs font-medium active:scale-[0.96] transition-transform duration-150"
                 >
                   {editingAddress ? 'Update Address' : 'Save Address'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
