@@ -80,4 +80,34 @@ describe('Server Environment Validation', () => {
       /ADMIN_SESSION_SECRET must be at least 32 characters long/
     );
   });
+
+  it('correctly parses brand identity and statutory corporate environment variables', () => {
+    const brandEnv = {
+      ...validDevEnv,
+      BRAND_NAME: 'Zeenat Haute',
+      BRAND_LEGAL_NAME: 'Zeenat Modest Retail Pvt. Ltd.',
+      BRAND_SHORT_NAME: 'Zeenat',
+      BRAND_TAGLINE: 'Timeless Grace',
+      BRAND_SUBTITLE: 'Haute Modest Couture',
+      BRAND_SUPPORT_EMAIL: 'concierge@zeenat.com',
+      BRAND_SUPPORT_PHONE: '+91 40 1234 5678',
+      BRAND_WHATSAPP: '+919876543210',
+      BRAND_INSTAGRAM: 'zeenat_haute',
+      BRAND_WEBSITE_URL: 'https://zeenat.com'
+    };
+
+    const env = validateServerEnv(brandEnv);
+    expect(env.BRAND_NAME).toBe('Zeenat Haute');
+    expect(env.BRAND_LEGAL_NAME).toBe('Zeenat Modest Retail Pvt. Ltd.');
+    expect(env.BRAND_SHORT_NAME).toBe('Zeenat');
+    expect(env.BRAND_TAGLINE).toBe('Timeless Grace');
+    expect(env.BRAND_SUBTITLE).toBe('Haute Modest Couture');
+    expect(env.BRAND_SUPPORT_EMAIL).toBe('concierge@zeenat.com');
+    expect(env.BRAND_SUPPORT_PHONE).toBe('+91 40 1234 5678');
+    expect(env.BRAND_WHATSAPP).toBe('+919876543210');
+    expect(env.BRAND_INSTAGRAM).toBe('zeenat_haute');
+    expect(env.BRAND_WEBSITE_URL).toBe('https://zeenat.com');
+    expect(env.COMPANY_CIN).toBe('U18101TG2024PTC189234');
+    expect(env.COMPANY_GSTIN).toBe('36AAACH1234F1Z5');
+  });
 });
