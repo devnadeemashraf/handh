@@ -10,7 +10,7 @@ import {
 
 import type { AddressFormValues } from '@/components/checkout/AddressForm';
 
-import { generateUUID, ShippingAddressSchema } from '@hh/domain';
+import { DEFAULT_BRAND_IDENTITY, generateUUID, ShippingAddressSchema } from '@hh/domain';
 
 import type {
   CartSummary,
@@ -368,7 +368,7 @@ export function useCheckoutFlow({
           key: initData.keyId,
           amount: initData.amountMinor,
           currency: initData.currency,
-          name: 'H&H',
+          name: DEFAULT_BRAND_IDENTITY.name,
           description: `Order ${initData.orderNumber}`,
           order_id: initData.razorpayOrderId,
           prefill: {
@@ -377,7 +377,7 @@ export function useCheckoutFlow({
             contact: values.phone
           },
           theme: {
-            color: '#0A2E24'
+            color: DEFAULT_BRAND_IDENTITY.theme.primaryEmerald
           },
           handler: async function (response: RazorpayResponse) {
             await verifyPayment({

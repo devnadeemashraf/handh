@@ -8,6 +8,8 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion';
 
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
+
 export interface ProductAccordionItem {
   id: string;
   title: string;
@@ -24,8 +26,7 @@ const DEFAULT_ITEMS: ProductAccordionItem[] = [
   {
     id: 'shipping',
     title: 'Courier Shipping & Tracking',
-    content:
-      'Every parcel is personally inspected, packaged, and handed directly to India Post or DTDC couriers. Once dispatched, you will receive a direct tracking link accessible through your H&H account and email notifications.'
+    content: `Every parcel is personally inspected, packaged, and handed directly to India Post or DTDC couriers. Once dispatched, you will receive a direct tracking link accessible through your ${DEFAULT_BRAND_IDENTITY.name} account and email notifications.`
   },
   {
     id: 'care',

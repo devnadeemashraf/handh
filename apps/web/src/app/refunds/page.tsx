@@ -4,11 +4,12 @@ import { LegalPageShell } from '@/components/legal/LegalPageShell';
 import type { Metadata } from 'next';
 
 import { findStoreBySlug, getCategoryTree, getSharedDbClient } from '@hh/db';
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Refund & Return Policy | H&H',
+  title: `Refund & Return Policy | ${DEFAULT_BRAND_IDENTITY.name}`,
   description:
     'Comprehensive 7-day return policy, reverse pickup guidelines, refund timelines, and cancellation procedures under Consumer Protection Rules.'
 };
@@ -30,7 +31,7 @@ export default async function RefundsPage() {
       subtitle="Our 7-day return policy ensures complete transparency and satisfaction. Learn about reverse pickups, quality inspections, and automated Razorpay refund timelines."
       badgeText="Consumer Protection (E-Commerce) Rules, 2020"
       lastUpdated="September 2026"
-      storeName={store?.name ?? 'H&H'}
+      storeName={store?.name ?? DEFAULT_BRAND_IDENTITY.name}
       categories={categories}
       instagramHandle={store?.settings.instagramHandle}
     >
@@ -39,10 +40,11 @@ export default async function RefundsPage() {
           1. 7-Day Return Eligibility Window
         </h2>
         <p>
-          At H&amp;H, every piece is inspected by hand before dispatch. In compliance with Rule
-          5(3)(e) of the Consumer Protection (E-Commerce) Rules, 2020, we offer a{' '}
-          <strong className="text-foreground">7-calendar-day return window</strong> commencing from
-          the date and timestamp the parcel is marked &quot;Delivered&quot; by our courier partner.
+          At {DEFAULT_BRAND_IDENTITY.name}, every piece is inspected by hand before dispatch. In
+          compliance with Rule 5(3)(e) of the Consumer Protection (E-Commerce) Rules, 2020, we offer
+          a <strong className="text-foreground">7-calendar-day return window</strong> commencing
+          from the date and timestamp the parcel is marked &quot;Delivered&quot; by our courier
+          partner.
         </p>
         <p>You may initiate a return request if the product received is:</p>
         <ul className="list-disc pl-5 space-y-1 text-sm">
@@ -150,8 +152,11 @@ export default async function RefundsPage() {
         <p>
           If your refund has not reflected within the stated timelines, or if you have questions
           regarding an ongoing inspection, please contact our designated Grievance Officer at{' '}
-          <a href="mailto:grievance@handh.in" className="text-accent hover:underline">
-            grievance@handh.in
+          <a
+            href={`mailto:${DEFAULT_BRAND_IDENTITY.grievanceOfficer.email}`}
+            className="text-accent hover:underline"
+          >
+            {DEFAULT_BRAND_IDENTITY.grievanceOfficer.email}
           </a>{' '}
           or file an escalation through our{' '}
           <Link href="/grievance" className="text-accent hover:underline font-medium">

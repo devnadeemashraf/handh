@@ -4,11 +4,12 @@ import { LegalPageShell } from '@/components/legal/LegalPageShell';
 import type { Metadata } from 'next';
 
 import { findStoreBySlug, getCategoryTree, getSharedDbClient } from '@hh/db';
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy & Data Protection | H&H',
+  title: `Privacy Policy & Data Protection | ${DEFAULT_BRAND_IDENTITY.name}`,
   description:
     'Privacy Policy detailing personal data processing, purpose limitation, retention, and customer rights under the Digital Personal Data Protection (DPDP) Act, 2023.'
 };
@@ -27,10 +28,10 @@ export default async function PrivacyPage() {
   return (
     <LegalPageShell
       title="Privacy Policy & Data Protection"
-      subtitle="How H&H processes, safeguards, and respects your personal data in accordance with the Digital Personal Data Protection (DPDP) Act, 2023 and the Information Technology Act, 2000."
+      subtitle={`How ${DEFAULT_BRAND_IDENTITY.name} processes, safeguards, and respects your personal data in accordance with the Digital Personal Data Protection (DPDP) Act, 2023 and the Information Technology Act, 2000.`}
       badgeText="DPDP Act, 2023 Compliant"
       lastUpdated="September 2026"
-      storeName={store?.name ?? 'H&H'}
+      storeName={store?.name ?? DEFAULT_BRAND_IDENTITY.name}
       categories={categories}
       instagramHandle={store?.settings.instagramHandle}
     >
@@ -39,9 +40,9 @@ export default async function PrivacyPage() {
           1. Identity of Data Fiduciary
         </h2>
         <p>
-          <strong className="text-foreground">H&amp;H Luxury Modest Wear Private Limited</strong>{' '}
-          acts as the Data Fiduciary under the Digital Personal Data Protection (DPDP) Act, 2023 in
-          respect of personal data collected from customers, visitors, and registered users of this
+          <strong className="text-foreground">{DEFAULT_BRAND_IDENTITY.legalName}</strong> acts as
+          the Data Fiduciary under the Digital Personal Data Protection (DPDP) Act, 2023 in respect
+          of personal data collected from customers, visitors, and registered users of this
           e-commerce storefront.
         </p>
       </section>
@@ -161,8 +162,11 @@ export default async function PrivacyPage() {
             Grievance Redressal Desk
           </Link>{' '}
           or contact our Nodal Officer at{' '}
-          <a href="mailto:grievance@handh.in" className="text-accent hover:underline">
-            grievance@handh.in
+          <a
+            href={`mailto:${DEFAULT_BRAND_IDENTITY.grievanceOfficer.email}`}
+            className="text-accent hover:underline"
+          >
+            {DEFAULT_BRAND_IDENTITY.grievanceOfficer.email}
           </a>
           .
         </p>

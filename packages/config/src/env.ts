@@ -115,7 +115,19 @@ export const serverEnvSchema = z
     COMPANY_CIN: z.string().default('U18101TG2024PTC189234'),
     COMPANY_GSTIN: z.string().default('36AAACH1234F1Z5'),
     COMPANY_SUPPORT_EMAIL: z.string().email().default('support@handh.in'),
-    COMPANY_SUPPORT_PHONE: z.string().default('+91 40 2355 7890')
+    COMPANY_SUPPORT_PHONE: z.string().default('+91 40 2355 7890'),
+
+    // Global Brand Identity Overrides
+    BRAND_NAME: z.string().optional(),
+    BRAND_LEGAL_NAME: z.string().optional(),
+    BRAND_SHORT_NAME: z.string().optional(),
+    BRAND_TAGLINE: z.string().optional(),
+    BRAND_SUBTITLE: z.string().optional(),
+    BRAND_SUPPORT_EMAIL: z.string().email().optional(),
+    BRAND_SUPPORT_PHONE: z.string().optional(),
+    BRAND_WHATSAPP: z.string().optional(),
+    BRAND_INSTAGRAM: z.string().optional(),
+    BRAND_WEBSITE_URL: z.string().url().optional()
   })
   .superRefine((data, ctx) => {
     // In staging and production, strictly disallow placeholder or dummy secrets

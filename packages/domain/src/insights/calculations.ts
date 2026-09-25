@@ -1,3 +1,5 @@
+import { DEFAULT_BRAND_IDENTITY } from '../brand/config';
+
 import type { InsightTimeframe } from './types';
 
 /**
@@ -62,7 +64,7 @@ export function buildTimeframeDateRange(
 export function buildVipWhatsAppUrl(
   phone: string,
   customerName: string,
-  brandName: string = 'H&H'
+  brandName: string = DEFAULT_BRAND_IDENTITY.name
 ): string {
   const digits = phone.replace(/\D/g, '');
   const cleanPhone = digits.startsWith('91') && digits.length === 12 ? digits.slice(2) : digits;

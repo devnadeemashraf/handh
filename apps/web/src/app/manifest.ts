@@ -1,10 +1,12 @@
 import type { MetadataRoute } from 'next';
 
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'H&H Luxury Atelier',
-    short_name: 'H&H',
-    description: 'Curated luxury essentials and refined modest accessories.',
+    name: `${DEFAULT_BRAND_IDENTITY.name} ${DEFAULT_BRAND_IDENTITY.terminology.atelierTitle}`,
+    short_name: DEFAULT_BRAND_IDENTITY.shortName,
+    description: DEFAULT_BRAND_IDENTITY.description,
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

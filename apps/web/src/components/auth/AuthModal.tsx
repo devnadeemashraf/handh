@@ -4,6 +4,8 @@ import { ShieldCheck, X } from 'lucide-react';
 import * as React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
+import { getBrandSecureAccessTitle } from '@hh/domain';
+
 import { AuthOtpStep } from './AuthOtpStep';
 import { AuthPhoneStep } from './AuthPhoneStep';
 import { useAuthModalFlow } from './useAuthModalFlow';
@@ -53,7 +55,7 @@ export function AuthModal({
           <div className="mb-1.5 flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-accent" />
             <span className="text-[0.7rem] uppercase tracking-[0.2em] font-semibold text-accent">
-              H&amp;H Secure Access
+              {getBrandSecureAccessTitle()}
             </span>
           </div>
 

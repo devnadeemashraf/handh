@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
+import { getBrandSecureAccessTitle } from '@hh/domain';
+
 import { AuthModal } from './AuthModal';
 
 describe('AuthModal Component', () => {
@@ -23,7 +25,7 @@ describe('AuthModal Component', () => {
       />
     );
 
-    expect(screen.getByText('H&H Secure Access')).toBeInTheDocument();
+    expect(screen.getByText(getBrandSecureAccessTitle())).toBeInTheDocument();
     expect(screen.getByText('An account is required to place your order.')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('98765 43210')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /send verification code/i })).toBeInTheDocument();

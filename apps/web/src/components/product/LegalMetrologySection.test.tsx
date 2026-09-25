@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-import type { PublicProductDetail } from '@hh/domain';
+import { DEFAULT_BRAND_IDENTITY, type PublicProductDetail } from '@hh/domain';
 
 import { LegalMetrologySection } from './LegalMetrologySection';
 
@@ -18,19 +18,19 @@ const mockProduct: PublicProductDetail = {
   netQuantity: '1 N',
   commodityName: 'Modest Wear Hijab Pin',
   manufacturerDetails: {
-    name: 'H&H Luxury Modest Wear Private Limited',
-    address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India',
-    email: 'support@handh.in',
-    phone: '+91 40 2355 7890'
+    name: DEFAULT_BRAND_IDENTITY.legalName,
+    address: DEFAULT_BRAND_IDENTITY.address.fullFormatted,
+    email: DEFAULT_BRAND_IDENTITY.supportEmail,
+    phone: DEFAULT_BRAND_IDENTITY.supportPhone
   },
   packerDetails: {
-    name: 'H&H Packaging Facility',
-    address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India'
+    name: `${DEFAULT_BRAND_IDENTITY.name} Packaging Facility`,
+    address: DEFAULT_BRAND_IDENTITY.address.fullFormatted
   },
   consumerCareDetails: {
-    email: 'support@handh.in',
-    phone: '+91 40 2355 7890',
-    address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India'
+    email: DEFAULT_BRAND_IDENTITY.supportEmail,
+    phone: DEFAULT_BRAND_IDENTITY.supportPhone,
+    address: DEFAULT_BRAND_IDENTITY.address.fullFormatted
   },
   category: {
     id: 'cat-01',
@@ -92,20 +92,18 @@ describe('LegalMetrologySection Component', () => {
   it('renders manufacturer and packer corporate details', () => {
     render(<LegalMetrologySection product={mockProduct} />);
 
-    expect(screen.getByText('H&H Luxury Modest Wear Private Limited')).toBeDefined();
-    expect(screen.getByText('H&H Packaging Facility')).toBeDefined();
+    expect(screen.getByText(DEFAULT_BRAND_IDENTITY.legalName)).toBeDefined();
+    expect(screen.getByText(`${DEFAULT_BRAND_IDENTITY.name} Packaging Facility`)).toBeDefined();
     expect(
-      screen.getAllByText(
-        'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India'
-      ).length
+      screen.getAllByText(DEFAULT_BRAND_IDENTITY.address.fullFormatted).length
     ).toBeGreaterThanOrEqual(1);
   });
 
   it('renders consumer care coordinates and links to /grievance', () => {
     render(<LegalMetrologySection product={mockProduct} />);
 
-    expect(screen.getByText('support@handh.in')).toBeDefined();
-    expect(screen.getByText('+91 40 2355 7890')).toBeDefined();
+    expect(screen.getByText(DEFAULT_BRAND_IDENTITY.supportEmail)).toBeDefined();
+    expect(screen.getByText(DEFAULT_BRAND_IDENTITY.supportPhone)).toBeDefined();
 
     const grievanceLink = screen.getByRole('link', { name: /File Grievance Ticket/i });
     expect(grievanceLink.getAttribute('href')).toBe('/grievance');

@@ -5,14 +5,17 @@ import { LegalPageShell } from '@/components/legal/LegalPageShell';
 import type { Metadata } from 'next';
 
 import { findStoreBySlug, getCategoryTree, getSharedDbClient } from '@hh/db';
-import { DEFAULT_CORPORATE_COORDINATES, DEFAULT_GRIEVANCE_OFFICER } from '@hh/domain';
+import {
+  DEFAULT_BRAND_IDENTITY,
+  DEFAULT_CORPORATE_COORDINATES,
+  DEFAULT_GRIEVANCE_OFFICER
+} from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Contact Us & Concierge Desk | H&H',
-  description:
-    'Reach our customer care concierge, workshop studio in Hyderabad, or statutory Grievance Officer.'
+  title: `Contact Us & Concierge Desk | ${DEFAULT_BRAND_IDENTITY.name}`,
+  description: `Reach our customer care concierge, workshop studio in ${DEFAULT_BRAND_IDENTITY.address.city}, or statutory Grievance Officer.`
 };
 
 function getDatabase() {
@@ -32,7 +35,7 @@ export default async function ContactPage() {
       subtitle="Whether you have questions about bespoke sizing, order delivery milestones, or require after-sales assistance, our artisans and concierge are here to help."
       badgeText="Client Care & Concierge"
       lastUpdated="September 2026"
-      storeName={store?.name ?? 'H&H'}
+      storeName={store?.name ?? DEFAULT_BRAND_IDENTITY.name}
       categories={categories}
       instagramHandle={store?.settings.instagramHandle}
     >
@@ -67,10 +70,10 @@ export default async function ContactPage() {
                     General &amp; Order Support
                   </span>
                   <a
-                    href="mailto:support@handh.in"
+                    href={`mailto:${DEFAULT_CORPORATE_COORDINATES.contactEmail}`}
                     className="font-medium text-foreground hover:text-accent transition-colors"
                   >
-                    support@handh.in
+                    {DEFAULT_CORPORATE_COORDINATES.contactEmail}
                   </a>
                 </div>
               </div>

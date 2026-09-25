@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/context/AuthContext';
 
+import { getBrandPatronLabel } from '@hh/domain';
+
 export function HeaderUserButton() {
   const { user, isLoading, openAuthModal, logout } = useAuth();
 
@@ -57,7 +59,7 @@ export function HeaderUserButton() {
         {/* User Ribbon */}
         <DropdownMenuLabel className="bg-secondary/30 rounded-t-sm px-3 py-2.5">
           <p className="font-bold text-sm text-primary leading-tight">
-            {user.name || 'H&H Patron'}
+            {getBrandPatronLabel(user.name)}
           </p>
           <p className="text-xs text-muted-foreground font-normal mt-0.5">{user.phone}</p>
         </DropdownMenuLabel>

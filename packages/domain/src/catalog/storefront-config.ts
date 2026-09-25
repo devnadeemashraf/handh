@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 const hexColorRegex = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
+import { DEFAULT_BRAND_IDENTITY } from '../brand/config';
+
 export const safeStorefrontUrlSchema = z
   .string()
   .trim()
@@ -15,43 +17,47 @@ export const storefrontThemeSchema = z.object({
   background: z
     .string()
     .regex(hexColorRegex, 'Background must be a valid hex color')
-    .default('#FDFBF7'),
-  surface: z.string().regex(hexColorRegex, 'Surface must be a valid hex color').default('#FFFFFF'),
-  border: z.string().regex(hexColorRegex, 'Border must be a valid hex color').default('#EBE7DF'),
+    .default(DEFAULT_BRAND_IDENTITY.theme.background),
+  surface: z
+    .string()
+    .regex(hexColorRegex, 'Surface must be a valid hex color')
+    .default(DEFAULT_BRAND_IDENTITY.theme.surface),
+  border: z
+    .string()
+    .regex(hexColorRegex, 'Border must be a valid hex color')
+    .default(DEFAULT_BRAND_IDENTITY.theme.border),
   primaryEmerald: z
     .string()
     .regex(hexColorRegex, 'Primary emerald must be a valid hex color')
-    .default('#0A2E24'),
+    .default(DEFAULT_BRAND_IDENTITY.theme.primaryEmerald),
   primaryEmeraldHover: z
     .string()
     .regex(hexColorRegex, 'Hover color must be a valid hex color')
-    .default('#07221A'),
+    .default(DEFAULT_BRAND_IDENTITY.theme.primaryEmeraldHover),
   accentGold: z
     .string()
     .regex(hexColorRegex, 'Accent gold must be a valid hex color')
-    .default('#C5A880'),
+    .default(DEFAULT_BRAND_IDENTITY.theme.accentGold),
   accentGoldLight: z
     .string()
     .regex(hexColorRegex, 'Light gold accent must be a valid hex color')
-    .default('#F5EFE6'),
+    .default(DEFAULT_BRAND_IDENTITY.theme.accentGoldLight),
   textPrimary: z
     .string()
     .regex(hexColorRegex, 'Primary text must be a valid hex color')
-    .default('#171A19'),
+    .default(DEFAULT_BRAND_IDENTITY.theme.textPrimary),
   textSecondary: z
     .string()
     .regex(hexColorRegex, 'Secondary text must be a valid hex color')
-    .default('#5C6460')
+    .default(DEFAULT_BRAND_IDENTITY.theme.textSecondary)
 });
 
 export const storefrontHeroSchema = z.object({
-  eyebrow: z.string().default('H&H Signature Collection'),
-  title: z.string().default('Crafted for Grace & Modesty'),
-  subtitle: z
+  eyebrow: z
     .string()
-    .default(
-      'Exquisite handcrafted nose-pieces and accessories designed for refined everyday elegance.'
-    ),
+    .default(`${DEFAULT_BRAND_IDENTITY.name} ${DEFAULT_BRAND_IDENTITY.terminology.signatureTitle}`),
+  title: z.string().default(DEFAULT_BRAND_IDENTITY.tagline),
+  subtitle: z.string().default(DEFAULT_BRAND_IDENTITY.description),
   ctaText: z.string().default('Explore the Collection'),
   ctaLink: safeStorefrontUrlSchema.default('#catalog'),
   badgeText: z.string().optional(),

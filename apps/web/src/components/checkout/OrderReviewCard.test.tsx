@@ -2,7 +2,7 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-import type { CartSummary } from '@hh/domain';
+import { type CartSummary, getBrandLegalConsentText } from '@hh/domain';
 
 import { OrderReviewCard } from './OrderReviewCard';
 
@@ -180,9 +180,7 @@ describe('OrderReviewCard Component', () => {
 
     const notice = screen.getByTestId('contract-formation-notice');
     expect(notice).toBeInTheDocument();
-    expect(notice).toHaveTextContent(
-      "By placing this order, you confirm and agree to H&H's Terms of Sale, Privacy Policy, and Refund Policy."
-    );
+    expect(notice).toHaveTextContent(getBrandLegalConsentText());
 
     const termsLink = screen.getByRole('link', { name: /Terms of Sale/i });
     expect(termsLink).toHaveAttribute('href', '/terms');

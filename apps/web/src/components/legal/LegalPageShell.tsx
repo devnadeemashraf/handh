@@ -4,7 +4,11 @@ import React from 'react';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 
-import { DEFAULT_CORPORATE_COORDINATES, DEFAULT_GRIEVANCE_OFFICER } from '@hh/domain';
+import {
+  DEFAULT_BRAND_IDENTITY,
+  DEFAULT_CORPORATE_COORDINATES,
+  DEFAULT_GRIEVANCE_OFFICER
+} from '@hh/domain';
 
 import type { CategoryTreeItem } from '@hh/domain';
 
@@ -24,7 +28,7 @@ export function LegalPageShell({
   subtitle,
   badgeText,
   lastUpdated,
-  storeName = 'H&H',
+  storeName = DEFAULT_BRAND_IDENTITY.name,
   categories = [],
   instagramHandle,
   children

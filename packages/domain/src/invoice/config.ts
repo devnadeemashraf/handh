@@ -1,24 +1,26 @@
 import { z } from 'zod';
 
+import { DEFAULT_BRAND_IDENTITY } from '../brand/config';
+
 import type { InvoiceTemplateConfig } from './types';
 
 export const defaultInvoiceTemplate: InvoiceTemplateConfig = {
-  brandName: 'H&H Artisan Studio',
-  legalName: 'H&H Luxury Goods Pvt. Ltd.',
-  tagline: 'Crafted for Grace & Modesty',
-  gstin: '27AABCH1234F1Z5',
-  pan: 'AABCH1234F',
-  addressLine1: 'Workshop 4B, Heritage Silversmith Enclave',
-  addressLine2: 'Shahjahanabad, Old Delhi',
-  city: 'New Delhi',
-  state: 'Delhi',
-  postalCode: '110006',
-  country: 'India',
-  supportEmail: 'concierge@handh.in',
-  supportPhone: '+91 98765 43210',
+  brandName: `${DEFAULT_BRAND_IDENTITY.name} ${DEFAULT_BRAND_IDENTITY.terminology.atelierTitle}`,
+  legalName: DEFAULT_BRAND_IDENTITY.legalName,
+  tagline: DEFAULT_BRAND_IDENTITY.tagline,
+  gstin: DEFAULT_BRAND_IDENTITY.gstin,
+  pan: DEFAULT_BRAND_IDENTITY.pan,
+  addressLine1: DEFAULT_BRAND_IDENTITY.address.street,
+  addressLine2: undefined,
+  city: DEFAULT_BRAND_IDENTITY.address.city,
+  state: DEFAULT_BRAND_IDENTITY.address.state,
+  postalCode: DEFAULT_BRAND_IDENTITY.address.postalCode,
+  country: DEFAULT_BRAND_IDENTITY.address.country,
+  supportEmail: DEFAULT_BRAND_IDENTITY.supportEmail,
+  supportPhone: DEFAULT_BRAND_IDENTITY.supportPhone,
   footerNote:
     'Thank you for supporting traditional Indian artisans. Handcrafted in pure silver and brass. All pieces are hallmarked.',
-  invoicePrefix: 'INV-HH-',
+  invoicePrefix: `INV-${DEFAULT_BRAND_IDENTITY.shortName.replace(/[^A-Za-z0-9]/g, '')}-`,
   showGstBreakdown: false
 };
 

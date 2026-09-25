@@ -21,7 +21,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-import type { StorefrontConfig, StorefrontReassurance } from '@hh/domain';
+import {
+  DEFAULT_BRAND_IDENTITY,
+  type StorefrontConfig,
+  type StorefrontReassurance
+} from '@hh/domain';
 
 interface BrandCustomizerDashboardProps {
   initialConfig: StorefrontConfig;
@@ -286,7 +290,7 @@ export default function BrandCustomizerDashboard({ initialConfig }: BrandCustomi
                   type="text"
                   value={heroEyebrow}
                   onChange={(e) => setHeroEyebrow(e.target.value)}
-                  placeholder="e.g. H&H Signature Collection"
+                  placeholder={`e.g. ${DEFAULT_BRAND_IDENTITY.shortName} ${DEFAULT_BRAND_IDENTITY.terminology.signatureTitle}`}
                 />
               </div>
 

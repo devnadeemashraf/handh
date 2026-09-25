@@ -4,11 +4,12 @@ import { LegalPageShell } from '@/components/legal/LegalPageShell';
 import type { Metadata } from 'next';
 
 import { findStoreBySlug, getCategoryTree, getSharedDbClient } from '@hh/db';
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Terms of Sale & Platform Terms | H&H',
+  title: `Terms of Sale & Platform Terms | ${DEFAULT_BRAND_IDENTITY.name}`,
   description:
     'Terms of Sale and Platform Terms governing orders, payments, fulfillment, and user agreements under Indian law.'
 };
@@ -30,7 +31,7 @@ export default async function TermsPage() {
       subtitle="Please read these terms carefully before placing an order. These terms govern your purchase of handcrafted modest wear accessories and use of our platform."
       badgeText="Consumer Protection (E-Commerce) Rules, 2020"
       lastUpdated="September 2026"
-      storeName={store?.name ?? 'H&H'}
+      storeName={store?.name ?? DEFAULT_BRAND_IDENTITY.name}
       categories={categories}
       instagramHandle={store?.settings.instagramHandle}
     >
@@ -42,8 +43,8 @@ export default async function TermsPage() {
           These Terms of Sale and Platform Terms (&quot;Terms&quot;) constitute an electronic record
           in terms of the Information Technology Act, 2000 and rules thereunder, and the Consumer
           Protection (E-Commerce) Rules, 2020. This document is published by{' '}
-          <strong className="text-foreground">H&amp;H Luxury Modest Wear Private Limited</strong>{' '}
-          (&quot;H&amp;H&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
+          <strong className="text-foreground">{DEFAULT_BRAND_IDENTITY.legalName}</strong> (&quot;
+          {DEFAULT_BRAND_IDENTITY.name}&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
         </p>
         <p>
           By accessing the platform, adding products to cart, and clicking &quot;Place Order &amp;
@@ -99,8 +100,8 @@ export default async function TermsPage() {
         <p>
           Payments are securely processed via Razorpay Software Private Limited
           (&quot;Razorpay&quot;), an RBI-authorized payment aggregator compliant with PCI DSS
-          standards. H&amp;H does not collect, handle, or store your raw credit card numbers, debit
-          card numbers, CVVs, or net banking passwords.
+          standards. {DEFAULT_BRAND_IDENTITY.name} does not collect, handle, or store your raw
+          credit card numbers, debit card numbers, CVVs, or net banking passwords.
         </p>
       </section>
 
@@ -144,9 +145,9 @@ export default async function TermsPage() {
         </h2>
         <p>
           In accordance with Rule 4(4) and Rule 5(3)(f) of the Consumer Protection (E-Commerce)
-          Rules, 2020, H&amp;H has designated a Nodal Grievance Officer. Any consumer dispute or
-          grievance will be acknowledged within 48 hours and resolved within 30 days. Please visit
-          our dedicated{' '}
+          Rules, 2020, {DEFAULT_BRAND_IDENTITY.name} has designated a Nodal Grievance Officer. Any
+          consumer dispute or grievance will be acknowledged within 48 hours and resolved within 30
+          days. Please visit our dedicated{' '}
           <Link href="/grievance" className="text-accent hover:underline font-medium">
             Grievance Redressal Desk
           </Link>{' '}
@@ -161,8 +162,9 @@ export default async function TermsPage() {
         <p>
           These Terms and any contractual disputes arising out of purchase transactions on this
           platform shall be governed by and construed in accordance with the laws of India. Subject
-          to mandatory consumer protection provisions, the competent courts located in Hyderabad,
-          Telangana, India shall have exclusive jurisdiction.
+          to mandatory consumer protection provisions, the competent courts located in{' '}
+          {DEFAULT_BRAND_IDENTITY.address.city},{DEFAULT_BRAND_IDENTITY.address.state}, India shall
+          have exclusive jurisdiction.
         </p>
       </section>
     </LegalPageShell>

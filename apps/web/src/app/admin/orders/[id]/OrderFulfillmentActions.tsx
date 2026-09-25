@@ -28,7 +28,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
-import { COURIER_LABELS, type CourierProvider, resolveCourierTrackingUrl } from '@hh/domain';
+import {
+  COURIER_LABELS,
+  type CourierProvider,
+  DEFAULT_BRAND_IDENTITY,
+  resolveCourierTrackingUrl
+} from '@hh/domain';
 
 import type { Fulfillment, Order, ShippingAddress } from '@hh/db';
 
@@ -271,7 +276,7 @@ export default function OrderFulfillmentActions({
   const digits = order.customerPhone.replace(/\D/g, '');
   const cleanPhone = digits.startsWith('91') && digits.length === 12 ? digits.slice(2) : digits;
   const waUrl = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(
-    `Hello ${order.customerName}, this is regarding your H&H order ${order.orderNumber}.`
+    `Hello ${order.customerName}, this is regarding your ${DEFAULT_BRAND_IDENTITY.shortName} order ${order.orderNumber}.`
   )}`;
 
   return (

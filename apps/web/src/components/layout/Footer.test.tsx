@@ -2,6 +2,8 @@ import React from 'react';
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
+
 import { Footer } from './Footer';
 
 describe('Footer Component', () => {
@@ -16,7 +18,9 @@ describe('Footer Component', () => {
     render(<Footer storeName="H&H" />);
 
     expect(
-      screen.getByText(/Registered Corporate Entity: H&H Luxury Modest Wear Private Limited/i)
+      screen.getByText(
+        new RegExp(`Registered Corporate Entity: ${DEFAULT_BRAND_IDENTITY.legalName}`, 'i')
+      )
     ).toBeDefined();
     expect(screen.getByText(/Registered Office: Plot No\. 128/i)).toBeDefined();
     expect(screen.getByText(/CIN:/i)).toBeDefined();
@@ -28,8 +32,8 @@ describe('Footer Component', () => {
 
     // Grievance Officer name and SLA link
     expect(screen.getByText(/Consumer Grievance Desk \(48h SLA\)/i)).toBeDefined();
-    expect(screen.getByText('Mohammed Irfan')).toBeDefined();
-    expect(screen.getByText('grievance@handh.in')).toBeDefined();
+    expect(screen.getByText(DEFAULT_BRAND_IDENTITY.grievanceOfficer.name)).toBeDefined();
+    expect(screen.getByText(DEFAULT_BRAND_IDENTITY.grievanceOfficer.email)).toBeDefined();
 
     // Verify /grievance links exist
     const grievanceLinks = screen

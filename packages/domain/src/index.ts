@@ -1,5 +1,6 @@
 export * from './analytics';
 export * from './auth';
+export * from './brand';
 export * from './cart';
 export type {
   CategoryTreeItem,

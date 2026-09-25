@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-import type { InvoiceTemplateConfig } from '@hh/domain';
+import { DEFAULT_BRAND_IDENTITY, type InvoiceTemplateConfig } from '@hh/domain';
 
 interface InvoiceCustomizerModalProps {
   initialTemplate: InvoiceTemplateConfig;
@@ -123,7 +123,7 @@ export default function InvoiceCustomizerModal({
                 type="text"
                 value={template.legalName || ''}
                 onChange={(e) => setTemplate({ ...template, legalName: e.target.value })}
-                placeholder="e.g. H&H Luxury Goods Pvt. Ltd."
+                placeholder={`e.g. ${DEFAULT_BRAND_IDENTITY.legalName}`}
                 className="h-9 text-xs"
               />
             </div>

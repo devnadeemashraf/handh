@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-import type { PublicProductListItem } from '@hh/domain';
+import { DEFAULT_BRAND_IDENTITY, type PublicProductListItem } from '@hh/domain';
 
 import { ProductCard } from './ProductCard';
 
@@ -33,10 +33,10 @@ describe('ProductCard Component', () => {
     expect(screen.getByText('Sold Out')).toBeInTheDocument();
   });
 
-  it('renders H&H Signature placeholder when primaryImageUrl is missing', () => {
+  it('renders brand signature placeholder when primaryImageUrl is missing', () => {
     render(<ProductCard product={{ ...mockProduct, primaryImageUrl: null }} />);
 
-    expect(screen.getByText('H&H Signature')).toBeInTheDocument();
+    expect(screen.getByText(`${DEFAULT_BRAND_IDENTITY.shortName} Signature`)).toBeInTheDocument();
   });
 
   it('renders image with priority attribute when priority prop is true', () => {

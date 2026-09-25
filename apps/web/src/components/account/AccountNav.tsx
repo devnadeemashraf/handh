@@ -8,6 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 
+import { getBrandPatronLabel } from '@hh/domain';
+
 export function AccountNav() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -26,7 +28,7 @@ export function AccountNav() {
         {/* User Ribbon */}
         <div className="mb-2 border-b border-border px-3 py-3">
           <p className="font-bold text-sm text-primary leading-tight">
-            {user?.name || 'H&H Patron'}
+            {getBrandPatronLabel(user?.name)}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">{user?.phone}</p>
         </div>

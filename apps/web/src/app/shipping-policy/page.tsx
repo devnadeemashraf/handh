@@ -4,11 +4,12 @@ import { LegalPageShell } from '@/components/legal/LegalPageShell';
 import type { Metadata } from 'next';
 
 import { findStoreBySlug, getCategoryTree, getSharedDbClient } from '@hh/db';
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Shipping & Delivery Policy | H&H',
+  title: `Shipping & Delivery Policy | ${DEFAULT_BRAND_IDENTITY.name}`,
   description:
     'Information regarding domestic parcel dispatch, courier partners, transit times, pincode serviceability, and consignment tracking across India.'
 };
@@ -27,10 +28,10 @@ export default async function ShippingPolicyPage() {
   return (
     <LegalPageShell
       title="Shipping & Delivery Policy"
-      subtitle="Discover our nationwide fulfillment standards, hand-inspection protocols, verified courier networks, and transit schedules from our Hyderabad studio."
+      subtitle={`Discover our nationwide fulfillment standards, hand-inspection protocols, verified courier networks, and transit schedules from our ${DEFAULT_BRAND_IDENTITY.address.city} studio.`}
       badgeText="Nationwide Express Courier"
       lastUpdated="September 2026"
-      storeName={store?.name ?? 'H&H'}
+      storeName={store?.name ?? DEFAULT_BRAND_IDENTITY.name}
       categories={categories}
       instagramHandle={store?.settings.instagramHandle}
     >
@@ -39,10 +40,12 @@ export default async function ShippingPolicyPage() {
           1. Origin &amp; Artisanal Handling
         </h2>
         <p>
-          All H&amp;H signature items are crafted, hand-inspected, and dispatched directly from our
-          registered workshop in{' '}
+          All {DEFAULT_BRAND_IDENTITY.shortName} signature items are crafted, hand-inspected, and
+          dispatched directly from our registered workshop in{' '}
           <strong className="text-foreground">
-            Jubilee Hills, Hyderabad, Telangana (PIN: 500034)
+            {DEFAULT_BRAND_IDENTITY.address.street}, {DEFAULT_BRAND_IDENTITY.address.city},{' '}
+            {DEFAULT_BRAND_IDENTITY.address.state} (PIN: {DEFAULT_BRAND_IDENTITY.address.postalCode}
+            )
           </strong>
           . Because each order is packaged with utmost care in padded luxury boxes, handling time is
           typically <strong className="text-foreground">24 to 48 business hours</strong> from
@@ -136,8 +139,8 @@ export default async function ShippingPolicyPage() {
         </p>
         <p>
           If the package remains undelivered after 3 attempts, it is flagged for Return to Origin
-          (RTO). Upon physical receipt at our Hyderabad warehouse, a full refund will be initiated
-          back to your payment account.
+          (RTO). Upon physical receipt at our {DEFAULT_BRAND_IDENTITY.address.city} warehouse, a
+          full refund will be initiated back to your payment account.
         </p>
       </section>
 
@@ -149,8 +152,11 @@ export default async function ShippingPolicyPage() {
           If the exterior shipping package appears torn, severely crushed, or tampered with at the
           time of delivery, please refuse to accept the parcel from the delivery agent, take a
           photograph, and immediately contact our concierge at{' '}
-          <a href="mailto:support@handh.in" className="text-accent hover:underline">
-            support@handh.in
+          <a
+            href={`mailto:${DEFAULT_BRAND_IDENTITY.supportEmail}`}
+            className="text-accent hover:underline"
+          >
+            {DEFAULT_BRAND_IDENTITY.supportEmail}
           </a>{' '}
           or file a complaint on our{' '}
           <Link href="/grievance" className="text-accent hover:underline font-medium">

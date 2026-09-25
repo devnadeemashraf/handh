@@ -23,7 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
-import { buildVipWhatsAppUrl } from '@hh/domain';
+import { buildVipWhatsAppUrl, DEFAULT_BRAND_IDENTITY } from '@hh/domain';
 
 import type { ExecutiveInsightsData, InsightTimeframe } from '@hh/domain';
 
@@ -323,7 +323,7 @@ export default function InsightsDashboard({ initialInsights }: InsightsDashboard
                   const waUrl = buildVipWhatsAppUrl(
                     patron.customerPhone,
                     patron.customerName,
-                    'H&H Atelier'
+                    `${DEFAULT_BRAND_IDENTITY.name} ${DEFAULT_BRAND_IDENTITY.terminology.atelierTitle}`
                   );
 
                   return (

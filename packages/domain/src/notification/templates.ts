@@ -1,3 +1,4 @@
+import { DEFAULT_BRAND_IDENTITY, getBrandNotificationSubject } from '../brand/config';
 import { Money } from '../money';
 
 import type { CurrencyCode } from '../money';
@@ -126,17 +127,17 @@ function renderBaseEmailLayout(title: string, contentHtml: string): string {
 <body>
   <div class="wrapper">
     <div class="header">
-      <h1 class="brand-title">H &amp; H</h1>
-      <div class="brand-subtitle">Haute &amp; Heritage</div>
+      <h1 class="brand-title">${escapeHtml(DEFAULT_BRAND_IDENTITY.name)}</h1>
+      <div class="brand-subtitle">${escapeHtml(DEFAULT_BRAND_IDENTITY.subtitle)}</div>
     </div>
     <div class="accent-bar"></div>
     <div class="content">
       ${contentHtml}
     </div>
     <div class="footer">
-      <p style="margin: 0 0 6px 0;"><strong>H&amp;H Luxury Concierge</strong></p>
-      <p style="margin: 0;">Questions about your piece? Reply to this email or reach us at <a href="mailto:concierge@handh.local" style="color: #0A2E24;">concierge@handh.local</a></p>
-      <p style="margin: 12px 0 0 0; font-size: 11px; color: #9da19f;">&copy; ${new Date().getFullYear()} H&amp;H Haute &amp; Heritage. All rights reserved.</p>
+      <p style="margin: 0 0 6px 0;"><strong>${escapeHtml(DEFAULT_BRAND_IDENTITY.name)} ${escapeHtml(DEFAULT_BRAND_IDENTITY.terminology.conciergeTitle)}</strong></p>
+      <p style="margin: 0;">Questions about your piece? Reply to this email or reach us at <a href="mailto:${escapeHtml(DEFAULT_BRAND_IDENTITY.supportEmail)}" style="color: #0A2E24;">${escapeHtml(DEFAULT_BRAND_IDENTITY.supportEmail)}</a></p>
+      <p style="margin: 12px 0 0 0; font-size: 11px; color: #9da19f;">&copy; ${new Date().getFullYear()} ${escapeHtml(DEFAULT_BRAND_IDENTITY.legalName)}. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -155,7 +156,7 @@ function escapeHtml(str: string): string {
 // ── Email Renderers ────────────────────────────────────────────────────────────
 
 export function renderOrderConfirmationEmail(data: OrderConfirmationEmailData): EmailRenderOutput {
-  const subject = `Order Confirmed: #${data.orderNumber} — H&H Luxury`;
+  const subject = getBrandNotificationSubject('confirmed', data.orderNumber);
   const formattedTotal = formatCurrency(data.totalMinor, data.currency);
 
   const itemsHtml = data.items
@@ -231,7 +232,7 @@ export function renderOrderConfirmationEmail(data: OrderConfirmationEmailData): 
     }
   `;
 
-  const text = `H&H — Order Confirmed: #${data.orderNumber}
+  const text = `${DEFAULT_BRAND_IDENTITY.name} — Order Confirmed: #${data.orderNumber}
 
 Thank you for your order, ${data.customerName}!
 
@@ -249,7 +250,7 @@ ${data.shippingAddress.line2 ? `${data.shippingAddress.line2}\n` : ''}${data.shi
 ${data.shippingAddress.country}
 
 ${data.orderUrl ? `View order details: ${data.orderUrl}\n` : ''}
-Need assistance? Reach us at concierge@handh.local`;
+Need assistance? Reach us at ${DEFAULT_BRAND_IDENTITY.supportEmail}`;
 
   return {
     subject,
@@ -259,7 +260,7 @@ Need assistance? Reach us at concierge@handh.local`;
 }
 
 export function renderOrderDispatchedEmail(data: OrderDispatchedEmailData): EmailRenderOutput {
-  const subject = `Dispatched: Your H&H Order #${data.orderNumber} is on the way`;
+  const subject = getBrandNotificationSubject('dispatched', data.orderNumber);
 
   const contentHtml = `
     <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #0A2E24; margin-top: 0; margin-bottom: 8px;">
@@ -293,7 +294,7 @@ export function renderOrderDispatchedEmail(data: OrderDispatchedEmailData): Emai
     }
   `;
 
-  const text = `H&H — Order Dispatched: #${data.orderNumber}
+  const text = `${DEFAULT_BRAND_IDENTITY.name} — Order Dispatched: #${data.orderNumber}
 
 Dear ${data.customerName},
 
@@ -303,7 +304,7 @@ Courier: ${data.courierName}
 Tracking Number (AWB): ${data.trackingNumber}
 
 ${data.trackingUrl ? `Track package: ${data.trackingUrl}\n` : ''}
-Questions? Contact concierge@handh.local`;
+Questions? Contact ${DEFAULT_BRAND_IDENTITY.supportEmail}`;
 
   return {
     subject,
@@ -313,7 +314,7 @@ Questions? Contact concierge@handh.local`;
 }
 
 export function renderOrderDeliveredEmail(data: OrderDeliveredEmailData): EmailRenderOutput {
-  const subject = `Delivered: Your H&H Order #${data.orderNumber}`;
+  const subject = getBrandNotificationSubject('delivered', data.orderNumber);
 
   const contentHtml = `
     <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; color: #0A2E24; margin-top: 0; margin-bottom: 8px;">
@@ -329,7 +330,7 @@ export function renderOrderDeliveredEmail(data: OrderDeliveredEmailData): EmailR
     </div>
 
     <p style="font-size: 14px; line-height: 1.6; color: #4a4e4c;">
-      We hope your new H&amp;H pieces bring you grace and joy. If you have any questions or need sizing adjustments, our concierge team is always at your service.
+      We hope your new ${escapeHtml(DEFAULT_BRAND_IDENTITY.name)} pieces bring you grace and joy. If you have any questions or need sizing adjustments, our concierge team is always at your service.
     </p>
 
     ${
@@ -341,7 +342,7 @@ export function renderOrderDeliveredEmail(data: OrderDeliveredEmailData): EmailR
     }
   `;
 
-  const text = `H&H — Order Delivered: #${data.orderNumber}
+  const text = `${DEFAULT_BRAND_IDENTITY.name} — Order Delivered: #${data.orderNumber}
 
 Dear ${data.customerName},
 
@@ -349,7 +350,7 @@ Your order #${data.orderNumber} has been delivered.
 
 We hope you enjoy your new pieces!
 ${data.orderUrl ? `View your order: ${data.orderUrl}\n` : ''}
-Need help? Contact concierge@handh.local`;
+Need help? Contact ${DEFAULT_BRAND_IDENTITY.supportEmail}`;
 
   return {
     subject,
@@ -407,7 +408,7 @@ export function renderAdminOrderAlertEmail(data: AdminOrderAlertEmailData): Emai
     }
   `;
 
-  const text = `[H&H Operations] New Order Alert: #${data.orderNumber}
+  const text = `[${DEFAULT_BRAND_IDENTITY.shortName} Operations] New Order Alert: #${data.orderNumber}
 
 Order Number: #${data.orderNumber}
 Amount: ${formattedTotal}
@@ -433,10 +434,10 @@ export function formatOrderConfirmationWhatsApp(
 ): WhatsAppRenderOutput {
   const formattedTotal = formatCurrency(data.totalMinor, data.currency);
 
-  const text = `*H&H Luxury Concierge* ✨
+  const text = `*${DEFAULT_BRAND_IDENTITY.name} ${DEFAULT_BRAND_IDENTITY.terminology.conciergeTitle}* ✨
 
 Dear ${data.customerName},
-Thank you for choosing H&H.
+Thank you for choosing ${DEFAULT_BRAND_IDENTITY.name}.
 
 Your order *#${data.orderNumber}* for *${formattedTotal}* (${data.itemCount} item${data.itemCount === 1 ? '' : 's'}) has been confirmed! Our atelier is preparing your pieces.
 
@@ -465,7 +466,7 @@ ${data.trackingUrl ? `Track order progress: ${data.trackingUrl}\n\n` : ''}Reply 
 export function formatOrderDispatchedWhatsApp(
   data: OrderDispatchedWhatsAppData
 ): WhatsAppRenderOutput {
-  const text = `*H&H Delivery Update* 📦
+  const text = `*${DEFAULT_BRAND_IDENTITY.name} Delivery Update* 📦
 
 Dear ${data.customerName},
 Your order *#${data.orderNumber}* has been dispatched via *${data.courierName}*.
@@ -496,12 +497,12 @@ ${data.trackingUrl ? `Track package: ${data.trackingUrl}\n\n` : ''}Expected deli
 export function formatOrderDeliveredWhatsApp(
   data: OrderDeliveredWhatsAppData
 ): WhatsAppRenderOutput {
-  const text = `*H&H Delivery Complete* 🌸
+  const text = `*${DEFAULT_BRAND_IDENTITY.name} Delivery Complete* 🌸
 
 Dear ${data.customerName},
 Your order *#${data.orderNumber}* has been delivered!
 
-We hope your new H&H pieces bring grace and beauty to your wardrobe. Reach out here anytime if you need assistance.`;
+We hope your new ${DEFAULT_BRAND_IDENTITY.name} pieces bring grace and beauty to your wardrobe. Reach out here anytime if you need assistance.`;
 
   return {
     text,

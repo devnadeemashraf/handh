@@ -21,6 +21,7 @@ import type { Metadata } from 'next';
 
 import { findStoreBySlug, getCategoryTree, getSharedDbClient } from '@hh/db';
 import {
+  DEFAULT_BRAND_IDENTITY,
   DEFAULT_CORPORATE_COORDINATES,
   DEFAULT_GRIEVANCE_OFFICER,
   resolveStorefrontConfig
@@ -31,7 +32,7 @@ import { GrievanceForm } from './GrievanceForm';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Statutory Consumer Grievance Redressal | H&H',
+  title: `Statutory Consumer Grievance Redressal | ${DEFAULT_BRAND_IDENTITY.name}`,
   description:
     'Designated Grievance Officer disclosures, statutory 48-hour SLA acknowledgement, and official grievance redressal mechanism under Consumer Protection (E-Commerce) Rules, 2020.'
 };
@@ -68,7 +69,7 @@ export default async function GrievancePage() {
       {storefrontConfig?.announcement && (
         <AnnouncementBar announcement={storefrontConfig.announcement} />
       )}
-      <Header storeName={store?.name ?? 'H&H'} categories={categories} />
+      <Header storeName={store?.name ?? DEFAULT_BRAND_IDENTITY.name} categories={categories} />
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
         {/* Breadcrumb Navigation */}
@@ -331,7 +332,10 @@ export default async function GrievancePage() {
         </div>
       </main>
 
-      <Footer storeName={store?.name ?? 'H&H'} instagramHandle={store?.settings.instagramHandle} />
+      <Footer
+        storeName={store?.name ?? DEFAULT_BRAND_IDENTITY.name}
+        instagramHandle={store?.settings.instagramHandle}
+      />
     </>
   );
 }

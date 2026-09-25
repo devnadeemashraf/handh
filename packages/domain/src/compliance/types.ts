@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { DEFAULT_BRAND_IDENTITY } from '../brand/config';
 import { IndianPhoneSchema } from '../phone';
 
 export const GRIEVANCE_CATEGORIES = [
@@ -46,24 +47,24 @@ export interface CorporateCoordinates {
 }
 
 export const DEFAULT_GRIEVANCE_OFFICER: GrievanceOfficerInfo = {
-  name: 'Mohammed Irfan',
-  designation: 'Head of Customer Experience & Grievance Officer',
-  email: 'grievance@handh.in',
-  phone: '+91 40 2355 7890',
-  address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India',
-  workingHours: 'Monday – Friday, 10:00 AM – 6:00 PM IST',
-  acknowledgementSla: 'Within 48 hours of complaint receipt',
-  resolutionSla: 'Within 30 calendar days from receipt'
+  name: DEFAULT_BRAND_IDENTITY.grievanceOfficer.name,
+  designation: DEFAULT_BRAND_IDENTITY.grievanceOfficer.designation,
+  email: DEFAULT_BRAND_IDENTITY.grievanceOfficer.email,
+  phone: DEFAULT_BRAND_IDENTITY.grievanceOfficer.phone,
+  address: DEFAULT_BRAND_IDENTITY.grievanceOfficer.address,
+  workingHours: DEFAULT_BRAND_IDENTITY.grievanceOfficer.workingHours,
+  acknowledgementSla: DEFAULT_BRAND_IDENTITY.grievanceOfficer.acknowledgementSla,
+  resolutionSla: DEFAULT_BRAND_IDENTITY.grievanceOfficer.resolutionSla
 };
 
 export const DEFAULT_CORPORATE_COORDINATES: CorporateCoordinates = {
-  legalName: 'H&H Luxury Modest Wear Private Limited',
-  tradeName: 'H&H',
-  registeredAddress: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India',
-  cin: 'U18101TG2024PTC189234',
-  gstin: '36AAACH1234F1Z5',
-  contactEmail: 'support@handh.in',
-  supportPhone: '+91 40 2355 7890'
+  legalName: DEFAULT_BRAND_IDENTITY.legalName,
+  tradeName: DEFAULT_BRAND_IDENTITY.name,
+  registeredAddress: DEFAULT_BRAND_IDENTITY.address.fullFormatted,
+  cin: DEFAULT_BRAND_IDENTITY.cin,
+  gstin: DEFAULT_BRAND_IDENTITY.gstin,
+  contactEmail: DEFAULT_BRAND_IDENTITY.supportEmail,
+  supportPhone: DEFAULT_BRAND_IDENTITY.supportPhone
 };
 
 export const GrievanceSubmissionSchema = z.object({

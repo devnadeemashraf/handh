@@ -78,8 +78,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: 'INTERNAL_SERVER_ERROR',
-        message:
-          'An unexpected error occurred while registering your grievance. Please try again or email grievance@handh.in directly.'
+        message: `An unexpected error occurred while registering your grievance. Please try again or email ${DEFAULT_GRIEVANCE_OFFICER.email} directly.`
       },
       { status: 500 }
     );

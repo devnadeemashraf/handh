@@ -2,7 +2,12 @@ import { FileCheck, HelpCircle, Scale, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
-import { Money, type PublicProductDetail, type PublicVariantItem } from '@hh/domain';
+import {
+  DEFAULT_BRAND_IDENTITY,
+  Money,
+  type PublicProductDetail,
+  type PublicVariantItem
+} from '@hh/domain';
 
 export interface LegalMetrologySectionProps {
   product: PublicProductDetail;
@@ -26,8 +31,8 @@ export function LegalMetrologySection({
   const manufacturer = product.manufacturerDetails;
   const packer = product.packerDetails ?? manufacturer;
   const consumerCare = product.consumerCareDetails ?? {
-    email: 'support@handh.in',
-    phone: '+91 40 2355 7890',
+    email: DEFAULT_BRAND_IDENTITY.supportEmail,
+    phone: DEFAULT_BRAND_IDENTITY.supportPhone,
     address: manufacturer.address
   };
 

@@ -11,7 +11,7 @@ describe('Invoice Domain & Template Config', () => {
     const template = resolveInvoiceTemplate(undefined);
     expect(template.brandName).toBe(defaultInvoiceTemplate.brandName);
     expect(template.invoicePrefix).toBe('INV-HH-');
-    expect(template.supportEmail).toBe('concierge@handh.in');
+    expect(template.supportEmail).toBe(defaultInvoiceTemplate.supportEmail);
   });
 
   it('resolves custom invoice template overriding specific fields', () => {

@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { triggerHaptic } from '@/lib/haptic';
 
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
+
 import { useAuth } from '../../context/AuthContext';
 
 export default function AccountProfilePage() {
@@ -122,7 +124,7 @@ export default function AccountProfilePage() {
           </label>
           <Input
             type="email"
-            placeholder="e.g. patron@handh.in"
+            placeholder={`e.g. patron@${DEFAULT_BRAND_IDENTITY.supportEmail.split('@')[1]}`}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="h-10 text-sm"

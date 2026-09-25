@@ -1,3 +1,5 @@
+import { DEFAULT_BRAND_IDENTITY } from '../brand/config';
+
 import type { ProductCustomizationRule } from './customization';
 
 export interface PublicVariantItem {
@@ -58,19 +60,19 @@ export const DEFAULT_LEGAL_METROLOGY: LegalMetrologyDeclarations = {
   netQuantity: '1 N',
   commodityName: 'Handcrafted Modest Wear Accessory',
   manufacturer: {
-    name: 'H&H Luxury Modest Wear Private Limited',
-    address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India',
-    email: 'support@handh.in',
-    phone: '+91 40 2355 7890'
+    name: DEFAULT_BRAND_IDENTITY.legalName,
+    address: DEFAULT_BRAND_IDENTITY.address.fullFormatted,
+    email: DEFAULT_BRAND_IDENTITY.supportEmail,
+    phone: DEFAULT_BRAND_IDENTITY.supportPhone
   },
   packer: {
-    name: 'H&H Luxury Modest Wear Private Limited',
-    address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India'
+    name: DEFAULT_BRAND_IDENTITY.legalName,
+    address: DEFAULT_BRAND_IDENTITY.address.fullFormatted
   },
   consumerCare: {
-    email: 'support@handh.in',
-    phone: '+91 40 2355 7890',
-    address: 'Plot No. 128, Road No. 36, Jubilee Hills, Hyderabad, Telangana 500034, India'
+    email: DEFAULT_BRAND_IDENTITY.supportEmail,
+    phone: DEFAULT_BRAND_IDENTITY.supportPhone,
+    address: DEFAULT_BRAND_IDENTITY.address.fullFormatted
   }
 };
 

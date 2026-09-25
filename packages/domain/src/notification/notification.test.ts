@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { DEFAULT_BRAND_IDENTITY } from '../brand/config';
 import {
   formatOrderConfirmationWhatsApp,
   formatOrderDeliveredWhatsApp,
@@ -53,9 +54,11 @@ describe('Notification Domain Templates', () => {
         orderUrl: 'https://handh.local/account/orders/ord-123'
       });
 
-      expect(email.subject).toBe('Order Confirmed: #HH-2026-0001 — H&H Luxury');
-      expect(email.html).toContain('H &amp; H');
-      expect(email.html).toContain('Haute &amp; Heritage');
+      expect(email.subject).toBe(
+        `Order Confirmed: #HH-2026-0001 — ${DEFAULT_BRAND_IDENTITY.name} Luxury`
+      );
+      expect(email.html).toContain(DEFAULT_BRAND_IDENTITY.name.replace(/&/g, '&amp;'));
+      expect(email.html).toContain(DEFAULT_BRAND_IDENTITY.subtitle.replace(/&/g, '&amp;'));
       expect(email.html).toContain('Fatima Al-Hassan');
       expect(email.html).toContain('#HH-2026-0001');
       expect(email.html).toContain('Silk Organza Abaya');
@@ -152,7 +155,9 @@ describe('Notification Domain Templates', () => {
         trackingUrl: 'https://handh.local/track/HH-2026-0001'
       });
 
-      expect(wa.text).toContain('*H&H Luxury Concierge*');
+      expect(wa.text).toContain(
+        `*${DEFAULT_BRAND_IDENTITY.name} ${DEFAULT_BRAND_IDENTITY.terminology.conciergeTitle}*`
+      );
       expect(wa.text).toContain('*#HH-2026-0001*');
       expect(wa.text).toContain('₹15,997.00');
       expect(wa.text).toContain('3 items');
@@ -180,7 +185,7 @@ describe('Notification Domain Templates', () => {
         trackingUrl: 'https://track.handh.local/TRK-2026-0001'
       });
 
-      expect(wa.text).toContain('*H&H Delivery Update*');
+      expect(wa.text).toContain(`*${DEFAULT_BRAND_IDENTITY.name} Delivery Update*`);
       expect(wa.text).toContain('*#HH-2026-0001*');
       expect(wa.text).toContain('*BlueDart*');
       expect(wa.text).toContain('*BLUEDART-88291039*');
@@ -205,7 +210,7 @@ describe('Notification Domain Templates', () => {
         deliveredAt: new Date().toISOString()
       });
 
-      expect(wa.text).toContain('*H&H Delivery Complete*');
+      expect(wa.text).toContain(`*${DEFAULT_BRAND_IDENTITY.name} Delivery Complete*`);
       expect(wa.text).toContain('*#HH-2026-0001*');
       expect(wa.text).toContain('Fatima');
 

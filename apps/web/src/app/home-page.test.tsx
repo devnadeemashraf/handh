@@ -11,8 +11,9 @@ vi.mock('@/lib/catalog-cache', () => ({
 
 import { getCachedCatalog, getCachedCategories, getCachedStore } from '@/lib/catalog-cache';
 
+import { type CategoryTreeItem, DEFAULT_BRAND_IDENTITY } from '@hh/domain';
+
 import type { Store } from '@hh/db';
-import type { CategoryTreeItem } from '@hh/domain';
 
 describe('Storefront Homepage (/page.tsx) - Performance & Edge Caching', () => {
   beforeEach(() => {
@@ -112,10 +113,10 @@ describe('Storefront Homepage (/page.tsx) - Performance & Edge Caching', () => {
 
     const meta = await generateMetadata();
 
-    expect(meta.title).toBe('H&H Luxury Modest Wear — Curated Modest Essentials & Jewelry');
-    expect(meta.description).toContain('Exquisite handcrafted nose-pieces');
+    expect(meta.title).toBe(`H&H Luxury Modest Wear — ${DEFAULT_BRAND_IDENTITY.subtitle}`);
+    expect(meta.description).toBe(DEFAULT_BRAND_IDENTITY.description);
     expect(meta.openGraph?.siteName).toBe('H&H Luxury Modest Wear');
-    expect(meta.alternates?.canonical).toBe('https://handh.in');
+    expect(meta.alternates?.canonical).toBe(DEFAULT_BRAND_IDENTITY.websiteUrl);
   });
 
   it('injects Schema.org JSON-LD structured data script on homepage (E-COM-151)', async () => {

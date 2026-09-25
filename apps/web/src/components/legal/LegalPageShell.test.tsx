@@ -2,6 +2,8 @@ import React from 'react';
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
+
 import { LegalPageShell } from './LegalPageShell';
 
 describe('LegalPageShell Component', () => {
@@ -39,9 +41,11 @@ describe('LegalPageShell Component', () => {
 
     expect(screen.getByText(/Corporate Legal Coordinates/i)).toBeDefined();
     expect(
-      screen.getAllByText(/H&H Luxury Modest Wear Private Limited/i).length
+      screen.getAllByText(new RegExp(DEFAULT_BRAND_IDENTITY.legalName, 'i')).length
     ).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText(/Mohammed Irfan/i).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText(new RegExp(DEFAULT_BRAND_IDENTITY.grievanceOfficer.name, 'i')).length
+    ).toBeGreaterThanOrEqual(1);
 
     const grievanceLinks = screen
       .getAllByRole('link')

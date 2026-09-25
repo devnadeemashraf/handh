@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { triggerHaptic } from '@/lib/haptic';
 
-import { Money } from '@hh/domain';
+import { DEFAULT_BRAND_IDENTITY, Money } from '@hh/domain';
 
 import type { Order, OrderItem } from '@hh/db';
 
@@ -93,7 +93,7 @@ export default function AccountOrdersPage() {
           key: data.keyId,
           amount: data.amountMinor,
           currency: data.currency,
-          name: 'H&H',
+          name: DEFAULT_BRAND_IDENTITY.name,
           description: `Order ${data.orderNumber}`,
           order_id: data.razorpayOrderId,
           prefill: {
@@ -101,7 +101,7 @@ export default function AccountOrdersPage() {
             email: order.customerEmail || '',
             contact: order.customerPhone || ''
           },
-          theme: { color: '#0A2E24' },
+          theme: { color: DEFAULT_BRAND_IDENTITY.theme.primaryEmerald },
           handler: async function (response: {
             razorpay_order_id: string;
             razorpay_payment_id: string;

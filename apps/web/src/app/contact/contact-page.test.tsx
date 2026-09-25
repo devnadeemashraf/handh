@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
+
 import ContactPage from './page';
 
 vi.mock('@hh/db', () => ({
@@ -26,11 +28,15 @@ describe('Contact Us Page (/contact)', () => {
       screen.getByRole('heading', { level: 1, name: 'Contact Us & Concierge Desk' })
     ).toBeDefined();
     expect(screen.getByText(/Customer Concierge/i)).toBeDefined();
-    expect(screen.getAllByText('support@handh.in').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(DEFAULT_BRAND_IDENTITY.supportEmail).length).toBeGreaterThanOrEqual(
+      1
+    );
     expect(screen.getByText(/Workshop Studio/i)).toBeDefined();
     expect(screen.getAllByText(/Registered Corporate Entity/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/Consumer Grievance Redressal/i)).toBeDefined();
-    expect(screen.getAllByText(/Mohammed Irfan/i).length).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getAllByText(new RegExp(DEFAULT_BRAND_IDENTITY.grievanceOfficer.name, 'i')).length
+    ).toBeGreaterThanOrEqual(1);
 
     // Verify /grievance and /track links exist
     const grievanceLinks = screen

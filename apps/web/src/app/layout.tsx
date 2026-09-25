@@ -12,7 +12,7 @@ import { getCachedStore } from '@/lib/catalog-cache';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 
-import { resolveStorefrontConfig } from '@hh/domain';
+import { DEFAULT_BRAND_IDENTITY, resolveStorefrontConfig } from '@hh/domain';
 
 import '../lib/polyfill-crypto';
 import './globals.css';
@@ -31,28 +31,26 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: 'H&H — Curated Modest Essentials & Jewelry',
-    template: '%s | H&H'
+    default: `${DEFAULT_BRAND_IDENTITY.name} — ${DEFAULT_BRAND_IDENTITY.subtitle}`,
+    template: `%s | ${DEFAULT_BRAND_IDENTITY.name}`
   },
-  description: 'Refined modest wear accessories and essentials crafted with precision and purpose.',
-  metadataBase: new URL(process.env['APP_URL'] ?? 'http://localhost:3000'),
+  description: DEFAULT_BRAND_IDENTITY.description,
+  metadataBase: new URL(process.env['APP_URL'] ?? DEFAULT_BRAND_IDENTITY.websiteUrl),
   manifest: '/manifest.webmanifest',
   icons: {
     icon: '/icons/icon-192.png',
     apple: '/icons/icon-192.png'
   },
   openGraph: {
-    title: 'H&H — Curated Modest Essentials & Jewelry',
-    description:
-      'Refined modest wear accessories and essentials crafted with precision and purpose.',
+    title: `${DEFAULT_BRAND_IDENTITY.name} — ${DEFAULT_BRAND_IDENTITY.subtitle}`,
+    description: DEFAULT_BRAND_IDENTITY.description,
     type: 'website',
-    siteName: 'H&H'
+    siteName: DEFAULT_BRAND_IDENTITY.name
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'H&H — Curated Modest Essentials & Jewelry',
-    description:
-      'Refined modest wear accessories and essentials crafted with precision and purpose.'
+    title: `${DEFAULT_BRAND_IDENTITY.name} — ${DEFAULT_BRAND_IDENTITY.subtitle}`,
+    description: DEFAULT_BRAND_IDENTITY.description
   },
   robots: {
     index: true,

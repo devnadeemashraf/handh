@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
+
 import manifest from './manifest';
 
 describe('PWA Web App Manifest (E-COM-123)', () => {
@@ -7,8 +9,10 @@ describe('PWA Web App Manifest (E-COM-123)', () => {
     const config = manifest();
 
     // 1. Branding and Theme
-    expect(config.name).toBe('H&H Luxury Atelier');
-    expect(config.short_name).toBe('H&H');
+    expect(config.name).toBe(
+      `${DEFAULT_BRAND_IDENTITY.name} ${DEFAULT_BRAND_IDENTITY.terminology.atelierTitle}`
+    );
+    expect(config.short_name).toBe(DEFAULT_BRAND_IDENTITY.shortName);
     expect(config.theme_color).toBe('#09090b');
     expect(config.background_color).toBe('#ffffff');
     expect(config.display).toBe('standalone');

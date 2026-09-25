@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
+import { DEFAULT_BRAND_IDENTITY } from '@hh/domain';
+
 import ProductDetailPage from './page';
 
 const { mockProduct } = vi.hoisted(() => ({
@@ -104,9 +106,9 @@ describe('Product Detail Page (/products/[slug])', () => {
     expect(screen.getAllByText(/MRP \(Inclusive of all taxes\)/i).length).toBeGreaterThanOrEqual(1);
 
     // Corporate coordinates
-    expect(
-      screen.getAllByText('H&H Luxury Modest Wear Private Limited').length
-    ).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('support@handh.in').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(DEFAULT_BRAND_IDENTITY.legalName).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(DEFAULT_BRAND_IDENTITY.supportEmail).length).toBeGreaterThanOrEqual(
+      1
+    );
   });
 });

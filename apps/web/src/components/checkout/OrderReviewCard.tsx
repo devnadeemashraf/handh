@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
-import { calculateCheckoutFinancials, Money } from '@hh/domain';
+import { calculateCheckoutFinancials, DEFAULT_BRAND_IDENTITY, Money } from '@hh/domain';
 
 import type { CartSummary } from '@hh/domain';
 
@@ -320,7 +320,7 @@ export function OrderReviewCard({
           data-testid="contract-formation-notice"
           className="mb-4 text-xs text-muted-foreground leading-relaxed text-center px-1"
         >
-          By placing this order, you confirm and agree to H&amp;H&apos;s{' '}
+          By placing this order, you confirm and agree to {DEFAULT_BRAND_IDENTITY.name}&apos;s{' '}
           <Link
             href="/terms"
             target="_blank"

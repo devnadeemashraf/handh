@@ -17,7 +17,7 @@ import { isDraftModeEnabled } from '@/lib/draft';
 
 import type { Metadata } from 'next';
 
-import { resolveStorefrontConfig } from '@hh/domain';
+import { DEFAULT_BRAND_IDENTITY, resolveStorefrontConfig } from '@hh/domain';
 
 interface HomePageProps {
   searchParams: Promise<{ category?: string }>;
@@ -31,10 +31,9 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const store = await getCachedStore('hh');
-  const name = store?.name ?? 'H&H';
-  const title = `${name} — Curated Modest Essentials & Jewelry`;
-  const description =
-    'Exquisite handcrafted nose-pieces and accessories designed for refined everyday elegance.';
+  const name = store?.name ?? DEFAULT_BRAND_IDENTITY.name;
+  const title = `${name} — ${DEFAULT_BRAND_IDENTITY.subtitle}`;
+  const description = DEFAULT_BRAND_IDENTITY.description;
 
   return {
     title,
@@ -43,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       type: 'website',
-      url: 'https://handh.in',
+      url: DEFAULT_BRAND_IDENTITY.websiteUrl,
       siteName: name
     },
     twitter: {
@@ -52,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description
     },
     alternates: {
-      canonical: 'https://handh.in'
+      canonical: DEFAULT_BRAND_IDENTITY.websiteUrl
     }
   };
 }
@@ -92,30 +91,28 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     '@graph': [
       {
         '@type': 'WebSite',
-        '@id': 'https://handh.in/#website',
-        url: 'https://handh.in',
+        '@id': `${DEFAULT_BRAND_IDENTITY.websiteUrl}/#website`,
+        url: DEFAULT_BRAND_IDENTITY.websiteUrl,
         name: store.name,
-        description:
-          storefrontConfig.hero.subtitle ||
-          'Refined modest wear accessories and essentials crafted with precision and purpose.',
+        description: storefrontConfig.hero.subtitle || DEFAULT_BRAND_IDENTITY.description,
         publisher: {
-          '@id': 'https://handh.in/#organization'
+          '@id': `${DEFAULT_BRAND_IDENTITY.websiteUrl}/#organization`
         }
       },
       {
         '@type': 'JewelryStore',
-        '@id': 'https://handh.in/#organization',
+        '@id': `${DEFAULT_BRAND_IDENTITY.websiteUrl}/#organization`,
         name: store.name,
-        legalName: 'H&H Curated Modest Essentials & Jewelry Private Limited',
-        url: 'https://handh.in',
-        logo: 'https://handh.in/icons/icon-512.png',
+        legalName: DEFAULT_BRAND_IDENTITY.legalName,
+        url: DEFAULT_BRAND_IDENTITY.websiteUrl,
+        logo: `${DEFAULT_BRAND_IDENTITY.websiteUrl}/icons/icon-512.png`,
         priceRange: '₹₹',
         address: {
           '@type': 'PostalAddress',
-          streetAddress: 'Plot No. 42, Road No. 36, Jubilee Hills',
-          addressLocality: 'Hyderabad',
-          addressRegion: 'Telangana',
-          postalCode: '500033',
+          streetAddress: DEFAULT_BRAND_IDENTITY.address.street,
+          addressLocality: DEFAULT_BRAND_IDENTITY.address.city,
+          addressRegion: DEFAULT_BRAND_IDENTITY.address.state,
+          postalCode: DEFAULT_BRAND_IDENTITY.address.postalCode,
           addressCountry: 'IN'
         }
       }

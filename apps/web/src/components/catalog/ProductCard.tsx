@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
-import { Money } from '@hh/domain';
+import { DEFAULT_BRAND_IDENTITY, Money } from '@hh/domain';
 
 import type { PublicProductListItem } from '@hh/domain';
 
@@ -39,7 +39,7 @@ export function ProductCard({
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-xs font-serif tracking-widest uppercase text-muted-foreground">
-              H&amp;H Signature
+              {DEFAULT_BRAND_IDENTITY.shortName} Signature
             </div>
           )}
 
