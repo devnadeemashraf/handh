@@ -59,7 +59,7 @@ flowchart TD
 
 ---
 
-## Sprint 11.2: App Shell, Adaptive Navigation & Global Search
+## Sprint 11.2: App Shell, Adaptive Navigation & Global Search — 🟢 COMPLETED (Commit `ffad87c`)
 
 **Design Specs:** `03_COMPONENT_LIBRARY.md`, `04_INFORMATION_ARCHITECTURE_AND_NAVIGATION.md`, `05_HOME_AND_DISCOVERY.md` (§5.4 Search)  
 **Goal:** Deliver the responsive navigation shell: desktop sticky header with border-on-scroll, mobile 5-item fixed bottom navigation bar, desktop slide-over cart drawer, and debounced search overlay.
