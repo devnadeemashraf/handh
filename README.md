@@ -112,10 +112,18 @@ cd handh
 pnpm install
 ```
 
-### Step 3: Start Local Infrastructure (PostgreSQL & Redis)
+### Step 3: Start Local Infrastructure
 
 ```bash
-docker compose up -d postgres redis
+# all services without floci
+pnpm docker:up
+```
+
+OR
+
+```bash
+# all services with floci
+pnpm docker:up:with-floci
 ```
 
 This boots:
