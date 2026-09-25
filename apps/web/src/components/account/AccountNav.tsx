@@ -1,11 +1,19 @@
 'use client';
 
-import { Heart, LogOut, MapPin, Package, Shield, User as UserIcon, Users } from 'lucide-react';
+import {
+  ChevronRight,
+  Heart,
+  MapPin,
+  Package,
+  Shield,
+  User as UserIcon,
+  Users
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
+import { triggerHaptic } from '@/lib/haptic';
 import { cn } from '@/lib/utils';
 
 import { getBrandPatronLabel } from '@hh/domain';
@@ -15,78 +23,108 @@ export function AccountNav() {
   const { user, logout } = useAuth();
 
   const links = [
-    { href: '/account', label: 'My Profile', icon: UserIcon },
+    { href: '/account', label: 'My Profile & Preferences', icon: UserIcon },
     { href: '/account/orders', label: 'Order History', icon: Package },
+    { href: '/account/wishlist', label: 'Saved Wishlist', icon: Heart },
     { href: '/account/addresses', label: 'Saved Addresses', icon: MapPin },
-    { href: '/account/family', label: 'Family & Sizes', icon: Users },
-    { href: '/account/wishlist', label: 'Saved Wishlist', icon: Heart }
+    { href: '/account/family', label: 'Family & Sizes', icon: Users }
   ];
 
+  // User initials
+  const initials = user?.name
+    ? user.name
+        .trim()
+        .split(' ')
+        .map((p) => p[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    : 'P';
+
   return (
-    <Card className="border-border bg-card shadow-sm">
-      <CardContent className="p-3">
-        {/* User Ribbon */}
-        <div className="mb-2 border-b border-border px-3 py-3">
-          <p className="font-bold text-sm text-primary leading-tight">
+    <div className="bg-card border border-border/80 rounded-md shadow-xs overflow-hidden">
+      {/* 1. Header: Initials circle + Name + Phone/Email */}
+      <div className="p-4 sm:p-5 border-b border-border/60 flex items-center gap-3.5 bg-secondary/20">
+        <div className="w-12 h-12 rounded-full bg-royal/10 text-royal border border-royal/20 flex items-center justify-center font-serif text-base font-semibold shrink-0">
+          {initials}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-serif font-semibold text-base text-foreground truncate">
             {getBrandPatronLabel(user?.name)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{user?.phone}</p>
+          <p className="text-xs text-muted-foreground truncate font-mono tabular-nums">
+            {user?.phone || user?.email || 'Patron'}
+          </p>
         </div>
+      </div>
 
-        {/* Links */}
-        <div className="space-y-1">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname === link.href;
+      {/* 2. Navigation Rows (56px high on mobile per spec 09 §9.1) */}
+      <nav className="divide-y divide-border/60" aria-label="Account navigation">
+        {links.map((link) => {
+          const Icon = link.icon;
+          const isActive = pathname === link.href;
 
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-secondary text-primary font-semibold shadow-xs'
-                    : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
-                )}
-              >
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => triggerHaptic('selection')}
+              className={cn(
+                'min-h-[56px] px-4 py-3.5 flex items-center justify-between text-sm font-medium transition-colors',
+                isActive
+                  ? 'bg-royal/10 text-royal font-semibold'
+                  : 'text-foreground hover:bg-secondary/40'
+              )}
+            >
+              <div className="flex items-center gap-3">
                 <Icon
                   className={cn(
-                    'h-4 w-4 shrink-0',
-                    isActive ? 'text-primary' : 'text-muted-foreground'
+                    'w-4 h-4 shrink-0',
+                    isActive ? 'text-royal' : 'text-muted-foreground'
                   )}
                 />
                 <span>{link.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Admin Portal Link */}
-        {(user?.role === 'admin' || user?.role === 'super_admin') && (
-          <div className="mt-2 pt-2 border-t border-border">
-            <Link
-              href="/admin"
-              className="flex items-center gap-3 rounded-md bg-primary px-3 py-2.5 text-sm font-semibold text-accent hover:bg-primary/90 transition-colors shadow-xs"
-            >
-              <Shield className="h-4 w-4 shrink-0 text-accent" />
-              <span>Admin Portal</span>
+              </div>
+              <ChevronRight
+                className={cn(
+                  'w-4 h-4 transition-transform',
+                  isActive ? 'text-royal translate-x-0.5' : 'text-muted-foreground/60'
+                )}
+              />
             </Link>
-          </div>
-        )}
+          );
+        })}
+      </nav>
 
-        {/* Sign Out Action */}
-        <div className="mt-2 border-t border-border pt-2">
-          <button
-            type="button"
-            onClick={logout}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors text-left"
+      {/* 3. Admin Portal (if applicable) */}
+      {(user?.role === 'admin' || user?.role === 'super_admin') && (
+        <div className="p-3 border-t border-border/60 bg-secondary/10">
+          <Link
+            href="/admin"
+            className="flex items-center justify-between h-10 px-3 rounded-sm bg-royal text-white text-xs font-semibold hover:bg-royal/90 transition-colors"
           >
-            <LogOut className="h-4 w-4 shrink-0" />
-            <span>Sign Out</span>
-          </button>
+            <div className="flex items-center gap-2">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Admin Portal</span>
+            </div>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {/* 4. Visually Separated Logout (Spec 09 §9.1: own section, space-6, red text, no icon) */}
+      <div className="p-4 border-t border-border/60 bg-muted/20">
+        <button
+          type="button"
+          onClick={() => {
+            triggerHaptic('medium');
+            logout();
+          }}
+          className="w-full h-11 flex items-center justify-center text-sm font-medium text-destructive hover:bg-destructive/10 rounded-sm transition-colors text-center"
+        >
+          Sign Out
+        </button>
+      </div>
+    </div>
   );
 }

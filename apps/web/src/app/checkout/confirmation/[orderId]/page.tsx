@@ -2,14 +2,15 @@ import { notFound } from 'next/navigation';
 import React from 'react';
 import { OrderConfirmationView } from '@/components/checkout/OrderConfirmationView';
 
-import { findOrderByOrderNumber, getSharedDbClient } from '@hh/db';
+import { findOrderById, findOrderByOrderNumber, getSharedDbClient } from '@hh/db';
 
-import { getAdminSession } from '../../../lib/admin-auth';
-import { getCurrentUser } from '../../../lib/auth';
-import { verifyOrderReceiptToken } from '../../../lib/receipt-token';
+import { getAdminSession } from '../../../../lib/admin-auth';
+import { getCurrentUser } from '../../../../lib/auth';
+import { verifyOrderReceiptToken } from '../../../../lib/receipt-token';
 
-interface SuccessPageProps {
-  searchParams: Promise<{ orderNumber?: string; token?: string }>;
+interface ConfirmationPageProps {
+  params: Promise<{ orderId: string }>;
+  searchParams: Promise<{ token?: string }>;
 }
 
 function getDatabase() {
@@ -18,16 +19,24 @@ function getDatabase() {
   return getSharedDbClient(databaseUrl);
 }
 
-export default async function CheckoutSuccessPage({ searchParams }: SuccessPageProps) {
-  const { orderNumber, token } = await searchParams;
+export default async function OrderConfirmationPage({
+  params,
+  searchParams
+}: ConfirmationPageProps) {
+  const { orderId } = await params;
+  const { token } = await searchParams;
 
-  if (!orderNumber) {
+  if (!orderId) {
     notFound();
     return null;
   }
 
   const db = getDatabase();
-  const order = await findOrderByOrderNumber(db, orderNumber);
+  // Support both UUID orderId and reference orderNumber (e.g. HH-2026-XXXXX)
+  let order = await findOrderById(db, orderId);
+  if (!order) {
+    order = await findOrderByOrderNumber(db, orderId);
+  }
 
   if (!order) {
     notFound();

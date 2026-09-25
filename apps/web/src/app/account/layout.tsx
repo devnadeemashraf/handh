@@ -25,15 +25,15 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   if (!user) {
     return (
       <div className="min-h-[75vh] flex items-center justify-center bg-background p-6">
-        <div className="max-w-md w-full bg-card rounded-2xl border border-border/80 p-8 sm:p-9 text-center shadow-sm">
-          <div className="h-14 w-14 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 text-primary">
+        <div className="max-w-md w-full bg-card rounded-md border border-border/80 p-8 sm:p-9 text-center shadow-xs">
+          <div className="h-14 w-14 rounded-full bg-royal/10 text-royal flex items-center justify-center mx-auto mb-4 border border-royal/20">
             <Lock className="h-6 w-6" />
           </div>
 
-          <h1 className="font-serif text-2xl font-semibold text-foreground mb-2">
+          <h1 className="font-serif text-2xl font-medium text-foreground tracking-tight mb-2">
             Sign In Required
           </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-6">
             Please sign in with your mobile number to view your order history, manage saved delivery
             addresses, and tailor family size preferences.
           </p>
@@ -43,7 +43,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
               triggerHaptic('medium');
               openAuthModal({ reason: 'Sign in to access your patron account.' });
             }}
-            className="w-full h-11 text-sm font-medium tracking-wide active:scale-[0.96] transition-transform duration-150"
+            className="w-full h-11 text-xs font-medium bg-royal hover:bg-royal/90 text-white rounded-sm active:scale-[0.98] transition-transform"
           >
             Sign In with Mobile OTP
           </Button>

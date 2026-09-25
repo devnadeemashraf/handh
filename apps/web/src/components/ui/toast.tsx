@@ -14,9 +14,21 @@ export interface ToastItem {
   };
 }
 
+export interface AddToastOptions {
+  title?: string;
+  description?: string;
+  message?: string;
+  variant?: 'default' | 'success' | 'error' | 'info';
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
 interface ToastContextType {
   toasts: ToastItem[];
   toast: (item: Omit<ToastItem, 'id'>) => void;
+  addToast: (options: AddToastOptions) => void;
   dismiss: (id: string) => void;
 }
 
@@ -46,8 +58,20 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [dismiss]
   );
 
+  const addToast = React.useCallback(
+    (opts: AddToastOptions) => {
+      const message = opts.message || opts.description || opts.title || '';
+      toast({
+        message,
+        variant: opts.variant ?? 'default',
+        ...(opts.action ? { action: opts.action } : {})
+      });
+    },
+    [toast]
+  );
+
   return (
-    <ToastContext.Provider value={{ toasts, toast, dismiss }}>
+    <ToastContext.Provider value={{ toasts, toast, addToast, dismiss }}>
       {children}
       <ToastViewport toasts={toasts} onDismiss={dismiss} />
     </ToastContext.Provider>
@@ -57,6 +81,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 const DEFAULT_TOAST_CONTEXT: ToastContextType = {
   toasts: [],
   toast: () => {},
+  addToast: () => {},
   dismiss: () => {}
 };
 
