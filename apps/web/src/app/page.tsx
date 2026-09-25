@@ -1,7 +1,14 @@
 import { CategoryFilter } from '@/components/catalog/CategoryFilter';
 import { ProductCard } from '@/components/catalog/ProductCard';
-import { HeroSection } from '@/components/home/HeroSection';
-import { ReassuranceSection } from '@/components/home/ReassuranceSection';
+import { BrandIntroStrip } from '@/components/home/BrandIntroStrip';
+import { CraftsmanshipStrip } from '@/components/home/CraftsmanshipStrip';
+import { CuratedCollectionsGrid } from '@/components/home/CuratedCollectionsGrid';
+import { EditorialHero } from '@/components/home/EditorialHero';
+import { FeaturedCollectionBanner } from '@/components/home/FeaturedCollectionBanner';
+import { InstagramFeedSection } from '@/components/home/InstagramFeedSection';
+import { NewsletterSection } from '@/components/home/NewsletterSection';
+import { ProductCarousel } from '@/components/home/ProductCarousel';
+import { SocialProofSection } from '@/components/home/SocialProofSection';
 import { AnnouncementBar } from '@/components/layout/AnnouncementBar';
 import { DraftPreviewBanner } from '@/components/layout/DraftPreviewBanner';
 import { Footer } from '@/components/layout/Footer';
@@ -119,6 +126,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     ]
   };
 
+  const newArrivals = products.slice(0, 4);
+  const bestSellers = products.slice().reverse().slice(0, 4);
+
   return (
     <>
       {/* Live Preview Mode Indicator Banner */}
@@ -139,11 +149,37 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       {/* Luxury Navigation Header */}
       <Header storeName={store.name} categories={categories} />
 
-      {/* Server-Driven Hero Section */}
-      <HeroSection hero={storefrontConfig.hero} />
+      {/* Magazine-Spread 85vh Editorial Hero */}
+      <EditorialHero hero={storefrontConfig.hero} />
+
+      {/* Brand Intro Typography Pause Strip */}
+      <BrandIntroStrip />
+
+      {/* New Arrivals Horizontal Carousel (1.4 cards visible on mobile) */}
+      {!activeCategory && products.length > 0 && (
+        <ProductCarousel
+          title="New Arrivals"
+          eyebrow="Fresh From The Atelier"
+          viewAllHref="/shop?sort=newest"
+          products={newArrivals}
+        />
+      )}
+
+      {/* Featured Collection Seasonal Editorial Banner */}
+      {!activeCategory && <FeaturedCollectionBanner />}
+
+      {/* Best Sellers Horizontal Carousel */}
+      {!activeCategory && products.length > 0 && (
+        <ProductCarousel
+          title="Best Sellers"
+          eyebrow="Patron Favorites"
+          viewAllHref="/shop?sort=best_selling"
+          products={bestSellers}
+        />
+      )}
 
       {/* Main Catalog Showcase */}
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14" id="catalog">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-10 pb-16" id="catalog">
         <div className="mx-auto max-w-xl text-center">
           <span className="text-xs uppercase tracking-[0.25em] font-semibold text-accent">
             Artisanal Curation
@@ -167,16 +203,28 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             ))}
           </div>
         ) : (
-          <div className="mt-8 rounded-md border border-border-subtle bg-surface p-12 text-center">
+          <div className="mt-8 rounded-sm border border-border-subtle bg-surface p-12 text-center">
             <p className="text-sm text-text-secondary">
               No pieces are currently cataloged in this collection.
             </p>
           </div>
         )}
-
-        {/* Brand Reassurance Section */}
-        <ReassuranceSection items={storefrontConfig.reassurances} />
       </main>
+
+      {/* Curated Collections Grid */}
+      <CuratedCollectionsGrid />
+
+      {/* Craftsmanship & Quality Pillars Trust Strip */}
+      <CraftsmanshipStrip />
+
+      {/* Social Proof Quote Cards */}
+      <SocialProofSection />
+
+      {/* Instagram Visual Feed */}
+      <InstagramFeedSection handle={store.settings.instagramHandle} />
+
+      {/* In-Flow Newsletter Subscription */}
+      <NewsletterSection />
 
       {/* Global Footer */}
       <Footer storeName={store.name} instagramHandle={store.settings.instagramHandle} />

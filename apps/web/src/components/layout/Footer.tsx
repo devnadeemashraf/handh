@@ -145,6 +145,18 @@ export function Footer({
             &copy; {new Date().getFullYear()} {storeName}. All rights reserved. Registered in India.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <Link href="/about" className="hover:text-foreground transition-colors">
+              Our Story
+            </Link>
+            <Link href="/faq" className="hover:text-foreground transition-colors">
+              FAQ
+            </Link>
+            <Link href="/shipping" className="hover:text-foreground transition-colors">
+              Shipping Guide
+            </Link>
+            <Link href="/returns" className="hover:text-foreground transition-colors">
+              Returns &amp; Exchanges
+            </Link>
             <Link href="/track" className="hover:text-foreground transition-colors">
               Track Parcel
             </Link>

@@ -52,7 +52,7 @@ export function LegalPageShell({
 
         {/* Hero Header */}
         <div className="border-b border-border pb-8 mb-10">
-          <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent tracking-wide uppercase">
+          <div className="inline-flex items-center gap-2 rounded-sm border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent tracking-wide uppercase">
             <Scale className="h-3.5 w-3.5" />
             <span>{badgeText}</span>
           </div>
@@ -86,7 +86,7 @@ export function LegalPageShell({
         </article>
 
         {/* Corporate Disclosure & Grievance Box */}
-        <div className="mt-14 rounded-2xl border border-border bg-card/60 p-6 sm:p-8 text-xs sm:text-sm shadow-sm">
+        <div className="mt-14 rounded-sm border border-border bg-card/60 p-6 sm:p-8 text-xs sm:text-sm shadow-sm">
           <div className="flex items-center gap-3 text-accent mb-3">
             <FileText className="h-5 w-5" />
             <h3 className="font-serif font-bold text-foreground text-base">

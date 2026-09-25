@@ -48,6 +48,10 @@ describe('Footer Component', () => {
     const links = screen.getAllByRole('link');
     const hrefs = links.map((link) => link.getAttribute('href'));
 
+    expect(hrefs).toContain('/about');
+    expect(hrefs).toContain('/faq');
+    expect(hrefs).toContain('/shipping');
+    expect(hrefs).toContain('/returns');
     expect(hrefs).toContain('/track');
     expect(hrefs).toContain('/grievance');
     expect(hrefs).toContain('/terms');
