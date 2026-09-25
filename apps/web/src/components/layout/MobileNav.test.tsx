@@ -2,7 +2,7 @@ import * as React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { MobileNav } from './MobileNav';
+import { MobileBottomNav } from './MobileBottomNav';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -11,9 +11,8 @@ vi.mock('next/navigation', () => ({
 
 // Mock contexts
 const mockOpenAuthModal = vi.fn();
-const mockOpenCart = vi.fn();
+const mockOpenSearch = vi.fn();
 let mockUser: { id: string; email: string } | null = null;
-let mockTotalItemCount = 0;
 
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => ({
@@ -22,32 +21,31 @@ vi.mock('@/context/AuthContext', () => ({
   })
 }));
 
-vi.mock('@/context/CartContext', () => ({
-  useCart: () => ({
-    totalItemCount: mockTotalItemCount,
-    openCart: mockOpenCart
+vi.mock('@/context/SearchContext', () => ({
+  useSearch: () => ({
+    isOpen: false,
+    openSearch: mockOpenSearch
   })
 }));
 
-describe('MobileNav Component (E-COM-145)', () => {
+describe('MobileBottomNav Component (Sprint 11.2)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockUser = null;
-    mockTotalItemCount = 0;
   });
 
-  it('renders all 5 navigation links and unauthenticated Sign In button without nested links', () => {
-    render(<MobileNav />);
+  it('renders all 5 intent-driven navigation items (Home, Shop, Search, Wishlist, Sign In/Account)', () => {
+    render(<MobileBottomNav />);
 
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Catalog')).toBeInTheDocument();
-    expect(screen.getByText('Wishlist')).toBeInTheDocument();
-    expect(screen.getByText('Bag')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /shop/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /search catalog/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /wishlist/i })).toBeInTheDocument();
 
     const signInButton = screen.getByRole('button', { name: /sign in/i });
     expect(signInButton).toBeInTheDocument();
 
-    // Verify no <a> tags exist inside any <button> element (E-COM-145 DOM nesting validation)
+    // Verify no <a> tags exist inside any <button> element
     const buttons = screen.getAllByRole('button');
     buttons.forEach((btn) => {
       expect(btn.querySelector('a')).toBeNull();
@@ -59,9 +57,17 @@ describe('MobileNav Component (E-COM-145)', () => {
     });
   });
 
-  it('renders direct Account Link when authenticated without wrapping button (E-COM-145)', () => {
+  it('triggers openSearch when Search button is tapped', () => {
+    render(<MobileBottomNav />);
+
+    const searchButton = screen.getByRole('button', { name: /search catalog/i });
+    fireEvent.click(searchButton);
+    expect(mockOpenSearch).toHaveBeenCalled();
+  });
+
+  it('renders direct Account Link when authenticated without wrapping button', () => {
     mockUser = { id: 'usr_123', email: 'patron@example.com' };
-    render(<MobileNav />);
+    render(<MobileBottomNav />);
 
     const accountLink = screen.getByRole('link', { name: /account/i });
     expect(accountLink).toBeInTheDocument();
@@ -71,15 +77,9 @@ describe('MobileNav Component (E-COM-145)', () => {
     expect(accountLink.closest('button')).toBeNull();
   });
 
-  it('triggers openCart when Bag button is clicked', () => {
-    mockTotalItemCount = 3;
-    render(<MobileNav />);
-
-    const bagButton = screen.getByRole('button', { name: /open shopping bag with 3 items/i });
-    expect(bagButton).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
-
-    fireEvent.click(bagButton);
-    expect(mockOpenCart).toHaveBeenCalled();
+  it('does NOT contain a Bag/Cart button (Cart lives in the top bar per design spec)', () => {
+    render(<MobileBottomNav />);
+    expect(screen.queryByText('Bag')).toBeNull();
+    expect(screen.queryByText('Cart')).toBeNull();
   });
 });

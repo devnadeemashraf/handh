@@ -4,10 +4,12 @@ import { AttributionTracker } from '@/components/layout/AttributionTracker';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { OfflineBanner } from '@/components/layout/OfflineBanner';
 import { PwaRegister } from '@/components/layout/PwaRegister';
+import { SearchOverlay } from '@/components/layout/SearchOverlay';
 import { ThemeInjector } from '@/components/layout/ThemeInjector';
 import { ToastProvider } from '@/components/ui/toast';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
+import { SearchProvider } from '@/context/SearchContext';
 import { getCachedStore } from '@/lib/catalog-cache';
 
 import type { Metadata, Viewport } from 'next';
@@ -87,14 +89,17 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body className="min-h-full flex flex-col pb-16 md:pb-0 font-sans">
         <AuthProvider>
           <CartProvider>
-            <ToastProvider>
-              <AttributionTracker />
-              <OfflineBanner />
-              {children}
-              <CartDrawer />
-              <MobileNav />
-              <PwaRegister />
-            </ToastProvider>
+            <SearchProvider>
+              <ToastProvider>
+                <AttributionTracker />
+                <OfflineBanner />
+                {children}
+                <CartDrawer />
+                <MobileNav />
+                <SearchOverlay />
+                <PwaRegister />
+              </ToastProvider>
+            </SearchProvider>
           </CartProvider>
         </AuthProvider>
       </body>
